@@ -119,49 +119,52 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-            <h1 className="text-3xl font-bold text-foreground">My Trips</h1>
+        <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Trips</h1>
             <Link
               href="/trips/new"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
               Create New Trip
             </Link>
           </div>
 
-          <div className="mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
             <div className="relative flex-grow">
               <input
                 type="text"
                 placeholder="Search trips..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full rounded-md border-input bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                className="block w-full rounded-md border-input bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary text-xs sm:text-sm py-1.5 px-3"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="h-5 w-5 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-4 w-4 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                 </svg>
               </div>
             </div>
 
-            <div className="flex space-x-2">
+            <div className="flex space-x-1 sm:space-x-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
               <button
                 onClick={() => setFilter('all')}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'all' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
+                className={`px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium rounded-md whitespace-nowrap ${filter === 'all' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
               >
                 All Trips
               </button>
               <button
                 onClick={() => setFilter('upcoming')}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'upcoming' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
+                className={`px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium rounded-md whitespace-nowrap ${filter === 'upcoming' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
               >
                 Upcoming
               </button>
               <button
                 onClick={() => setFilter('past')}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'past' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
+                className={`px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium rounded-md whitespace-nowrap ${filter === 'past' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
               >
                 Past
               </button>
@@ -170,25 +173,25 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
         {error && (
-          <div className="bg-destructive/10 border-l-4 border-destructive p-4 text-destructive mb-6">
+          <div className="bg-destructive/10 border-l-4 border-destructive p-3 text-destructive mb-4 sm:mb-6 text-sm sm:text-base rounded-r-md">
             <p>{error}</p>
           </div>
         )}
 
         {/* Upcoming Trips Section */}
         {!loading && upcomingTrips.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Upcoming Trips</h2>
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Upcoming Trips</h2>
             <div className="bg-card overflow-hidden shadow rounded-lg">
               <ul className="divide-y divide-border">
                 {upcomingTrips.map((trip) => (
-                  <li key={trip.id} className="px-4 py-4 sm:px-6 hover:bg-accent/50 transition-colors">
+                  <li key={trip.id} className="px-3 py-3 sm:px-4 sm:py-4 hover:bg-accent/50 transition-colors">
                     <Link href={`/trips/${trip.id}`} className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-lg font-medium text-primary">{trip.name}</span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-base sm:text-lg font-medium text-primary">{trip.name}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">
                           {trip.destination || 'No destination'} • {formatDate(trip.start_date)}
                         </span>
                       </div>
@@ -209,10 +212,10 @@ export default function Dashboard() {
         )}
 
         {/* All Trips Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-foreground mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">
             {filter === 'all' ? 'All Trips' : filter === 'upcoming' ? 'Upcoming Trips' : 'Past Trips'}
-            {searchTerm && ` matching "${searchTerm}"`}
+            {searchTerm && <span className="text-sm sm:text-base"> matching "{searchTerm}"</span>}
           </h2>
 
           {loading ? (
@@ -237,20 +240,20 @@ export default function Dashboard() {
               <p className="text-muted-foreground">Try adjusting your filters or search term</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredTrips.map((trip) => (
               <Link key={trip.id} href={`/trips/${trip.id}`}>
                 <div className="bg-card overflow-hidden shadow rounded-lg hover:shadow-md transition-all duration-300 h-full hover:scale-[1.02]">
-                  <div className="px-4 py-5 sm:p-6 h-full flex flex-col">
-                    <h3 className="text-lg font-medium text-foreground truncate">{trip.name}</h3>
+                  <div className="px-3 py-3 sm:px-4 sm:py-5 h-full flex flex-col">
+                    <h3 className="text-base sm:text-lg font-medium text-foreground truncate">{trip.name}</h3>
 
                     {trip.destination && (
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
                         <span className="font-medium text-foreground">Destination:</span> {trip.destination}
                       </p>
                     )}
 
-                    <div className="mt-2 text-sm text-muted-foreground">
+                    <div className="mt-2 text-xs sm:text-sm text-muted-foreground">
                       <p>
                         <span className="font-medium">Dates:</span>{' '}
                         {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
@@ -258,14 +261,14 @@ export default function Dashboard() {
                     </div>
 
                     {trip.description && (
-                      <p className="mt-3 text-sm text-muted-foreground line-clamp-2">{trip.description}</p>
+                      <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-muted-foreground line-clamp-2">{trip.description}</p>
                     )}
 
-                    <div className="mt-auto pt-4 flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">
+                    <div className="mt-auto pt-3 sm:pt-4 flex justify-between items-center">
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">
                         Created {new Date(trip.created_at).toLocaleDateString()}
                       </span>
-                      <span className="text-primary text-sm font-medium group-hover:text-primary/90">View details →</span>
+                      <span className="text-primary text-xs sm:text-sm font-medium group-hover:text-primary/90">View details →</span>
                     </div>
                   </div>
                 </div>

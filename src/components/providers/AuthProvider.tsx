@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation';
 import { AuthContext, User, signIn, signOut, signUp, resetPassword, updateProfile, supabase } from '@/lib/auth';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -240,8 +240,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Log the state being provided by the context
-  console.log('AuthProvider RENDERING - Providing context value:', { user, loading });
+  // Prefetch common routes when user is authenticated
+  useEffect(() => {
+    if (user && !loading) {
+      try {
+        // Manually prefetch important routes
+        router.prefetch('/dashboard');
+        router.prefetch('/trips/new');
+      } catch (error) {
+        console.error('Error prefetching routes:', error);
+      }
+    }
+  }, [user, loading, router]);
+
+  // Only log in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('AuthProvider RENDERING - Providing context value:', { user, loading });
+  }
 
   return (
     <AuthContext.Provider
