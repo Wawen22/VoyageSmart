@@ -38,6 +38,29 @@
   - Implemented activity management (create, edit, delete)
   - Added priority levels and time scheduling for activities
   - Created reusable components for itinerary UI
+- [x] Fixed automatic redirection after login
+  - Issue: After login, the user wasn't automatically redirected to the dashboard
+  - Fix: Added explicit redirection in both the login page and the auth provider
+- [x] Enhanced itinerary day management
+  - Added automatic creation of days based on trip date range
+  - Implemented automatic update of days when trip dates are modified
+  - Added automatic removal of days outside the trip date range
+  - Fixed issue with adding new days manually
+- [x] Added confirmation dialog before deleting days with activities
+  - Implemented a detailed confirmation dialog showing which activities would be deleted
+  - Added grouping of activities by day for better user information
+  - Improved user experience by providing clear information before deletion
+- [x] Implemented activity movement between days
+  - Created a new modal component for moving activities
+  - Added a "Move" button to each activity
+  - Implemented the backend logic for updating activity day assignments
+  - Improved user experience by allowing easy reorganization of the itinerary
+- [x] Implemented calendar view for itinerary
+  - Added a toggle to switch between list and calendar views
+  - Integrated react-big-calendar for the calendar visualization
+  - Customized the calendar to match the application's theme
+  - Implemented event handling for adding, editing, and viewing activities
+  - Added visual indicators for activity priority levels
 
 ## Pending Tasks (In Priority Order)
 
@@ -72,7 +95,6 @@
    - [ ] Create expense reports and summaries
 
 ## Current Focus
-- Implementing expense tracking functionality
+- Developing expense tracking functionality
 - Enhancing trip collaboration features
 - Improving user experience for mobile devices
-- Adding location and mapping features
