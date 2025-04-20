@@ -38,6 +38,7 @@ type DayScheduleProps = {
   onEditActivity: (activity: Activity) => void;
   onDeleteActivity: (activityId: string) => void;
   onMoveActivity?: (activity: Activity) => void;
+  onViewActivityDetails?: (activity: Activity) => void;
 };
 
 export default function DaySchedule({
@@ -46,7 +47,8 @@ export default function DaySchedule({
   onAddActivity,
   onEditActivity,
   onDeleteActivity,
-  onMoveActivity
+  onMoveActivity,
+  onViewActivityDetails
 }: DayScheduleProps) {
   const formatDate = (dateString: string) => {
     try {
@@ -104,6 +106,7 @@ export default function DaySchedule({
                 onEdit={onEditActivity}
                 onDelete={onDeleteActivity}
                 onMove={onMoveActivity}
+                onViewDetails={onViewActivityDetails}
               />
             ))}
           </div>

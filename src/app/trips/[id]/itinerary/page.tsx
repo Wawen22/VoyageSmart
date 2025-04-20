@@ -13,6 +13,7 @@ import ActivityModal from '@/components/itinerary/ActivityModal';
 import DayModal from '@/components/itinerary/DayModal';
 import MoveActivityModal from '@/components/itinerary/MoveActivityModal';
 import CalendarView from '@/components/itinerary/CalendarView';
+import ActivityDetailsModal from '@/components/activity/ActivityDetailsModal';
 
 type Trip = {
   id: string;
@@ -62,6 +63,7 @@ export default function TripItinerary() {
   const [showDayModal, setShowDayModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [showMoveModal, setShowMoveModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [currentDay, setCurrentDay] = useState<ItineraryDay | null>(null);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentDayId, setCurrentDayId] = useState<string>('');
@@ -422,6 +424,11 @@ export default function TripItinerary() {
     setShowMoveModal(true);
   };
 
+  const handleViewActivityDetails = (activity: Activity) => {
+    setCurrentActivity(activity);
+    setShowDetailsModal(true);
+  };
+
   const handleMoveActivitySubmit = async (activityId: string, newDayId: string) => {
     try {
       // Find the activity to move
@@ -616,6 +623,7 @@ export default function TripItinerary() {
                 }}
                 onDeleteActivity={handleDeleteActivity}
                 onMoveActivity={handleMoveActivity}
+                onViewActivityDetails={handleViewActivityDetails}
               />
             ))}
           </div>
@@ -638,6 +646,7 @@ export default function TripItinerary() {
             }}
             onDeleteActivity={handleDeleteActivity}
             onMoveActivity={handleMoveActivity}
+            onViewActivityDetails={handleViewActivityDetails}
           />
         )}
       </main>
@@ -687,6 +696,24 @@ export default function TripItinerary() {
           onMove={handleMoveActivitySubmit}
           activity={currentActivity}
           days={itineraryDays}
+        />
+      )}
+
+      {/* Activity Details Modal */}
+      {showDetailsModal && currentActivity && (
+        <ActivityDetailsModal
+          isOpen={showDetailsModal}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setCurrentActivity(null);
+          }}
+          activity={currentActivity}
+          onEdit={(activity) => {
+            setShowDetailsModal(false);
+            setCurrentActivity(activity);
+            setCurrentDayId(activity.day_id);
+            setShowActivityModal(true);
+          }}
         />
       )}
     </div>

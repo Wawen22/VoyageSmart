@@ -6,6 +6,7 @@ import BackButton from '@/components/ui/BackButton';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import UnreadBadge from '@/components/chat/UnreadBadge';
 
 type Trip = {
   id: string;
@@ -325,7 +326,7 @@ export default function TripDetails() {
               </p>
             </div>
             <div className="border-t border-border px-4 py-5 sm:p-6">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
                 <Link href={`/trips/${id}/itinerary`}>
                   <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
                     <h3 className="text-lg font-medium text-foreground">Itinerary</h3>
@@ -358,6 +359,18 @@ export default function TripDetails() {
                     <h3 className="text-lg font-medium text-foreground">Expenses</h3>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Track and split trip expenses
+                    </p>
+                  </div>
+                </Link>
+
+                <Link href={`/trips/${id}/chat`}>
+                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer relative">
+                    <div className="absolute top-3 right-3">
+                      <UnreadBadge tripId={id as string} />
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground">Group Chat</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Chat with trip participants
                     </p>
                   </div>
                 </Link>

@@ -99,8 +99,8 @@
    - [x] Implement email notification system for invitations and trip changes
    - [x] Improve invitation acceptance page for better user experience
    - [x] Implement role-based permissions for trip participants
-   - [ ] Add real-time updates for shared trips
-   - [ ] Add commenting/discussion feature for trips
+   - [x] Add real-time updates for shared trips
+   - [x] Add commenting/discussion feature for trips
 
 ### UI/UX Improvements
 3. [x] Improve mobile experience
@@ -119,10 +119,23 @@
    - [x] Add multiple currency support
    - [x] Implement expense splitting
    - [x] Create expense reports and summaries
+6. [x] Collaboration features
+   - [x] Implement activity comments system
+   - [x] Add group chat for trip participants
+   - [x] Implement real-time updates for shared content
+7. [ ] Document management
+   - [ ] Implement document upload and storage
+   - [ ] Add document sharing with trip participants
+   - [ ] Create document categories (tickets, reservations, etc.)
 
 ## Current Focus
-- Adding real-time updates for shared trips
-- Implementing commenting/discussion feature for trips
 - Integrating maps for trip planning
 - Adding location search and suggestions
 - Implementing route planning
+- Implementing document sharing and storage for trip-related files
+
+## Recently Completed
+- Added real-time updates for shared trips
+- Implemented commenting system for activities
+- Added group chat for trip participants
+- Improved invitation system with automatic participant addition
