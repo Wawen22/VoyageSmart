@@ -117,14 +117,14 @@ export default function Dashboard() {
   ).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-background">
+      <header className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-            <h1 className="text-3xl font-bold text-gray-900">My Trips</h1>
+            <h1 className="text-3xl font-bold text-foreground">My Trips</h1>
             <Link
               href="/trips/new"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
               Create New Trip
             </Link>
@@ -137,10 +137,10 @@ export default function Dashboard() {
                 placeholder="Search trips..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                className="block w-full rounded-md border-input bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-5 w-5 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -149,19 +149,19 @@ export default function Dashboard() {
             <div className="flex space-x-2">
               <button
                 onClick={() => setFilter('all')}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'all' ? 'bg-primary-100 text-primary-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'all' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
               >
                 All Trips
               </button>
               <button
                 onClick={() => setFilter('upcoming')}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'upcoming' ? 'bg-primary-100 text-primary-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'upcoming' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
               >
                 Upcoming
               </button>
               <button
                 onClick={() => setFilter('past')}
-                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'past' ? 'bg-primary-100 text-primary-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                className={`px-3 py-2 text-sm font-medium rounded-md ${filter === 'past' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
               >
                 Past
               </button>
@@ -172,7 +172,7 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 text-red-700 mb-6">
+          <div className="bg-destructive/10 border-l-4 border-destructive p-4 text-destructive mb-6">
             <p>{error}</p>
           </div>
         )}
@@ -180,23 +180,23 @@ export default function Dashboard() {
         {/* Upcoming Trips Section */}
         {!loading && upcomingTrips.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Trips</h2>
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <ul className="divide-y divide-gray-200">
+            <h2 className="text-xl font-semibold text-foreground mb-4">Upcoming Trips</h2>
+            <div className="bg-card overflow-hidden shadow rounded-lg">
+              <ul className="divide-y divide-border">
                 {upcomingTrips.map((trip) => (
-                  <li key={trip.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                  <li key={trip.id} className="px-4 py-4 sm:px-6 hover:bg-accent/50 transition-colors">
                     <Link href={`/trips/${trip.id}`} className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-lg font-medium text-primary-600">{trip.name}</span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-lg font-medium text-primary">{trip.name}</span>
+                        <span className="text-sm text-muted-foreground">
                           {trip.destination || 'No destination'} • {formatDate(trip.start_date)}
                         </span>
                       </div>
                       <div className="flex items-center">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary/10 text-primary">
                           Upcoming
                         </span>
-                        <svg className="ml-2 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="ml-2 h-5 w-5 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
@@ -210,47 +210,47 @@ export default function Dashboard() {
 
         {/* All Trips Section */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          <h2 className="text-xl font-semibold text-foreground mb-4">
             {filter === 'all' ? 'All Trips' : filter === 'upcoming' ? 'Upcoming Trips' : 'Past Trips'}
             {searchTerm && ` matching "${searchTerm}"`}
           </h2>
 
           {loading ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-              <p className="mt-4 text-gray-500">Loading your trips...</p>
+            <div className="text-center py-12 bg-card rounded-lg shadow">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading your trips...</p>
             </div>
           ) : trips.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">No trips found</h3>
-              <p className="text-gray-500 mb-6">Start planning your first adventure!</p>
+            <div className="text-center py-12 bg-card rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-foreground mb-2">No trips found</h3>
+              <p className="text-muted-foreground mb-6">Start planning your first adventure!</p>
               <Link
                 href="/trips/new"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 Create New Trip
               </Link>
             </div>
           ) : filteredTrips.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">No matching trips</h3>
-              <p className="text-gray-500">Try adjusting your filters or search term</p>
+            <div className="text-center py-12 bg-card rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-foreground mb-2">No matching trips</h3>
+              <p className="text-muted-foreground">Try adjusting your filters or search term</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredTrips.map((trip) => (
               <Link key={trip.id} href={`/trips/${trip.id}`}>
-                <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300 h-full">
+                <div className="bg-card overflow-hidden shadow rounded-lg hover:shadow-md transition-all duration-300 h-full hover:scale-[1.02]">
                   <div className="px-4 py-5 sm:p-6 h-full flex flex-col">
-                    <h3 className="text-lg font-medium text-gray-900 truncate">{trip.name}</h3>
+                    <h3 className="text-lg font-medium text-foreground truncate">{trip.name}</h3>
 
                     {trip.destination && (
-                      <p className="mt-1 text-sm text-gray-500">
-                        <span className="font-medium">Destination:</span> {trip.destination}
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">Destination:</span> {trip.destination}
                       </p>
                     )}
 
-                    <div className="mt-2 text-sm text-gray-500">
+                    <div className="mt-2 text-sm text-muted-foreground">
                       <p>
                         <span className="font-medium">Dates:</span>{' '}
                         {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
@@ -258,14 +258,14 @@ export default function Dashboard() {
                     </div>
 
                     {trip.description && (
-                      <p className="mt-3 text-sm text-gray-500 line-clamp-2">{trip.description}</p>
+                      <p className="mt-3 text-sm text-muted-foreground line-clamp-2">{trip.description}</p>
                     )}
 
                     <div className="mt-auto pt-4 flex justify-between items-center">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground">
                         Created {new Date(trip.created_at).toLocaleDateString()}
                       </span>
-                      <span className="text-primary-600 text-sm font-medium">View details →</span>
+                      <span className="text-primary text-sm font-medium group-hover:text-primary/90">View details →</span>
                     </div>
                   </div>
                 </div>

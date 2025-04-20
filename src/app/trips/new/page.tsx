@@ -148,50 +148,50 @@ export default function NewTrip() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-background">
+      <header className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center">
             <Link
               href="/dashboard"
-              className="mr-4 text-primary-600 hover:text-primary-500"
+              className="mr-4 text-primary hover:text-primary/90 transition-colors"
             >
               ← Back
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Create New Trip</h1>
+            <h1 className="text-3xl font-bold text-foreground">Create New Trip</h1>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="bg-card shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 text-red-700 mb-6">
+              <div className="bg-destructive/10 border-l-4 border-destructive p-4 text-destructive mb-6">
                 <p>{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="bg-green-50 border-l-4 border-green-500 p-4 text-green-700 mb-6">
+              <div className="bg-primary/10 border-l-4 border-primary p-4 text-primary mb-6">
                 <p>{success}</p>
               </div>
             )}
 
             <div className="mb-8">
               <div className="flex justify-between items-center">
-                <h2 className="text-lg font-medium text-gray-900">
+                <h2 className="text-lg font-medium text-foreground">
                   {currentStep === 1 ? 'Basic Information' :
                    currentStep === 2 ? 'Dates and Budget' : 'Additional Details'}
                 </h2>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                   Step {currentStep} of 3
                 </div>
               </div>
               <div className="mt-4 relative">
-                <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                <div className="overflow-hidden h-2 text-xs flex rounded bg-secondary">
                   <div
-                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500"
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-primary-foreground justify-center bg-primary"
                     style={{ width: `${(currentStep / 3) * 100}%` }}
                   ></div>
                 </div>
@@ -202,7 +202,7 @@ export default function NewTrip() {
               {currentStep === 1 && (
                 <>
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="name" className="block text-sm font-medium text-foreground">
                       Trip Name *
                     </label>
                     <input
@@ -212,13 +212,13 @@ export default function NewTrip() {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                       placeholder="Summer Vacation 2025"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="destination" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="destination" className="block text-sm font-medium text-foreground">
                       Destination
                     </label>
                     <input
@@ -227,13 +227,13 @@ export default function NewTrip() {
                       id="destination"
                       value={formData.destination}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                       placeholder="Paris, France"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="tripType" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="tripType" className="block text-sm font-medium text-foreground">
                       Trip Type
                     </label>
                     <select
@@ -241,7 +241,7 @@ export default function NewTrip() {
                       id="tripType"
                       value={formData.tripType}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                     >
                       <option value="vacation">Vacation</option>
                       <option value="business">Business</option>
@@ -252,7 +252,7 @@ export default function NewTrip() {
                   </div>
 
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="description" className="block text-sm font-medium text-foreground">
                       Description
                     </label>
                     <textarea
@@ -261,7 +261,7 @@ export default function NewTrip() {
                       rows={3}
                       value={formData.description}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                       placeholder="A brief description of your trip"
                     />
                   </div>
@@ -272,7 +272,7 @@ export default function NewTrip() {
                 <>
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="startDate" className="block text-sm font-medium text-foreground">
                         Start Date
                       </label>
                       <input
@@ -281,12 +281,12 @@ export default function NewTrip() {
                         id="startDate"
                         value={formData.startDate}
                         onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="endDate" className="block text-sm font-medium text-foreground">
                         End Date
                       </label>
                       <input
@@ -295,14 +295,14 @@ export default function NewTrip() {
                         id="endDate"
                         value={formData.endDate}
                         onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="budgetTotal" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="budgetTotal" className="block text-sm font-medium text-foreground">
                         Budget
                       </label>
                       <input
@@ -313,13 +313,13 @@ export default function NewTrip() {
                         step="0.01"
                         value={formData.budgetTotal}
                         onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                         placeholder="1000.00"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="currency" className="block text-sm font-medium text-gray-700">
+                      <label htmlFor="currency" className="block text-sm font-medium text-foreground">
                         Currency
                       </label>
                       <select
@@ -327,7 +327,7 @@ export default function NewTrip() {
                         id="currency"
                         value={formData.currency}
                         onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                       >
                         <option value="USD">USD - US Dollar</option>
                         <option value="EUR">EUR - Euro</option>
@@ -340,7 +340,7 @@ export default function NewTrip() {
                   </div>
 
                   <div>
-                    <label htmlFor="accommodation" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="accommodation" className="block text-sm font-medium text-foreground">
                       Accommodation
                     </label>
                     <input
@@ -349,7 +349,7 @@ export default function NewTrip() {
                       id="accommodation"
                       value={formData.accommodation}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                       placeholder="Hotel name or type of accommodation"
                     />
                   </div>
@@ -359,7 +359,7 @@ export default function NewTrip() {
               {currentStep === 3 && (
                 <>
                   <div>
-                    <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="notes" className="block text-sm font-medium text-foreground">
                       Additional Notes
                     </label>
                     <textarea
@@ -368,7 +368,7 @@ export default function NewTrip() {
                       rows={3}
                       value={formData.notes}
                       onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                      className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                       placeholder="Any additional notes or information about your trip"
                     />
                   </div>
@@ -381,40 +381,40 @@ export default function NewTrip() {
                         type="checkbox"
                         checked={formData.isPrivate}
                         onChange={handleChange}
-                        className="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded"
+                        className="focus:ring-2 focus:ring-primary h-4 w-4 text-primary border-input rounded bg-background"
                       />
                     </div>
                     <div className="ml-3 text-sm">
-                      <label htmlFor="isPrivate" className="font-medium text-gray-700">
+                      <label htmlFor="isPrivate" className="font-medium text-foreground">
                         Private Trip
                       </label>
-                      <p className="text-gray-500">
+                      <p className="text-muted-foreground">
                         Only invited participants can view this trip
                       </p>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Trip Summary</h3>
+                  <div className="bg-secondary/50 p-4 rounded-md border border-border">
+                    <h3 className="text-lg font-medium text-foreground mb-2">Trip Summary</h3>
                     <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Trip Name</dt>
-                        <dd className="text-sm text-gray-900">{formData.name}</dd>
+                        <dt className="text-sm font-medium text-muted-foreground">Trip Name</dt>
+                        <dd className="text-sm text-foreground">{formData.name}</dd>
                       </div>
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Destination</dt>
-                        <dd className="text-sm text-gray-900">{formData.destination || 'Not specified'}</dd>
+                        <dt className="text-sm font-medium text-muted-foreground">Destination</dt>
+                        <dd className="text-sm text-foreground">{formData.destination || 'Not specified'}</dd>
                       </div>
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Dates</dt>
-                        <dd className="text-sm text-gray-900">
+                        <dt className="text-sm font-medium text-muted-foreground">Dates</dt>
+                        <dd className="text-sm text-foreground">
                           {formData.startDate ? new Date(formData.startDate).toLocaleDateString() : 'Not set'} -
                           {formData.endDate ? new Date(formData.endDate).toLocaleDateString() : 'Not set'}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Budget</dt>
-                        <dd className="text-sm text-gray-900">
+                        <dt className="text-sm font-medium text-muted-foreground">Budget</dt>
+                        <dd className="text-sm text-foreground">
                           {formData.budgetTotal ? `${formData.budgetTotal} ${formData.currency}` : 'Not set'}
                         </dd>
                       </div>
@@ -429,7 +429,7 @@ export default function NewTrip() {
                     <button
                       type="button"
                       onClick={prevStep}
-                      className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                      className="bg-secondary py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
                     >
                       Back
                     </button>
@@ -438,14 +438,14 @@ export default function NewTrip() {
                 <div className="flex space-x-3">
                   <Link
                     href="/dashboard"
-                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                    className="bg-secondary py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
                   >
                     Cancel
                   </Link>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="bg-primary-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                    className="bg-primary py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-colors"
                   >
                     {loading ? 'Creating...' : currentStep < 3 ? 'Next' : 'Create Trip'}
                   </button>
