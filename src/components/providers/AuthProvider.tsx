@@ -172,7 +172,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Explicitly redirect to dashboard after successful login
         console.log('Redirecting to dashboard after successful login');
-        router.push('/dashboard');
+
+        // Use setTimeout to ensure the state update has completed before redirecting
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 100);
       }
 
       // No return needed here, the function updates state internally

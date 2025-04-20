@@ -5,29 +5,22 @@ import { useParams, useRouter } from 'next/navigation';
 import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import { useEmail } from '@/hooks/useEmail';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { Toaster } from '@/components/ui/toaster';
 import {
   UserPlusIcon,
-  LinkIcon,
-  MailIcon,
-  CheckIcon,
   XIcon,
-  ClipboardCopyIcon,
   RefreshCwIcon,
   UsersIcon,
   AlertCircleIcon,
-  SearchIcon,
-  PlusIcon
 } from 'lucide-react';
 
 type Participant = {
@@ -68,6 +61,7 @@ export default function InvitePage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<Invitation[]>([]);
   const [isOwner, setIsOwner] = useState(false);
+  const { sendInvitationEmail, sendTripUpdatedEmail } = useEmail();
 
   // Form state
   const [inviteEmail, setInviteEmail] = useState('');
@@ -119,22 +113,22 @@ export default function InvitePage() {
 
         if (participantsError) throw participantsError;
 
-  // Format participants data with proper type handling
-  const formattedParticipants = participantsData.map(p => {
-    const userData = (Array.isArray(p.users) ? p.users[0] : p.users) as { full_name: string; email: string } | null;
-    return {
-      id: p.id,
-      user_id: p.user_id,
-      trip_id: p.trip_id,
-      role: p.role,
-      invitation_status: p.invitation_status,
-      created_at: p.created_at,
-      full_name: userData?.full_name || 'Unknown',
-      email: userData?.email || '',
-    };
-  });
+        // Format participants data with proper type handling
+        const formattedParticipants = participantsData.map(p => {
+          const userData = (Array.isArray(p.users) ? p.users[0] : p.users) as { full_name: string; email: string } | null;
+          return {
+            id: p.id,
+            user_id: p.user_id,
+            trip_id: p.trip_id,
+            role: p.role,
+            invitation_status: p.invitation_status,
+            created_at: p.created_at,
+            full_name: userData?.full_name || 'Unknown',
+            email: userData?.email || '',
+          };
+        });
 
-  setParticipants(formattedParticipants);
+        setParticipants(formattedParticipants);
 
         // Fetch pending invitations
         const { data: invitationsData, error: invitationsError } = await supabase
@@ -158,28 +152,26 @@ export default function InvitePage() {
 
         if (invitationsError) throw invitationsError;
 
-  // Format invitations data with proper type handling
-  const formattedInvitations = invitationsData
-    .filter(inv => !inv.email.startsWith('link_invitation_'))
-    .map(inv => {
-      const userData = (Array.isArray(inv.users) ? inv.users[0] : inv.users) as { full_name: string } | null;
-      return {
-        id: inv.id,
-        trip_id: inv.trip_id,
-        email: inv.email,
-        status: inv.status,
-        role: inv.role,
-        created_at: inv.created_at,
-        expires_at: inv.expires_at,
-        invite_code: inv.invite_code,
-        invited_by: inv.invited_by,
-        inviter_name: userData?.full_name || 'Unknown',
-      };
-    });
+        // Format invitations data with proper type handling
+        const formattedInvitations = invitationsData
+          .filter(inv => !inv.email.startsWith('link_invitation_'))
+          .map(inv => {
+            const userData = (Array.isArray(inv.users) ? inv.users[0] : inv.users) as { full_name: string } | null;
+            return {
+              id: inv.id,
+              trip_id: inv.trip_id,
+              email: inv.email,
+              status: inv.status,
+              role: inv.role,
+              created_at: inv.created_at,
+              expires_at: inv.expires_at,
+              invite_code: inv.invite_code,
+              invited_by: inv.invited_by,
+              inviter_name: userData?.full_name || 'Unknown',
+            };
+          });
 
         setPendingInvitations(formattedInvitations);
-
-        // No need to generate invite link anymore
       } catch (err) {
         console.error('Error fetching trip details:', err);
         setError('Failed to load trip details. Please try again.');
@@ -190,8 +182,6 @@ export default function InvitePage() {
 
     fetchTripDetails();
   }, [id, user]);
-
-
 
   const handleCancelInvitation = async (invitationId: string) => {
     try {
@@ -247,84 +237,172 @@ export default function InvitePage() {
         return;
       }
 
-      // First, check if the user exists in the system
-      const { data: userData, error: userError } = await supabase
+      // Check if the user is already registered in the system
+      const { data: existingUsers, error: userError } = await supabase
         .from('users')
-        .select('id, email, full_name')
-        .eq('email', inviteEmail)
-        .single();
+        .select('id, full_name, email')
+        .eq('email', inviteEmail.toLowerCase())
+        .limit(1);
 
-      if (userError && userError.code !== 'PGRST116') {
-        throw userError;
+      if (userError) {
+        console.error('Error checking if user exists:', userError);
+        // Continue with the normal invitation flow
       }
 
-      let userId;
+      // If the user is already registered, add them directly to the trip
+      if (existingUsers && existingUsers.length > 0) {
+        const existingUser = existingUsers[0];
+        console.log('User already registered, adding directly to trip:', existingUser);
 
-      if (userData) {
-        // User exists, use their ID
-        userId = userData.id;
-        console.log(`User found with ID: ${userId}`);
-      } else {
-        // User doesn't exist, create a placeholder record
-        const { data: newUserData, error: newUserError } = await supabase
-          .from('users')
-          .insert([
-            {
-              email: inviteEmail,
-              full_name: inviteEmail.split('@')[0], // Use part of email as name
-              is_placeholder: true, // Mark as placeholder
-            },
-          ])
-          .select();
+        try {
+          // Add the user as a participant
+          const { data: participantData, error: participantError } = await supabase
+            .from('trip_participants')
+            .insert([
+              {
+                trip_id: id,
+                user_id: existingUser.id,
+                role: inviteRole,
+                invitation_status: 'accepted',
+              },
+            ])
+            .select();
 
-        if (newUserError) throw newUserError;
-        userId = newUserData?.[0]?.id;
-        console.log(`Created placeholder user with ID: ${userId}`);
+          if (participantError) {
+            throw participantError;
+          }
+
+          // Send notification email to the user
+          try {
+            const baseUrl = window.location.origin;
+            const tripLink = `${baseUrl}/trips/${id}`;
+
+            // Send email notification
+            await sendTripUpdatedEmail({
+              to: existingUser.email,
+              tripName: trip?.name || 'Trip',
+              updaterName: user?.full_name || 'Trip Organizer',
+              changes: ['You have been added as a participant'],
+              tripLink: tripLink,
+            });
+          } catch (emailError) {
+            console.error('Failed to send notification email:', emailError);
+            // Continue even if email fails
+          }
+
+          // Show success message
+          setSuccess(`${existingUser.full_name || existingUser.email} has been added to the trip automatically.`);
+          toast({
+            title: "Participant added",
+            description: `${existingUser.full_name || existingUser.email} has been added to the trip automatically.`,
+            action: <ToastAction altText="OK">OK</ToastAction>,
+          });
+
+          // Reset form
+          setInviteEmail('');
+          setInviting(false);
+          return;
+        } catch (err) {
+          console.error('Error adding existing user to trip:', err);
+          // If there's an error, continue with the normal invitation flow
+        }
       }
 
-      if (!userId) {
-        throw new Error('Failed to get or create user ID');
-      }
+      // Generate a unique invite code
+      const inviteCode = Math.random().toString(36).substring(2, 15);
 
-      // Add the user as a participant
-      const { data: participantData, error: participantError } = await supabase
-        .from('trip_participants')
+      // Calculate expiration date (7 days from now)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      // Create an invitation for this email
+      const { data: invitationData, error: invitationError } = await supabase
+        .from('trip_invitations')
         .insert([
           {
             trip_id: id,
-            user_id: userId,
+            email: inviteEmail,
+            status: 'pending',
             role: inviteRole,
-            invitation_status: 'accepted',
+            invited_by: user?.id,
+            invite_code: inviteCode,
+            expires_at: expiresAt.toISOString(),
           },
         ])
         .select();
 
-      if (participantError) throw participantError;
-
-      // Add the new participant to the list
-      if (participantData && participantData[0]) {
-        const newParticipant: Participant = {
-          ...participantData[0],
-          full_name: userData?.full_name || inviteEmail.split('@')[0],
-          email: inviteEmail,
-        };
-
-        setParticipants([...participants, newParticipant]);
+      if (invitationError) {
+        // Check if it's a duplicate invitation
+        if (invitationError.code === '23505') { // Unique constraint violation
+          setError(`An invitation has already been sent to ${inviteEmail}. Please ask them to check their email.`);
+        } else {
+          throw invitationError;
+        }
+        setInviting(false);
+        return;
       }
 
-      // Show success message
-      setSuccess(`${inviteEmail} has been added to the trip`);
-      toast({
-        title: "Participant added",
-        description: `${inviteEmail} has been added to the trip`,
-        action: <ToastAction altText="OK">OK</ToastAction>,
-      });
+      // Add the new invitation to the list
+      if (invitationData && invitationData[0]) {
+        const newInvitation: Invitation = {
+          ...invitationData[0],
+          inviter_name: user?.full_name || 'Unknown',
+        };
 
-      // Reset form
-      setInviteEmail('');
+        setPendingInvitations([...pendingInvitations, newInvitation]);
+
+        // Send email notification
+        const baseUrl = window.location.origin;
+        const inviteLink = `${baseUrl}/invite/${id}/${newInvitation.invite_code}`;
+
+        try {
+          // Send invitation email
+          await sendInvitationEmail({
+            to: inviteEmail,
+            inviterName: user?.full_name || 'Trip Organizer',
+            tripName: trip?.name || 'Trip',
+            inviteLink: inviteLink,
+          });
+
+          // Show success message for invitation
+          setSuccess(`Invitation sent to ${inviteEmail}. They need to register and accept the invitation.`);
+          toast({
+            title: "Invitation created",
+            description: `${inviteEmail} needs to register before they can join this trip.`,
+            action: <ToastAction altText="OK">OK</ToastAction>,
+          });
+        } catch (emailError) {
+          console.error('Failed to send invitation email:', emailError);
+          // Still show success for invitation creation even if email fails
+          setSuccess(`Invitation created for ${inviteEmail}, but we couldn't send an email notification.`);
+          toast({
+            title: "Invitation created",
+            description: `${inviteEmail} has been invited, but email notification failed. Error: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`,
+            variant: "destructive",
+            action: <ToastAction altText="OK">OK</ToastAction>,
+          });
+        }
+
+        // Reset form
+        setInviteEmail('');
+      }
     } catch (err) {
       console.error('Error adding participant:', err);
-      setError('Failed to add participant. Please try again.');
+
+      // Provide more specific error messages
+      if (err instanceof Error) {
+        setError(`Failed to add participant: ${err.message}`);
+      } else {
+        setError('Failed to add participant. Please try again.');
+      }
+
+      // Show error toast for better visibility
+      toast({
+        title: "Error",
+        description: "Failed to add participant. Please try again.",
+        variant: "destructive",
+        action: <ToastAction altText="OK">OK</ToastAction>,
+      });
     } finally {
       setInviting(false);
     }
@@ -356,15 +434,33 @@ export default function InvitePage() {
 
       if (error) throw error;
 
-      // Send email notification (in a real app, you would integrate with an email service)
-      // For now, we'll just simulate it
-      console.log(`Invitation email resent to ${invitation.email} with code ${invitation.invite_code}`);
+      // Send email notification
+      const baseUrl = window.location.origin;
+      const inviteLink = `${baseUrl}/invite/${id}/${invitation.invite_code}`;
 
-      toast({
-        title: "Invitation resent",
-        description: `The invitation has been resent to ${invitation.email}`,
-        action: <ToastAction altText="OK">OK</ToastAction>,
-      });
+      try {
+        // Send invitation email
+        await sendInvitationEmail({
+          to: invitation.email,
+          inviterName: user?.full_name || 'Trip Organizer',
+          tripName: trip?.name || 'Trip',
+          inviteLink: inviteLink,
+        });
+
+        toast({
+          title: "Invitation resent",
+          description: `The invitation has been resent to ${invitation.email}`,
+          action: <ToastAction altText="OK">OK</ToastAction>,
+        });
+      } catch (emailError) {
+        console.error('Failed to send invitation email:', emailError);
+        toast({
+          title: "Invitation updated",
+          description: `The invitation has been updated, but we couldn't send an email to ${invitation.email}. Error: ${emailError instanceof Error ? emailError.message : 'Unknown error'}`,
+          variant: "destructive",
+          action: <ToastAction altText="OK">OK</ToastAction>,
+        });
+      }
     } catch (err) {
       console.error('Error resending invitation:', err);
       setError('Failed to resend invitation. Please try again.');
@@ -436,71 +532,98 @@ export default function InvitePage() {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>Add Participants Manually</CardTitle>
+                <CardTitle>Add Participants</CardTitle>
                 <CardDescription>
-                  Add participants directly to this trip without sending invitations
+                  Add registered users or invite new participants to join this trip
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="manualEmail">Email Address</Label>
-                    <Input
-                      id="manualEmail"
-                      type="email"
-                      placeholder="Enter email address"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="manualRole">Role</Label>
-                    <Select
-                      value={inviteRole}
-                      onValueChange={(value) => setInviteRole(value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="participant">Participant</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Admins can edit trip details and manage participants
-                    </p>
-                  </div>
-
-                  {error && (
-                    <div className="bg-destructive/10 border-l-4 border-destructive p-4 text-destructive">
-                      <p>{error}</p>
+              <form onSubmit={handleAddParticipantManually}>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-muted p-4 rounded-md mb-4">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircleIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
+                        <div className="text-sm text-muted-foreground">
+                          <p className="font-medium">Important:</p>
+                          <ul className="list-disc list-inside mt-1 space-y-1">
+                            <li>If the person is already registered, they will be added to the trip automatically</li>
+                            <li>If not, an invitation will be created and they will need to register and accept it</li>
+                            {process.env.NODE_ENV === 'development' && (
+                              <li className="text-amber-600 dark:text-amber-400 font-medium mt-2">
+                                Development mode: Emails are simulated and not actually sent
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
                     </div>
-                  )}
 
-                  {success && (
-                    <div className="bg-primary/10 border-l-4 border-primary p-4 text-primary">
-                      <p>{success}</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="manualEmail">Email Address</Label>
+                      <Input
+                        id="manualEmail"
+                        type="email"
+                        placeholder="Enter email address"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        required
+                      />
                     </div>
-                  )}
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push(`/trips/${id}`)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddParticipantManually}
-                  disabled={inviting || !inviteEmail}
-                >
-                  {inviting ? 'Adding...' : 'Add Participant'}
-                </Button>
-              </CardFooter>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="manualRole">Role</Label>
+                      <Select
+                        value={inviteRole}
+                        onValueChange={(value) => setInviteRole(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="participant">Participant</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Admins can edit trip details and manage participants
+                      </p>
+                    </div>
+
+                    {error && (
+                      <div className="bg-destructive/10 border-l-4 border-destructive p-4 text-destructive">
+                        <p>{error}</p>
+                      </div>
+                    )}
+
+                    {success && (
+                      <div className="bg-primary/10 border-l-4 border-primary p-4 text-primary">
+                        <p>{success}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push(`/trips/${id}`)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={inviting || !inviteEmail}
+                    className={inviting ? 'animate-pulse' : ''}
+                  >
+                    {inviting ? (
+                      <>
+                        <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                        Adding...
+                      </>
+                    ) : 'Add Participant'}
+                  </Button>
+                </CardFooter>
+              </form>
             </Card>
           </div>
 

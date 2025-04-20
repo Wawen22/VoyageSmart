@@ -40,10 +40,20 @@ export default function Login() {
     // If a user object exists (from AuthProvider), redirect away from login
     if (user) {
       console.log('Login Page: User detected via context, redirecting to dashboard...');
-      router.push('/dashboard');
+
+      // Get the return URL if it exists
+      const returnUrl = searchParams.get('returnUrl');
+      const redirectTo = returnUrl || '/dashboard';
+
+      console.log('Redirecting to:', redirectTo);
+
+      // Use setTimeout to ensure the state update has completed before redirecting
+      setTimeout(() => {
+        router.push(redirectTo);
+      }, 100);
     }
     // We only care if the user object becomes available
-  }, [user, router]);
+  }, [user, router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,17 +70,23 @@ export default function Login() {
       await signIn(email, password);
 
       // The AuthProvider's onAuthStateChange or middleware should handle the redirect now.
-      // The explicit push below might still be useful for immediate feedback,
-      // but the core redirection relies on the state update.
       console.log('Sign in initiated via context');
 
-      // Show success message (optional, as redirection should be quick)
+      // Show success message
       setSuccess('Login successful! Redirecting...');
 
-      // Let the AuthProvider handle the redirection
-      // We'll just show a success message here
-      console.log('Login successful, waiting for AuthProvider to handle redirection');
-      // The redirection will be handled by the AuthProvider
+      // Get the return URL if it exists
+      const returnUrl = searchParams.get('returnUrl');
+      const redirectTo = returnUrl || '/dashboard';
+
+      console.log('Manual redirect to:', redirectTo);
+
+      // Manual redirect as a fallback
+      setTimeout(() => {
+        router.push(redirectTo);
+      }, 500);
+
+      console.log('Login successful, waiting for redirection');
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Invalid email or password. Please try again.');

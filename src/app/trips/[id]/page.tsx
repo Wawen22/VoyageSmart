@@ -260,14 +260,23 @@ export default function TripDetails() {
                 </p>
               </div>
 
-              {isOwner && (
+              <div className="flex space-x-2">
                 <Link
-                  href={`/trips/${id}/invite`}
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                  href={`/trips/${id}/participants`}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-foreground bg-secondary hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-colors"
                 >
-                  Invite
+                  Manage
                 </Link>
-              )}
+
+                {isOwner && (
+                  <Link
+                    href={`/trips/${id}/invite`}
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                  >
+                    Invite
+                  </Link>
+                )}
+              </div>
             </div>
             <div className="border-t border-border">
               <ul className="divide-y divide-border">
