@@ -13,7 +13,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, ReceiptIcon, BarChart3Icon, UsersIcon } from 'lucide-react';
 
-type Expense = {
+type DatabaseUser = {
+  full_name: string;
+  email: string;
+};
+
+type DatabaseParticipant = {
+  id: string;
+  user_id: string;
+  trip_id: string;
+  role: string;
+  invitation_status: string;
+  created_at: string;
+  users: DatabaseUser;
+};
+
+type DatabaseExpenseParticipant = {
+  user_id: string;
+  amount: number;
+  is_paid: boolean;
+  users: {
+    full_name: string;
+  };
+};
+
+type DatabaseExpense = {
   id: string;
   trip_id: string;
   category: string;
@@ -27,8 +51,21 @@ type Expense = {
   status: string;
   created_at: string;
   updated_at: string;
-  // Joined fields
-  paid_by_name?: string;
+  users: {
+    full_name: string;
+  };
+  expense_participants: DatabaseExpenseParticipant[];
+};
+
+// Types for our component state
+type Expense = Omit<DatabaseExpense, 'users' | 'expense_participants'> & {
+  paid_by_name: string;
+  participants: {
+    user_id: string;
+    amount: number;
+    is_paid: boolean;
+    full_name: string;
+  }[];
 };
 
 type Participant = {
@@ -38,7 +75,6 @@ type Participant = {
   role: string;
   invitation_status: string;
   created_at: string;
-  // Joined fields
   full_name: string;
   email: string;
 };
@@ -63,7 +99,16 @@ export default function ExpensesPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [trip, setTrip] = useState<any | null>(null);
+  interface Trip {
+    id: string;
+    name: string;
+    destination?: string;
+    preferences?: {
+      currency: string;
+    };
+  }
+  
+  const [trip, setTrip] = useState<Trip | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [balances, setBalances] = useState<Balance[]>([]);
@@ -82,43 +127,38 @@ export default function ExpensesPage() {
         // Fetch trip details
         const { data: tripData, error: tripError } = await supabase
           .from('trips')
-          .select('*')
+          .select(`
+            id,
+            name,
+            destination,
+            preferences
+          `)
           .eq('id', id)
           .single();
 
         if (tripError) throw tripError;
         setTrip(tripData);
 
-        // Fetch participants
+        // Fetch accepted participants with user details
         const { data: participantsData, error: participantsError } = await supabase
           .from('trip_participants')
-          .select(`
-            id,
-            user_id,
-            trip_id,
-            role,
-            invitation_status,
-            created_at,
-            users:user_id (
-              full_name,
-              email
-            )
-          `)
+          .select('*, users!inner(*)')
           .eq('trip_id', id)
-          .eq('invitation_status', 'accepted');
+          .eq('invitation_status', 'accepted')
+          .order('created_at', { ascending: true });
 
         if (participantsError) throw participantsError;
 
-        // Format participants data
-        const formattedParticipants = participantsData.map(p => ({
+        // Format participants data with type assertion
+        const formattedParticipants: Participant[] = ((participantsData || []) as any[]).map(p => ({
           id: p.id,
           user_id: p.user_id,
           trip_id: p.trip_id,
           role: p.role,
           invitation_status: p.invitation_status,
           created_at: p.created_at,
-          full_name: p.users?.full_name || 'Unknown',
-          email: p.users?.email || '',
+          full_name: p.users.full_name,
+          email: p.users.email
         }));
 
         setParticipants(formattedParticipants);
@@ -128,8 +168,12 @@ export default function ExpensesPage() {
           .from('expenses')
           .select(`
             *,
-            users:paid_by (
-              full_name
+            users!inner(*),
+            expense_participants!inner(
+              user_id,
+              amount,
+              is_paid,
+              users:user_id!inner(*)
             )
           `)
           .eq('trip_id', id)
@@ -138,9 +182,27 @@ export default function ExpensesPage() {
         if (expensesError) throw expensesError;
 
         // Format expenses data
-        const formattedExpenses = expensesData.map(e => ({
-          ...e,
-          paid_by_name: e.users?.full_name || 'Unknown',
+        const formattedExpenses: Expense[] = (expensesData || []).map((e: any) => ({
+          id: e.id,
+          trip_id: e.trip_id,
+          category: e.category,
+          amount: e.amount,
+          currency: e.currency,
+          date: e.date,
+          description: e.description,
+          paid_by: e.paid_by,
+          split_type: e.split_type,
+          receipt_url: e.receipt_url,
+          status: e.status,
+          created_at: e.created_at,
+          updated_at: e.updated_at,
+          paid_by_name: e.users.full_name,
+          participants: (e.expense_participants || []).map((p: any) => ({
+            user_id: p.user_id,
+            amount: p.amount,
+            is_paid: p.is_paid,
+            full_name: p.users.full_name
+          }))
         }));
 
         setExpenses(formattedExpenses);
@@ -167,19 +229,17 @@ export default function ExpensesPage() {
 
     // Calculate how much each person has paid and owes
     expenses.forEach(expense => {
-      // Add the full amount to the payer's balance
       const payerId = expense.paid_by;
-      const currentPayerBalance = balanceMap.get(payerId) || 0;
-      balanceMap.set(payerId, currentPayerBalance + expense.amount);
-
-      // Fetch expense participants to see how the expense is split
-      // For now, we'll assume equal split among all participants
-      const splitAmount = expense.amount / participants.length;
       
-      participants.forEach(p => {
+      // Add what each participant owes
+      expense.participants.forEach(p => {
         const currentBalance = balanceMap.get(p.user_id) || 0;
-        balanceMap.set(p.user_id, currentBalance - splitAmount);
+        balanceMap.set(p.user_id, currentBalance - p.amount);
       });
+
+      // Add what the payer paid
+      const payerBalance = balanceMap.get(payerId) || 0;
+      balanceMap.set(payerId, payerBalance + expense.amount);
     });
 
     // Convert the balance map to an array
@@ -197,7 +257,7 @@ export default function ExpensesPage() {
 
     setBalances(balancesArray);
 
-    // Calculate settlements (who pays whom)
+    // Calculate settlements and make sure they are ordered correctly for display
     calculateSettlements(balancesArray);
   };
 
@@ -208,16 +268,18 @@ export default function ExpensesPage() {
     
     const settlements: Settlement[] = [];
 
-    // For each debtor, find creditors to pay
+    // Process each debtor in order
     debtors.forEach(debtor => {
+      const debtorSettlements: Settlement[] = [];
       let remainingDebt = Math.abs(debtor.balance);
       
+      // Find all creditors this debtor needs to pay
       while (remainingDebt > 0.01 && creditors.length > 0) {
         const creditor = creditors[0];
         const paymentAmount = Math.min(remainingDebt, creditor.balance);
         
         if (paymentAmount > 0.01) {
-          settlements.push({
+          debtorSettlements.push({
             from_id: debtor.user_id,
             from_name: debtor.full_name,
             to_id: creditor.user_id,
@@ -228,14 +290,14 @@ export default function ExpensesPage() {
           remainingDebt -= paymentAmount;
           creditor.balance -= paymentAmount;
           
-          // If creditor is fully paid, remove from list
           if (creditor.balance < 0.01) {
             creditors.shift();
           }
-        } else {
-          break;
         }
       }
+
+      // Add all settlements for this debtor
+      settlements.push(...debtorSettlements);
     });
 
     setSettlements(settlements);
@@ -295,8 +357,12 @@ export default function ExpensesPage() {
           .from('expenses')
           .select(`
             *,
-            users:paid_by (
-              full_name
+            users!inner(*),
+            expense_participants!inner(
+              user_id,
+              amount,
+              is_paid,
+              users:user_id!inner(*)
             )
           `)
           .eq('trip_id', id)
@@ -304,9 +370,27 @@ export default function ExpensesPage() {
           
         if (fetchError) throw fetchError;
         
-        const formattedExpenses = updatedExpenses.map(e => ({
-          ...e,
-          paid_by_name: e.users?.full_name || 'Unknown',
+        const formattedExpenses: Expense[] = (updatedExpenses || []).map((e: any) => ({
+          id: e.id,
+          trip_id: e.trip_id,
+          category: e.category,
+          amount: e.amount,
+          currency: e.currency,
+          date: e.date,
+          description: e.description,
+          paid_by: e.paid_by,
+          split_type: e.split_type,
+          receipt_url: e.receipt_url,
+          status: e.status,
+          created_at: e.created_at,
+          updated_at: e.updated_at,
+          paid_by_name: e.users.full_name,
+          participants: (e.expense_participants || []).map((p: any) => ({
+            user_id: p.user_id,
+            amount: p.amount,
+            is_paid: p.is_paid,
+            full_name: p.users.full_name
+          }))
         }));
         
         setExpenses(formattedExpenses);
