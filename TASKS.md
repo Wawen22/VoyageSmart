@@ -32,13 +32,19 @@
   - Added delete button to trip details page
   - Implemented confirmation dialog before deletion
   - Added proper error handling and redirection after deletion
+- [x] Implemented Itinerary Management functionality
+  - Created itinerary page with day-by-day view
+  - Added ability to create, edit, and delete itinerary days
+  - Implemented activity management (create, edit, delete)
+  - Added priority levels and time scheduling for activities
+  - Created reusable components for itinerary UI
 
 ## Pending Tasks (In Priority Order)
 
 ### High Priority
 1. [x] Implement trip details page
    - [x] Design and create the trip overview section
-   - [ ] Add itinerary management functionality
+   - [x] Add itinerary management functionality
    - [ ] Implement basic expense tracking UI
    - [x] Add participant management section
 
@@ -66,7 +72,7 @@
    - [ ] Create expense reports and summaries
 
 ## Current Focus
-- Implementing itinerary and expense tracking functionality
-- Enhancing trip management features
-- Improving user experience for trip editing and deletion
-- Ensuring good user experience on both desktop and mobile
+- Implementing expense tracking functionality
+- Enhancing trip collaboration features
+- Improving user experience for mobile devices
+- Adding location and mapping features

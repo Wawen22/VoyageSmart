@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'; // Keep for resetPassword
 
 export default function Login() {
   const router = useRouter();
-  const { signIn, user, loading: authLoading } = useAuth(); // Get signIn, user, and loading state
+  const { signIn, user } = useAuth(); // Get signIn and user from auth context
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -56,8 +56,8 @@ export default function Login() {
       // Show success message (optional, as redirection should be quick)
       setSuccess('Login successful! Redirecting...');
 
-      // Explicit redirection removed. Middleware should handle this based on auth state.
-      // router.push('/dashboard');
+      // Add explicit redirection to dashboard
+      router.push('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Invalid email or password. Please try again.');

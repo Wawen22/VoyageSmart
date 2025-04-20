@@ -169,6 +169,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: data.user.email || '',
           });
         }
+
+        // Explicitly redirect to dashboard after successful login
+        console.log('Redirecting to dashboard after successful login');
+        router.push('/dashboard');
       }
 
       // No return needed here, the function updates state internally
