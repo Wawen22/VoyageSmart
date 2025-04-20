@@ -35,6 +35,7 @@ export default function TripDetails() {
   const [trip, setTrip] = useState<Trip | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
 
@@ -42,21 +43,21 @@ export default function TripDetails() {
     const fetchTripDetails = async () => {
       try {
         setLoading(true);
-        
+
         if (!user) return;
-        
+
         // Fetch trip details
         const { data: tripData, error: tripError } = await supabase
           .from('trips')
           .select('*')
           .eq('id', id)
           .single();
-        
+
         if (tripError) throw tripError;
-        
+
         setTrip(tripData);
         setIsOwner(tripData.owner_id === user.id);
-        
+
         // Fetch participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('trip_participants')
@@ -70,9 +71,9 @@ export default function TripDetails() {
             )
           `)
           .eq('trip_id', id);
-        
+
         if (participantsError) throw participantsError;
-        
+
         // Format participants data
         // Safe type assertion after validating the structure
         const formattedParticipants = participantsData?.map((p: any) => ({
@@ -82,7 +83,7 @@ export default function TripDetails() {
           full_name: (p.users?.full_name as string) || 'Unknown',
           email: (p.users?.email as string) || 'Unknown',
         }));
-        
+
         setParticipants(formattedParticipants);
       } catch (err) {
         console.error('Error fetching trip details:', err);
@@ -106,6 +107,35 @@ export default function TripDetails() {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this trip? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError(null);
+
+      // Delete the trip
+      const { error: deleteError } = await supabase
+        .from('trips')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) {
+        console.error('Error deleting trip:', deleteError);
+        throw deleteError;
+      }
+
+      // Redirect to dashboard
+      router.push('/dashboard');
+    } catch (err) {
+      console.error('Error deleting trip:', err);
+      setError('Failed to delete trip. Please try again.');
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -146,19 +176,28 @@ export default function TripDetails() {
               </Link>
               <h1 className="text-3xl font-bold text-foreground">{trip.name}</h1>
             </div>
-            
+
             {isOwner && (
-              <Link
-                href={`/trips/${id}/edit`}
-                className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-              >
-                Edit Trip
-              </Link>
+              <div className="flex space-x-2">
+                <Link
+                  href={`/trips/${id}/edit`}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                >
+                  Edit Trip
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive disabled:opacity-50 transition-colors"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Trip'}
+                </button>
+              </div>
             )}
           </div>
         </div>
       </header>
-      
+
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Trip Details */}
@@ -204,7 +243,7 @@ export default function TripDetails() {
               </dl>
             </div>
           </div>
-          
+
           {/* Participants */}
           <div className="bg-card shadow overflow-hidden sm:rounded-lg">
             <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
@@ -214,7 +253,7 @@ export default function TripDetails() {
                   People joining this trip
                 </p>
               </div>
-              
+
               {isOwner && (
                 <Link
                   href={`/trips/${id}/invite`}
@@ -260,7 +299,7 @@ export default function TripDetails() {
             </div>
           </div>
         </div>
-        
+
         {/* Trip Actions */}
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="bg-card shadow overflow-hidden sm:rounded-lg lg:col-span-3">
@@ -280,7 +319,7 @@ export default function TripDetails() {
                     </p>
                   </div>
                 </Link>
-                
+
                 <Link href={`/trips/${id}/accommodations`}>
                   <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
                     <h3 className="text-lg font-medium text-foreground">Accommodations</h3>
@@ -289,7 +328,7 @@ export default function TripDetails() {
                     </p>
                   </div>
                 </Link>
-                
+
                 <Link href={`/trips/${id}/transportation`}>
                   <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
                     <h3 className="text-lg font-medium text-foreground">Transportation</h3>
@@ -298,7 +337,7 @@ export default function TripDetails() {
                     </p>
                   </div>
                 </Link>
-                
+
                 <Link href={`/trips/${id}/expenses`}>
                   <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
                     <h3 className="text-lg font-medium text-foreground">Expenses</h3>

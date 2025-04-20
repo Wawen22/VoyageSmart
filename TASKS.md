@@ -21,15 +21,26 @@
   - Improved overall UI consistency
   - Enhanced form field visibility in both themes
   - Added smooth transitions between themes
+- [x] Fixed infinite recursion in trip_participants RLS policy
+  - Issue: The policy was causing an infinite recursion when querying trip participants
+  - Fix: Restructured the policy to avoid circular dependencies
+- [x] Implemented Edit Trip functionality
+  - Created edit page with form to modify trip details
+  - Added validation for trip data
+  - Implemented update functionality with Supabase
+- [x] Added Delete Trip functionality
+  - Added delete button to trip details page
+  - Implemented confirmation dialog before deletion
+  - Added proper error handling and redirection after deletion
 
 ## Pending Tasks (In Priority Order)
 
 ### High Priority
-1. [ ] Implement trip details page
-   - Design and create the trip overview section
-   - Add itinerary management functionality
-   - Implement basic expense tracking UI
-   - Add participant management section
+1. [x] Implement trip details page
+   - [x] Design and create the trip overview section
+   - [ ] Add itinerary management functionality
+   - [ ] Implement basic expense tracking UI
+   - [x] Add participant management section
 
 ### Medium Priority
 2. [ ] Enhance trip collaboration features
@@ -55,6 +66,7 @@
    - [ ] Create expense reports and summaries
 
 ## Current Focus
-- Implementing the trip details page as the next major feature
-- Focusing on core trip management functionality
+- Implementing itinerary and expense tracking functionality
+- Enhancing trip management features
+- Improving user experience for trip editing and deletion
 - Ensuring good user experience on both desktop and mobile
