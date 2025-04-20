@@ -80,7 +80,7 @@
 1. [x] Implement trip details page
    - [x] Design and create the trip overview section
    - [x] Add itinerary management functionality
-   - [ ] Implement basic expense tracking UI
+   - [x] Implement basic expense tracking UI
    - [x] Add participant management section
 
 ### Medium Priority
@@ -101,11 +101,12 @@
    - [ ] Integrate maps for trip planning
    - [ ] Add location search and suggestions
    - [ ] Implement route planning
-5. [ ] Advanced expense management
-   - [ ] Add multiple currency support
-   - [ ] Implement expense splitting
-   - [ ] Create expense reports and summaries
+5. [x] Advanced expense management
+   - [x] Add multiple currency support
+   - [x] Implement expense splitting
+   - [x] Create expense reports and summaries
 
 ## Current Focus
-- Developing expense tracking functionality
 - Enhancing trip collaboration features
+- Improving mobile experience
+- Implementing location and mapping features

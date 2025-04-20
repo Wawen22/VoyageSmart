@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
@@ -150,16 +151,12 @@ export default function NewTrip() {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <Link
-              href="/dashboard"
-              className="mr-4 text-primary hover:text-primary/90 transition-colors"
-            >
-              ← Back
-            </Link>
-            <h1 className="text-3xl font-bold text-foreground">Create New Trip</h1>
-          </div>
+        <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
+          <BackButton href="/dashboard" label="Back to Dashboard" />
+        </div>
+
+        <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Create New Trip</h1>
         </div>
       </header>
 
