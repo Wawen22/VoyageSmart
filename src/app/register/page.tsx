@@ -1,12 +1,14 @@
  'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation'; // Import useRouter and useSearchParams
 import { signUpUser } from '@/lib/auth-utils';
 
 export default function Register() {
   const router = useRouter(); // Initialize useRouter
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +17,13 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Log the return URL for debugging
+    if (returnUrl) {
+      console.log('Registration page loaded with returnUrl:', returnUrl);
+    }
+  }, [returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +65,13 @@ export default function Register() {
       setConfirmPassword('');
       setAcceptTerms(false);
 
-      // No automatic redirect here, user needs to confirm email first.
+      // If there's a returnUrl, add it to the login redirect
+      if (returnUrl) {
+        router.push(`/login?returnUrl=${encodeURIComponent(returnUrl)}&registered=true`);
+      } else {
+        // No automatic redirect here, user needs to confirm email first.
+        router.push('/login?registered=true');
+      }
     } catch (err: any) {
       console.error('Registration error:', err);
       setError(err.message || 'Registration failed. Please try again.');

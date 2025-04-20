@@ -19,8 +19,19 @@ export default function Login() {
   useEffect(() => {
     // Check if user just registered
     const registered = searchParams.get('registered');
+    const returnUrl = searchParams.get('returnUrl');
+
     if (registered === 'true') {
-      setSuccess('Registration successful! You can now log in with your credentials.');
+      if (returnUrl && returnUrl.includes('/invite/')) {
+        setSuccess('Registration successful! Please log in to accept the invitation.');
+      } else {
+        setSuccess('Registration successful! You can now log in with your credentials.');
+      }
+    }
+
+    // Log the return URL for debugging
+    if (returnUrl) {
+      console.log('Login page loaded with returnUrl:', returnUrl);
     }
   }, [searchParams]);
 
@@ -56,8 +67,10 @@ export default function Login() {
       // Show success message (optional, as redirection should be quick)
       setSuccess('Login successful! Redirecting...');
 
-      // Add explicit redirection to dashboard
-      router.push('/dashboard');
+      // Let the AuthProvider handle the redirection
+      // We'll just show a success message here
+      console.log('Login successful, waiting for AuthProvider to handle redirection');
+      // The redirection will be handled by the AuthProvider
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Invalid email or password. Please try again.');
@@ -178,7 +191,9 @@ export default function Login() {
 
           <div className="mt-6">
             <Link
-              href="/register"
+              href={searchParams.get('returnUrl')
+                ? `/register?returnUrl=${encodeURIComponent(searchParams.get('returnUrl') || '')}`
+                : '/register'}
               className="w-full flex justify-center py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-foreground bg-secondary hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
             >
               Create an account

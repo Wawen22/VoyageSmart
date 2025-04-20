@@ -84,8 +84,8 @@
    - [x] Add participant management section
 
 ### Medium Priority
-2. [ ] Enhance trip collaboration features
-   - [ ] Implement user invitation system
+2. [x] Enhance trip collaboration features
+   - [x] Implement user invitation system
    - [ ] Add real-time updates for shared trips
    - [ ] Create notification system for trip changes
    - [ ] Add commenting/discussion feature for trips
