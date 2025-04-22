@@ -86,15 +86,28 @@ export default function TripCard({ trip }: TripCardProps) {
   const daysUntil = getDaysUntil();
 
   return (
-    <Link href={`/trips/${trip.id}`}>
+    <Link href={`/trips/${trip.id}`} className="block h-full">
       <Card
-        className="overflow-hidden hover:shadow-md transition-all duration-300 h-full hover:scale-[1.02] border-l-4 hover-lift"
+        className="overflow-hidden hover:shadow-md transition-all duration-300 h-full hover:scale-[1.02] border-l-4 hover-lift relative"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{
           borderLeftColor: isHovered ? 'var(--primary)' : getStatusColor()
         }}
       >
+        {/* Ripple effect overlay */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-md">
+          <div
+            className={`absolute bg-primary/5 rounded-full transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-700 ease-in-out ${isHovered ? 'scale-[4]' : 'scale-0'}`}
+            style={{
+              top: '50%',
+              left: '50%',
+              width: '100px',
+              height: '100px',
+              opacity: isHovered ? 0.8 : 0
+            }}
+          />
+        </div>
         <CardContent className="p-0">
           <div className="p-4 space-y-3">
             {/* Header with title and status */}
@@ -141,8 +154,11 @@ export default function TripCard({ trip }: TripCardProps) {
                 Created {format(parseISO(trip.created_at), 'MMM d, yyyy')}
               </span>
               <div className="flex items-center text-primary text-sm font-medium group">
-                View details
-                <ArrowRightIcon className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+                <span className="relative">
+                  <span className="transition-all duration-300 group-hover:pr-1">View details</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                </span>
+                <ArrowRightIcon className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
               </div>
             </div>
           </div>

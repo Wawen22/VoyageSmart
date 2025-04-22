@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface PageTransitionProps {
   children: React.ReactNode;
   location?: string;
   className?: string;
-  transitionType?: 'fade' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'scale';
+  transitionType?: 'fade' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'scale' | 'none';
   duration?: number;
+  delay?: number;
+  onAnimationComplete?: () => void;
 }
 
 export default function PageTransition({
@@ -14,36 +17,101 @@ export default function PageTransition({
   className = '',
   transitionType = 'fade',
   duration = 300,
+  delay = 0,
+  onAnimationComplete,
 }: PageTransitionProps) {
   const [displayChildren, setDisplayChildren] = useState(children);
   const [transitionStage, setTransitionStage] = useState('fadeIn');
+  const pathname = usePathname();
+  const firstRender = useRef(true);
+  const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Use pathname as location if not provided
+  const effectiveLocation = location || pathname;
+
+  // Handle children changes (for nested transitions)
   useEffect(() => {
-    if (children !== displayChildren) {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+
+    if (children !== displayChildren && transitionType !== 'none') {
       setTransitionStage('fadeOut');
 
-      const timeout = setTimeout(() => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+
+      animationTimeoutRef.current = setTimeout(() => {
         setDisplayChildren(children);
         setTransitionStage('fadeIn');
+
+        // Call onAnimationComplete after the fade in animation
+        if (onAnimationComplete) {
+          setTimeout(onAnimationComplete, duration);
+        }
       }, duration);
 
-      return () => clearTimeout(timeout);
+      return () => {
+        if (animationTimeoutRef.current) {
+          clearTimeout(animationTimeoutRef.current);
+        }
+      };
+    } else if (transitionType === 'none') {
+      setDisplayChildren(children);
+      if (onAnimationComplete) {
+        onAnimationComplete();
+      }
     }
-  }, [children, displayChildren, duration]);
+  }, [children, displayChildren, duration, transitionType, onAnimationComplete]);
 
+  // Handle location/pathname changes
   useEffect(() => {
-    if (location) {
+    if (firstRender.current) {
+      return;
+    }
+
+    if (effectiveLocation && transitionType !== 'none') {
       setTransitionStage('fadeOut');
 
-      const timeout = setTimeout(() => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+
+      animationTimeoutRef.current = setTimeout(() => {
         setTransitionStage('fadeIn');
+
+        // Call onAnimationComplete after the fade in animation
+        if (onAnimationComplete) {
+          setTimeout(onAnimationComplete, duration);
+        }
       }, 50);
 
-      return () => clearTimeout(timeout);
+      return () => {
+        if (animationTimeoutRef.current) {
+          clearTimeout(animationTimeoutRef.current);
+        }
+      };
+    } else if (transitionType === 'none' && onAnimationComplete) {
+      onAnimationComplete();
     }
-  }, [location]);
+  }, [effectiveLocation, transitionType, duration, onAnimationComplete]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const getTransitionClass = () => {
+    if (transitionType === 'none') {
+      return '';
+    }
+
     if (transitionStage === 'fadeOut') {
       switch (transitionType) {
         case 'fade':
@@ -82,14 +150,22 @@ export default function PageTransition({
     }
   };
 
+  const delayStyle = delay > 0 ? { animationDelay: `${delay}ms`, transitionDelay: `${delay}ms` } : {};
+
   return (
     <div
       className={`transition-all ease-in-out ${className}`}
-      style={{ transitionDuration: `${duration}ms` }}
+      style={{
+        transitionDuration: `${duration}ms`,
+        ...delayStyle
+      }}
     >
       <div
         className={`transition-all ease-in-out ${getTransitionClass()}`}
-        style={{ transitionDuration: `${duration}ms` }}
+        style={{
+          transitionDuration: `${duration}ms`,
+          ...delayStyle
+        }}
       >
         {displayChildren}
       </div>
