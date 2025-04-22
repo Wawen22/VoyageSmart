@@ -28,7 +28,7 @@ export default function Dashboard() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('upcoming');
   const [searchTerm, setSearchTerm] = useState('');
   const [tripCount, setTripCount] = useState<number | null>(null);
 
@@ -207,25 +207,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Upcoming Trips Section */}
-        {!loading && upcomingTrips.length > 0 && (
-          <div className="mb-6 sm:mb-8 animate-content-fade-in" style={{ animationDelay: '200ms' }}>
-            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Upcoming Trips</h2>
-            <AnimatedList
-              className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3"
-              staggerDelay={100}
-              initialDelay={100}
-              animationType="slide-up"
-            >
-              {upcomingTrips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} />
-              ))}
-            </AnimatedList>
-          </div>
-        )}
-
-        {/* All Trips Section */}
-        <div className="mb-6 sm:mb-8 animate-content-fade-in" style={{ animationDelay: '300ms' }}>
+        {/* Trips Section */}
+        <div className="mb-6 sm:mb-8 animate-content-fade-in" style={{ animationDelay: '200ms' }}>
           <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">
             {filter === 'all' ? 'All Trips' : filter === 'upcoming' ? 'Upcoming Trips' : 'Past Trips'}
             {searchTerm && <span className="text-sm sm:text-base"> matching "{searchTerm}"</span>}
