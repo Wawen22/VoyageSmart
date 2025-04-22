@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
@@ -10,11 +10,14 @@ import { format, parseISO, isValid, addDays } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { it } from 'date-fns/locale';
 import DaySchedule from '@/components/itinerary/DaySchedule';
-import ActivityModal from '@/components/itinerary/ActivityModal';
-import DayModal from '@/components/itinerary/DayModal';
-import MoveActivityModal from '@/components/itinerary/MoveActivityModal';
-import CalendarView from '@/components/itinerary/CalendarView';
-import ActivityDetailsModal from '@/components/activity/ActivityDetailsModal';
+import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
+
+// Lazy load heavy components
+const ActivityModal = lazy(() => import('@/components/itinerary/ActivityModal'));
+const DayModal = lazy(() => import('@/components/itinerary/DayModal'));
+const MoveActivityModal = lazy(() => import('@/components/itinerary/MoveActivityModal'));
+const CalendarView = lazy(() => import('@/components/itinerary/CalendarView'));
+const ActivityDetailsModal = lazy(() => import('@/components/activity/ActivityDetailsModal'));
 
 type Trip = {
   id: string;
@@ -71,69 +74,118 @@ export default function TripItinerary() {
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
   useEffect(() => {
+    // Create a cache key for this trip
+    const cacheKey = `itinerary_${id}`;
+
     const fetchTripAndItinerary = async () => {
       try {
         setLoading(true);
 
         if (!user) return;
 
-        // Fetch trip details
-        const { data: tripData, error: tripError } = await supabase
-          .from('trips')
-          .select('id, name, start_date, end_date, destination')
-          .eq('id', id)
-          .single();
+        // Check if we have cached data
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+          try {
+            const parsed = JSON.parse(cachedData);
+            const cacheTime = parsed.timestamp;
+            const now = Date.now();
 
-        if (tripError) throw tripError;
+            // Use cache if it's less than 5 minutes old
+            if (now - cacheTime < 5 * 60 * 1000) {
+              console.log('[Itinerary] Using cached data');
+              setTrip(parsed.trip);
+              setItineraryDays(parsed.days);
+              setIsParticipant(parsed.isParticipant);
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error('Error parsing cached data:', e);
+            // Continue with normal fetch if cache parsing fails
+          }
+        }
 
+        console.log('[Itinerary] Fetching fresh data');
+
+        // Fetch trip details and participant status in parallel
+        const [tripResponse, participantResponse] = await Promise.all([
+          supabase
+            .from('trips')
+            .select('id, name, start_date, end_date, destination, owner_id')
+            .eq('id', id)
+            .single(),
+          supabase
+            .from('trip_participants')
+            .select('id')
+            .eq('trip_id', id)
+            .eq('user_id', user.id)
+            .maybeSingle()
+        ]);
+
+        if (tripResponse.error) throw tripResponse.error;
+        const tripData = tripResponse.data;
         setTrip(tripData);
 
-        // Check if user is a participant
-        const { data: participantData, error: participantError } = await supabase
-          .from('trip_participants')
-          .select('id')
-          .eq('trip_id', id)
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (participantError) throw participantError;
-
-        const isUserParticipant = !!participantData || tripData.owner_id === user.id;
+        if (participantResponse.error) throw participantResponse.error;
+        const isUserParticipant = !!participantResponse.data || tripData.owner_id === user.id;
         setIsParticipant(isUserParticipant);
 
         if (!isUserParticipant) {
           setError('You do not have permission to view this trip\'s itinerary');
+          setLoading(false);
           return;
         }
 
-        // Fetch itinerary days
-        const { data: daysData, error: daysError } = await supabase
+        // Fetch all itinerary days at once
+        const daysResponse = await supabase
           .from('itinerary_days')
           .select('*')
           .eq('trip_id', id)
           .order('day_date', { ascending: true });
 
-        if (daysError) throw daysError;
+        if (daysResponse.error) throw daysResponse.error;
+        const daysData = daysResponse.data;
 
-        // Fetch activities for each day
-        const daysWithActivities = await Promise.all(
-          daysData.map(async (day) => {
-            const { data: activitiesData, error: activitiesError } = await supabase
-              .from('activities')
-              .select('*')
-              .eq('day_id', day.id)
-              .order('start_time', { ascending: true });
+        // Fetch all activities for this trip at once (more efficient than per-day)
+        const activitiesResponse = await supabase
+          .from('activities')
+          .select('*')
+          .eq('trip_id', id)
+          .order('start_time', { ascending: true });
 
-            if (activitiesError) throw activitiesError;
+        if (activitiesResponse.error) throw activitiesResponse.error;
+        const allActivities = activitiesResponse.data || [];
 
-            return {
-              ...day,
-              activities: activitiesData || [],
-            };
-          })
-        );
+        // Group activities by day_id
+        const activitiesByDay = allActivities.reduce((acc, activity) => {
+          if (!acc[activity.day_id]) {
+            acc[activity.day_id] = [];
+          }
+          acc[activity.day_id].push(activity);
+          return acc;
+        }, {});
+
+        // Combine days with their activities
+        const daysWithActivities = daysData.map(day => ({
+          ...day,
+          activities: activitiesByDay[day.id] || []
+        }));
 
         setItineraryDays(daysWithActivities);
+
+        // Cache the data
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({
+            timestamp: Date.now(),
+            trip: tripData,
+            days: daysWithActivities,
+            isParticipant
+          }));
+        } catch (e) {
+          console.error('Error caching data:', e);
+          // Continue even if caching fails
+        }
 
         // If trip has start and end dates but no itinerary days, create them automatically
         if (daysWithActivities.length === 0 && tripData.start_date && tripData.end_date) {
@@ -479,8 +531,12 @@ export default function TripItinerary() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading itinerary...</p>
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="flex items-center mb-6">
+          <BackButton href={`/trips/${id}`} />
+          <h1 className="text-2xl font-bold ml-2">Itinerary</h1>
+        </div>
+        <ItinerarySkeleton />
       </div>
     );
   }
@@ -632,94 +688,99 @@ export default function TripItinerary() {
             ))}
           </div>
         ) : (
-          <CalendarView
-            days={itineraryDays}
-            onEditDay={(day) => {
-              setCurrentDay(day);
-              setShowDayModal(true);
+          <Suspense fallback={<div className="p-8 text-center">Loading calendar view...</div>}>
+            <CalendarView
+              days={itineraryDays}
+              onEditDay={(day) => {
+                setCurrentDay(day);
+                setShowDayModal(true);
+              }}
+              onAddActivity={(dayId) => {
+                setCurrentActivity(null);
+                setCurrentDayId(dayId);
+                setShowActivityModal(true);
+              }}
+              onEditActivity={(activity) => {
+                setCurrentActivity(activity);
+                setCurrentDayId(activity.day_id);
+                setShowActivityModal(true);
+              }}
+              onDeleteActivity={handleDeleteActivity}
+              onMoveActivity={handleMoveActivity}
+              onViewActivityDetails={handleViewActivityDetails}
+            />
+          </Suspense>
+        )}
+      </main>
+
+      {/* Modals with Suspense */}
+      <Suspense fallback={null}>
+        {/* Day Modal */}
+        {showDayModal && (
+          <DayModal
+            isOpen={showDayModal}
+            onClose={() => {
+              setShowDayModal(false);
+              setCurrentDay(null);
+              setError(null);
             }}
-            onAddActivity={(dayId) => {
+            onSave={handleSaveDay}
+            onDelete={currentDay ? handleDeleteDay : undefined}
+            day={currentDay}
+            tripId={id as string}
+          />
+        )}
+
+        {/* Activity Modal */}
+        {showActivityModal && (
+          <ActivityModal
+            isOpen={showActivityModal}
+            onClose={() => {
+              setShowActivityModal(false);
               setCurrentActivity(null);
-              setCurrentDayId(dayId);
-              setShowActivityModal(true);
+              setCurrentDayId('');
+              setError(null);
             }}
-            onEditActivity={(activity) => {
+            onSave={handleSaveActivity}
+            activity={currentActivity}
+            tripId={id as string}
+            dayId={currentDayId}
+          />
+        )}
+
+        {/* Move Activity Modal */}
+        {showMoveModal && currentActivity && (
+          <MoveActivityModal
+            isOpen={showMoveModal}
+            onClose={() => {
+              setShowMoveModal(false);
+              setCurrentActivity(null);
+              setError(null);
+            }}
+            onMove={handleMoveActivitySubmit}
+            activity={currentActivity}
+            days={itineraryDays}
+          />
+        )}
+
+        {/* Activity Details Modal */}
+        {showDetailsModal && currentActivity && (
+          <ActivityDetailsModal
+            isOpen={showDetailsModal}
+            onClose={() => {
+              setShowDetailsModal(false);
+              setCurrentActivity(null);
+            }}
+            activity={currentActivity}
+            onEdit={(activity) => {
+              setShowDetailsModal(false);
               setCurrentActivity(activity);
               setCurrentDayId(activity.day_id);
               setShowActivityModal(true);
             }}
-            onDeleteActivity={handleDeleteActivity}
-            onMoveActivity={handleMoveActivity}
-            onViewActivityDetails={handleViewActivityDetails}
           />
         )}
-      </main>
-
-      {/* Day Modal */}
-      {showDayModal && (
-        <DayModal
-          isOpen={showDayModal}
-          onClose={() => {
-            setShowDayModal(false);
-            setCurrentDay(null);
-            setError(null);
-          }}
-          onSave={handleSaveDay}
-          onDelete={currentDay ? handleDeleteDay : undefined}
-          day={currentDay}
-          tripId={id as string}
-        />
-      )}
-
-      {/* Activity Modal */}
-      {showActivityModal && (
-        <ActivityModal
-          isOpen={showActivityModal}
-          onClose={() => {
-            setShowActivityModal(false);
-            setCurrentActivity(null);
-            setCurrentDayId('');
-            setError(null);
-          }}
-          onSave={handleSaveActivity}
-          activity={currentActivity}
-          tripId={id as string}
-          dayId={currentDayId}
-        />
-      )}
-
-      {/* Move Activity Modal */}
-      {showMoveModal && currentActivity && (
-        <MoveActivityModal
-          isOpen={showMoveModal}
-          onClose={() => {
-            setShowMoveModal(false);
-            setCurrentActivity(null);
-            setError(null);
-          }}
-          onMove={handleMoveActivitySubmit}
-          activity={currentActivity}
-          days={itineraryDays}
-        />
-      )}
-
-      {/* Activity Details Modal */}
-      {showDetailsModal && currentActivity && (
-        <ActivityDetailsModal
-          isOpen={showDetailsModal}
-          onClose={() => {
-            setShowDetailsModal(false);
-            setCurrentActivity(null);
-          }}
-          activity={currentActivity}
-          onEdit={(activity) => {
-            setShowDetailsModal(false);
-            setCurrentActivity(activity);
-            setCurrentDayId(activity.day_id);
-            setShowActivityModal(true);
-          }}
-        />
-      )}
+      </Suspense>
     </div>
   );
 }

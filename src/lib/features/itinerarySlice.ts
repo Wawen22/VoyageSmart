@@ -45,33 +45,57 @@ const initialState: ItineraryState = {
   error: null,
 };
 
+// Cache for itinerary data to prevent redundant fetches
+const itineraryCache: Record<string, { timestamp: number, data: { days: ItineraryDay[], activities: Activity[] } }> = {};
+
+// Cache expiration time (5 minutes)
+const CACHE_EXPIRATION = 5 * 60 * 1000;
+
 // Async thunk for fetching trip itinerary
 export const fetchTripItinerary = createAsyncThunk(
   'itinerary/fetchTripItinerary',
-  async (tripId: string, { rejectWithValue }) => {
+  async (tripId: string, { rejectWithValue, getState }) => {
     try {
-      // Fetch itinerary days
-      const { data: daysData, error: daysError } = await supabase
-        .from('itinerary_days')
-        .select('*')
-        .eq('trip_id', tripId)
-        .order('day_date', { ascending: true });
+      // Check if we have cached data that's still valid
+      const cachedData = itineraryCache[tripId];
+      const now = Date.now();
 
-      if (daysError) throw daysError;
+      if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRATION)) {
+        console.log('[Itinerary] Using cached data');
+        return cachedData.data;
+      }
 
-      // Fetch activities for all days
-      const { data: activitiesData, error: activitiesError } = await supabase
-        .from('activities')
-        .select('*')
-        .eq('trip_id', tripId)
-        .order('start_time', { ascending: true });
+      console.log('[Itinerary] Fetching fresh data');
 
-      if (activitiesError) throw activitiesError;
+      // Use Promise.all to fetch days and activities in parallel
+      const [daysResponse, activitiesResponse] = await Promise.all([
+        supabase
+          .from('itinerary_days')
+          .select('*')
+          .eq('trip_id', tripId)
+          .order('day_date', { ascending: true }),
+        supabase
+          .from('activities')
+          .select('*')
+          .eq('trip_id', tripId)
+          .order('start_time', { ascending: true })
+      ]);
 
-      return {
-        days: daysData || [],
-        activities: activitiesData || [],
+      if (daysResponse.error) throw daysResponse.error;
+      if (activitiesResponse.error) throw activitiesResponse.error;
+
+      const result = {
+        days: daysResponse.data || [],
+        activities: activitiesResponse.data || [],
       };
+
+      // Cache the result
+      itineraryCache[tripId] = {
+        timestamp: now,
+        data: result
+      };
+
+      return result;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch itinerary');
     }
@@ -87,7 +111,7 @@ export const itinerarySlice = createSlice({
     addDay: (state, action: PayloadAction<ItineraryDay>) => {
       state.days.push(action.payload);
       // Sort days by date
-      state.days.sort((a, b) => 
+      state.days.sort((a, b) =>
         new Date(a.day_date).getTime() - new Date(b.day_date).getTime()
       );
     },
@@ -97,7 +121,7 @@ export const itinerarySlice = createSlice({
       if (index !== -1) {
         state.days[index] = action.payload;
         // Sort days by date
-        state.days.sort((a, b) => 
+        state.days.sort((a, b) =>
           new Date(a.day_date).getTime() - new Date(b.day_date).getTime()
         );
       }
@@ -139,7 +163,7 @@ export const itinerarySlice = createSlice({
     moveActivity: (state, action: PayloadAction<{ activityId: string; newDayId: string }>) => {
       const { activityId, newDayId } = action.payload;
       const activityIndex = state.activities.findIndex(activity => activity.id === activityId);
-      
+
       if (activityIndex !== -1) {
         state.activities[activityIndex].day_id = newDayId;
       }

@@ -21,6 +21,7 @@ Questo documento riassume le migliorie apportate all'interfaccia utente e all'es
 - Miglioramento degli stati di hover e focus per gli elementi interattivi
 - Implementazione di feedback visivo per le azioni dell'utente
 - Aggiunta di indicatori di caricamento per operazioni asincrone
+- Implementazione di skeleton loaders per migliorare la percezione di caricamento
 
 ### 4. Accessibilità
 - Miglioramento della struttura HTML per una migliore accessibilità
@@ -102,10 +103,11 @@ Questo documento riassume le migliorie apportate all'interfaccia utente e all'es
 - Ottimizzare i controlli per l'uso con una sola mano su dispositivi mobili
 
 ### 3. Performance
-- Implementare il lazy loading per i componenti pesanti
+- Implementare il lazy loading per i componenti pesanti ✅ (Implementato per modali e vista calendario)
 - Ottimizzare il rendering delle liste lunghe
-- Migliorare i tempi di caricamento delle pagine
-- Implementare la memorizzazione nella cache per i dati frequentemente utilizzati
+- Migliorare i tempi di caricamento delle pagine ✅ (Ottimizzato per la sezione Itinerario)
+- Implementare la memorizzazione nella cache per i dati frequentemente utilizzati ✅ (Implementato caching per i dati dell'itinerario)
+- Ottimizzare il middleware per ridurre i tempi di risposta ✅
 
 ### 4. Personalizzazione
 - Permettere agli utenti di personalizzare il layout della dashboard

@@ -31,15 +31,20 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Migliorare l'interazione con i marker sulla mappa
 
 ### 3. Performance
-- **Ottimizzare il caricamento iniziale**
-  - Implementare lazy loading per i componenti pesanti
-  - Aggiungere scheletri di caricamento per migliorare la percezione di velocità
+- **Ottimizzare ulteriormente il caricamento iniziale** ✅ (Parzialmente implementato)
+  - Implementare lazy loading per altri componenti pesanti ✅
+  - Aggiungere scheletri di caricamento per migliorare la percezione di velocità ✅
   - Ottimizzare il bundle size con code splitting
 
 - **Migliorare la performance delle liste**
   - Implementare virtualizzazione per liste lunghe
   - Ottimizzare il rendering dei componenti complessi
   - Implementare paginazione per ridurre il carico iniziale
+
+- **Ottimizzare il caching e la gestione dello stato**
+  - Estendere il caching a più sezioni dell'applicazione ✅ (Implementato per Itinerario)
+  - Implementare strategie di invalidazione della cache intelligenti
+  - Ottimizzare la gestione dello stato Redux per ridurre i re-render
 
 ## Nuove Funzionalità
 
