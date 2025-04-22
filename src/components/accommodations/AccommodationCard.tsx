@@ -1,14 +1,15 @@
 'use client';
 
+import { memo } from 'react';
 import { Accommodation } from '@/lib/features/accommodationSlice';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
-import { 
-  Building2Icon, 
-  CalendarIcon, 
-  MapPinIcon, 
+import {
+  Building2Icon,
+  CalendarIcon,
+  MapPinIcon,
   FileIcon,
   EyeIcon,
   EditIcon
@@ -21,9 +22,9 @@ interface AccommodationCardProps {
   canEdit: boolean;
 }
 
-export default function AccommodationCard({ 
-  accommodation, 
-  onView, 
+function AccommodationCard({
+  accommodation,
+  onView,
   onEdit,
   canEdit
 }: AccommodationCardProps) {
@@ -43,7 +44,7 @@ export default function AccommodationCard({
 
   const formatCurrency = (amount: number | null, currency: string) => {
     if (amount === null) return '';
-    
+
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
@@ -60,14 +61,14 @@ export default function AccommodationCard({
                 <Building2Icon className="h-4 w-4 mr-2 text-primary" />
                 {accommodation.name}
               </h3>
-              
+
               {accommodation.type && (
                 <Badge variant="outline" className="text-xs">
                   {getAccommodationTypeLabel(accommodation.type)}
                 </Badge>
               )}
             </div>
-            
+
             {accommodation.cost !== null && (
               <div className="text-right">
                 <p className="text-sm font-medium">
@@ -76,7 +77,7 @@ export default function AccommodationCard({
               </div>
             )}
           </div>
-          
+
           {/* Dates */}
           {(accommodation.check_in_date || accommodation.check_out_date) && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
@@ -87,7 +88,7 @@ export default function AccommodationCard({
                   <span>{format(parseISO(accommodation.check_in_date), 'MMM d, yyyy')}</span>
                 </div>
               )}
-              
+
               {accommodation.check_out_date && (
                 <div className="flex items-center">
                   <CalendarIcon className="h-3 w-3 mr-1 text-muted-foreground" />
@@ -97,7 +98,7 @@ export default function AccommodationCard({
               )}
             </div>
           )}
-          
+
           {/* Address */}
           {accommodation.address && (
             <div className="flex items-center text-sm">
@@ -105,7 +106,7 @@ export default function AccommodationCard({
               <p className="truncate">{accommodation.address}</p>
             </div>
           )}
-          
+
           {/* Documents */}
           {accommodation.documents && accommodation.documents.length > 0 && (
             <div className="flex items-center text-sm">
@@ -115,7 +116,7 @@ export default function AccommodationCard({
           )}
         </div>
       </CardContent>
-      
+
       <CardFooter className="p-3 pt-0 flex justify-end gap-2 border-t">
         <Button
           variant="ghost"
@@ -125,7 +126,7 @@ export default function AccommodationCard({
           <EyeIcon className="h-4 w-4 mr-1" />
           View
         </Button>
-        
+
         {canEdit && (
           <Button
             variant="outline"
@@ -140,3 +141,6 @@ export default function AccommodationCard({
     </Card>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export default memo(AccommodationCard);

@@ -53,11 +53,28 @@ const initialState: TransportationState = {
   currentTransportation: null,
 };
 
+// Cache for transportations data to prevent redundant fetches
+const transportationsCache: Record<string, { timestamp: number, data: Transportation[] }> = {};
+
+// Cache expiration time (5 minutes)
+const CACHE_EXPIRATION = 5 * 60 * 1000;
+
 // Fetch transportations for a trip
 export const fetchTransportations = createAsyncThunk(
   'transportations/fetchTransportations',
   async (tripId: string, { rejectWithValue }) => {
     try {
+      // Check if we have cached data that's still valid
+      const cachedData = transportationsCache[tripId];
+      const now = Date.now();
+
+      if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRATION)) {
+        console.log('[Transportation] Using cached data');
+        return cachedData.data;
+      }
+
+      console.log('[Transportation] Fetching fresh data');
+
       // Fetch transportations
       const { data: transportations, error: transportationsError } = await supabase
         .from('transportation')
@@ -73,7 +90,7 @@ export const fetchTransportations = createAsyncThunk(
       // Process transportations to reconstruct coordinates from JSON
       const processedTransportations = transportations?.map(item => {
         const transportation: any = { ...item };
-        
+
         // Parse departure coordinates
         if (item.departure_coordinates_json) {
           try {
@@ -82,7 +99,7 @@ export const fetchTransportations = createAsyncThunk(
             console.error('Error parsing departure coordinates JSON:', e);
           }
         }
-        
+
         // Parse arrival coordinates
         if (item.arrival_coordinates_json) {
           try {
@@ -91,7 +108,7 @@ export const fetchTransportations = createAsyncThunk(
             console.error('Error parsing arrival coordinates JSON:', e);
           }
         }
-        
+
         return transportation;
       });
 
@@ -112,7 +129,7 @@ export const fetchTransportations = createAsyncThunk(
           // Process stops to reconstruct coordinates from JSON
           const processedStops = stops?.map(stop => {
             const processedStop: any = { ...stop };
-            
+
             if (stop.coordinates_json) {
               try {
                 processedStop.coordinates = JSON.parse(stop.coordinates_json);
@@ -120,7 +137,7 @@ export const fetchTransportations = createAsyncThunk(
                 console.error('Error parsing stop coordinates JSON:', e);
               }
             }
-            
+
             return processedStop;
           });
 
@@ -131,7 +148,15 @@ export const fetchTransportations = createAsyncThunk(
         })
       );
 
-      return transportationsWithStops || [];
+      const result = transportationsWithStops || [];
+
+      // Cache the result
+      transportationsCache[tripId] = {
+        timestamp: now,
+        data: result
+      };
+
+      return result;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -145,18 +170,18 @@ export const addTransportation = createAsyncThunk(
     try {
       // Prepare data for insertion
       const dataToInsert = { ...transportation };
-      
+
       // Convert coordinates to JSON strings
       if (dataToInsert.departure_coordinates) {
         dataToInsert.departure_coordinates_json = JSON.stringify(dataToInsert.departure_coordinates);
         delete dataToInsert.departure_coordinates;
       }
-      
+
       if (dataToInsert.arrival_coordinates) {
         dataToInsert.arrival_coordinates_json = JSON.stringify(dataToInsert.arrival_coordinates);
         delete dataToInsert.arrival_coordinates;
       }
-      
+
       // Extract stops to insert separately
       const stops = dataToInsert.stops;
       delete dataToInsert.stops;
@@ -200,7 +225,7 @@ export const addTransportation = createAsyncThunk(
 
       // Reconstruct the result with parsed coordinates
       const result: any = { ...data };
-      
+
       if (data.departure_coordinates_json) {
         try {
           result.departure_coordinates = JSON.parse(data.departure_coordinates_json);
@@ -208,7 +233,7 @@ export const addTransportation = createAsyncThunk(
           console.error('Error parsing departure coordinates JSON:', e);
         }
       }
-      
+
       if (data.arrival_coordinates_json) {
         try {
           result.arrival_coordinates = JSON.parse(data.arrival_coordinates_json);
@@ -216,11 +241,11 @@ export const addTransportation = createAsyncThunk(
           console.error('Error parsing arrival coordinates JSON:', e);
         }
       }
-      
+
       // Add stops to the result
       result.stops = stopsData.map((stop: any) => {
         const processedStop: any = { ...stop };
-        
+
         if (stop.coordinates_json) {
           try {
             processedStop.coordinates = JSON.parse(stop.coordinates_json);
@@ -228,9 +253,14 @@ export const addTransportation = createAsyncThunk(
             console.error('Error parsing stop coordinates JSON:', e);
           }
         }
-        
+
         return processedStop;
       });
+
+      // Invalidate cache for this trip
+      if (transportation.trip_id) {
+        delete transportationsCache[transportation.trip_id as string];
+      }
 
       return result;
     } catch (error: any) {
@@ -249,18 +279,18 @@ export const updateTransportation = createAsyncThunk(
     try {
       // Prepare data for update
       const dataToUpdate = { ...transportation };
-      
+
       // Convert coordinates to JSON strings
       if (dataToUpdate.departure_coordinates) {
         dataToUpdate.departure_coordinates_json = JSON.stringify(dataToUpdate.departure_coordinates);
         delete dataToUpdate.departure_coordinates;
       }
-      
+
       if (dataToUpdate.arrival_coordinates) {
         dataToUpdate.arrival_coordinates_json = JSON.stringify(dataToUpdate.arrival_coordinates);
         delete dataToUpdate.arrival_coordinates;
       }
-      
+
       // Extract stops to update separately
       const stops = dataToUpdate.stops;
       delete dataToUpdate.stops;
@@ -319,7 +349,7 @@ export const updateTransportation = createAsyncThunk(
 
       // Reconstruct the result with parsed coordinates
       const result: any = { ...data };
-      
+
       if (data.departure_coordinates_json) {
         try {
           result.departure_coordinates = JSON.parse(data.departure_coordinates_json);
@@ -327,7 +357,7 @@ export const updateTransportation = createAsyncThunk(
           console.error('Error parsing departure coordinates JSON:', e);
         }
       }
-      
+
       if (data.arrival_coordinates_json) {
         try {
           result.arrival_coordinates = JSON.parse(data.arrival_coordinates_json);
@@ -335,11 +365,11 @@ export const updateTransportation = createAsyncThunk(
           console.error('Error parsing arrival coordinates JSON:', e);
         }
       }
-      
+
       // Add stops to the result
       result.stops = stopsData.map((stop: any) => {
         const processedStop: any = { ...stop };
-        
+
         if (stop.coordinates_json) {
           try {
             processedStop.coordinates = JSON.parse(stop.coordinates_json);
@@ -347,9 +377,14 @@ export const updateTransportation = createAsyncThunk(
             console.error('Error parsing stop coordinates JSON:', e);
           }
         }
-        
+
         return processedStop;
       });
+
+      // Invalidate cache for this trip
+      if (transportation.trip_id) {
+        delete transportationsCache[transportation.trip_id as string];
+      }
 
       return result;
     } catch (error: any) {
@@ -361,7 +396,7 @@ export const updateTransportation = createAsyncThunk(
 // Delete a transportation
 export const deleteTransportation = createAsyncThunk(
   'transportations/deleteTransportation',
-  async (id: string, { rejectWithValue }) => {
+  async (id: string, { rejectWithValue, getState }) => {
     try {
       // Delete transportation (stops will be deleted automatically due to CASCADE)
       const { error } = await supabase
@@ -372,6 +407,16 @@ export const deleteTransportation = createAsyncThunk(
       if (error) {
         console.error('Error deleting transportation:', error);
         throw error;
+      }
+
+      // Get the trip_id before deleting to invalidate cache
+      const state = getState() as { transportation: TransportationState };
+      const transportation = state.transportation.transportations.find(t => t.id === id);
+      const tripId = transportation?.trip_id;
+
+      // Invalidate cache for this trip
+      if (tripId) {
+        delete transportationsCache[tripId];
       }
 
       return id;
@@ -407,7 +452,7 @@ const transportationSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // Add transportation
       .addCase(addTransportation.pending, (state) => {
         state.loading = true;
@@ -421,7 +466,7 @@ const transportationSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // Update transportation
       .addCase(updateTransportation.pending, (state) => {
         state.loading = true;
@@ -438,7 +483,7 @@ const transportationSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      
+
       // Delete transportation
       .addCase(deleteTransportation.pending, (state) => {
         state.loading = true;

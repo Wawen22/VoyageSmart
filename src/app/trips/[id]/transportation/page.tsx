@@ -64,27 +64,70 @@ export default function TransportationPage() {
       try {
         if (!user) return;
 
-        // Fetch trip details
-        const { data: tripData, error: tripError } = await supabase
-          .from('trips')
-          .select('id, name, destination, owner_id')
-          .eq('id', id)
-          .single();
+        // Create a cache key for this trip
+        const cacheKey = `trip_details_${id}`;
 
-        if (tripError) throw tripError;
+        // Check if we have cached data
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+          try {
+            const parsed = JSON.parse(cachedData);
+            const cacheTime = parsed.timestamp;
+            const now = Date.now();
+
+            // Use cache if it's less than 5 minutes old
+            if (now - cacheTime < 5 * 60 * 1000) {
+              console.log('[Transportation] Using cached trip data');
+              setTrip(parsed.trip);
+              setIsParticipant(parsed.isParticipant);
+
+              // Fetch transportations (this will use its own cache)
+              dispatch(fetchTransportations(id as string));
+              return;
+            }
+          } catch (e) {
+            console.error('Error parsing cached trip data:', e);
+            // Continue with normal fetch if cache parsing fails
+          }
+        }
+
+        console.log('[Transportation] Fetching fresh trip data');
+
+        // Fetch trip details and participant status in parallel
+        const [tripResponse, participantResponse] = await Promise.all([
+          supabase
+            .from('trips')
+            .select('id, name, destination, owner_id')
+            .eq('id', id)
+            .single(),
+          supabase
+            .from('trip_participants')
+            .select('id')
+            .eq('trip_id', id)
+            .eq('user_id', user.id)
+            .eq('invitation_status', 'accepted')
+            .maybeSingle()
+        ]);
+
+        if (tripResponse.error) throw tripResponse.error;
+        const tripData = tripResponse.data;
         setTrip(tripData);
 
-        // Check if user is a participant
-        const { data: participantData, error: participantError } = await supabase
-          .from('trip_participants')
-          .select('id')
-          .eq('trip_id', id)
-          .eq('user_id', user.id)
-          .eq('invitation_status', 'accepted')
-          .maybeSingle();
+        if (participantResponse.error) throw participantResponse.error;
+        const isUserParticipant = !!participantResponse.data || tripData.owner_id === user.id;
+        setIsParticipant(isUserParticipant);
 
-        if (participantError) throw participantError;
-        setIsParticipant(!!participantData || tripData.owner_id === user.id);
+        // Cache the trip data
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({
+            timestamp: Date.now(),
+            trip: tripData,
+            isParticipant: isUserParticipant
+          }));
+        } catch (e) {
+          console.error('Error caching trip data:', e);
+          // Continue even if caching fails
+        }
 
         // Fetch transportations
         dispatch(fetchTransportations(id as string));

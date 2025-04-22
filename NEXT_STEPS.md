@@ -42,9 +42,9 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Implementare paginazione per ridurre il carico iniziale
 
 - **Ottimizzare il caching e la gestione dello stato**
-  - Estendere il caching a più sezioni dell'applicazione ✅ (Implementato per Itinerario)
-  - Implementare strategie di invalidazione della cache intelligenti
-  - Ottimizzare la gestione dello stato Redux per ridurre i re-render
+  - Estendere il caching a più sezioni dell'applicazione ✅ (Implementato per Itinerario, Alloggi, Trasporti e Spese)
+  - Implementare strategie di invalidazione della cache intelligenti ✅ (Implementato per Alloggi, Trasporti e Spese)
+  - Ottimizzare la gestione dello stato Redux per ridurre i re-render ✅ (Implementato memoizzazione per AccommodationCard, TransportationCard e ExpenseCard)
 
 ## Nuove Funzionalità
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Transportation } from '@/lib/features/transportationSlice';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,7 +24,7 @@ interface TransportationCardProps {
   getIcon: (type: string) => JSX.Element;
 }
 
-export default function TransportationCard({
+function TransportationCard({
   transportation,
   onView,
   onEdit,
@@ -201,3 +201,6 @@ export default function TransportationCard({
     </Card>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export default memo(TransportationCard);

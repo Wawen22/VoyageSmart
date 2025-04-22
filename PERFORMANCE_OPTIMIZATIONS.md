@@ -7,8 +7,8 @@ Questo documento tiene traccia delle ottimizzazioni delle prestazioni implementa
 ### 1. Ottimizzazioni del Caricamento Dati
 
 - **Richieste API Parallele**: Sostituite le query Supabase sequenziali con `Promise.all` per l'esecuzione parallela nella sezione Itinerario.
-- **Caching dei Dati**: Implementata una cache in memoria per i dati dell'itinerario con una scadenza di 5 minuti per evitare richieste ridondanti.
-- **Caching con Session Storage**: Aggiunto il caching nel browser tramite session storage per i dati del viaggio e dell'itinerario.
+- **Caching dei Dati**: Implementata una cache in memoria per i dati dell'itinerario, degli alloggi e dei trasporti con una scadenza di 5 minuti per evitare richieste ridondanti.
+- **Caching con Session Storage**: Aggiunto il caching nel browser tramite session storage per i dati del viaggio, dell'itinerario, degli alloggi, dei trasporti e delle spese.
 - **Pattern di Query Ottimizzati**: Sostituite le query multiple per le attività giornaliere con una singola query per tutte le attività, raggruppandole poi per giorno.
 
 ### 2. Ottimizzazioni del Middleware
@@ -21,6 +21,7 @@ Questo documento tiene traccia delle ottimizzazioni delle prestazioni implementa
 - **Skeleton Loaders**: Aggiunti loader scheletro dettagliati per la sezione Itinerario per migliorare la percezione delle prestazioni.
 - **Lazy Loading**: Implementato il caricamento lazy per componenti pesanti come i modal e la vista calendario.
 - **Suspense Boundaries**: Aggiunti i confini React Suspense attorno ai componenti caricati in modo lazy.
+- **Memoizzazione dei Componenti**: Implementata la memoizzazione per componenti come AccommodationCard, TransportationCard e ExpenseCard per evitare re-render non necessari.
 
 ## Raccomandazioni per Ottimizzazioni Future
 

@@ -124,33 +124,88 @@ export default function ExpensesPage() {
 
         if (!user) return;
 
-        // Fetch trip details
-        const { data: tripData, error: tripError } = await supabase
-          .from('trips')
-          .select(`
-            id,
-            name,
-            destination,
-            preferences
-          `)
-          .eq('id', id)
-          .single();
+        // Create cache keys for this trip
+        const tripCacheKey = `expenses_trip_${id}`;
+        const participantsCacheKey = `expenses_participants_${id}`;
+        const expensesCacheKey = `expenses_data_${id}`;
 
-        if (tripError) throw tripError;
+        // Check if we have cached data
+        let cachedTrip = null;
+        let cachedParticipants = null;
+        let cachedExpenses = null;
+        let shouldFetchFresh = false;
+
+        try {
+          const tripCache = sessionStorage.getItem(tripCacheKey);
+          const participantsCache = sessionStorage.getItem(participantsCacheKey);
+          const expensesCache = sessionStorage.getItem(expensesCacheKey);
+
+          if (tripCache && participantsCache && expensesCache) {
+            const parsedTripCache = JSON.parse(tripCache);
+            const parsedParticipantsCache = JSON.parse(participantsCache);
+            const parsedExpensesCache = JSON.parse(expensesCache);
+
+            const now = Date.now();
+            const cacheTime = parsedTripCache.timestamp;
+
+            // Use cache if it's less than 5 minutes old
+            if (now - cacheTime < 5 * 60 * 1000) {
+              console.log('[Expenses] Using cached data');
+              cachedTrip = parsedTripCache.data;
+              cachedParticipants = parsedParticipantsCache.data;
+              cachedExpenses = parsedExpensesCache.data;
+            } else {
+              shouldFetchFresh = true;
+            }
+          } else {
+            shouldFetchFresh = true;
+          }
+        } catch (e) {
+          console.error('Error parsing cached data:', e);
+          shouldFetchFresh = true;
+        }
+
+        // If we have valid cached data, use it
+        if (cachedTrip && cachedParticipants && cachedExpenses) {
+          setTrip(cachedTrip);
+          setParticipants(cachedParticipants);
+          setExpenses(cachedExpenses);
+          calculateBalances(cachedExpenses, cachedParticipants);
+          setLoading(false);
+          return;
+        }
+
+        // Otherwise fetch fresh data
+        console.log('[Expenses] Fetching fresh data');
+
+        // Fetch trip details and participants in parallel
+        const [tripResponse, participantsResponse] = await Promise.all([
+          supabase
+            .from('trips')
+            .select(`
+              id,
+              name,
+              destination,
+              preferences
+            `)
+            .eq('id', id)
+            .single(),
+          supabase
+            .from('trip_participants')
+            .select('*, users!inner(*)')
+            .eq('trip_id', id)
+            .eq('invitation_status', 'accepted')
+            .order('created_at', { ascending: true })
+        ]);
+
+        if (tripResponse.error) throw tripResponse.error;
+        const tripData = tripResponse.data;
         setTrip(tripData);
 
-        // Fetch accepted participants with user details
-        const { data: participantsData, error: participantsError } = await supabase
-          .from('trip_participants')
-          .select('*, users!inner(*)')
-          .eq('trip_id', id)
-          .eq('invitation_status', 'accepted')
-          .order('created_at', { ascending: true });
-
-        if (participantsError) throw participantsError;
+        if (participantsResponse.error) throw participantsResponse.error;
 
         // Format participants data with type assertion
-        const formattedParticipants: Participant[] = ((participantsData || []) as any[]).map(p => ({
+        const formattedParticipants: Participant[] = ((participantsResponse.data || []) as any[]).map(p => ({
           id: p.id,
           user_id: p.user_id,
           trip_id: p.trip_id,
@@ -209,6 +264,17 @@ export default function ExpensesPage() {
 
         // Calculate balances
         calculateBalances(formattedExpenses, formattedParticipants);
+
+        // Cache the data
+        try {
+          const timestamp = Date.now();
+          sessionStorage.setItem(tripCacheKey, JSON.stringify({ timestamp, data: tripData }));
+          sessionStorage.setItem(participantsCacheKey, JSON.stringify({ timestamp, data: formattedParticipants }));
+          sessionStorage.setItem(expensesCacheKey, JSON.stringify({ timestamp, data: formattedExpenses }));
+        } catch (e) {
+          console.error('Error caching data:', e);
+          // Continue even if caching fails
+        }
       } catch (err) {
         console.error('Error fetching trip details:', err);
         setError('Failed to load trip details. Please try again.');
@@ -397,6 +463,14 @@ export default function ExpensesPage() {
 
         // Recalculate balances
         calculateBalances(formattedExpenses, participants);
+
+        // Invalidate cache
+        try {
+          const expensesCacheKey = `expenses_data_${id}`;
+          sessionStorage.removeItem(expensesCacheKey);
+        } catch (e) {
+          console.error('Error invalidating cache:', e);
+        }
       }
 
       setIsAddExpenseModalOpen(false);
@@ -440,6 +514,14 @@ export default function ExpensesPage() {
         expenses.filter(e => e.id !== expenseId),
         participants
       );
+
+      // Invalidate cache
+      try {
+        const expensesCacheKey = `expenses_data_${id}`;
+        sessionStorage.removeItem(expensesCacheKey);
+      } catch (e) {
+        console.error('Error invalidating cache:', e);
+      }
     } catch (err) {
       console.error('Error deleting expense:', err);
       setError('Failed to delete expense. Please try again.');

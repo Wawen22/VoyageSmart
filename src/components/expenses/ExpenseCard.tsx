@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ interface ExpenseCardProps {
   onDelete: (id: string) => void;
 }
 
-export default function ExpenseCard({ expense, onDelete }: ExpenseCardProps) {
+function ExpenseCard({ expense, onDelete }: ExpenseCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const getCategoryIcon = (category: string) => {
@@ -171,3 +171,6 @@ export default function ExpenseCard({ expense, onDelete }: ExpenseCardProps) {
     </Card>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export default memo(ExpenseCard);

@@ -104,9 +104,9 @@ Questo documento riassume le migliorie apportate all'interfaccia utente e all'es
 
 ### 3. Performance
 - Implementare il lazy loading per i componenti pesanti ✅ (Implementato per modali e vista calendario)
-- Ottimizzare il rendering delle liste lunghe
-- Migliorare i tempi di caricamento delle pagine ✅ (Ottimizzato per la sezione Itinerario)
-- Implementare la memorizzazione nella cache per i dati frequentemente utilizzati ✅ (Implementato caching per i dati dell'itinerario)
+- Ottimizzare il rendering delle liste lunghe ✅ (Implementato memoizzazione per componenti di lista)
+- Migliorare i tempi di caricamento delle pagine ✅ (Ottimizzato per le sezioni Itinerario, Alloggi, Trasporti e Spese)
+- Implementare la memorizzazione nella cache per i dati frequentemente utilizzati ✅ (Implementato caching per i dati dell'itinerario, degli alloggi, dei trasporti e delle spese)
 - Ottimizzare il middleware per ridurre i tempi di risposta ✅
 
 ### 4. Personalizzazione

@@ -35,11 +35,28 @@ const initialState: AccommodationState = {
   currentAccommodation: null,
 };
 
+// Cache for accommodations data to prevent redundant fetches
+const accommodationsCache: Record<string, { timestamp: number, data: Accommodation[] }> = {};
+
+// Cache expiration time (5 minutes)
+const CACHE_EXPIRATION = 5 * 60 * 1000;
+
 // Fetch accommodations for a trip
 export const fetchAccommodations = createAsyncThunk(
   'accommodations/fetchAccommodations',
   async (tripId: string, { rejectWithValue }) => {
     try {
+      // Check if we have cached data that's still valid
+      const cachedData = accommodationsCache[tripId];
+      const now = Date.now();
+
+      if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRATION)) {
+        console.log('[Accommodations] Using cached data');
+        return cachedData.data;
+      }
+
+      console.log('[Accommodations] Fetching fresh data');
+
       const { data, error } = await supabase
         .from('accommodations')
         .select('*')
@@ -66,7 +83,15 @@ export const fetchAccommodations = createAsyncThunk(
         return item;
       });
 
-      return processedData || [];
+      const result = processedData || [];
+
+      // Cache the result
+      accommodationsCache[tripId] = {
+        timestamp: now,
+        data: result
+      };
+
+      return result;
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
@@ -111,6 +136,11 @@ export const addAccommodation = createAsyncThunk(
         } catch (e) {
           console.error('Error parsing coordinates JSON:', e);
         }
+      }
+
+      // Invalidate cache for this trip
+      if (result.trip_id) {
+        delete accommodationsCache[result.trip_id];
       }
 
       return result;
@@ -164,6 +194,11 @@ export const updateAccommodation = createAsyncThunk(
         }
       }
 
+      // Invalidate cache for this trip
+      if (result.trip_id) {
+        delete accommodationsCache[result.trip_id];
+      }
+
       return result;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -174,14 +209,25 @@ export const updateAccommodation = createAsyncThunk(
 // Delete an accommodation
 export const deleteAccommodation = createAsyncThunk(
   'accommodations/deleteAccommodation',
-  async (id: string, { rejectWithValue }) => {
+  async (id: string, { rejectWithValue, getState }) => {
     try {
+      // Get the trip_id before deleting to invalidate cache
+      const state = getState() as { accommodations: AccommodationState };
+      const accommodation = state.accommodations.accommodations.find(acc => acc.id === id);
+      const tripId = accommodation?.trip_id;
+
       const { error } = await supabase
         .from('accommodations')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
+
+      // Invalidate cache for this trip
+      if (tripId) {
+        delete accommodationsCache[tripId];
+      }
+
       return id;
     } catch (error: any) {
       return rejectWithValue(error.message);
