@@ -187,7 +187,9 @@ export default function Dashboard() {
             <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Upcoming Trips</h2>
             <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {upcomingTrips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} />
+                <div key={trip.id} className="stagger-item">
+                  <TripCard trip={trip} />
+                </div>
               ))}
             </div>
           </div>
@@ -224,7 +226,9 @@ export default function Dashboard() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredTrips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} />
+                <div key={trip.id} className="stagger-item">
+                  <TripCard trip={trip} />
+                </div>
               ))}
             </div>
           )}

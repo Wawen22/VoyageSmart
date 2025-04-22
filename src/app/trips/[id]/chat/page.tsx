@@ -7,6 +7,7 @@ import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import TripChat from '@/components/chat/TripChat';
+import { MessageCircleIcon } from 'lucide-react';
 
 export default function TripChatPage() {
   const { id } = useParams();
@@ -106,6 +107,20 @@ export default function TripChatPage() {
       <header className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
           <BackButton href={`/trips/${id}`} label="Back to Trip" />
+        </div>
+
+        <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col space-y-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
+              <MessageCircleIcon className="h-6 w-6 mr-2" />
+              Chat
+            </h1>
+            {trip && (
+              <p className="text-sm text-muted-foreground">
+                {trip.name} {trip.destination && `• ${trip.destination}`}
+              </p>
+            )}
+          </div>
         </div>
       </header>
 

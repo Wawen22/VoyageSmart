@@ -151,74 +151,31 @@ export default function AccommodationsPage() {
   }
 
   return (
-    <div className="container mx-auto py-4 px-4 sm:px-6">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="mb-6">
-        <div className="flex items-center mb-4">
-          <BackButton href={`/trips/${id}`} />
-          <h1 className="text-2xl font-bold ml-2 flex items-center">
-            <Building2Icon className="h-6 w-6 mr-2" />
-            Accommodations
-          </h1>
+      <header className="bg-card border-b border-border mb-6">
+        <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
+          <BackButton href={`/trips/${id}`} label="Back to Trip" />
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold">{trip.name}</h2>
-            {trip.destination && (
-              <p className="text-muted-foreground flex items-center">
-                <MapPinIcon className="h-4 w-4 mr-1" />
-                {trip.destination}
+        <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col space-y-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
+              <Building2Icon className="h-6 w-6 mr-2" />
+              Accommodations
+            </h1>
+
+            {trip && (
+              <p className="text-sm text-muted-foreground">
+                {trip.name} {trip.destination && `• ${trip.destination}`}
               </p>
             )}
           </div>
-
-          {canEdit && (
-            <Button onClick={handleAddAccommodation}>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Accommodation
-            </Button>
-          )}
         </div>
       </header>
 
-      {/* View Mode Tabs */}
-      <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
-        <TabsList className="grid w-full max-w-xs grid-cols-2">
-          <TabsTrigger value="list" className="flex items-center">
-            <ListIcon className="h-4 w-4 mr-2" />
-            List View
-          </TabsTrigger>
-          <TabsTrigger value="map" className="flex items-center">
-            <MapIcon className="h-4 w-4 mr-2" />
-            Map View
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      {/* Content */}
-      {loading ? (
-        <div className="text-center py-8">
-          <p>Loading accommodations...</p>
-        </div>
-      ) : error ? (
-        <div className="text-center py-8">
-          <p className="text-destructive">Error: {error}</p>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() => dispatch(fetchAccommodations(id as string))}
-          >
-            Try Again
-          </Button>
-        </div>
-      ) : accommodations.length === 0 ? (
-        <div className="text-center py-12">
-          <Building2Icon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No accommodations yet</h3>
-          <p className="text-muted-foreground mb-6">
-            Add your first accommodation to keep track of your stays during this trip.
-          </p>
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {canEdit && (
             <Button onClick={handleAddAccommodation}>
               <PlusIcon className="h-4 w-4 mr-2" />
@@ -226,67 +183,113 @@ export default function AccommodationsPage() {
             </Button>
           )}
         </div>
-      ) : (
-        <>
-          {/* List View */}
-          {viewMode === 'list' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {accommodations.map((accommodation) => (
-                <AccommodationCard
-                  key={accommodation.id}
-                  accommodation={accommodation}
-                  onView={handleViewAccommodation}
-                  onEdit={handleEditAccommodation}
-                  canEdit={canEdit}
-                />
-              ))}
-            </div>
-          )}
 
-          {/* Map View */}
-          {viewMode === 'map' && (
-            <Card>
-              <CardContent className="p-4">
-                <div className="h-[500px] relative">
-                  <AccommodationsMapView
-                    accommodations={accommodations}
-                    height="500px"
-                    onMarkerClick={handleViewAccommodation}
+        {/* View Mode Tabs */}
+        <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
+          <TabsList className="grid w-full max-w-xs grid-cols-2">
+            <TabsTrigger value="list" className="flex items-center">
+              <ListIcon className="h-4 w-4 mr-2" />
+              List View
+            </TabsTrigger>
+            <TabsTrigger value="map" className="flex items-center">
+              <MapIcon className="h-4 w-4 mr-2" />
+              Map View
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Content */}
+        {loading ? (
+          <div className="text-center py-8">
+            <p>Loading accommodations...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-destructive">Error: {error}</p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => dispatch(fetchAccommodations(id as string))}
+            >
+              Try Again
+            </Button>
+          </div>
+        ) : accommodations.length === 0 ? (
+          <div className="text-center py-12">
+            <Building2Icon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No accommodations yet</h3>
+            <p className="text-muted-foreground mb-6">
+              Add your first accommodation to keep track of your stays during this trip.
+            </p>
+            {canEdit && (
+              <Button onClick={handleAddAccommodation}>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Add Accommodation
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* List View */}
+            {viewMode === 'list' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {accommodations.map((accommodation) => (
+                  <AccommodationCard
+                    key={accommodation.id}
+                    accommodation={accommodation}
+                    onView={handleViewAccommodation}
+                    onEdit={handleEditAccommodation}
+                    canEdit={canEdit}
                   />
+                ))}
+              </div>
+            )}
 
-                  {/* Accommodation list */}
-                  <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm p-4 rounded-md shadow max-h-[450px] overflow-y-auto w-72">
-                    <h3 className="font-medium mb-3">Accommodations</h3>
-                    <div className="space-y-2">
-                      {accommodations.map((accommodation) => (
-                        <div
-                          key={accommodation.id}
-                          className="p-2 border rounded-md hover:bg-accent cursor-pointer"
-                          onClick={() => handleViewAccommodation(accommodation)}
-                        >
-                          <p className="font-medium text-sm">{accommodation.name}</p>
-                          {accommodation.check_in_date && (
-                            <div className="flex items-center text-xs text-muted-foreground">
-                              <CalendarIcon className="h-3 w-3 mr-1" />
-                              {format(parseISO(accommodation.check_in_date), 'MMM d, yyyy')}
-                            </div>
-                          )}
-                          {accommodation.address && (
-                            <div className="flex items-center text-xs text-muted-foreground">
-                              <MapPinIcon className="h-3 w-3 mr-1" />
-                              <span className="truncate">{accommodation.address}</span>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+            {/* Map View */}
+            {viewMode === 'map' && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="h-[500px] relative">
+                    <AccommodationsMapView
+                      accommodations={accommodations}
+                      height="500px"
+                      onMarkerClick={handleViewAccommodation}
+                    />
+
+                    {/* Accommodation list */}
+                    <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm p-4 rounded-md shadow max-h-[450px] overflow-y-auto w-72">
+                      <h3 className="font-medium mb-3">Accommodations</h3>
+                      <div className="space-y-2">
+                        {accommodations.map((accommodation) => (
+                          <div
+                            key={accommodation.id}
+                            className="p-2 border rounded-md hover:bg-accent cursor-pointer"
+                            onClick={() => handleViewAccommodation(accommodation)}
+                          >
+                            <p className="font-medium text-sm">{accommodation.name}</p>
+                            {accommodation.check_in_date && (
+                              <div className="flex items-center text-xs text-muted-foreground">
+                                <CalendarIcon className="h-3 w-3 mr-1" />
+                                {format(parseISO(accommodation.check_in_date), 'MMM d, yyyy')}
+                              </div>
+                            )}
+                            {accommodation.address && (
+                              <div className="flex items-center text-xs text-muted-foreground">
+                                <MapPinIcon className="h-3 w-3 mr-1" />
+                                <span className="truncate">{accommodation.address}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+      </main>
 
       {/* Modals */}
       <AccommodationModal

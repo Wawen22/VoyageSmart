@@ -11,7 +11,7 @@ import ExpenseBalances from '@/components/expenses/ExpenseBalances';
 import AddExpenseModal from '@/components/expenses/AddExpenseModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { PlusIcon, ReceiptIcon, BarChart3Icon, UsersIcon } from 'lucide-react';
+import { PlusIcon, ReceiptIcon, BarChart3Icon, UsersIcon, DollarSignIcon } from 'lucide-react';
 
 type DatabaseUser = {
   full_name: string;
@@ -107,7 +107,7 @@ export default function ExpensesPage() {
       currency: string;
     };
   }
-  
+
   const [trip, setTrip] = useState<Trip | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -230,7 +230,7 @@ export default function ExpensesPage() {
     // Calculate how much each person has paid and owes
     expenses.forEach(expense => {
       const payerId = expense.paid_by;
-      
+
       // Add what each participant owes
       expense.participants.forEach(p => {
         const currentBalance = balanceMap.get(p.user_id) || 0;
@@ -265,19 +265,19 @@ export default function ExpensesPage() {
     // Separate positive (creditors) and negative (debtors) balances
     const creditors = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
     const debtors = balances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance);
-    
+
     const settlements: Settlement[] = [];
 
     // Process each debtor in order
     debtors.forEach(debtor => {
       const debtorSettlements: Settlement[] = [];
       let remainingDebt = Math.abs(debtor.balance);
-      
+
       // Find all creditors this debtor needs to pay
       while (remainingDebt > 0.01 && creditors.length > 0) {
         const creditor = creditors[0];
         const paymentAmount = Math.min(remainingDebt, creditor.balance);
-        
+
         if (paymentAmount > 0.01) {
           debtorSettlements.push({
             from_id: debtor.user_id,
@@ -286,10 +286,10 @@ export default function ExpensesPage() {
             to_name: creditor.full_name,
             amount: parseFloat(paymentAmount.toFixed(2)),
           });
-          
+
           remainingDebt -= paymentAmount;
           creditor.balance -= paymentAmount;
-          
+
           if (creditor.balance < 0.01) {
             creditors.shift();
           }
@@ -306,7 +306,7 @@ export default function ExpensesPage() {
   const handleAddExpense = async (newExpense: any) => {
     try {
       setLoading(true);
-      
+
       // Insert the new expense
       const { data, error } = await supabase
         .from('expenses')
@@ -329,11 +329,11 @@ export default function ExpensesPage() {
 
       if (data && data[0]) {
         const expenseId = data[0].id;
-        
+
         // Handle expense participants based on split type
         if (newExpense.splitType === 'equal') {
           const splitAmount = parseFloat(newExpense.amount) / newExpense.participants.length;
-          
+
           const participantInserts = newExpense.participants.map((participantId: string) => ({
             expense_id: expenseId,
             user_id: participantId,
@@ -341,17 +341,17 @@ export default function ExpensesPage() {
             currency: newExpense.currency,
             is_paid: participantId === newExpense.paidBy, // The payer has already paid their share
           }));
-          
+
           const { error: participantError } = await supabase
             .from('expense_participants')
             .insert(participantInserts);
-            
+
           if (participantError) throw participantError;
         } else if (newExpense.splitType === 'custom') {
           // Handle custom split (would need custom amounts from the form)
           // Not implemented in this version
         }
-        
+
         // Refresh expenses
         const { data: updatedExpenses, error: fetchError } = await supabase
           .from('expenses')
@@ -367,9 +367,9 @@ export default function ExpensesPage() {
           `)
           .eq('trip_id', id)
           .order('date', { ascending: false });
-          
+
         if (fetchError) throw fetchError;
-        
+
         const formattedExpenses: Expense[] = (updatedExpenses || []).map((e: any) => ({
           id: e.id,
           trip_id: e.trip_id,
@@ -392,13 +392,13 @@ export default function ExpensesPage() {
             full_name: p.users.full_name
           }))
         }));
-        
+
         setExpenses(formattedExpenses);
-        
+
         // Recalculate balances
         calculateBalances(formattedExpenses, participants);
       }
-      
+
       setIsAddExpenseModalOpen(false);
     } catch (err) {
       console.error('Error adding expense:', err);
@@ -412,29 +412,29 @@ export default function ExpensesPage() {
     if (!confirm('Are you sure you want to delete this expense?')) {
       return;
     }
-    
+
     try {
       setLoading(true);
-      
+
       // First delete the expense participants
       const { error: participantError } = await supabase
         .from('expense_participants')
         .delete()
         .eq('expense_id', expenseId);
-        
+
       if (participantError) throw participantError;
-      
+
       // Then delete the expense
       const { error } = await supabase
         .from('expenses')
         .delete()
         .eq('id', expenseId);
-        
+
       if (error) throw error;
-      
+
       // Update the expenses list
       setExpenses(expenses.filter(e => e.id !== expenseId));
-      
+
       // Recalculate balances
       calculateBalances(
         expenses.filter(e => e.id !== expenseId),
@@ -478,10 +478,13 @@ export default function ExpensesPage() {
         <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
           <BackButton href={`/trips/${id}`} label="Back to Trip" />
         </div>
-        
+
         <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col space-y-2">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Expenses</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
+              <DollarSignIcon className="h-6 w-6 mr-2" />
+              Expenses
+            </h1>
             {trip && (
               <p className="text-sm text-muted-foreground">
                 {trip.name} • {trip.destination || 'No destination'}
@@ -493,8 +496,8 @@ export default function ExpensesPage() {
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <Tabs 
-            defaultValue="expenses" 
+          <Tabs
+            defaultValue="expenses"
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
@@ -519,8 +522,8 @@ export default function ExpensesPage() {
             </Button>
 
             <TabsContent value="expenses" className="mt-0">
-              <ExpenseList 
-                expenses={expenses} 
+              <ExpenseList
+                expenses={expenses}
                 participants={participants}
                 currency={trip?.preferences?.currency || 'USD'}
                 onDelete={handleDeleteExpense}
@@ -528,8 +531,8 @@ export default function ExpensesPage() {
             </TabsContent>
 
             <TabsContent value="balances" className="mt-0">
-              <ExpenseBalances 
-                balances={balances} 
+              <ExpenseBalances
+                balances={balances}
                 settlements={settlements}
                 currency={trip?.preferences?.currency || 'USD'}
                 currentUserId={user?.id}

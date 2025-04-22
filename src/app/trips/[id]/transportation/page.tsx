@@ -172,74 +172,31 @@ export default function TransportationPage() {
   }
 
   return (
-    <div className="container mx-auto py-4 px-4 sm:px-6">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="mb-6">
-        <div className="flex items-center mb-4">
-          <BackButton href={`/trips/${id}`} />
-          <h1 className="text-2xl font-bold ml-2 flex items-center">
-            <PlaneTakeoffIcon className="h-6 w-6 mr-2" />
-            Transportation
-          </h1>
+      <header className="bg-card border-b border-border mb-6">
+        <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
+          <BackButton href={`/trips/${id}`} label="Back to Trip" />
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold">{trip.name}</h2>
-            {trip.destination && (
-              <p className="text-muted-foreground flex items-center">
-                <MapPinIcon className="h-4 w-4 mr-1" />
-                {trip.destination}
+        <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col space-y-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
+              <PlaneTakeoffIcon className="h-6 w-6 mr-2" />
+              Transportation
+            </h1>
+
+            {trip && (
+              <p className="text-sm text-muted-foreground">
+                {trip.name} {trip.destination && `• ${trip.destination}`}
               </p>
             )}
           </div>
-
-          {canEdit && (
-            <Button onClick={handleAddTransportation}>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Transportation
-            </Button>
-          )}
         </div>
       </header>
 
-      {/* View Mode Tabs */}
-      <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
-        <TabsList className="grid w-full max-w-xs grid-cols-2">
-          <TabsTrigger value="list" className="flex items-center">
-            <ListIcon className="h-4 w-4 mr-2" />
-            List View
-          </TabsTrigger>
-          <TabsTrigger value="map" className="flex items-center">
-            <MapIcon className="h-4 w-4 mr-2" />
-            Map View
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      {/* Content */}
-      {loading ? (
-        <div className="text-center py-8">
-          <p>Loading transportation...</p>
-        </div>
-      ) : error ? (
-        <div className="text-center py-8">
-          <p className="text-destructive">Error: {error}</p>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() => dispatch(fetchTransportations(id as string))}
-          >
-            Try Again
-          </Button>
-        </div>
-      ) : transportations.length === 0 ? (
-        <div className="text-center py-12">
-          <PlaneTakeoffIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No transportation yet</h3>
-          <p className="text-muted-foreground mb-6">
-            Add your first transportation to keep track of your travels during this trip.
-          </p>
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {canEdit && (
             <Button onClick={handleAddTransportation}>
               <PlusIcon className="h-4 w-4 mr-2" />
@@ -247,73 +204,119 @@ export default function TransportationPage() {
             </Button>
           )}
         </div>
-      ) : (
-        <>
-          {/* List View */}
-          {viewMode === 'list' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {transportations.map((transportation) => (
-                <TransportationCard
-                  key={transportation.id}
-                  transportation={transportation}
-                  onView={handleViewTransportation}
-                  onEdit={handleEditTransportation}
-                  canEdit={canEdit}
-                  getIcon={getTransportationIcon}
-                />
-              ))}
-            </div>
-          )}
 
-          {/* Map View */}
-          {viewMode === 'map' && (
-            <Card>
-              <CardContent className="p-4">
-                <div className="h-[500px] relative">
-                  <TransportationMap
-                    transportations={transportations}
-                    height="500px"
-                    onMarkerClick={handleViewTransportation}
+        {/* View Mode Tabs */}
+        <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
+          <TabsList className="grid w-full max-w-xs grid-cols-2">
+            <TabsTrigger value="list" className="flex items-center">
+              <ListIcon className="h-4 w-4 mr-2" />
+              List View
+            </TabsTrigger>
+            <TabsTrigger value="map" className="flex items-center">
+              <MapIcon className="h-4 w-4 mr-2" />
+              Map View
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Content */}
+        {loading ? (
+          <div className="text-center py-8">
+            <p>Loading transportation...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-destructive">Error: {error}</p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => dispatch(fetchTransportations(id as string))}
+            >
+              Try Again
+            </Button>
+          </div>
+        ) : transportations.length === 0 ? (
+          <div className="text-center py-12">
+            <PlaneTakeoffIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No transportation yet</h3>
+            <p className="text-muted-foreground mb-6">
+              Add your first transportation to keep track of your travels during this trip.
+            </p>
+            {canEdit && (
+              <Button onClick={handleAddTransportation}>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Add Transportation
+              </Button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* List View */}
+            {viewMode === 'list' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {transportations.map((transportation) => (
+                  <TransportationCard
+                    key={transportation.id}
+                    transportation={transportation}
+                    onView={handleViewTransportation}
+                    onEdit={handleEditTransportation}
+                    canEdit={canEdit}
+                    getIcon={getTransportationIcon}
                   />
+                ))}
+              </div>
+            )}
 
-                  {/* Transportation list */}
-                  <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm p-4 rounded-md shadow max-h-[450px] overflow-y-auto w-72">
-                    <h3 className="font-medium mb-3">Transportation</h3>
-                    <div className="space-y-2">
-                      {transportations.map((transportation) => (
-                        <div
-                          key={transportation.id}
-                          className="p-2 border rounded-md hover:bg-accent cursor-pointer"
-                          onClick={() => handleViewTransportation(transportation)}
-                        >
-                          <div className="flex items-center">
-                            {getTransportationIcon(transportation.type)}
-                            <p className="font-medium text-sm ml-2">
-                              {transportation.provider || transportation.type}
-                            </p>
+            {/* Map View */}
+            {viewMode === 'map' && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="h-[500px] relative">
+                    <TransportationMap
+                      transportations={transportations}
+                      height="500px"
+                      onMarkerClick={handleViewTransportation}
+                    />
+
+                    {/* Transportation list */}
+                    <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm p-4 rounded-md shadow max-h-[450px] overflow-y-auto w-72">
+                      <h3 className="font-medium mb-3">Transportation</h3>
+                      <div className="space-y-2">
+                        {transportations.map((transportation) => (
+                          <div
+                            key={transportation.id}
+                            className="p-2 border rounded-md hover:bg-accent cursor-pointer"
+                            onClick={() => handleViewTransportation(transportation)}
+                          >
+                            <div className="flex items-center">
+                              {getTransportationIcon(transportation.type)}
+                              <p className="font-medium text-sm ml-2">
+                                {transportation.provider || transportation.type}
+                              </p>
+                            </div>
+                            {transportation.departure_time && (
+                              <div className="flex items-center text-xs text-muted-foreground">
+                                <CalendarIcon className="h-3 w-3 mr-1" />
+                                {format(parseISO(transportation.departure_time), 'MMM d, yyyy HH:mm')}
+                              </div>
+                            )}
+                            {transportation.departure_location && (
+                              <div className="flex items-center text-xs text-muted-foreground">
+                                <MapPinIcon className="h-3 w-3 mr-1" />
+                                <span className="truncate">{transportation.departure_location}</span>
+                              </div>
+                            )}
                           </div>
-                          {transportation.departure_time && (
-                            <div className="flex items-center text-xs text-muted-foreground">
-                              <CalendarIcon className="h-3 w-3 mr-1" />
-                              {format(parseISO(transportation.departure_time), 'MMM d, yyyy HH:mm')}
-                            </div>
-                          )}
-                          {transportation.departure_location && (
-                            <div className="flex items-center text-xs text-muted-foreground">
-                              <MapPinIcon className="h-3 w-3 mr-1" />
-                              <span className="truncate">{transportation.departure_location}</span>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      )}
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+      </main>
 
       {/* Modals */}
       <TransportationModal

@@ -7,6 +7,7 @@ import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { format, parseISO, isValid, addDays } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import { it } from 'date-fns/locale';
 import DaySchedule from '@/components/itinerary/DaySchedule';
 import ActivityModal from '@/components/itinerary/ActivityModal';
@@ -528,10 +529,13 @@ export default function TripItinerary() {
           <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
             {/* Title */}
             <div className="overflow-hidden">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground truncate">{trip.name}</h1>
-              {trip.destination && (
-                <p className="text-sm text-muted-foreground truncate">{trip.destination}</p>
-              )}
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground truncate flex items-center">
+                <CalendarIcon className="h-6 w-6 mr-2" />
+                Itinerario
+              </h1>
+              <p className="text-sm text-muted-foreground truncate">
+                {trip.name} {trip.destination && `• ${trip.destination}`}
+              </p>
             </div>
 
             {/* Controls */}

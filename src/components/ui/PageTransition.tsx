@@ -21,12 +21,12 @@ export default function PageTransition({
   useEffect(() => {
     if (children !== displayChildren) {
       setTransitionStage('fadeOut');
-      
+
       const timeout = setTimeout(() => {
         setDisplayChildren(children);
         setTransitionStage('fadeIn');
       }, duration);
-      
+
       return () => clearTimeout(timeout);
     }
   }, [children, displayChildren, duration]);
@@ -34,11 +34,11 @@ export default function PageTransition({
   useEffect(() => {
     if (location) {
       setTransitionStage('fadeOut');
-      
+
       const timeout = setTimeout(() => {
         setTransitionStage('fadeIn');
       }, 50);
-      
+
       return () => clearTimeout(timeout);
     }
   }, [location]);
@@ -62,7 +62,24 @@ export default function PageTransition({
           return 'opacity-0';
       }
     }
-    return '';
+
+    // Classes for fade in
+    switch (transitionType) {
+      case 'fade':
+        return 'animate-fade-in';
+      case 'slide-up':
+        return 'animate-slide-in-bottom';
+      case 'slide-down':
+        return 'animate-slide-in-top';
+      case 'slide-left':
+        return 'animate-slide-in-right';
+      case 'slide-right':
+        return 'animate-slide-in-left';
+      case 'scale':
+        return 'animate-scale-in';
+      default:
+        return 'animate-fade-in';
+    }
   };
 
   return (

@@ -68,7 +68,7 @@ export default function DaySchedule({
   };
 
   return (
-    <div className="bg-card shadow rounded-lg overflow-hidden border border-border hover:border-primary/30 transition-colors">
+    <div className="bg-card shadow rounded-lg overflow-hidden border border-border hover:border-primary/30 transition-colors animate-fade-in">
       <div
         className="px-3 py-3 sm:px-6 sm:py-4 flex justify-between items-center bg-muted/30 cursor-pointer"
         onClick={toggleCollapse}
@@ -106,11 +106,11 @@ export default function DaySchedule({
       </div>
 
       {!isCollapsed && (
-        <div className="px-3 py-3 sm:px-6 sm:py-4 border-t border-border">
+        <div className="px-3 py-3 sm:px-6 sm:py-4 border-t border-border animate-slide-in-top">
           <div className="flex justify-between items-center mb-3">
             <div className="flex-1">
               {day.notes && (
-                <div className="mb-3 bg-muted/20 p-2 rounded-md">
+                <div className="mb-3 bg-muted/20 p-2 rounded-md animate-fade-in">
                   <p className="text-xs sm:text-sm text-muted-foreground">{day.notes}</p>
                 </div>
               )}

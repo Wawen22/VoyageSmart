@@ -51,9 +51,9 @@ export default function Navbar() {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 href="/dashboard"
-                className={`${
+                className={`nav-indicator ${
                   pathname === '/dashboard'
-                    ? 'border-primary text-foreground'
+                    ? 'border-primary text-foreground active'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
@@ -61,9 +61,9 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/trips/new"
-                className={`${
+                className={`nav-indicator ${
                   pathname === '/trips/new'
-                    ? 'border-primary text-foreground'
+                    ? 'border-primary text-foreground active'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
@@ -138,7 +138,7 @@ export default function Navbar() {
             {/* Mobile Quick Links */}
             <Link
               href="/dashboard"
-              className={`p-2 rounded-md ${pathname === '/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`p-2 rounded-md ${pathname === '/dashboard' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
               aria-label="Dashboard"
             >
               <HomeIcon className="h-5 w-5" />
@@ -146,7 +146,7 @@ export default function Navbar() {
 
             <Link
               href="/trips/new"
-              className={`p-2 rounded-md ${pathname === '/trips/new' ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`p-2 rounded-md ${pathname === '/trips/new' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
               aria-label="New Trip"
             >
               <PlusCircleIcon className="h-5 w-5" />
@@ -154,7 +154,7 @@ export default function Navbar() {
 
             <Link
               href="/profile"
-              className={`p-2 rounded-md ${pathname === '/profile' ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`p-2 rounded-md ${pathname === '/profile' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
               aria-label="Profile"
             >
               <UserIcon className="h-5 w-5" />

@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { format, parseISO, isValid } from 'date-fns';
-import { 
-  MapPinIcon, 
-  CalendarIcon, 
-  ClockIcon, 
+import {
+  MapPinIcon,
+  CalendarIcon,
+  ClockIcon,
   UsersIcon,
   ArrowRightIcon
 } from 'lucide-react';
@@ -29,7 +29,7 @@ interface TripCardProps {
 
 export default function TripCard({ trip }: TripCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Not specified';
     try {
@@ -39,7 +39,7 @@ export default function TripCard({ trip }: TripCardProps) {
       return 'Invalid date';
     }
   };
-  
+
   const isUpcoming = () => {
     if (!trip.start_date) return false;
     try {
@@ -49,7 +49,7 @@ export default function TripCard({ trip }: TripCardProps) {
       return false;
     }
   };
-  
+
   const isPast = () => {
     if (!trip.end_date) return false;
     try {
@@ -59,36 +59,36 @@ export default function TripCard({ trip }: TripCardProps) {
       return false;
     }
   };
-  
+
   const getStatusColor = () => {
     if (isUpcoming()) return 'var(--primary)';
     if (isPast()) return 'var(--muted)';
     return 'var(--border)';
   };
-  
+
   const getDaysUntil = () => {
     if (!trip.start_date) return null;
     try {
       const startDate = parseISO(trip.start_date);
       if (!isValid(startDate)) return null;
-      
+
       const today = new Date();
       const diffTime = startDate.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
+
       if (diffDays < 0) return null;
       return diffDays;
     } catch (error) {
       return null;
     }
   };
-  
+
   const daysUntil = getDaysUntil();
 
   return (
     <Link href={`/trips/${trip.id}`}>
-      <Card 
-        className="overflow-hidden hover:shadow-md transition-all duration-300 h-full hover:scale-[1.02] border-l-4"
+      <Card
+        className="overflow-hidden hover:shadow-md transition-all duration-300 h-full hover:scale-[1.02] border-l-4 hover-lift"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{
@@ -111,7 +111,7 @@ export default function TripCard({ trip }: TripCardProps) {
                 </Badge>
               )}
             </div>
-            
+
             {/* Destination */}
             {trip.destination && (
               <div className="flex items-center text-sm">
@@ -119,7 +119,7 @@ export default function TripCard({ trip }: TripCardProps) {
                 <span className="text-foreground line-clamp-1">{trip.destination}</span>
               </div>
             )}
-            
+
             {/* Dates */}
             <div className="flex items-center text-sm">
               <CalendarIcon className="h-4 w-4 mr-2 text-primary" />
@@ -127,22 +127,22 @@ export default function TripCard({ trip }: TripCardProps) {
                 {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
               </span>
             </div>
-            
+
             {/* Description */}
             {trip.description && (
               <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
                 {trip.description}
               </p>
             )}
-            
+
             {/* Footer */}
             <div className="pt-3 mt-auto flex justify-between items-center border-t border-border">
               <span className="text-xs text-muted-foreground">
                 Created {format(parseISO(trip.created_at), 'MMM d, yyyy')}
               </span>
-              <div className="flex items-center text-primary text-sm font-medium">
+              <div className="flex items-center text-primary text-sm font-medium group">
                 View details
-                <ArrowRightIcon className="h-4 w-4 ml-1" />
+                <ArrowRightIcon className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
               </div>
             </div>
           </div>

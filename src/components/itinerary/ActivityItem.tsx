@@ -97,7 +97,7 @@ export default function ActivityItem({ activity, onEdit, onDelete, onMove, onVie
 
   return (
     <div
-      className="border border-l-4 rounded-md p-3 hover:shadow-md transition-all"
+      className="border border-l-4 rounded-md p-3 hover:shadow-md transition-all hover-lift animate-fade-in"
       style={{ borderLeftColor: getPriorityBorderColor(activity.priority) }}
     >
       <div className="flex justify-between items-start gap-2">
@@ -152,7 +152,7 @@ export default function ActivityItem({ activity, onEdit, onDelete, onMove, onVie
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 p-0"
+              className="h-7 w-7 p-0 hover:bg-accent hover:text-accent-foreground transition-colors"
               onClick={() => onViewDetails(activity)}
               aria-label="View details"
             >
@@ -163,7 +163,7 @@ export default function ActivityItem({ activity, onEdit, onDelete, onMove, onVie
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 text-primary"
+            className="h-7 w-7 p-0 text-primary hover:bg-primary/10 transition-colors"
             onClick={() => onEdit(activity)}
             aria-label="Edit activity"
           >
@@ -174,7 +174,7 @@ export default function ActivityItem({ activity, onEdit, onDelete, onMove, onVie
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 p-0 text-primary"
+              className="h-7 w-7 p-0 text-primary hover:bg-primary/10 transition-colors"
               onClick={() => onMove(activity)}
               aria-label="Move activity"
             >
@@ -185,7 +185,7 @@ export default function ActivityItem({ activity, onEdit, onDelete, onMove, onVie
           <Button
             variant="ghost"
             size="sm"
-            className={`h-7 w-7 p-0 ${confirmDelete ? 'text-destructive bg-destructive/10' : 'text-destructive/80'}`}
+            className={`h-7 w-7 p-0 transition-colors ${confirmDelete ? 'text-destructive bg-destructive/10 animate-pulse-once' : 'text-destructive/80 hover:bg-destructive/10 hover:text-destructive'}`}
             onClick={handleDeleteClick}
             aria-label={confirmDelete ? 'Confirm delete' : 'Delete activity'}
           >
