@@ -18,10 +18,12 @@ Questo documento tiene traccia delle ottimizzazioni delle prestazioni implementa
 
 ### 3. Miglioramenti UI/UX durante il Caricamento
 
-- **Skeleton Loaders**: Aggiunti loader scheletro dettagliati per la sezione Itinerario per migliorare la percezione delle prestazioni.
+- **Skeleton Loaders**: Aggiunti loader scheletro dettagliati per le sezioni Itinerario, Alloggi, Trasporti e Spese per migliorare la percezione delle prestazioni.
+- **Animazioni Avanzate**: Implementate animazioni fluide per transizioni tra pagine e interazioni utente con effetti personalizzati (fade, slide, scale, flip).
 - **Lazy Loading**: Implementato il caricamento lazy per componenti pesanti come i modal e la vista calendario.
 - **Suspense Boundaries**: Aggiunti i confini React Suspense attorno ai componenti caricati in modo lazy.
 - **Memoizzazione dei Componenti**: Implementata la memoizzazione per componenti come AccommodationCard, TransportationCard e ExpenseCard per evitare re-render non necessari.
+- **Feedback Visivo**: Aggiunti effetti di animazione per fornire feedback visivo durante le interazioni dell'utente.
 
 ## Raccomandazioni per Ottimizzazioni Future
 

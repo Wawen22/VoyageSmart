@@ -27,6 +27,12 @@ module.exports = {
         'slide-in-top': 'slideInTop 0.3s ease-out',
         'scale-in': 'scaleIn 0.3s ease-out',
         'shake': 'shake 0.6s ease-in-out',
+        'flip-in': 'flipIn 0.8s ease-out',
+        'float': 'float 3s ease-in-out infinite',
+        'typing': 'typing 1s steps(40, end)',
+        'attention': 'attention 2s cubic-bezier(.36,.07,.19,.97) infinite',
+        'progress': 'progress 2s ease-out forwards',
+        'skeleton-breathe': 'shimmer 1.5s infinite, breathe 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -57,6 +63,37 @@ module.exports = {
           '0%, 100%': { transform: 'translateX(0)' },
           '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
           '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' },
+        },
+        flipIn: {
+          '0%': { transform: 'perspective(400px) rotateY(90deg)', opacity: '0' },
+          '40%': { transform: 'perspective(400px) rotateY(-10deg)' },
+          '70%': { transform: 'perspective(400px) rotateY(10deg)' },
+          '100%': { transform: 'perspective(400px) rotateY(0deg)', opacity: '1' },
+        },
+        float: {
+          '0%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-5px)' },
+          '100%': { transform: 'translateY(0px)' },
+        },
+        typing: {
+          'from': { width: '0' },
+          'to': { width: '100%' },
+        },
+        attention: {
+          '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.4)' },
+          '70%': { transform: 'scale(1.05)', boxShadow: '0 0 0 10px rgba(59, 130, 246, 0)' },
+        },
+        progress: {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        breathe: {
+          '0%, 100%': { opacity: '0.5' },
+          '50%': { opacity: '0.8' },
         },
       },
       colors: {

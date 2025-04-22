@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
@@ -24,6 +24,7 @@ import {
   MapIcon
 } from 'lucide-react';
 import AccommodationCard from '@/components/accommodations/AccommodationCard';
+import AccommodationSkeleton from '@/components/accommodations/AccommodationSkeleton';
 import AccommodationModal from '@/components/accommodations/AccommodationModal';
 import AccommodationDetailsModal from '@/components/accommodations/AccommodationDetailsModal';
 import MapView from '@/components/map/MapView';
@@ -281,9 +282,7 @@ export default function AccommodationsPage() {
         </Tabs>
 
         {loading ? (
-          <div className="text-center py-8">
-            <p>Loading accommodations...</p>
-          </div>
+          <AccommodationSkeleton />
         ) : error ? (
           <div className="text-center py-8">
             <p className="text-destructive">Error: {error}</p>

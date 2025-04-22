@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import ExpenseList from '@/components/expenses/ExpenseList';
+import ExpensesSkeleton from '@/components/expenses/ExpensesSkeleton';
 import ExpenseBalances from '@/components/expenses/ExpenseBalances';
 import AddExpenseModal from '@/components/expenses/AddExpenseModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -532,8 +533,25 @@ export default function ExpensesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background">
+        <header className="bg-card border-b border-border">
+          <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
+            <BackButton href={`/trips/${id}`} label="Back to Trip" />
+          </div>
+
+          <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+            <div className="flex flex-col space-y-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
+                <DollarSignIcon className="h-6 w-6 mr-2" />
+                Expenses
+              </h1>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <ExpensesSkeleton />
+        </main>
       </div>
     );
   }

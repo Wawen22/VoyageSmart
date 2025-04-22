@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
@@ -28,6 +28,7 @@ import {
   BusIcon
 } from 'lucide-react';
 import TransportationCard from '@/components/transportation/TransportationCard';
+import TransportationSkeleton from '@/components/transportation/TransportationSkeleton';
 import TransportationModal from '@/components/transportation/TransportationModal';
 import TransportationDetailsModal from '@/components/transportation/TransportationDetailsModal';
 import TransportationMap from '@/components/transportation/TransportationMap';
@@ -278,9 +279,7 @@ export default function TransportationPage() {
 
             {/* Content */}
             {loading ? (
-              <div className="text-center py-8">
-                <p>Loading transportation...</p>
-              </div>
+              <TransportationSkeleton />
             ) : error ? (
               <div className="text-center py-8">
                 <p className="text-destructive">Error: {error}</p>
