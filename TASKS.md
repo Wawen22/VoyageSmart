@@ -111,9 +111,9 @@
    - [x] Improve loading states and transitions
 
 ### Additional Features
-4. [ ] Location and mapping features
-   - [ ] Integrate maps for trip planning
-   - [ ] Add location search and suggestions
+4. [x] Location and mapping features
+   - [x] Integrate maps for trip planning
+   - [x] Add location search and suggestions
    - [ ] Implement route planning
 5. [x] Advanced expense management
    - [x] Add multiple currency support
@@ -123,19 +123,28 @@
    - [x] Implement activity comments system
    - [x] Add group chat for trip participants
    - [x] Implement real-time updates for shared content
-7. [ ] Document management
-   - [ ] Implement document upload and storage
-   - [ ] Add document sharing with trip participants
-   - [ ] Create document categories (tickets, reservations, etc.)
+7. [x] Document management
+   - [x] Implement document upload and storage
+   - [x] Add document sharing with trip participants
+   - [x] Create document categories (tickets, reservations, etc.)
+8. [x] Accommodations management
+   - [x] Create accommodations section with CRUD operations
+   - [x] Implement file upload for accommodation documents
+   - [x] Add map integration for accommodation locations
+   - [x] Create modern and user-friendly UI for accommodations
+   - [x] Fix map markers to show all accommodations
+   - [x] Implement proper storage bucket for documents
 
 ## Current Focus
-- Integrating maps for trip planning
-- Adding location search and suggestions
-- Implementing route planning
-- Implementing document sharing and storage for trip-related files
+- Implementing transportation management
+- Enhancing expense tracking with splitting functionality
+- Improving overall mobile experience
+- Implementing route planning with Mapbox integration
 
 ## Recently Completed
-- Added real-time updates for shared trips
-- Implemented commenting system for activities
-- Added group chat for trip participants
-- Improved invitation system with automatic participant addition
+- Implemented accommodations management with map integration
+- Added document upload and storage for accommodations
+- Integrated Mapbox for location visualization
+- Added modern UI for accommodations section with list and map views
+- Fixed map markers to show all accommodations on the map
+- Implemented proper storage bucket for accommodation documents

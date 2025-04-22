@@ -33,7 +33,7 @@ Voyage Smart è un'applicazione mobile e web dedicata alla pianificazione comple
 - **Mobile**: React Native con Expo
 - **Web**: React.js con Next.js
 - **State Management**: Redux Toolkit + RTK Query
-- **UI/UX**: 
+- **UI/UX**:
   - Styled Components
   - React Native Paper (mobile)
   - MUI (web)
@@ -73,7 +73,7 @@ users
   id, email, full_name, avatar_url, preferences, created_at, last_login
 
 trips
-  id, name, description, start_date, end_date, destination, preferences, 
+  id, name, description, start_date, end_date, destination, preferences,
   is_private, budget_total, owner_id (FK -> users.id), created_at, updated_at
 
 trip_participants
@@ -83,12 +83,12 @@ itinerary_days
   id, trip_id (FK), day_date, notes, weather_forecast, created_at, updated_at
 
 transportation
-  id, trip_id (FK), day_id (FK), type, provider, booking_reference, departure_time, 
-  departure_location, arrival_time, arrival_location, notes, status, cost, currency, 
+  id, trip_id (FK), day_id (FK), type, provider, booking_reference, departure_time,
+  departure_location, arrival_time, arrival_location, notes, status, cost, currency,
   documents, created_at, updated_at
 
 accommodations
-  id, trip_id (FK), name, type, check_in_date, check_out_date, address, coordinates, 
+  id, trip_id (FK), name, type, check_in_date, check_out_date, address, coordinates,
   booking_reference, contact_info, cost, currency, documents, notes, created_at, updated_at
 
 activities
@@ -96,7 +96,7 @@ activities
   booking_reference, priority, cost, currency, notes, status, created_at, updated_at
 
 expenses
-  id, trip_id (FK), category, amount, currency, date, description, paid_by (FK), 
+  id, trip_id (FK), category, amount, currency, date, description, paid_by (FK),
   split_type, receipt_url, status, created_at, updated_at
 
 expense_participants
@@ -106,16 +106,16 @@ documents
   id, trip_id (FK), user_id (FK), type, name, file_url, extracted_data, created_at, updated_at
 
 trip_media
-  id, trip_id (FK), day_id (FK), user_id (FK), type, url, caption, location, 
+  id, trip_id (FK), day_id (FK), user_id (FK), type, url, caption, location,
   coordinates, tags, created_at
 ```
 
 ### Bucket Storage
 
-- `trip_documents`: Documenti di viaggio (biglietti, voucher, etc.)
-- `trip_receipts`: Ricevute e fatture
-- `trip_media`: Foto e video dei viaggi
-- `user_avatars`: Immagini profilo utenti
+- `trip-documents`: Documenti di viaggio (biglietti, voucher, etc.)
+- `trip-receipts`: Ricevute e fatture
+- `trip-media`: Foto e video dei viaggi
+- `user-avatars`: Immagini profilo utenti
 
 ### Funzioni RPC
 
@@ -134,9 +134,10 @@ trip_media
 
 ### 2. Pianificazione Itinerari
 - **Trasporti**: Registrazione voli, treni, auto a noleggio, trasferimenti, tracking in tempo reale
-- **Alloggi**: Gestione prenotazioni, dettagli contatti, visualizzazione su mappa
+- **Alloggi**: Gestione prenotazioni, dettagli contatti, visualizzazione su mappa, caricamento documenti
 - **Attività**: Pianificazione visite ed eventi, sistema di priorità, gestione prenotazioni
 - **Timeline giornaliera**: Vista dettagliata, gestione orari, avvisi per sovrapposizioni
+- **Visualizzazione mappa**: Mappa interattiva con tutti gli alloggi, attività e punti di interesse
 
 ### 3. Gestione Budget e Spese
 - **Pianificazione**: Budget complessivo e per categorie, previsioni costi
@@ -362,7 +363,7 @@ trip_media
    ```bash
    # Web
    npm run dev
-   
+
    # Mobile (richiede Expo CLI)
    npm run mobile
    ```

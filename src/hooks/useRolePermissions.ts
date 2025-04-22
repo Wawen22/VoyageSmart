@@ -16,6 +16,9 @@ export interface RolePermissions {
   canAddExpenses: boolean;
   canEditExpenses: boolean;
   canDeleteExpenses: boolean;
+  canAddAccommodations: boolean;
+  canEditAccommodations: boolean;
+  canDeleteAccommodations: boolean;
 }
 
 const DEFAULT_PERMISSIONS: Record<Role, RolePermissions> = {
@@ -31,6 +34,9 @@ const DEFAULT_PERMISSIONS: Record<Role, RolePermissions> = {
     canAddExpenses: true,
     canEditExpenses: true,
     canDeleteExpenses: true,
+    canAddAccommodations: true,
+    canEditAccommodations: true,
+    canDeleteAccommodations: true,
   },
   admin: {
     canEditTrip: true,
@@ -44,6 +50,9 @@ const DEFAULT_PERMISSIONS: Record<Role, RolePermissions> = {
     canAddExpenses: true,
     canEditExpenses: true,
     canDeleteExpenses: true,
+    canAddAccommodations: true,
+    canEditAccommodations: true,
+    canDeleteAccommodations: true,
   },
   participant: {
     canEditTrip: false,
@@ -57,6 +66,9 @@ const DEFAULT_PERMISSIONS: Record<Role, RolePermissions> = {
     canAddExpenses: true,
     canEditExpenses: true,
     canDeleteExpenses: false,
+    canAddAccommodations: false,
+    canEditAccommodations: false,
+    canDeleteAccommodations: false,
   },
 };
 
@@ -66,6 +78,7 @@ export interface UseRolePermissionsResult {
   isOwner: boolean;
   isAdmin: boolean;
   isParticipant: boolean;
+  canEdit: boolean;
   loading: boolean;
   error: string | null;
 }
@@ -144,6 +157,7 @@ export function useRolePermissions(tripId: string): UseRolePermissionsResult {
     isOwner: role === 'owner',
     isAdmin: role === 'admin' || role === 'owner',
     isParticipant: !!role,
+    canEdit: !!permissions?.canEditAccommodations || !!permissions?.canAddAccommodations,
     loading,
     error,
   };

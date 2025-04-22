@@ -3,12 +3,14 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import authReducer from './features/authSlice';
 import tripReducer from './features/tripSlice';
 import itineraryReducer from './features/itinerarySlice';
+import accommodationReducer from './features/accommodationSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     trip: tripReducer,
     itinerary: itineraryReducer,
+    accommodations: accommodationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
