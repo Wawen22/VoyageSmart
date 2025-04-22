@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useSubscription } from '@/lib/subscription';
 import {
   HomeIcon,
   PlusCircleIcon,
@@ -10,11 +11,14 @@ import {
   DollarSignIcon,
   UserIcon,
   PlaneTakeoffIcon,
-  MessageCircleIcon
+  MessageCircleIcon,
+  SparklesIcon,
+  LockIcon
 } from 'lucide-react';
 
 export default function MobileNavbar() {
   const pathname = usePathname();
+  const { isSubscribed } = useSubscription();
 
   // Don't show on auth pages or homepage
   if (
@@ -66,9 +70,14 @@ export default function MobileNavbar() {
             isAccommodationsPage
               ? 'text-primary mobile-nav-active'
               : 'text-muted-foreground hover:text-foreground'
-          }`}
+          } relative`}
         >
-          <MapPinIcon className="h-5 w-5" />
+          <div className="relative">
+            <MapPinIcon className="h-5 w-5" />
+            {!isSubscribed('premium') && (
+              <SparklesIcon className="h-3 w-3 text-amber-500 absolute -top-1 -right-1 animate-pulse" />
+            )}
+          </div>
           <span className="text-xs mt-1">Alloggi</span>
         </Link>
 
@@ -79,9 +88,14 @@ export default function MobileNavbar() {
             isTransportationPage
               ? 'text-primary mobile-nav-active'
               : 'text-muted-foreground hover:text-foreground'
-          }`}
+          } relative`}
         >
-          <PlaneTakeoffIcon className="h-5 w-5" />
+          <div className="relative">
+            <PlaneTakeoffIcon className="h-5 w-5" />
+            {!isSubscribed('premium') && (
+              <SparklesIcon className="h-3 w-3 text-amber-500 absolute -top-1 -right-1 animate-pulse" />
+            )}
+          </div>
           <span className="text-xs mt-1">Trasporti</span>
         </Link>
 

@@ -68,17 +68,17 @@ export default function PremiumIndicator({
     switch (variant) {
       case 'badge':
         return (
-          <Badge variant="outline" className="gap-1 border-amber-500 text-amber-500">
-            <SparklesIcon className={iconSizes[size]} />
+          <Badge variant="outline" className="gap-1 border-amber-500 text-amber-500 bg-amber-100/30 dark:bg-amber-900/30 hover:bg-amber-100/50 dark:hover:bg-amber-900/50 transition-colors">
+            <SparklesIcon className={`${iconSizes[size]} animate-pulse`} />
             <span className={textSizes[size]}>Premium</span>
           </Badge>
         );
       case 'icon':
-        return <LockIcon className={`${iconSizes[size]} text-amber-500`} />;
+        return <SparklesIcon className={`${iconSizes[size]} text-amber-500 animate-pulse`} />;
       case 'text':
         return (
-          <span className={`${textSizes[size]} text-amber-500 flex items-center gap-1`}>
-            <SparklesIcon className={iconSizes[size]} />
+          <span className={`${textSizes[size]} text-amber-500 flex items-center gap-1 bg-amber-100/30 dark:bg-amber-900/30 px-2 py-0.5 rounded-full`}>
+            <SparklesIcon className={`${iconSizes[size]} animate-pulse`} />
             Premium
           </span>
         );
