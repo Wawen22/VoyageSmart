@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
+import { HomeIcon, PlusCircleIcon, UserIcon } from 'lucide-react';
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
@@ -133,7 +134,33 @@ export default function Navbar() {
               </div>
             )}
           </div>
-          <div className="-mr-2 flex items-center sm:hidden">
+          <div className="-mr-2 flex items-center gap-2 sm:hidden">
+            {/* Mobile Quick Links */}
+            <Link
+              href="/dashboard"
+              className={`p-2 rounded-md ${pathname === '/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}
+              aria-label="Dashboard"
+            >
+              <HomeIcon className="h-5 w-5" />
+            </Link>
+
+            <Link
+              href="/trips/new"
+              className={`p-2 rounded-md ${pathname === '/trips/new' ? 'text-primary' : 'text-muted-foreground'}`}
+              aria-label="New Trip"
+            >
+              <PlusCircleIcon className="h-5 w-5" />
+            </Link>
+
+            <Link
+              href="/profile"
+              className={`p-2 rounded-md ${pathname === '/profile' ? 'text-primary' : 'text-muted-foreground'}`}
+              aria-label="Profile"
+            >
+              <UserIcon className="h-5 w-5" />
+            </Link>
+
+            {/* Hamburger Menu */}
             <button
               type="button"
               className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"

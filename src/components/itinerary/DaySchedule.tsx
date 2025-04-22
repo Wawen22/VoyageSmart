@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import ActivityItem from './ActivityItem';
+import { ChevronDownIcon, ChevronUpIcon, CalendarIcon, PlusIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type Activity = {
   id: string;
@@ -50,6 +52,8 @@ export default function DaySchedule({
   onMoveActivity,
   onViewActivityDetails
 }: DayScheduleProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   const formatDate = (dateString: string) => {
     try {
       const date = parseISO(dateString);
@@ -59,69 +63,117 @@ export default function DaySchedule({
     }
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
-    <div className="bg-card shadow rounded-lg overflow-hidden">
-      <div className="px-3 py-3 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 bg-muted/30">
-        <h2 className="text-lg sm:text-xl font-semibold text-foreground">
-          {formatDate(day.day_date)}
-        </h2>
-        <div className="flex space-x-2">
-          <button
-            className="text-primary hover:text-primary/90 text-xs sm:text-sm font-medium flex items-center"
-            onClick={() => onEditDay(day)}
-            aria-label="Edit day"
+    <div className="bg-card shadow rounded-lg overflow-hidden border border-border hover:border-primary/30 transition-colors">
+      <div
+        className="px-3 py-3 sm:px-6 sm:py-4 flex justify-between items-center bg-muted/30 cursor-pointer"
+        onClick={toggleCollapse}
+      >
+        <div className="flex items-center space-x-2">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <CalendarIcon className="h-4 w-4 text-primary" />
+          </div>
+          <h2 className="text-base sm:text-lg font-semibold text-foreground">
+            {formatDate(day.day_date)}
+          </h2>
+        </div>
+
+        <div className="flex items-center space-x-1">
+          <div className="text-xs bg-muted px-2 py-1 rounded-full hidden sm:block">
+            {day.activities?.length || 0} attività
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleCollapse();
+            }}
+            aria-label={isCollapsed ? "Espandi" : "Comprimi"}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-            </svg>
-            <span>Edit Day</span>
-          </button>
-          <button
-            className="text-primary hover:text-primary/90 text-xs sm:text-sm font-medium flex items-center"
-            onClick={() => onAddActivity(day.id)}
-            aria-label="Add activity"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
-            <span>Add Activity</span>
-          </button>
+            {isCollapsed ? (
+              <ChevronDownIcon className="h-4 w-4" />
+            ) : (
+              <ChevronUpIcon className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
 
-      <div className="px-3 py-3 sm:px-6 sm:py-5">
-        {day.notes && (
-          <div className="mb-4 bg-muted/20 p-3 rounded-md">
-            <h3 className="text-sm font-medium text-foreground mb-1">Notes:</h3>
-            <p className="text-sm text-muted-foreground">{day.notes}</p>
-          </div>
-        )}
+      {!isCollapsed && (
+        <div className="px-3 py-3 sm:px-6 sm:py-4 border-t border-border">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex-1">
+              {day.notes && (
+                <div className="mb-3 bg-muted/20 p-2 rounded-md">
+                  <p className="text-xs sm:text-sm text-muted-foreground">{day.notes}</p>
+                </div>
+              )}
+            </div>
 
-        {day.activities && day.activities.length > 0 ? (
-          <div className="space-y-4">
-            {day.activities.map((activity) => (
-              <ActivityItem
-                key={activity.id}
-                activity={activity}
-                onEdit={onEditActivity}
-                onDelete={onDeleteActivity}
-                onMove={onMoveActivity}
-                onViewDetails={onViewActivityDetails}
-              />
-            ))}
+            <div className="flex space-x-2 ml-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => onEditDay(day)}
+              >
+                <CalendarIcon className="h-3.5 w-3.5 mr-1" />
+                <span className="hidden xs:inline">Modifica</span>
+              </Button>
+
+              <Button
+                variant="primary"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => onAddActivity(day.id)}
+              >
+                <PlusIcon className="h-3.5 w-3.5 mr-1" />
+                <span className="hidden xs:inline">Attività</span>
+              </Button>
+            </div>
           </div>
-        ) : (
-          <div className="text-center py-6">
-            <p className="text-muted-foreground">No activities planned for this day yet.</p>
-            <button
-              className="mt-2 text-primary hover:text-primary/90 text-sm font-medium"
-              onClick={() => onAddActivity(day.id)}
-            >
-              Add an activity
-            </button>
-          </div>
-        )}
-      </div>
+
+          {day.activities && day.activities.length > 0 ? (
+            <div className="space-y-3">
+              {day.activities
+                .sort((a, b) => {
+                  if (!a.start_time && !b.start_time) return 0;
+                  if (!a.start_time) return 1;
+                  if (!b.start_time) return -1;
+                  return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+                })
+                .map((activity) => (
+                <ActivityItem
+                  key={activity.id}
+                  activity={activity}
+                  onEdit={onEditActivity}
+                  onDelete={onDeleteActivity}
+                  onMove={onMoveActivity}
+                  onViewDetails={onViewActivityDetails}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-4 bg-muted/10 rounded-md">
+              <p className="text-muted-foreground text-sm">Nessuna attività pianificata per questo giorno.</p>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => onAddActivity(day.id)}
+                className="mt-1 h-8 text-xs"
+              >
+                Aggiungi un'attività
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

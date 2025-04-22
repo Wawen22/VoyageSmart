@@ -5,6 +5,8 @@ import { it } from 'date-fns/locale';
 import { dateFnsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '@/styles/calendar.css';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import MobileCalendarView from './MobileCalendarView';
 
 // Configurazione del localizzatore per il calendario con date-fns
 const locales = {
@@ -82,6 +84,7 @@ export default function CalendarView({
   onMoveActivity
 }: CalendarViewProps) {
   const [view, setView] = useState('month');
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Converti i giorni e le attività in eventi del calendario
   const events = useMemo(() => {
@@ -190,6 +193,21 @@ export default function CalendarView({
     };
   };
 
+  // Se è mobile, mostra la vista mobile del calendario
+  if (isMobile) {
+    return (
+      <MobileCalendarView
+        days={days}
+        onEditDay={onEditDay}
+        onAddActivity={onAddActivity}
+        onEditActivity={onEditActivity}
+        onDeleteActivity={onDeleteActivity}
+        onMoveActivity={onMoveActivity}
+      />
+    );
+  }
+
+  // Altrimenti mostra il calendario normale
   return (
     <div className="h-auto min-h-[400px] bg-card rounded-lg shadow overflow-visible">
       <Calendar

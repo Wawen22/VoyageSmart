@@ -571,7 +571,7 @@ export default function TripItinerary() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
-                <span>Add Day</span>
+                <span>Aggiungi Giorno</span>
               </button>
             </div>
           </div>
@@ -587,9 +587,9 @@ export default function TripItinerary() {
 
         {itineraryDays.length === 0 ? (
           <div className="bg-card shadow rounded-lg p-4 sm:p-6 text-center">
-            <h2 className="text-xl font-semibold mb-4">No itinerary days yet</h2>
+            <h2 className="text-xl font-semibold mb-4">Nessun giorno nell'itinerario</h2>
             <p className="text-muted-foreground mb-6">
-              Start planning your trip by adding days to your itinerary.
+              Inizia a pianificare il tuo viaggio aggiungendo giorni al tuo itinerario.
             </p>
             <button
               onClick={() => {
@@ -598,7 +598,7 @@ export default function TripItinerary() {
               }}
               className="bg-primary py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
             >
-              Add Your First Day
+              Aggiungi il tuo primo giorno
             </button>
           </div>
         ) : viewMode === 'list' ? (

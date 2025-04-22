@@ -155,6 +155,7 @@
     height: auto !important;
     width: 100%;
     overflow: visible;
+    font-size: 0.85rem;
   }
 
   /* Improve month view on small screens */
@@ -175,17 +176,34 @@
   /* Fix for day cells */
   .rbc-date-cell {
     padding-right: 3px;
+    font-size: 0.7rem;
   }
 
   /* Fix for events */
   .rbc-event {
     min-height: 1.5rem;
+    padding: 1px 3px;
+    font-size: 0.7rem;
+    border-radius: 2px;
+    margin: 1px;
+    z-index: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
+
+  /* Improve toolbar */
   .rbc-toolbar {
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.5rem;
     padding: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--card);
+    border-bottom: 1px solid var(--border);
   }
 
   .rbc-toolbar .rbc-toolbar-label {
@@ -194,30 +212,44 @@
     text-align: center;
     margin-bottom: 0.5rem;
     font-size: 1rem;
+    font-weight: 600;
   }
 
   .rbc-toolbar button {
-    padding: 0.25rem 0.5rem;
+    padding: 0.35rem 0.5rem;
     font-size: 0.75rem;
+    min-width: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
+  /* Improve headers */
   .rbc-header {
-    padding: 0.25rem;
-    font-size: 0.75rem;
-  }
-
-  .rbc-date-cell {
-    font-size: 0.75rem;
-  }
-
-  .rbc-event {
-    padding: 1px 3px;
+    padding: 0.35rem 0.25rem;
     font-size: 0.7rem;
-    border-radius: 2px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  /* Improve time views */
+  .rbc-time-view {
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .rbc-time-header {
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+
+  .rbc-time-content {
+    border-radius: 0 0 0.5rem 0.5rem;
   }
 
   .rbc-day-slot .rbc-event {
     min-height: 1.5rem;
+    border-radius: 4px;
   }
 
   .rbc-time-view .rbc-header {
@@ -228,35 +260,55 @@
     font-size: 0.7rem;
   }
 
+  /* Improve agenda view */
   .rbc-agenda-view table.rbc-agenda-table {
     font-size: 0.75rem;
   }
 
   .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
-    padding: 0.25rem;
+    padding: 0.35rem 0.25rem;
   }
 
   .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
-    padding: 0.25rem;
+    padding: 0.35rem 0.25rem;
   }
 
-  /* Migliorare il touch per dispositivi mobili */
+  /* Improve touch for mobile devices */
   .rbc-day-bg, .rbc-date-cell, .rbc-event {
     touch-action: manipulation;
   }
 
-  /* Ridurre lo spazio tra le celle */
+  /* Reduce space between cells */
   .rbc-month-row {
-    min-height: 6rem;
+    min-height: 5.5rem;
   }
 
-  /* Migliorare la visualizzazione degli eventi sovrapposti */
-  .rbc-event {
-    z-index: 2;
-  }
-
-  /* Migliorare la visualizzazione del popup */
+  /* Improve popup */
   .rbc-overlay {
     max-width: 90vw;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 20;
+  }
+
+  .rbc-overlay-header {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.5rem;
+  }
+
+  /* Improve today highlight */
+  .rbc-today {
+    background-color: var(--primary-light, rgba(var(--primary-rgb), 0.15));
+  }
+
+  /* Add swipe animations */
+  .rbc-calendar {
+    transition: transform 0.3s ease;
+  }
+
+  /* Improve event colors */
+  .rbc-event.rbc-selected {
+    box-shadow: 0 0 0 1px #fff;
   }
 }

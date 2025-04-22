@@ -3,8 +3,9 @@ import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { Providers } from '@/components/providers/Providers';
 import Navbar from '@/components/layout/Navbar';
+import MobileNavbar from '@/components/layout/MobileNavbar';
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
 });
@@ -24,7 +25,10 @@ export default function RootLayout({
       <body className={`${inter.className} transition-theme antialiased`}>
         <Providers>
           <Navbar />
-          {children}
+          <div className="pb-16 sm:pb-0"> {/* Add padding bottom on mobile for the navbar */}
+            {children}
+          </div>
+          <MobileNavbar />
         </Providers>
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import TripCard from '@/components/trips/TripCard';
 
 type Trip = {
   id: string;
@@ -184,29 +185,10 @@ export default function Dashboard() {
         {!loading && upcomingTrips.length > 0 && (
           <div className="mb-6 sm:mb-8">
             <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Upcoming Trips</h2>
-            <div className="bg-card overflow-hidden shadow rounded-lg">
-              <ul className="divide-y divide-border">
-                {upcomingTrips.map((trip) => (
-                  <li key={trip.id} className="px-3 py-3 sm:px-4 sm:py-4 hover:bg-accent/50 transition-colors">
-                    <Link href={`/trips/${trip.id}`} className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-base sm:text-lg font-medium text-primary">{trip.name}</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">
-                          {trip.destination || 'No destination'} • {formatDate(trip.start_date)}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary/10 text-primary">
-                          Upcoming
-                        </span>
-                        <svg className="ml-2 h-5 w-5 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {upcomingTrips.map((trip) => (
+                <TripCard key={trip.id} trip={trip} />
+              ))}
             </div>
           </div>
         )}
@@ -242,38 +224,8 @@ export default function Dashboard() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredTrips.map((trip) => (
-              <Link key={trip.id} href={`/trips/${trip.id}`}>
-                <div className="bg-card overflow-hidden shadow rounded-lg hover:shadow-md transition-all duration-300 h-full hover:scale-[1.02]">
-                  <div className="px-3 py-3 sm:px-4 sm:py-5 h-full flex flex-col">
-                    <h3 className="text-base sm:text-lg font-medium text-foreground truncate">{trip.name}</h3>
-
-                    {trip.destination && (
-                      <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                        <span className="font-medium text-foreground">Destination:</span> {trip.destination}
-                      </p>
-                    )}
-
-                    <div className="mt-2 text-xs sm:text-sm text-muted-foreground">
-                      <p>
-                        <span className="font-medium">Dates:</span>{' '}
-                        {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
-                      </p>
-                    </div>
-
-                    {trip.description && (
-                      <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-muted-foreground line-clamp-2">{trip.description}</p>
-                    )}
-
-                    <div className="mt-auto pt-3 sm:pt-4 flex justify-between items-center">
-                      <span className="text-[10px] sm:text-xs text-muted-foreground">
-                        Created {new Date(trip.created_at).toLocaleDateString()}
-                      </span>
-                      <span className="text-primary text-xs sm:text-sm font-medium group-hover:text-primary/90">View details →</span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                <TripCard key={trip.id} trip={trip} />
+              ))}
             </div>
           )}
         </div>
