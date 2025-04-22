@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 
 export default function Profile() {
   const { user, updateProfile, signOut } = useAuth();
@@ -10,7 +11,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     fullName: user?.full_name || '',
     avatarUrl: user?.avatar_url || '',
@@ -26,17 +27,17 @@ export default function Profile() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
       setError(null);
       setSuccess(null);
-      
+
       await updateProfile({
         full_name: formData.fullName,
         avatar_url: formData.avatarUrl,
       });
-      
+
       setSuccess('Profile updated successfully');
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -67,11 +68,14 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-foreground">Your Profile</h1>
+          <div className="sm:hidden">
+            <ThemeSwitcher />
+          </div>
         </div>
       </header>
-      
+
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="bg-card shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -80,13 +84,13 @@ export default function Profile() {
                 <p>{error}</p>
               </div>
             )}
-            
+
             {success && (
               <div className="bg-primary/10 border-l-4 border-primary p-4 text-primary mb-6">
                 <p>{success}</p>
               </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-foreground">
@@ -104,7 +108,7 @@ export default function Profile() {
                   Email cannot be changed
                 </p>
               </div>
-              
+
               <div>
                 <label htmlFor="fullName" className="block text-sm font-medium text-foreground">
                   Full Name
@@ -118,7 +122,7 @@ export default function Profile() {
                   className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="avatarUrl" className="block text-sm font-medium text-foreground">
                   Avatar URL
@@ -135,7 +139,7 @@ export default function Profile() {
                   Enter a URL to an image for your profile picture
                 </p>
               </div>
-              
+
               <div className="flex justify-between">
                 <button
                   type="submit"
@@ -144,7 +148,7 @@ export default function Profile() {
                 >
                   {loading ? 'Saving...' : 'Save Changes'}
                 </button>
-                
+
                 <button
                   type="button"
                   onClick={handleSignOut}
@@ -156,7 +160,7 @@ export default function Profile() {
             </form>
           </div>
         </div>
-        
+
         <div className="mt-6 bg-card shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-foreground">Delete Account</h3>

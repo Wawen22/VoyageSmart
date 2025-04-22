@@ -7,6 +7,20 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import UnreadBadge from '@/components/chat/UnreadBadge';
+import {
+  MapPinIcon,
+  CalendarIcon,
+  BanknoteIcon,
+  LockIcon,
+  FileTextIcon,
+  UsersIcon,
+  PencilIcon,
+  TrashIcon,
+  PlaneTakeoffIcon,
+  Building2Icon,
+  DollarSignIcon,
+  MessageCircleIcon
+} from 'lucide-react';
 
 type Trip = {
   id: string;
@@ -176,9 +190,7 @@ export default function TripDetails() {
                 href={`/trips/${id}/edit`}
                 className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
+                <PencilIcon className="h-3 w-3 mr-1" />
                 Edit
               </Link>
               <button
@@ -186,9 +198,7 @@ export default function TripDetails() {
                 disabled={deleting}
                 className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive disabled:opacity-50 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
+                <TrashIcon className="h-3 w-3 mr-1" />
                 {deleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
@@ -196,11 +206,22 @@ export default function TripDetails() {
         </div>
 
         <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-          <div>
+          <div className="animate-fade-in">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground truncate">{trip.name}</h1>
-            {trip.destination && (
-              <p className="text-sm text-muted-foreground truncate">{trip.destination}</p>
-            )}
+            <div className="flex items-center mt-1">
+              {trip.destination && (
+                <div className="flex items-center text-sm text-muted-foreground mr-4">
+                  <MapPinIcon className="h-4 w-4 mr-1" />
+                  <span className="truncate">{trip.destination}</span>
+                </div>
+              )}
+              {trip.start_date && trip.end_date && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <CalendarIcon className="h-4 w-4 mr-1" />
+                  <span>{formatDate(trip.start_date)} - {formatDate(trip.end_date)}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -208,7 +229,7 @@ export default function TripDetails() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Trip Details */}
-          <div className="bg-card shadow overflow-hidden sm:rounded-lg lg:col-span-2">
+          <div className="bg-card shadow overflow-hidden sm:rounded-lg lg:col-span-2 animate-fade-in">
             <div className="px-4 py-5 sm:px-6">
               <h2 className="text-lg leading-6 font-medium text-foreground">Trip Details</h2>
               <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
@@ -217,32 +238,49 @@ export default function TripDetails() {
             </div>
             <div className="border-t border-border px-4 py-5 sm:p-0">
               <dl className="sm:divide-y sm:divide-border">
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-muted-foreground">Destination</dt>
+                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors">
+                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
+                    <MapPinIcon className="h-4 w-4 mr-2" />
+                    Destination
+                  </dt>
                   <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2">
                     {trip.destination || 'Not specified'}
                   </dd>
                 </div>
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-muted-foreground">Dates</dt>
+                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors">
+                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    Dates
+                  </dt>
                   <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2">
                     {formatDate(trip.start_date)} to {formatDate(trip.end_date)}
                   </dd>
                 </div>
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-muted-foreground">Budget</dt>
+                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors">
+                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
+                    <BanknoteIcon className="h-4 w-4 mr-2" />
+                    Budget
+                  </dt>
                   <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2">
                     {formatCurrency(trip.budget_total)}
                   </dd>
                 </div>
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-muted-foreground">Privacy</dt>
+                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors">
+                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
+                    <LockIcon className="h-4 w-4 mr-2" />
+                    Privacy
+                  </dt>
                   <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2">
-                    {trip.is_private ? 'Private' : 'Public'}
+                    <span className={`px-2 py-1 rounded-full text-xs ${trip.is_private ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'}`}>
+                      {trip.is_private ? 'Private' : 'Public'}
+                    </span>
                   </dd>
                 </div>
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-muted-foreground">Description</dt>
+                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors">
+                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
+                    <FileTextIcon className="h-4 w-4 mr-2" />
+                    Description
+                  </dt>
                   <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2">
                     {trip.description || 'No description provided'}
                   </dd>
@@ -252,10 +290,13 @@ export default function TripDetails() {
           </div>
 
           {/* Participants */}
-          <div className="bg-card shadow overflow-hidden sm:rounded-lg">
+          <div className="bg-card shadow overflow-hidden sm:rounded-lg animate-fade-in delay-100">
             <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
               <div>
-                <h2 className="text-lg leading-6 font-medium text-foreground">Participants</h2>
+                <h2 className="text-lg leading-6 font-medium text-foreground flex items-center">
+                  <UsersIcon className="h-5 w-5 mr-2" />
+                  Participants
+                </h2>
                 <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
                   People joining this trip
                 </p>
@@ -287,10 +328,10 @@ export default function TripDetails() {
                   </li>
                 ) : (
                   participants.map((participant) => (
-                    <li key={participant.id} className="px-4 py-4 sm:px-6">
+                    <li key={participant.id} className={`px-4 py-4 sm:px-6 hover:bg-muted/10 transition-colors stagger-item`}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+                          <div className="flex-shrink-0 h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary/20 transition-colors">
                             <span className="text-primary font-medium">
                               {participant.full_name.charAt(0).toUpperCase()}
                             </span>
@@ -303,7 +344,7 @@ export default function TripDetails() {
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary/10 text-primary">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${participant.role === 'owner' ? 'bg-primary/10 text-primary' : 'bg-secondary/50 text-secondary-foreground'}`}>
                             {participant.role}
                           </span>
                         </div>
@@ -318,9 +359,12 @@ export default function TripDetails() {
 
         {/* Trip Actions */}
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="bg-card shadow overflow-hidden sm:rounded-lg lg:col-span-3">
+          <div className="bg-card shadow overflow-hidden sm:rounded-lg lg:col-span-3 animate-fade-in delay-200">
             <div className="px-4 py-5 sm:px-6">
-              <h2 className="text-lg leading-6 font-medium text-foreground">Trip Actions</h2>
+              <h2 className="text-lg leading-6 font-medium text-foreground flex items-center">
+                <MapPinIcon className="h-5 w-5 mr-2" />
+                Trip Actions
+              </h2>
               <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
                 Manage your trip activities
               </p>
@@ -328,8 +372,11 @@ export default function TripDetails() {
             <div className="border-t border-border px-4 py-5 sm:p-6">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
                 <Link href={`/trips/${id}/itinerary`}>
-                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
-                    <h3 className="text-lg font-medium text-foreground">Itinerary</h3>
+                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer hover:shadow-md">
+                    <div className="flex items-center mb-3">
+                      <CalendarIcon className="h-5 w-5 text-primary mr-2" />
+                      <h3 className="text-lg font-medium text-foreground">Itinerary</h3>
+                    </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Plan your daily activities and schedule
                     </p>
@@ -337,8 +384,11 @@ export default function TripDetails() {
                 </Link>
 
                 <Link href={`/trips/${id}/accommodations`}>
-                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
-                    <h3 className="text-lg font-medium text-foreground">Accommodations</h3>
+                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer hover:shadow-md">
+                    <div className="flex items-center mb-3">
+                      <Building2Icon className="h-5 w-5 text-primary mr-2" />
+                      <h3 className="text-lg font-medium text-foreground">Accommodations</h3>
+                    </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Manage hotels and places to stay
                     </p>
@@ -346,8 +396,11 @@ export default function TripDetails() {
                 </Link>
 
                 <Link href={`/trips/${id}/transportation`}>
-                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
-                    <h3 className="text-lg font-medium text-foreground">Transportation</h3>
+                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer hover:shadow-md">
+                    <div className="flex items-center mb-3">
+                      <PlaneTakeoffIcon className="h-5 w-5 text-primary mr-2" />
+                      <h3 className="text-lg font-medium text-foreground">Transportation</h3>
+                    </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Track flights, trains, and other transport
                     </p>
@@ -355,8 +408,11 @@ export default function TripDetails() {
                 </Link>
 
                 <Link href={`/trips/${id}/expenses`}>
-                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
-                    <h3 className="text-lg font-medium text-foreground">Expenses</h3>
+                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer hover:shadow-md">
+                    <div className="flex items-center mb-3">
+                      <DollarSignIcon className="h-5 w-5 text-primary mr-2" />
+                      <h3 className="text-lg font-medium text-foreground">Expenses</h3>
+                    </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Track and split trip expenses
                     </p>
@@ -364,11 +420,14 @@ export default function TripDetails() {
                 </Link>
 
                 <Link href={`/trips/${id}/chat`}>
-                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer relative">
+                  <div className="border border-border rounded-lg p-6 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer hover:shadow-md relative">
                     <div className="absolute top-3 right-3">
                       <UnreadBadge tripId={id as string} />
                     </div>
-                    <h3 className="text-lg font-medium text-foreground">Group Chat</h3>
+                    <div className="flex items-center mb-3">
+                      <MessageCircleIcon className="h-5 w-5 text-primary mr-2" />
+                      <h3 className="text-lg font-medium text-foreground">Group Chat</h3>
+                    </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       Chat with trip participants
                     </p>

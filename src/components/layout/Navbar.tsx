@@ -10,12 +10,7 @@ import { HomeIcon, PlusCircleIcon, UserIcon } from 'lucide-react';
 export default function Navbar() {
   const { user, signOut } = useAuth();
   const pathname = usePathname();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen(!isProfileMenuOpen);
@@ -159,132 +154,11 @@ export default function Navbar() {
             >
               <UserIcon className="h-5 w-5" />
             </Link>
-
-            {/* Hamburger Menu */}
-            <button
-              type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
-              aria-expanded="false"
-              onClick={toggleMenu}
-            >
-              <span className="sr-only">Open main menu</span>
-              <svg
-                className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-              <svg
-                className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
           </div>
         </div>
       </div>
 
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} sm:hidden`}>
-        <div className="pt-2 pb-3 space-y-1">
-          <Link
-            href="/dashboard"
-            className={`${
-              pathname === '/dashboard'
-                ? 'bg-primary/10 border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:bg-accent hover:text-foreground'
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/trips/new"
-            className={`${
-              pathname === '/trips/new'
-                ? 'bg-primary/10 border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:bg-accent hover:text-foreground'
-            } block pl-3 pr-4 py-2 border-l-4 text-base font-medium`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            New Trip
-          </Link>
-        </div>
-        {user ? (
-          <div className="pt-4 pb-3 border-t border-border">
-            <div className="flex items-center px-4">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-medium">
-                    {user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              </div>
-              <div className="ml-3">
-                <div className="text-base font-medium text-foreground">
-                  {user.full_name || 'User'}
-                </div>
-                <div className="text-sm font-medium text-muted-foreground">{user.email}</div>
-              </div>
-            </div>
-            <div className="mt-3 space-y-1">
-              <Link
-                href="/profile"
-                className="block px-4 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Your Profile
-              </Link>
-              <button
-                className="block w-full text-left px-4 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                onClick={() => {
-                  handleSignOut();
-                  setIsMenuOpen(false);
-                }}
-              >
-                Sign out
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="pt-4 pb-3 border-t border-border">
-            <div className="flex items-center justify-around">
-              <Link
-                href="/login"
-                className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-base font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Log in
-              </Link>
-              <Link
-                href="/register"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-2 rounded-md text-base font-medium transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sign up
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Mobile menu removed */}
     </nav>
   );
 }
