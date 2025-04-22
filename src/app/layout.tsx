@@ -4,6 +4,7 @@ import '@/styles/globals.css';
 import { Providers } from '@/components/providers/Providers';
 import Navbar from '@/components/layout/Navbar';
 import MobileNavbar from '@/components/layout/MobileNavbar';
+import OnboardingModal from '@/components/subscription/OnboardingModal';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -29,6 +30,7 @@ export default function RootLayout({
             {children}
           </div>
           <MobileNavbar />
+          <OnboardingModal />
         </Providers>
       </body>
     </html>

@@ -4,11 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
-import { HomeIcon, PlusCircleIcon, UserIcon } from 'lucide-react';
+import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon } from 'lucide-react';
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
+  const { subscription } = useSubscription();
   const pathname = usePathname();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
@@ -64,6 +66,16 @@ export default function Navbar() {
               >
                 New Trip
               </Link>
+              <Link
+                href="/pricing"
+                className={`nav-indicator ${
+                  pathname === '/pricing'
+                    ? 'border-primary text-foreground active'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Pricing
+              </Link>
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center gap-4">
@@ -89,7 +101,7 @@ export default function Navbar() {
                 </div>
                 {isProfileMenuOpen && (
                   <div
-                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-popover border border-border focus:outline-none"
+                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-popover border border-border focus:outline-none z-50"
                     role="menu"
                     aria-orientation="vertical"
                     aria-labelledby="user-menu"
@@ -101,6 +113,14 @@ export default function Navbar() {
                       onClick={() => setIsProfileMenuOpen(false)}
                     >
                       Your Profile
+                    </Link>
+                    <Link
+                      href="/pricing"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                      role="menuitem"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      Subscription {subscription?.tier === 'premium' ? '(Premium)' : '(Free)'}
                     </Link>
                     <button
                       className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
@@ -153,6 +173,14 @@ export default function Navbar() {
               aria-label="Profile"
             >
               <UserIcon className="h-5 w-5" />
+            </Link>
+
+            <Link
+              href="/pricing"
+              className={`p-2 rounded-md ${pathname === '/pricing' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
+              aria-label="Pricing"
+            >
+              <TagIcon className="h-5 w-5" />
             </Link>
           </div>
         </div>

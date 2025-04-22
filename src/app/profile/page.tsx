@@ -1,21 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
+import { Badge } from '@/components/ui/badge';
+import { formatDate } from '@/lib/utils';
+import { RocketIcon, TagIcon, LockIcon } from 'lucide-react';
 
 export default function Profile() {
   const { user, updateProfile, signOut } = useAuth();
+  const { subscription, upgradeSubscription } = useSubscription();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    fullName: user?.full_name || '',
-    avatarUrl: user?.avatar_url || '',
+    fullName: '',
+    avatarUrl: '',
   });
+
+  // Set initial form data when user is available
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.full_name || '',
+        avatarUrl: user.avatar_url || '',
+      });
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -161,6 +177,91 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Subscription Information */}
+        <div className="mt-6 bg-card shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg leading-6 font-medium text-foreground flex items-center">
+                <TagIcon className="h-5 w-5 mr-2" />
+                Subscription Plan
+              </h3>
+              {subscription && (
+                <Badge variant={subscription.tier === 'premium' ? 'default' : 'outline'} className="text-sm">
+                  {subscription.tier === 'premium' ? 'Premium' : 'Free'}
+                </Badge>
+              )}
+            </div>
+
+            <div className="mt-2 space-y-4">
+              {subscription ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Current Plan</p>
+                      <p className="text-sm text-muted-foreground capitalize">{subscription.tier}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Status</p>
+                      <p className="text-sm text-muted-foreground capitalize">{subscription.status}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Valid Until</p>
+                      <p className="text-sm text-muted-foreground">{formatDate(subscription.validUntil.toISOString())}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Features</p>
+                      <p className="text-sm text-muted-foreground">
+                        {subscription.tier === 'premium' ? (
+                          'Unlimited trips, Accommodations, Transportation'
+                        ) : (
+                          'Up to 3 trips'
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-border">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      {subscription.tier === 'premium' ? (
+                        <div className="flex items-center text-sm text-primary">
+                          <RocketIcon className="h-4 w-4 mr-2" />
+                          <span>You're enjoying all premium features!</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <LockIcon className="h-4 w-4 mr-2" />
+                          <span>Upgrade to unlock premium features</span>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        {subscription.tier !== 'premium' && (
+                          <button
+                            type="button"
+                            onClick={upgradeSubscription}
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                          >
+                            Upgrade to Premium
+                          </button>
+                        )}
+                        <Link
+                          href="/subscription"
+                          className="inline-flex items-center justify-center px-4 py-2 border border-border shadow-sm text-sm font-medium rounded-md text-foreground bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                        >
+                          Manage Subscription
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">Loading subscription information...</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Account */}
         <div className="mt-6 bg-card shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-foreground">Delete Account</h3>

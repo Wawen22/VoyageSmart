@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
 import { fetchAccommodations, Accommodation, setCurrentAccommodation } from '@/lib/features/accommodationSlice';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import { useRolePermissions } from '@/hooks/useRolePermissions';
 import { format, parseISO } from 'date-fns';
@@ -27,11 +28,13 @@ import AccommodationModal from '@/components/accommodations/AccommodationModal';
 import AccommodationDetailsModal from '@/components/accommodations/AccommodationDetailsModal';
 import MapView from '@/components/map/MapView';
 import AccommodationsMapView from '@/components/map/AccommodationsMapView';
+import UpgradePrompt from '@/components/subscription/UpgradePrompt';
 
 type Trip = {
   id: string;
   name: string;
   destination: string | null;
+  owner_id?: string;
 };
 
 export default function AccommodationsPage() {
@@ -39,6 +42,7 @@ export default function AccommodationsPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
+  const { canAccessFeature } = useSubscription();
   const { accommodations, loading, error, currentAccommodation } = useSelector(
     (state: RootState) => state.accommodations
   );
@@ -60,7 +64,7 @@ export default function AccommodationsPage() {
         // Fetch trip details
         const { data: tripData, error: tripError } = await supabase
           .from('trips')
-          .select('id, name, destination')
+          .select('id, name, destination, owner_id')
           .eq('id', id)
           .single();
 
@@ -150,9 +154,45 @@ export default function AccommodationsPage() {
     );
   }
 
+  // Check if user has access to this premium feature
+  const hasAccess = canAccessFeature('accommodations');
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="bg-card border-b border-border mb-6">
+          <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
+            <BackButton href={`/trips/${id}`} label="Back to Trip" />
+          </div>
+
+          <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+            <div className="flex flex-col space-y-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
+                <Building2Icon className="h-6 w-6 mr-2" />
+                Accommodations
+              </h1>
+
+              {trip && (
+                <p className="text-sm text-muted-foreground">
+                  {trip.name} {trip.destination && `• ${trip.destination}`}
+                </p>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <UpgradePrompt
+            feature="Accommodations"
+            description="Track your hotels, Airbnbs, and other accommodations with our premium Accommodations feature."
+          />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="bg-card border-b border-border mb-6">
         <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
           <BackButton href={`/trips/${id}`} label="Back to Trip" />
@@ -184,7 +224,6 @@ export default function AccommodationsPage() {
           )}
         </div>
 
-        {/* View Mode Tabs */}
         <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
           <TabsList className="grid w-full max-w-xs grid-cols-2">
             <TabsTrigger value="list" className="flex items-center">
@@ -198,7 +237,6 @@ export default function AccommodationsPage() {
           </TabsList>
         </Tabs>
 
-        {/* Content */}
         {loading ? (
           <div className="text-center py-8">
             <p>Loading accommodations...</p>
@@ -230,7 +268,6 @@ export default function AccommodationsPage() {
           </div>
         ) : (
           <>
-            {/* List View */}
             {viewMode === 'list' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {accommodations.map((accommodation) => (
@@ -245,7 +282,6 @@ export default function AccommodationsPage() {
               </div>
             )}
 
-            {/* Map View */}
             {viewMode === 'map' && (
               <Card>
                 <CardContent className="p-4">
@@ -256,7 +292,6 @@ export default function AccommodationsPage() {
                       onMarkerClick={handleViewAccommodation}
                     />
 
-                    {/* Accommodation list */}
                     <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm p-4 rounded-md shadow max-h-[450px] overflow-y-auto w-72">
                       <h3 className="font-medium mb-3">Accommodations</h3>
                       <div className="space-y-2">
@@ -291,7 +326,6 @@ export default function AccommodationsPage() {
         )}
       </main>
 
-      {/* Modals */}
       <AccommodationModal
         tripId={id as string}
         isOpen={isAddModalOpen}

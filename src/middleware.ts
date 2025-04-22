@@ -68,6 +68,7 @@ export const config = {
     '/dashboard/:path*',
     '/trips/:path*',
     '/profile/:path*',
+    '/pricing',
     '/login',
     '/register',
     '/forgot-password',

@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import TripCard from '@/components/trips/TripCard';
 import PageLayout from '@/components/layout/PageLayout';
 import AnimatedList from '@/components/ui/AnimatedList';
 import RippleButton from '@/components/ui/RippleButton';
-import { PlusIcon, SearchIcon } from 'lucide-react';
+import PremiumIndicator from '@/components/subscription/PremiumIndicator';
+import { PlusIcon, SearchIcon, InfoIcon } from 'lucide-react';
 
 type Trip = {
   id: string;
@@ -22,11 +24,13 @@ type Trip = {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { subscription, canCreateTrip } = useSubscription();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [tripCount, setTripCount] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -54,6 +58,7 @@ export default function Dashboard() {
 
           console.log('Dashboard - Trips fetched successfully:', data?.length || 0);
           setTrips(data || []);
+          setTripCount(data?.length || 0);
         } catch (fetchError) {
           console.error('Dashboard - Error in fetch operation:', fetchError);
 
@@ -126,17 +131,32 @@ export default function Dashboard() {
       <header className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0 animate-content-fade-in">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Trips</h1>
-            <RippleButton
-              asChild
-              feedbackType="ripple"
-              className="px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center"
-            >
-              <Link href="/trips/new">
-                <PlusIcon className="h-4 w-4 mr-1" />
-                Create New Trip
-              </Link>
-            </RippleButton>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Trips</h1>
+              {subscription?.tier === 'free' && tripCount !== null && (
+                <div className="flex items-center text-sm text-muted-foreground bg-muted px-2 py-1 rounded">
+                  <InfoIcon className="h-4 w-4 mr-1" />
+                  <span>{tripCount}/3 trips</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {subscription?.tier === 'free' && tripCount !== null && tripCount >= 3 && (
+                <div className="mr-2">
+                  <PremiumIndicator feature="unlimited_trips" variant="text" />
+                </div>
+              )}
+              <RippleButton
+                asChild
+                feedbackType="ripple"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center"
+              >
+                <Link href="/trips/new">
+                  <PlusIcon className="h-4 w-4 mr-1" />
+                  Create New Trip
+                </Link>
+              </RippleButton>
+            </div>
           </div>
 
           <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 animate-content-fade-in" style={{ animationDelay: '100ms' }}>

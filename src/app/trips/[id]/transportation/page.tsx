@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
 import { fetchTransportations, Transportation, setCurrentTransportation } from '@/lib/features/transportationSlice';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import { useRolePermissions } from '@/hooks/useRolePermissions';
 import { format, parseISO } from 'date-fns';
@@ -21,21 +22,22 @@ import {
   MapPinIcon,
   ListIcon,
   MapIcon,
-  TrainIcon,
-  BusIcon,
   CarIcon,
+  TrainIcon,
   ShipIcon,
-  MoreHorizontalIcon
+  BusIcon
 } from 'lucide-react';
 import TransportationCard from '@/components/transportation/TransportationCard';
 import TransportationModal from '@/components/transportation/TransportationModal';
 import TransportationDetailsModal from '@/components/transportation/TransportationDetailsModal';
 import TransportationMap from '@/components/transportation/TransportationMap';
+import UpgradePrompt from '@/components/subscription/UpgradePrompt';
 
 type Trip = {
   id: string;
   name: string;
   destination: string | null;
+  owner_id?: string;
 };
 
 export default function TransportationPage() {
@@ -43,6 +45,7 @@ export default function TransportationPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
+  const { canAccessFeature } = useSubscription();
   const { transportations, loading, error, currentTransportation } = useSelector(
     (state: RootState) => state.transportation
   );
@@ -64,7 +67,7 @@ export default function TransportationPage() {
         // Fetch trip details
         const { data: tripData, error: tripError } = await supabase
           .from('trips')
-          .select('id, name, destination')
+          .select('id, name, destination, owner_id')
           .eq('id', id)
           .single();
 
@@ -131,19 +134,20 @@ export default function TransportationPage() {
   };
 
   const getTransportationIcon = (type: string) => {
-    switch (type) {
+    switch (type?.toLowerCase()) {
       case 'flight':
-        return <PlaneTakeoffIcon className="h-5 w-5 text-primary" />;
+        return <PlaneTakeoffIcon className="h-4 w-4 text-primary" />;
       case 'train':
-        return <TrainIcon className="h-5 w-5 text-primary" />;
-      case 'bus':
-        return <BusIcon className="h-5 w-5 text-primary" />;
+        return <TrainIcon className="h-4 w-4 text-primary" />;
       case 'car':
-        return <CarIcon className="h-5 w-5 text-primary" />;
+        return <CarIcon className="h-4 w-4 text-primary" />;
+      case 'bus':
+        return <BusIcon className="h-4 w-4 text-primary" />;
       case 'ferry':
-        return <ShipIcon className="h-5 w-5 text-primary" />;
+      case 'boat':
+        return <ShipIcon className="h-4 w-4 text-primary" />;
       default:
-        return <MoreHorizontalIcon className="h-5 w-5 text-primary" />;
+        return <PlaneTakeoffIcon className="h-4 w-4 text-primary" />;
     }
   };
 
@@ -171,6 +175,9 @@ export default function TransportationPage() {
     );
   }
 
+  // Check if user has access to this premium feature
+  const hasAccess = canAccessFeature('transportation');
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -196,150 +203,163 @@ export default function TransportationPage() {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {canEdit && (
-            <Button onClick={handleAddTransportation}>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Transportation
-            </Button>
-          )}
-        </div>
-
-        {/* View Mode Tabs */}
-        <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
-          <TabsList className="grid w-full max-w-xs grid-cols-2">
-            <TabsTrigger value="list" className="flex items-center">
-              <ListIcon className="h-4 w-4 mr-2" />
-              List View
-            </TabsTrigger>
-            <TabsTrigger value="map" className="flex items-center">
-              <MapIcon className="h-4 w-4 mr-2" />
-              Map View
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        {/* Content */}
-        {loading ? (
-          <div className="text-center py-8">
-            <p>Loading transportation...</p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-8">
-            <p className="text-destructive">Error: {error}</p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => dispatch(fetchTransportations(id as string))}
-            >
-              Try Again
-            </Button>
-          </div>
-        ) : transportations.length === 0 ? (
-          <div className="text-center py-12">
-            <PlaneTakeoffIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No transportation yet</h3>
-            <p className="text-muted-foreground mb-6">
-              Add your first transportation to keep track of your travels during this trip.
-            </p>
-            {canEdit && (
-              <Button onClick={handleAddTransportation}>
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Add Transportation
-              </Button>
-            )}
-          </div>
+        {!hasAccess ? (
+          <UpgradePrompt
+            feature="Transportation"
+            description="Track your flights, trains, and other transportation with our premium Transportation feature."
+          />
         ) : (
           <>
-            {/* List View */}
-            {viewMode === 'list' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {transportations.map((transportation) => (
-                  <TransportationCard
-                    key={transportation.id}
-                    transportation={transportation}
-                    onView={handleViewTransportation}
-                    onEdit={handleEditTransportation}
-                    canEdit={canEdit}
-                    getIcon={getTransportationIcon}
-                  />
-                ))}
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              {canEdit && (
+                <Button onClick={handleAddTransportation}>
+                  <PlusIcon className="h-4 w-4 mr-2" />
+                  Add Transportation
+                </Button>
+              )}
+            </div>
+
+            {/* View Mode Tabs */}
+            <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
+              <TabsList className="grid w-full max-w-xs grid-cols-2">
+                <TabsTrigger value="list" className="flex items-center">
+                  <ListIcon className="h-4 w-4 mr-2" />
+                  List View
+                </TabsTrigger>
+                <TabsTrigger value="map" className="flex items-center">
+                  <MapIcon className="h-4 w-4 mr-2" />
+                  Map View
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {/* Content */}
+            {loading ? (
+              <div className="text-center py-8">
+                <p>Loading transportation...</p>
               </div>
-            )}
-
-            {/* Map View */}
-            {viewMode === 'map' && (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="h-[500px] relative">
-                    <TransportationMap
-                      transportations={transportations}
-                      height="500px"
-                      onMarkerClick={handleViewTransportation}
-                    />
-
-                    {/* Transportation list */}
-                    <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm p-4 rounded-md shadow max-h-[450px] overflow-y-auto w-72">
-                      <h3 className="font-medium mb-3">Transportation</h3>
-                      <div className="space-y-2">
-                        {transportations.map((transportation) => (
-                          <div
-                            key={transportation.id}
-                            className="p-2 border rounded-md hover:bg-accent cursor-pointer"
-                            onClick={() => handleViewTransportation(transportation)}
-                          >
-                            <div className="flex items-center">
-                              {getTransportationIcon(transportation.type)}
-                              <p className="font-medium text-sm ml-2">
-                                {transportation.provider || transportation.type}
-                              </p>
-                            </div>
-                            {transportation.departure_time && (
-                              <div className="flex items-center text-xs text-muted-foreground">
-                                <CalendarIcon className="h-3 w-3 mr-1" />
-                                {format(parseISO(transportation.departure_time), 'MMM d, yyyy HH:mm')}
-                              </div>
-                            )}
-                            {transportation.departure_location && (
-                              <div className="flex items-center text-xs text-muted-foreground">
-                                <MapPinIcon className="h-3 w-3 mr-1" />
-                                <span className="truncate">{transportation.departure_location}</span>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <p className="text-destructive">Error: {error}</p>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => dispatch(fetchTransportations(id as string))}
+                >
+                  Try Again
+                </Button>
+              </div>
+            ) : transportations.length === 0 ? (
+              <div className="text-center py-12">
+                <PlaneTakeoffIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No transportation yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Add your first transportation to keep track of your travels during this trip.
+                </p>
+                {canEdit && (
+                  <Button onClick={handleAddTransportation}>
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Add Transportation
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* List View */}
+                {viewMode === 'list' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {transportations.map((transportation) => (
+                      <TransportationCard
+                        key={transportation.id}
+                        transportation={transportation}
+                        onView={handleViewTransportation}
+                        onEdit={handleEditTransportation}
+                        canEdit={canEdit}
+                        getIcon={getTransportationIcon}
+                      />
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                {/* Map View */}
+                {viewMode === 'map' && (
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="h-[500px] relative">
+                        <TransportationMap
+                          transportations={transportations}
+                          height="500px"
+                          onMarkerClick={handleViewTransportation}
+                        />
+
+                        {/* Transportation list */}
+                        <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm p-4 rounded-md shadow max-h-[450px] overflow-y-auto w-72">
+                          <h3 className="font-medium mb-3">Transportation</h3>
+                          <div className="space-y-2">
+                            {transportations.map((transportation) => (
+                              <div
+                                key={transportation.id}
+                                className="p-2 border rounded-md hover:bg-accent cursor-pointer"
+                                onClick={() => handleViewTransportation(transportation)}
+                              >
+                                <div className="flex items-center">
+                                  {getTransportationIcon(transportation.type)}
+                                  <p className="font-medium text-sm ml-2">
+                                    {transportation.provider || transportation.type}
+                                  </p>
+                                </div>
+                                {transportation.departure_time && (
+                                  <div className="flex items-center text-xs text-muted-foreground">
+                                    <CalendarIcon className="h-3 w-3 mr-1" />
+                                    {format(parseISO(transportation.departure_time), 'MMM d, yyyy HH:mm')}
+                                  </div>
+                                )}
+                                {transportation.departure_location && (
+                                  <div className="flex items-center text-xs text-muted-foreground">
+                                    <MapPinIcon className="h-3 w-3 mr-1" />
+                                    <span className="truncate">{transportation.departure_location}</span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
             )}
           </>
         )}
       </main>
 
-      {/* Modals */}
-      <TransportationModal
-        tripId={id as string}
-        isOpen={isAddModalOpen}
-        onClose={handleCloseAddModal}
-      />
+      {/* Modals - Only render if user has access */}
+      {hasAccess && (
+        <>
+          <TransportationModal
+            tripId={id as string}
+            isOpen={isAddModalOpen}
+            onClose={handleCloseAddModal}
+          />
 
-      <TransportationModal
-        tripId={id as string}
-        transportation={currentTransportation}
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-      />
+          <TransportationModal
+            tripId={id as string}
+            transportation={currentTransportation}
+            isOpen={isEditModalOpen}
+            onClose={handleCloseEditModal}
+          />
 
-      <TransportationDetailsModal
-        transportation={currentTransportation}
-        isOpen={isDetailsModalOpen}
-        onClose={handleCloseDetailsModal}
-        onEdit={handleEditFromDetails}
-        canEdit={canEdit}
-        getIcon={getTransportationIcon}
-      />
+          <TransportationDetailsModal
+            transportation={currentTransportation}
+            isOpen={isDetailsModalOpen}
+            onClose={handleCloseDetailsModal}
+            onEdit={handleEditFromDetails}
+            canEdit={canEdit}
+            getIcon={getTransportationIcon}
+          />
+        </>
+      )}
     </div>
   );
 }

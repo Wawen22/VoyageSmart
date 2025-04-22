@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import PremiumIndicator from '@/components/subscription/PremiumIndicator';
 
 type Trip = {
   id: string;
@@ -112,17 +113,26 @@ export default function TripCard({ trip }: TripCardProps) {
           <div className="p-4 space-y-3">
             {/* Header with title and status */}
             <div className="flex justify-between items-start">
-              <h3 className="text-lg font-medium text-foreground line-clamp-1">{trip.name}</h3>
-              {daysUntil !== null && (
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                  In {daysUntil} {daysUntil === 1 ? 'day' : 'days'}
-                </Badge>
-              )}
-              {isPast() && (
-                <Badge variant="outline" className="bg-muted text-muted-foreground">
-                  Completed
-                </Badge>
-              )}
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-medium text-foreground line-clamp-1">{trip.name}</h3>
+                {/* Premium indicator for accommodations and transportation */}
+                <div className="flex gap-1">
+                  <PremiumIndicator feature="accommodations" variant="icon" size="sm" />
+                  <PremiumIndicator feature="transportation" variant="icon" size="sm" />
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                {daysUntil !== null && (
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                    In {daysUntil} {daysUntil === 1 ? 'day' : 'days'}
+                  </Badge>
+                )}
+                {isPast() && (
+                  <Badge variant="outline" className="bg-muted text-muted-foreground">
+                    Completed
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {/* Destination */}

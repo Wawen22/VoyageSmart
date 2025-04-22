@@ -1,17 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
+import TripLimitPrompt from '@/components/subscription/TripLimitPrompt';
 
 export default function NewTrip() {
   const { user } = useAuth();
+  const { canCreateTrip } = useSubscription();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canCreate, setCanCreate] = useState<boolean | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -29,6 +33,17 @@ export default function NewTrip() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [success, setSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkTripLimit = async () => {
+      if (user) {
+        const canCreate = await canCreateTrip();
+        setCanCreate(canCreate);
+      }
+    };
+
+    checkTripLimit();
+  }, [user, canCreateTrip]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -147,6 +162,36 @@ export default function NewTrip() {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking if user can create a trip
+  if (canCreate === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  // If user has reached the trip limit, show the upgrade prompt
+  if (canCreate === false) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="bg-card border-b border-border">
+          <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
+            <BackButton href="/dashboard" label="Back to Dashboard" />
+          </div>
+
+          <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Create New Trip</h1>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <TripLimitPrompt />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

@@ -257,9 +257,11 @@ trip_media
   - NLP per query in linguaggio naturale
   - Suggerimenti pro-attivi
 
-- **Monetizzazione e piani premium**
-  - Sistema abbonamenti con Stripe
-  - Paywall per funzionalità premium
+- **Monetizzazione e piani premium** ✅
+  - ✅ Sistema abbonamenti con Supabase
+  - ✅ Paywall per funzionalità premium (Accommodations, Transportation)
+  - ✅ Limite di 3 viaggi per utenti free
+  - ✅ Pagina Pricing con piani Free, Premium e AI (coming soon)
   - Dashboard amministrativa ricavi
 
 - **Funzionalità innovative**

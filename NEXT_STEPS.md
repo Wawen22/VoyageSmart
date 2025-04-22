@@ -153,6 +153,41 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere correlazione tra log per tracciare richieste complete
   - Implementare rotazione e archiviazione dei log
 
+## Monetizzazione e Abbonamenti
+
+### 1. Integrazione con Stripe
+- **Implementare pagamenti con Stripe**
+  - Integrare Stripe API per gestione abbonamenti
+  - Implementare webhook per gestire eventi di pagamento
+  - Aggiungere pagina di gestione abbonamento nel profilo utente
+
+- **Migliorare l'esperienza di upgrade**
+  - Ottimizzare il flusso di conversione da free a premium
+  - Implementare trial gratuito per funzionalità premium
+  - Aggiungere notifiche per abbonamenti in scadenza
+
+### 2. Dashboard Amministrativa
+- **Creare dashboard per monitoraggio abbonamenti**
+  - Implementare visualizzazione di metriche chiave (conversione, churn, etc.)
+  - Aggiungere gestione manuale degli abbonamenti
+  - Implementare reportistica per revenue e previsioni
+
+- **Implementare analytics avanzati**
+  - Aggiungere tracciamento del comportamento utente
+  - Implementare funnel di conversione
+  - Creare segmentazione utenti per marketing mirato
+
+### 3. Piano AI
+- **Sviluppare funzionalità AI per piano premium**
+  - Implementare assistente AI per pianificazione viaggi
+  - Aggiungere ottimizzazione automatica degli itinerari
+  - Implementare suggerimenti personalizzati basati su preferenze
+
+- **Integrare servizi AI esterni**
+  - Implementare integrazione con OpenAI o Google Gemini
+  - Aggiungere analisi predittiva per costi e affluenza
+  - Implementare generazione automatica di riassunti di viaggio
+
 ## Espansione della Piattaforma
 
 ### 1. Applicazione Mobile Nativa
@@ -191,20 +226,20 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
 ## Priorità Consigliate
 
 ### Priorità Alta (1-3 mesi)
-1. **Miglioramenti UI/UX**
+1. **Monetizzazione e Abbonamenti**
+   - Completare l'integrazione con Stripe per pagamenti
+   - Migliorare l'esperienza di upgrade con trial gratuito
+   - Implementare dashboard amministrativa base
+
+2. **Miglioramenti UI/UX**
    - Implementare animazioni di transizione tra pagine
    - Migliorare il feedback visivo
    - Ottimizzare le animazioni per dispositivi mobili
 
-2. **Performance**
+3. **Performance**
    - Ottimizzare il caricamento iniziale
    - Migliorare la performance delle liste
    - Implementare lazy loading per componenti pesanti
-
-3. **Pianificazione Avanzata degli Itinerari**
-   - Implementare ottimizzazione dei percorsi
-   - Migliorare la visualizzazione su mappa
-   - Aggiungere percorsi tra le attività sulla mappa
 
 ### Priorità Media (3-6 mesi)
 1. **Collaborazione Avanzata**

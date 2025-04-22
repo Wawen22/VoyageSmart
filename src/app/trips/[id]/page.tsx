@@ -5,8 +5,10 @@ import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import UnreadBadge from '@/components/chat/UnreadBadge';
+import PremiumIndicator from '@/components/subscription/PremiumIndicator';
 import {
   MapPinIcon,
   CalendarIcon,
@@ -20,7 +22,8 @@ import {
   Building2Icon,
   DollarSignIcon,
   MessageCircleIcon,
-  ArrowLeft
+  ArrowLeft,
+  InfoIcon
 } from 'lucide-react';
 
 type Trip = {
@@ -49,12 +52,14 @@ export default function TripDetails() {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { subscription } = useSubscription();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
+  const [tripCount, setTripCount] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -102,6 +107,18 @@ export default function TripDetails() {
         }));
 
         setParticipants(formattedParticipants);
+
+        // Get trip count for free users
+        if (subscription?.tier === 'free') {
+          const { count, error: countError } = await supabase
+            .from('trips')
+            .select('*', { count: 'exact', head: true })
+            .eq('owner_id', user.id);
+
+          if (!countError) {
+            setTripCount(count || 0);
+          }
+        }
       } catch (err) {
         console.error('Error fetching trip details:', err);
         setError('Failed to load trip details. Please try again.');
@@ -215,7 +232,15 @@ export default function TripDetails() {
         </div>
 
         <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center relative z-10">
-          <BackButton href="/dashboard" label="Back to Dashboard" className="hover:scale-105 transition-transform" />
+          <div className="flex items-center gap-3">
+            <BackButton href="/dashboard" label="Back to Dashboard" className="hover:scale-105 transition-transform" />
+            {subscription?.tier === 'free' && tripCount !== null && (
+              <div className="flex items-center text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                <InfoIcon className="h-3 w-3 mr-1" />
+                <span>{tripCount}/3 trips</span>
+              </div>
+            )}
+          </div>
 
           {isOwner && (
             <div className="flex space-x-2">
@@ -474,7 +499,10 @@ export default function TripDetails() {
                       <div className="p-2 rounded-md bg-primary/10 mr-3 group-hover:bg-primary/20 transition-colors">
                         <Building2Icon className="h-5 w-5 text-primary" />
                       </div>
-                      <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">Accommodations</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">Accommodations</h3>
+                        <PremiumIndicator feature="accommodations" variant="badge" size="sm" />
+                      </div>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground relative">
                       Manage hotels and places to stay
@@ -491,7 +519,10 @@ export default function TripDetails() {
                       <div className="p-2 rounded-md bg-primary/10 mr-3 group-hover:bg-primary/20 transition-colors">
                         <PlaneTakeoffIcon className="h-5 w-5 text-primary" />
                       </div>
-                      <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">Transportation</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-medium text-foreground group-hover:text-primary transition-colors">Transportation</h3>
+                        <PremiumIndicator feature="transportation" variant="badge" size="sm" />
+                      </div>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground relative">
                       Track flights, trains, and other transport
