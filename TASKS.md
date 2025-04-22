@@ -11,6 +11,14 @@
   - Implemented loading states with skeleton loaders
   - Added visual feedback for user actions
   - Enhanced mobile responsiveness with optimized layouts
+- [x] Improved UI/UX across the entire application
+  - Added consistent icons to section titles (Itinerary, Accommodations, Transportation, Expenses, Chat)
+  - Fixed layout issues in mobile view
+  - Improved header structure and consistency across all pages
+  - Enhanced Trip Details page with better layout and visual feedback
+  - Removed hamburger menu from mobile view for a cleaner interface
+  - Added Dark Mode selector to the Your Profile page for mobile view
+  - Fixed HTML structure issues in accommodations and transportation pages
 
 - [x] Fixed RLS policy for trips table that was causing infinite recursion
   - Issue: The policy was incorrectly comparing `trip_participants.trip_id = trip_participants.id`
@@ -143,19 +151,21 @@
    - [x] Add support for different transportation types
 
 ## Current Focus
-- Implementing expense tracking with splitting functionality
-- Improving overall mobile experience
 - Implementing route planning with Mapbox integration
-- Enhancing transportation management with additional features
+- Enhancing collaboration features with real-time updates
+- Improving overall user experience with animations and transitions
+- Implementing advanced search and filtering functionality
 
 ## Recently Completed
+- Improved UI/UX across the entire application with consistent design
+- Added icons to all section titles for better visual hierarchy
+- Enhanced Trip Details page with better layout and visual feedback
+- Removed hamburger menu from mobile view for a cleaner interface
+- Added Dark Mode selector to the Your Profile page for mobile view
+- Fixed HTML structure issues in accommodations and transportation pages
 - Implemented transportation management with map integration
 - Added support for different transportation types (flight, train, bus, car, ferry)
-- Implemented stops management for multi-leg journeys
-- Added document upload for transportation tickets and bookings
 - Implemented accommodations management with map integration
-- Added document upload and storage for accommodations
+- Added document upload and storage for accommodations and transportation
 - Integrated Mapbox for location visualization
-- Added modern UI for accommodations section with list and map views
-- Fixed map markers to show all accommodations on the map
-- Implemented proper storage bucket for accommodation documents
+- Added modern UI for accommodations and transportation sections with list and map views

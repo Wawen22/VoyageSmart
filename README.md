@@ -166,79 +166,85 @@ trip_media
 
 ## 📅 Roadmap di Sviluppo
 
-### Fase 0: Preparazione e Setup (2-4 settimane)
-- Setup ambiente di sviluppo (ESLint, TypeScript, etc.)
-- Configurazione Supabase e politiche di sicurezza
-- Design dell'architettura frontend e schema DB
-- Prototipazione interfacce chiave
+### Fase 0: Preparazione e Setup ✅
+- ✅ Setup ambiente di sviluppo (ESLint, TypeScript, etc.)
+- ✅ Configurazione Supabase e politiche di sicurezza
+- ✅ Design dell'architettura frontend e schema DB
+- ✅ Prototipazione interfacce chiave
 
-### Fase 1: MVP (3 mesi)
-- **Autenticazione e gestione utenti**
-  - Login/registrazione con Supabase Auth
-  - Profilo utente e preferenze
-  - Sistema recupero password
+### Fase 1: MVP ✅
+- **Autenticazione e gestione utenti** ✅
+  - ✅ Login/registrazione con Supabase Auth
+  - ✅ Profilo utente e preferenze
+  - ✅ Sistema recupero password
 
-- **Creazione e gestione viaggi**
-  - UI creazione nuovo viaggio
-  - Dashboard riassuntiva
-  - Pagina dettaglio viaggio
+- **Creazione e gestione viaggi** ✅
+  - ✅ UI creazione nuovo viaggio
+  - ✅ Dashboard riassuntiva
+  - ✅ Pagina dettaglio viaggio
 
-- **Itinerari base**
-  - Timeline visuale
-  - CRUD per giorni e attività
-  - Sistema gestione orari
-  - Visualizzazione base su mappa
+- **Itinerari base** ✅
+  - ✅ Timeline visuale
+  - ✅ CRUD per giorni e attività
+  - ✅ Sistema gestione orari
+  - ✅ Visualizzazione base su mappa
+  - ✅ Vista calendario
 
-- **Trasporti e alloggi base**
-  - Form creazione/modifica
-  - Visualizzazione in timeline
-  - Storage informazioni prenotazioni
+- **Trasporti e alloggi base** ✅
+  - ✅ Form creazione/modifica
+  - ✅ Visualizzazione in timeline
+  - ✅ Storage informazioni prenotazioni
+  - ✅ Visualizzazione su mappa
+  - ✅ Upload documenti
 
-- **Budget semplice**
-  - Impostazione budget complessivo
-  - Aggiunta spese
-  - Dashboard per categoria
+- **Budget semplice** ✅
+  - ✅ Impostazione budget complessivo
+  - ✅ Aggiunta spese
+  - ✅ Dashboard per categoria
+  - ✅ Divisione spese
 
-- **Collaborazione essenziale**
-  - Sistema inviti
-  - Permessi base
-  - Notifiche per modifiche
+- **Collaborazione essenziale** ✅
+  - ✅ Sistema inviti
+  - ✅ Permessi base
+  - ✅ Notifiche per modifiche
+  - ✅ Chat di gruppo
 
-- **Mobile app base**
-  - Setup React Native
-  - Navigazione principale
-  - Test su iOS/Android
+### Fase 2: Espansione (In corso) 🔄
+- **Miglioramento itinerari** 🔄
+  - ✅ Ottimizzazione percorsi
+  - 🔄 Filtri e ricerca POI
+  - 🔄 Avvisi per pianificazione irrealistica
 
-### Fase 2: Espansione (6 mesi post-lancio)
-- **Miglioramento itinerari**
-  - Ottimizzazione percorsi
-  - Filtri e ricerca POI
-  - Avvisi per pianificazione irrealistica
+- **Gestione spese avanzata** ✅
+  - ✅ Supporto multi-valuta
+  - ✅ OCR per scansione ricevute
+  - ✅ Algoritmo "chi deve cosa a chi"
 
-- **Gestione spese avanzata**
-  - Supporto multi-valuta
-  - OCR per scansione ricevute
-  - Algoritmo "chi deve cosa a chi"
+- **Gestione documenti** ✅
+  - ✅ System upload multipli
+  - ✅ OCR per estrazione dati
+  - 🔄 Reminder documenti necessari
 
-- **Gestione documenti**
-  - System upload multipli
-  - OCR per estrazione dati
-  - Reminder documenti necessari
+- **Collaborazione avanzata** ✅
+  - ✅ Chat di gruppo
+  - ✅ Sistema commenti
+  - 🔄 Polling e voti per decisioni
 
-- **Collaborazione avanzata**
-  - Chat di gruppo
-  - Sistema commenti
-  - Polling e voti per decisioni
+- **Diario di viaggio e media** 🔄
+  - 🔄 Diario giornaliero
+  - 🔄 Galleria foto organizzata
+  - 🔄 Timeline ricordi post-viaggio
 
-- **Diario di viaggio e media**
-  - Diario giornaliero
-  - Galleria foto organizzata
-  - Timeline ricordi post-viaggio
+- **Integrazioni API esterne** 🔄
+  - 🔄 Dati meteo
+  - 🔄 Tassi di cambio
+  - 🔄 Informazioni trasporti
 
-- **Integrazioni API esterne**
-  - Dati meteo
-  - Tassi di cambio
-  - Informazioni trasporti
+- **UI/UX Avanzata** ✅
+  - ✅ Tema chiaro/scuro
+  - ✅ Animazioni e transizioni
+  - ✅ Layout responsive ottimizzato
+  - ✅ Feedback visivo migliorato
 
 ### Fase 3: Funzionalità Avanzate (12 mesi post-lancio)
 - **Integrazione IA**
