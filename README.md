@@ -133,11 +133,11 @@ trip_media
 - **Gestione dati**: Archiviazione, modifica e condivisione informazioni viaggio
 
 ### 2. Pianificazione Itinerari
-- **Trasporti**: Registrazione voli, treni, auto a noleggio, trasferimenti, tracking in tempo reale
+- **Trasporti**: Registrazione voli, treni, auto a noleggio, trasferimenti, gestione soste intermedie, caricamento documenti
 - **Alloggi**: Gestione prenotazioni, dettagli contatti, visualizzazione su mappa, caricamento documenti
 - **Attività**: Pianificazione visite ed eventi, sistema di priorità, gestione prenotazioni
 - **Timeline giornaliera**: Vista dettagliata, gestione orari, avvisi per sovrapposizioni
-- **Visualizzazione mappa**: Mappa interattiva con tutti gli alloggi, attività e punti di interesse
+- **Visualizzazione mappa**: Mappa interattiva con tutti gli alloggi, trasporti, attività e punti di interesse
 
 ### 3. Gestione Budget e Spese
 - **Pianificazione**: Budget complessivo e per categorie, previsioni costi

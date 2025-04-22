@@ -134,14 +134,25 @@
    - [x] Create modern and user-friendly UI for accommodations
    - [x] Fix map markers to show all accommodations
    - [x] Implement proper storage bucket for documents
+9. [x] Transportation management
+   - [x] Create transportation section with CRUD operations
+   - [x] Implement file upload for transportation documents
+   - [x] Add map integration for transportation routes
+   - [x] Create modern and user-friendly UI for transportation
+   - [x] Implement stops management for multi-leg journeys
+   - [x] Add support for different transportation types
 
 ## Current Focus
-- Implementing transportation management
-- Enhancing expense tracking with splitting functionality
+- Implementing expense tracking with splitting functionality
 - Improving overall mobile experience
 - Implementing route planning with Mapbox integration
+- Enhancing transportation management with additional features
 
 ## Recently Completed
+- Implemented transportation management with map integration
+- Added support for different transportation types (flight, train, bus, car, ferry)
+- Implemented stops management for multi-leg journeys
+- Added document upload for transportation tickets and bookings
 - Implemented accommodations management with map integration
 - Added document upload and storage for accommodations
 - Integrated Mapbox for location visualization
