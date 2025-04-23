@@ -3,11 +3,18 @@ import { supabase } from './supabase';
 
 export type SubscriptionTier = 'free' | 'premium' | 'ai';
 
+export type SubscriptionStatus = 'active' | 'inactive' | 'canceled' | 'past_due' | 'trialing';
+
 export type Subscription = {
   id: string;
   tier: SubscriptionTier;
-  status: 'active' | 'inactive' | 'canceled';
+  status: SubscriptionStatus;
   validUntil: Date;
+  currentPeriodEnd?: Date;
+  cancelAtPeriodEnd?: boolean;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  paymentMethod?: string;
 };
 
 export type SubscriptionState = {
@@ -17,7 +24,8 @@ export type SubscriptionState = {
   isSubscribed: (tier: SubscriptionTier) => boolean;
   canCreateTrip: () => Promise<boolean>;
   canAccessFeature: (feature: 'accommodations' | 'transportation') => boolean;
-  upgradeSubscription: () => void;
+  upgradeSubscription: (tier: SubscriptionTier) => void;
+  manageSubscription: () => void;
 };
 
 export const SubscriptionContext = createContext<SubscriptionState | undefined>(undefined);
@@ -32,11 +40,11 @@ export function useSubscription() {
 
 export async function getUserSubscription(userId: string): Promise<Subscription | null> {
   try {
+    console.log('Getting subscription for user:', userId);
     const { data, error } = await supabase
       .from('user_subscriptions')
       .select('*')
       .eq('user_id', userId)
-      .eq('status', 'active')
       .single();
 
     if (error) {
@@ -45,14 +53,20 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
     }
 
     if (!data) {
+      console.log('No subscription found for user:', userId);
       return null;
     }
 
+    console.log('Subscription found:', data);
     return {
       id: data.id,
       tier: data.tier as SubscriptionTier,
-      status: data.status,
+      status: data.status as SubscriptionStatus,
       validUntil: new Date(data.valid_until),
+      currentPeriodEnd: data.current_period_end ? new Date(data.current_period_end) : undefined,
+      cancelAtPeriodEnd: data.cancel_at_period_end,
+      stripeCustomerId: data.stripe_customer_id,
+      stripeSubscriptionId: data.stripe_subscription_id,
     };
   } catch (error) {
     console.error('Error in getUserSubscription:', error);
@@ -81,6 +95,7 @@ export async function getUserTripCount(userId: string): Promise<number> {
 
 export async function createDefaultSubscription(userId: string): Promise<void> {
   try {
+    console.log('Creating default subscription for user:', userId);
     // Check if user already has a subscription
     const { data: existingSubscription, error: checkError } = await supabase
       .from('user_subscriptions')
@@ -95,23 +110,31 @@ export async function createDefaultSubscription(userId: string): Promise<void> {
 
     // If user already has a subscription, don't create a new one
     if (existingSubscription) {
+      console.log('User already has a subscription:', existingSubscription);
       return;
     }
 
+    console.log('No existing subscription found, creating a new one');
     // Create a free subscription for the user
-    const { error } = await supabase
+    const validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(); // 1 year from now
+    console.log('Setting valid_until to:', validUntil);
+
+    const { data, error } = await supabase
       .from('user_subscriptions')
       .insert([
         {
           user_id: userId,
           tier: 'free',
           status: 'active',
-          valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
+          valid_until: validUntil,
         }
-      ]);
+      ])
+      .select();
 
     if (error) {
       console.error('Error creating default subscription:', error);
+    } else {
+      console.log('Default subscription created successfully:', data);
     }
   } catch (error) {
     console.error('Error in createDefaultSubscription:', error);

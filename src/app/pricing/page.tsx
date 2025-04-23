@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import PageLayout from '@/components/layout/PageLayout';
@@ -9,21 +9,45 @@ import { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckIcon, XIcon, SparklesIcon, RocketIcon, StarIcon } from 'lucide-react';
+import DirectCheckoutButton from '@/components/subscription/DirectCheckoutButton';
+import CustomerPortalButton from '@/components/subscription/CustomerPortalButton';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function PricingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { subscription, isSubscribed } = useSubscription();
+  const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<'free' | 'premium' | 'ai'>(
     subscription?.tier || 'free'
   );
 
-  const handleUpgrade = async (plan: 'free' | 'premium' | 'ai') => {
-    // For now, just simulate upgrading by redirecting to dashboard
-    // In a real implementation, this would integrate with a payment processor
-    alert(`Subscription upgraded to ${plan} plan! This is a simulation.`);
-    router.push('/dashboard');
-  };
+  // Check for success or canceled parameters
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+    const tier = searchParams.get('tier');
+
+    if (success) {
+      toast({
+        title: 'Subscription successful!',
+        description: 'Your subscription has been activated.',
+        variant: 'default',
+      });
+    } else if (canceled) {
+      toast({
+        title: 'Subscription canceled',
+        description: 'Your subscription process was canceled.',
+        variant: 'destructive',
+      });
+    }
+
+    // Set the selected plan from URL parameter
+    if (tier && (tier === 'free' || tier === 'premium' || tier === 'ai')) {
+      setSelectedPlan(tier);
+    }
+  }, [searchParams, toast]);
 
   const PricingFeature = ({ included, children }: { included: boolean; children: React.ReactNode }) => (
     <div className="flex items-center space-x-2">
@@ -80,8 +104,8 @@ export default function PricingPage() {
                 {isSubscribed('free') && !isSubscribed('premium') ? (
                   <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
                 ) : (
-                  <Button 
-                    variant={selectedPlan === 'free' ? 'default' : 'outline'} 
+                  <Button
+                    variant={selectedPlan === 'free' ? 'default' : 'outline'}
                     className="w-full"
                     onClick={() => setSelectedPlan('free')}
                     disabled={isSubscribed('free') && !isSubscribed('premium')}
@@ -121,8 +145,8 @@ export default function PricingPage() {
                 {isSubscribed('premium') ? (
                   <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
                 ) : (
-                  <Button 
-                    variant={selectedPlan === 'premium' ? 'default' : 'outline'} 
+                  <Button
+                    variant={selectedPlan === 'premium' ? 'default' : 'outline'}
                     className="w-full"
                     onClick={() => setSelectedPlan('premium')}
                   >
@@ -162,17 +186,23 @@ export default function PricingPage() {
 
           {selectedPlan && selectedPlan !== subscription?.tier && (
             <div className="flex justify-center mt-8">
-              <Button 
-                size="lg" 
-                onClick={() => handleUpgrade(selectedPlan)}
-                className="animate-pulse-once"
-              >
-                {subscription?.tier === 'free' && selectedPlan === 'premium'
-                  ? 'Upgrade to Premium'
-                  : subscription?.tier === 'premium' && selectedPlan === 'free'
-                  ? 'Downgrade to Free'
-                  : `Switch to ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)}`}
-              </Button>
+              {selectedPlan === 'free' && isSubscribed('premium') ? (
+                <CustomerPortalButton className="px-8">
+                  Downgrade to Free
+                </CustomerPortalButton>
+              ) : selectedPlan === 'premium' && !isSubscribed('premium') ? (
+                <DirectCheckoutButton tier="premium" className="px-8">
+                  Upgrade to Premium
+                </DirectCheckoutButton>
+              ) : null}
+            </div>
+          )}
+
+          {subscription?.stripeCustomerId && (
+            <div className="flex justify-center mt-4">
+              <CustomerPortalButton variant="outline">
+                Manage Current Subscription
+              </CustomerPortalButton>
             </div>
           )}
 
@@ -190,6 +220,10 @@ export default function PricingPage() {
               <div>
                 <h4 className="font-medium">When will the AI Assistant plan be available?</h4>
                 <p className="text-muted-foreground">We're working hard to bring AI features to VoyageSmart. Sign up for our newsletter to be the first to know when it launches.</p>
+              </div>
+              <div>
+                <h4 className="font-medium">How do I cancel my subscription?</h4>
+                <p className="text-muted-foreground">You can cancel your subscription at any time from your account settings. After cancellation, you'll continue to have access to premium features until the end of your current billing period.</p>
               </div>
             </div>
           </div>

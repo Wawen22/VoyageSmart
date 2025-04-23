@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
@@ -10,7 +10,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatCurrency } from '@/lib/utils';
+import { useToast } from '@/components/ui/use-toast';
+import DirectCheckoutButton from '@/components/subscription/DirectCheckoutButton';
+import CustomerPortalButton from '@/components/subscription/CustomerPortalButton';
 import {
   CheckIcon,
   XIcon,
@@ -26,9 +29,31 @@ import {
 
 export default function SubscriptionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
-  const { subscription, isSubscribed, upgradeSubscription } = useSubscription();
+  const { subscription, isSubscribed, upgradeSubscription, manageSubscription } = useSubscription();
   const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
+
+  // Check for success or canceled parameters
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const canceled = searchParams.get('canceled');
+
+    if (success) {
+      toast({
+        title: 'Subscription successful!',
+        description: 'Your subscription has been activated.',
+        variant: 'default',
+      });
+    } else if (canceled) {
+      toast({
+        title: 'Subscription canceled',
+        description: 'Your subscription process was canceled.',
+        variant: 'destructive',
+      });
+    }
+  }, [searchParams, toast]);
 
   if (!user) {
     return (
@@ -37,11 +62,6 @@ export default function SubscriptionPage() {
       </div>
     );
   }
-
-  const handleUpgrade = async (plan: 'free' | 'premium' | 'ai') => {
-    // For now, just simulate upgrading by redirecting to pricing page
-    router.push('/pricing');
-  };
 
   const PricingFeature = ({ included, children }: { included: boolean; children: React.ReactNode }) => (
     <div className="flex items-center space-x-2">
@@ -128,12 +148,20 @@ export default function SubscriptionPage() {
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-muted-foreground mb-2">Valid Until</h3>
-                          <p className="text-lg font-medium">{formatDate(subscription.validUntil.toISOString())}</p>
+                          <p className="text-lg font-medium">
+                            {subscription.currentPeriodEnd
+                              ? formatDate(subscription.currentPeriodEnd.toISOString())
+                              : formatDate(subscription.validUntil.toISOString())}
+                          </p>
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-muted-foreground mb-2">Next Payment</h3>
                           <p className="text-lg font-medium">
-                            {subscription.tier === 'free' ? 'No payment required' : formatDate(subscription.validUntil.toISOString())}
+                            {subscription.tier === 'free'
+                              ? 'No payment required'
+                              : subscription.currentPeriodEnd
+                                ? formatDate(subscription.currentPeriodEnd.toISOString())
+                                : formatDate(subscription.validUntil.toISOString())}
                           </p>
                         </div>
                       </div>
@@ -158,13 +186,13 @@ export default function SubscriptionPage() {
                 </CardContent>
                 <CardFooter className="flex flex-col sm:flex-row gap-3">
                   {subscription?.tier === 'free' ? (
-                    <Button onClick={() => handleUpgrade('premium')} className="w-full sm:w-auto">
+                    <DirectCheckoutButton tier="premium" className="w-full sm:w-auto">
                       Upgrade to Premium
-                    </Button>
+                    </DirectCheckoutButton>
                   ) : (
-                    <Button variant="outline" onClick={() => handleUpgrade('free')} className="w-full sm:w-auto">
+                    <CustomerPortalButton className="w-full sm:w-auto">
                       Manage Subscription
-                    </Button>
+                    </CustomerPortalButton>
                   )}
                   <Button variant="outline" asChild className="w-full sm:w-auto">
                     <Link href="/pricing">View All Plans</Link>
@@ -244,13 +272,12 @@ export default function SubscriptionPage() {
                     {subscription?.tier === 'free' ? (
                       <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
                     ) : (
-                      <Button 
-                        variant="outline" 
+                      <CustomerPortalButton
+                        variant="outline"
                         className="w-full"
-                        onClick={() => handleUpgrade('free')}
                       >
                         Downgrade
-                      </Button>
+                      </CustomerPortalButton>
                     )}
                   </CardFooter>
                 </Card>
@@ -284,12 +311,12 @@ export default function SubscriptionPage() {
                     {subscription?.tier === 'premium' ? (
                       <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
                     ) : (
-                      <Button 
+                      <DirectCheckoutButton
+                        tier="premium"
                         className="w-full"
-                        onClick={() => handleUpgrade('premium')}
                       >
                         Upgrade
-                      </Button>
+                      </DirectCheckoutButton>
                     )}
                   </CardFooter>
                 </Card>
@@ -336,14 +363,42 @@ export default function SubscriptionPage() {
                   {subscription?.tier === 'free' ? (
                     <div className="text-center py-6">
                       <p className="text-muted-foreground">No payment history available for Free plan</p>
-                      <Button onClick={() => handleUpgrade('premium')} className="mt-4">
+                      <DirectCheckoutButton tier="premium" className="mt-4">
                         Upgrade to Premium
-                      </Button>
+                      </DirectCheckoutButton>
+                    </div>
+                  ) : subscription?.stripeSubscriptionId ? (
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-4 p-4 border border-border rounded-lg">
+                        <div className="bg-primary/10 p-2 rounded-full">
+                          <CreditCardIcon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium">Premium Subscription</p>
+                              <p className="text-sm text-muted-foreground">
+                                {subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd.toISOString()) : 'Active'}
+                              </p>
+                            </div>
+                            <p className="font-medium">{formatCurrency(4.99, 'EUR')}</p>
+                          </div>
+                          <div className="mt-2 flex justify-between items-center">
+                            <p className="text-sm text-muted-foreground">Next billing date: {subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd.toISOString()) : 'N/A'}</p>
+                            <Badge variant="outline" className="text-xs">{subscription.status}</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-center mt-4">
+                        <CustomerPortalButton>
+                          View Full Billing History
+                        </CustomerPortalButton>
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-6">
-                      <p className="text-muted-foreground">Payment history will be available once Stripe integration is complete</p>
-                      <p className="text-xs text-muted-foreground mt-2">Coming soon</p>
+                      <p className="text-muted-foreground">No payment history available yet</p>
+                      <p className="text-xs text-muted-foreground mt-2">Your payment history will appear here after your first payment</p>
                     </div>
                   )}
                 </CardContent>

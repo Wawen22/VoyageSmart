@@ -29,16 +29,16 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
       try {
         setLoading(true);
-        
+
         // Get user's subscription
         const userSubscription = await getUserSubscription(user.id);
-        
+
         if (userSubscription) {
           setSubscription(userSubscription);
         } else {
           // Create a default free subscription if none exists
           await createDefaultSubscription(user.id);
-          
+
           // Fetch the newly created subscription
           const newSubscription = await getUserSubscription(user.id);
           setSubscription(newSubscription);
@@ -56,29 +56,29 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const isSubscribed = (tier: SubscriptionTier): boolean => {
     if (!subscription) return false;
-    
+
     // If user has premium, they have access to all tiers below it
     if (subscription.tier === 'premium' && (tier === 'premium' || tier === 'free')) {
       return true;
     }
-    
+
     // If user has AI tier, they have access to all tiers
     if (subscription.tier === 'ai') {
       return true;
     }
-    
+
     // Otherwise, check if the user's tier matches the requested tier
     return subscription.tier === tier;
   };
 
   const canCreateTrip = async (): Promise<boolean> => {
     if (!user) return false;
-    
+
     // Premium users can create unlimited trips
     if (isSubscribed('premium')) {
       return true;
     }
-    
+
     // Free users are limited to 3 trips
     const tripCount = await getUserTripCount(user.id);
     return tripCount < 3;
@@ -89,9 +89,39 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     return isSubscribed('premium');
   };
 
-  const upgradeSubscription = () => {
-    // Navigate to pricing page
-    router.push('/pricing');
+  const upgradeSubscription = (tier: SubscriptionTier) => {
+    // Navigate to pricing page with selected tier
+    router.push(`/pricing?tier=${tier}`);
+  };
+
+  const manageSubscription = async () => {
+    if (!user || !subscription?.stripeCustomerId) {
+      router.push('/subscription');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          returnUrl: `${window.location.origin}/subscription`,
+        }),
+      });
+
+      const { url, error } = await response.json();
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      // Redirect to the customer portal
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error accessing customer portal:', error);
+    }
   };
 
   return (
@@ -104,6 +134,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         canCreateTrip,
         canAccessFeature,
         upgradeSubscription,
+        manageSubscription,
       }}
     >
       {children}
