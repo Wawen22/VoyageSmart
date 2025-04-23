@@ -9,7 +9,10 @@ import {
   SubscriptionTier,
   getUserSubscription,
   getUserTripCount,
-  createDefaultSubscription
+  createDefaultSubscription,
+  initiateCheckout,
+  cancelStripeSubscription,
+  getSubscriptionHistory
 } from '@/lib/subscription';
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
@@ -19,39 +22,70 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchSubscription = async () => {
-      if (!user) {
-        setSubscription(null);
-        setLoading(false);
-        return;
+  // Funzione per recuperare la sottoscrizione dell'utente
+  const fetchSubscription = async () => {
+    if (!user) {
+      setSubscription(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Get user's subscription
+      // La funzione getUserSubscription ora gestisce internamente la creazione
+      // di una sottoscrizione predefinita se necessario
+      const userSubscription = await getUserSubscription(user.id);
+
+      if (userSubscription) {
+        console.log('Subscription found for user:', userSubscription);
+        setSubscription(userSubscription);
+      } else {
+        console.log('No subscription found for user after attempt to create one');
+        // Imposta una sottoscrizione predefinita in memoria per evitare errori
+        setSubscription({
+          id: 'temp-' + Date.now(),
+          tier: 'free',
+          status: 'active',
+          validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        });
       }
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+      setError(error as Error);
 
-      try {
-        setLoading(true);
+      // Imposta una sottoscrizione predefinita in memoria per evitare errori
+      setSubscription({
+        id: 'temp-' + Date.now(),
+        tier: 'free',
+        status: 'active',
+        validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // Get user's subscription
-        const userSubscription = await getUserSubscription(user.id);
+  // Carica la sottoscrizione all'avvio e quando l'utente cambia
+  useEffect(() => {
+    fetchSubscription();
+  }, [user]);
 
-        if (userSubscription) {
-          setSubscription(userSubscription);
-        } else {
-          // Create a default free subscription if none exists
-          await createDefaultSubscription(user.id);
-
-          // Fetch the newly created subscription
-          const newSubscription = await getUserSubscription(user.id);
-          setSubscription(newSubscription);
-        }
-      } catch (error) {
-        console.error('Error fetching subscription:', error);
-        setError(error as Error);
-      } finally {
-        setLoading(false);
+  // Aggiorna la sottoscrizione quando l'utente torna alla pagina
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user) {
+        console.log('Window focused, refreshing subscription data');
+        fetchSubscription();
       }
     };
 
-    fetchSubscription();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [user]);
 
   const isSubscribed = (tier: SubscriptionTier): boolean => {
@@ -89,38 +123,85 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     return isSubscribed('premium');
   };
 
-  const upgradeSubscription = (tier: SubscriptionTier) => {
-    // Navigate to pricing page with selected tier
-    router.push(`/pricing?tier=${tier}`);
-  };
+  const upgradeSubscription = async (tier: SubscriptionTier): Promise<void> => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
 
-  const manageSubscription = async () => {
-    if (!user || !subscription?.stripeCustomerId) {
-      router.push('/subscription');
+    if (tier === 'free') {
+      router.push('/dashboard');
       return;
     }
 
     try {
-      const response = await fetch('/api/stripe/portal', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          returnUrl: `${window.location.origin}/subscription`,
-        }),
-      });
+      const checkoutUrl = await initiateCheckout(tier);
 
-      const { url, error } = await response.json();
+      if (checkoutUrl) {
+        // Prima di reindirizzare, aggiorna lo stato locale per indicare che è in corso un upgrade
+        setSubscription(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            pendingUpgrade: true,
+            pendingTier: tier
+          };
+        });
 
-      if (error) {
-        throw new Error(error);
+        window.location.href = checkoutUrl;
+      } else {
+        throw new Error('Failed to create checkout session');
       }
-
-      // Redirect to the customer portal
-      window.location.href = url;
     } catch (error) {
-      console.error('Error accessing customer portal:', error);
+      console.error('Error upgrading subscription:', error);
+      setError(error as Error);
+    }
+  };
+
+  const cancelSubscription = async (): Promise<void> => {
+    if (!user || !subscription?.stripeSubscriptionId) {
+      return;
+    }
+
+    try {
+      const success = await cancelStripeSubscription(subscription.stripeSubscriptionId);
+
+      if (success) {
+        // Aggiorna lo stato locale
+        setSubscription(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            cancelAtPeriodEnd: true,
+          };
+        });
+      } else {
+        throw new Error('Failed to cancel subscription');
+      }
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      setError(error as Error);
+    }
+  };
+
+  const fetchSubscriptionHistory = async (): Promise<any[]> => {
+    if (!user) return [];
+
+    try {
+      const history = await getSubscriptionHistory(user.id);
+      console.log('Fetched subscription history:', history);
+      return history;
+    } catch (error) {
+      console.error('Error fetching subscription history:', error);
+      return [];
+    }
+  };
+
+  // Funzione per forzare il refresh dei dati della sottoscrizione
+  const refreshSubscription = async (): Promise<void> => {
+    if (user) {
+      console.log('Manually refreshing subscription data');
+      await fetchSubscription();
     }
   };
 
@@ -134,7 +215,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         canCreateTrip,
         canAccessFeature,
         upgradeSubscription,
-        manageSubscription,
+        cancelSubscription,
+        getSubscriptionHistory: fetchSubscriptionHistory,
+        refreshSubscription,
       }}
     >
       {children}

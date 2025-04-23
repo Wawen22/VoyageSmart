@@ -13,6 +13,7 @@
 - [Metriche di Successo](#metriche-di-successo)
 - [Standard di Codice](#standard-di-codice)
 - [Setup del Progetto](#setup-del-progetto)
+- [Integrazione con Stripe](#integrazione-con-stripe)
 - [Licenza](#licenza)
 
 ## 📱 Panoramica
@@ -359,7 +360,7 @@ trip_media
    ```bash
    # Crea .env.local
    cp .env.example .env.local
-   # Modifica con le tue credenziali Supabase
+   # Modifica con le tue credenziali Supabase e Stripe
    ```
 
 4. **Esecuzione migrazioni**
@@ -370,11 +371,66 @@ trip_media
 5. **Avvio applicazione**
    ```bash
    # Web
-   npm run dev
+   npm run dev --port=3000
+
+   # Stripe CLI per webhook (in un altro terminale)
+   stripe listen --forward-to http://localhost:3000/api/stripe/webhook
 
    # Mobile (richiede Expo CLI)
    npm run mobile
    ```
+
+## 💳 Integrazione con Stripe
+
+VoyageSmart utilizza Stripe per gestire i pagamenti e le sottoscrizioni. Ecco come funziona l'integrazione:
+
+### Setup Stripe
+
+1. **Configurazione delle variabili d'ambiente**
+   ```
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key
+   STRIPE_SECRET_KEY=sk_test_your_key
+   STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+   NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID=price_your_premium_price_id
+   NEXT_PUBLIC_STRIPE_AI_PRICE_ID=price_your_ai_price_id
+   ```
+
+2. **Avvio del listener Stripe per i webhook**
+   ```bash
+   stripe listen --forward-to http://localhost:3000/api/stripe/webhook
+   ```
+
+### Flusso di pagamento
+
+1. L'utente clicca su "Upgrade to Premium" nella pagina di gestione sottoscrizioni
+2. L'app crea una sessione di checkout con Stripe
+3. L'utente viene reindirizzato al form di pagamento di Stripe
+4. Dopo il pagamento, l'utente viene reindirizzato alla pagina di successo
+5. Stripe invia un webhook all'endpoint `/api/stripe/webhook`
+6. L'app aggiorna lo stato della sottoscrizione dell'utente nel database
+
+### Test dei pagamenti
+
+Per testare i pagamenti in ambiente di sviluppo, usa le carte di test di Stripe:
+
+- **Numero carta**: 4242 4242 4242 4242
+- **Data di scadenza**: Qualsiasi data futura
+- **CVC**: Qualsiasi 3 cifre
+- **Nome**: Qualsiasi nome
+- **Indirizzo**: Qualsiasi indirizzo
+
+### Debugging
+
+Per testare e debuggare l'integrazione con Stripe, puoi utilizzare l'endpoint di test:
+
+```
+http://localhost:3000/subscription
+```
+
+Scorri fino in fondo alla pagina per trovare il componente di test che ti permette di:
+- Verificare lo stato attuale della sottoscrizione
+- Simulare un upgrade a Premium
+- Eseguire test di debug per verificare le policy RLS e l'autenticazione
 
 ## 📄 Licenza
 

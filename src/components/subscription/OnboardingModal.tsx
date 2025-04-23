@@ -43,7 +43,7 @@ export default function OnboardingModal() {
   const handleUpgrade = () => {
     setIsOpen(false);
     localStorage.setItem('hasSeenOnboarding', 'true');
-    upgradeSubscription();
+    upgradeSubscription('premium');
   };
 
   const handleExplore = () => {

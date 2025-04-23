@@ -1,0 +1,349 @@
+[2025-04-23T16:48:02.298Z] Test webhook received
+[2025-04-23T16:48:02.323Z] Test webhook - Action: check for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "action": "check"
+}
+[2025-04-23T16:48:02.438Z] User subscription not found
+[2025-04-23T16:48:02.534Z] Error creating default subscription: new row violates row-level security policy for table "user_subscriptions": {
+  "code": "42501",
+  "details": null,
+  "hint": null,
+  "message": "new row violates row-level security policy for table \"user_subscriptions\""
+}
+[2025-04-23T16:48:28.263Z] Test webhook received
+[2025-04-23T16:48:28.264Z] Test webhook - Action: update for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "premium",
+  "action": "update"
+}
+[2025-04-23T16:48:28.401Z] User subscription not found
+[2025-04-23T16:48:28.486Z] Error creating default subscription: new row violates row-level security policy for table "user_subscriptions": {
+  "code": "42501",
+  "details": null,
+  "hint": null,
+  "message": "new row violates row-level security policy for table \"user_subscriptions\""
+}
+[2025-04-23T16:58:21.885Z] Test webhook received
+[2025-04-23T16:58:21.886Z] Test webhook - Action: check for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "action": "check"
+}
+[2025-04-23T16:58:21.992Z] User subscription not found
+[2025-04-23T16:58:22.109Z] Error creating default subscription: new row violates row-level security policy for table "user_subscriptions": {
+  "code": "42501",
+  "details": null,
+  "hint": null,
+  "message": "new row violates row-level security policy for table \"user_subscriptions\""
+}
+[2025-04-23T17:00:56.350Z] Test webhook received
+[2025-04-23T17:00:56.351Z] Test webhook - Action: check for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "action": "check"
+}
+[2025-04-23T17:00:56.645Z] Current subscription state for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+  "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2026-04-23T10:29:54.249+00:00",
+  "created_at": "2025-04-23T10:31:07.65444+00:00",
+  "updated_at": "2025-04-23T10:31:07.65444+00:00",
+  "stripe_customer_id": null,
+  "stripe_subscription_id": null,
+  "cancel_at_period_end": false,
+  "current_period_end": null
+}
+[2025-04-23T17:00:56.645Z] Subscription history for user 3cd16c84-225a-4a07-aa44-e51699d139b2: []
+[2025-04-23T17:01:40.665Z] Test webhook received
+[2025-04-23T17:01:40.666Z] Test webhook - Action: update for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "premium",
+  "action": "update"
+}
+[2025-04-23T17:01:40.804Z] Updated subscription for user 3cd16c84-225a-4a07-aa44-e51699d139b2: [
+  {
+    "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+    "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+    "tier": "premium",
+    "status": "active",
+    "valid_until": "2026-04-23T10:29:54.249+00:00",
+    "created_at": "2025-04-23T10:31:07.65444+00:00",
+    "updated_at": "2025-04-23T10:31:07.65444+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-05-23T17:01:40.752+00:00"
+  }
+]
+[2025-04-23T17:01:40.864Z] Current subscription state after update: {
+  "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+  "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T10:29:54.249+00:00",
+  "created_at": "2025-04-23T10:31:07.65444+00:00",
+  "updated_at": "2025-04-23T10:31:07.65444+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T17:01:40.752+00:00"
+}
+[2025-04-23T17:01:40.917Z] Error creating subscription history: new row violates row-level security policy for table "subscription_history": {
+  "code": "42501",
+  "details": null,
+  "hint": null,
+  "message": "new row violates row-level security policy for table \"subscription_history\""
+}
+[2025-04-23T17:02:30.424Z] Test webhook received
+[2025-04-23T17:02:30.425Z] Test webhook - Action: update for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "premium",
+  "action": "update"
+}
+[2025-04-23T17:02:30.587Z] Updated subscription for user 3cd16c84-225a-4a07-aa44-e51699d139b2: [
+  {
+    "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+    "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+    "tier": "premium",
+    "status": "active",
+    "valid_until": "2026-04-23T10:29:54.249+00:00",
+    "created_at": "2025-04-23T10:31:07.65444+00:00",
+    "updated_at": "2025-04-23T10:31:07.65444+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-05-23T17:02:30.525+00:00"
+  }
+]
+[2025-04-23T17:02:30.652Z] Current subscription state after update: {
+  "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+  "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T10:29:54.249+00:00",
+  "created_at": "2025-04-23T10:31:07.65444+00:00",
+  "updated_at": "2025-04-23T10:31:07.65444+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T17:02:30.525+00:00"
+}
+[2025-04-23T17:02:30.750Z] Test webhook - Successfully updated user 3cd16c84-225a-4a07-aa44-e51699d139b2 to tier premium
+[2025-04-23T17:04:43.808Z] Test webhook received
+[2025-04-23T17:04:43.809Z] Test webhook - Action: update for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "free",
+  "action": "update"
+}
+[2025-04-23T17:04:43.960Z] Updated subscription for user 3cd16c84-225a-4a07-aa44-e51699d139b2: [
+  {
+    "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+    "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+    "tier": "free",
+    "status": "active",
+    "valid_until": "2026-04-23T10:29:54.249+00:00",
+    "created_at": "2025-04-23T10:31:07.65444+00:00",
+    "updated_at": "2025-04-23T10:31:07.65444+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-05-23T17:04:43.904+00:00"
+  }
+]
+[2025-04-23T17:04:44.013Z] Current subscription state after update: {
+  "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+  "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2026-04-23T10:29:54.249+00:00",
+  "created_at": "2025-04-23T10:31:07.65444+00:00",
+  "updated_at": "2025-04-23T10:31:07.65444+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T17:04:43.904+00:00"
+}
+[2025-04-23T17:04:44.071Z] Test webhook - Successfully updated user 3cd16c84-225a-4a07-aa44-e51699d139b2 to tier free
+[2025-04-23T17:46:06.053Z] Test webhook received
+[2025-04-23T17:46:06.055Z] Test webhook - Action: check for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "action": "check"
+}
+[2025-04-23T17:46:06.243Z] Current subscription state for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+  "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T10:29:54.249+00:00",
+  "created_at": "2025-04-23T10:31:07.65444+00:00",
+  "updated_at": "2025-04-23T17:14:43.122+00:00",
+  "stripe_customer_id": "cus_SBULVn5L1vvpJc",
+  "stripe_subscription_id": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T17:46:53+00:00"
+}
+[2025-04-23T17:46:06.243Z] Subscription history for user 3cd16c84-225a-4a07-aa44-e51699d139b2: [
+  {
+    "id": "19efd6b6-21b9-4f9d-819a-cc4d33655ef6",
+    "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+    "event_type": "checkout_completed",
+    "tier": null,
+    "status": null,
+    "stripe_subscription_id": null,
+    "stripe_customer_id": "cus_SBULVn5L1vvpJc",
+    "event_timestamp": "2025-04-23T17:46:57.963759+00:00",
+    "details": {
+      "id": "cs_test_a1Td6vI4thj0eoVzNf0rWWGSKs18rw38pWunxz1RvKbEfu4HBFlL4lYom1",
+      "url": null,
+      "mode": "subscription",
+      "locale": null,
+      "object": "checkout.session",
+      "status": "complete",
+      "consent": null,
+      "created": 1745430378,
+      "invoice": "in_1RH7NqQ4CpdRSiZ74Tx5Fbv6",
+      "ui_mode": "hosted",
+      "currency": "eur",
+      "customer": "cus_SBULVn5L1vvpJc",
+      "livemode": false,
+      "metadata": {
+        "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2"
+      },
+      "discounts": [],
+      "cancel_url": "http://localhost:3000/subscription?canceled=true",
+      "expires_at": 1745516777,
+      "custom_text": {
+        "submit": null,
+        "after_submit": null,
+        "shipping_address": null,
+        "terms_of_service_acceptance": null
+      },
+      "permissions": null,
+      "submit_type": null,
+      "success_url": "http://localhost:3000/subscription?success=true?session_id={CHECKOUT_SESSION_ID}",
+      "amount_total": 499,
+      "payment_link": null,
+      "setup_intent": null,
+      "subscription": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+      "automatic_tax": {
+        "status": null,
+        "enabled": false,
+        "provider": null,
+        "liability": null
+      },
+      "client_secret": null,
+      "custom_fields": [],
+      "shipping_cost": null,
+      "total_details": {
+        "amount_tax": 0,
+        "amount_discount": 0,
+        "amount_shipping": 0
+      },
+      "customer_email": null,
+      "payment_intent": null,
+      "payment_status": "paid",
+      "recovered_from": null,
+      "wallet_options": null,
+      "amount_subtotal": 499,
+      "adaptive_pricing": null,
+      "after_expiration": null,
+      "customer_details": {
+        "name": "Test 1",
+        "email": "r.nebili22@gmail.com",
+        "phone": null,
+        "address": {
+          "city": null,
+          "line1": null,
+          "line2": null,
+          "state": null,
+          "country": "IT",
+          "postal_code": null
+        },
+        "tax_ids": [],
+        "tax_exempt": "none"
+      },
+      "invoice_creation": null,
+      "shipping_options": [],
+      "customer_creation": null,
+      "consent_collection": null,
+      "client_reference_id": null,
+      "currency_conversion": null,
+      "payment_method_types": [
+        "card",
+        "link"
+      ],
+      "allow_promotion_codes": null,
+      "collected_information": {
+        "shipping_details": null
+      },
+      "payment_method_options": {
+        "card": {
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "phone_number_collection": {
+        "enabled": false
+      },
+      "payment_method_collection": "always",
+      "billing_address_collection": null,
+      "shipping_address_collection": null,
+      "saved_payment_method_options": {
+        "payment_method_save": null,
+        "payment_method_remove": null,
+        "allow_redisplay_filters": [
+          "always"
+        ]
+      },
+      "payment_method_configuration_details": {
+        "id": "pmc_1RGq3OQ4CpdRSiZ7RDgIRCll",
+        "parent": null
+      }
+    },
+    "created_at": "2025-04-23T17:46:57.963759+00:00"
+  },
+  {
+    "id": "389a02eb-26a0-48af-bbd5-a4c5401d31d1",
+    "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+    "event_type": "debug_test",
+    "tier": "free",
+    "status": "active",
+    "stripe_subscription_id": null,
+    "stripe_customer_id": null,
+    "event_timestamp": "2025-04-23T17:15:57.42947+00:00",
+    "details": {
+      "test": true,
+      "timestamp": "2025-04-23T17:14:43.190Z"
+    },
+    "created_at": "2025-04-23T17:15:57.42947+00:00"
+  },
+  {
+    "id": "cc08c078-ccd0-4d95-89ea-791017368216",
+    "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+    "event_type": "subscription_created",
+    "tier": "free",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-04-23T17:05:58.227121+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-04-23T17:05:58.227121+00:00"
+  },
+  {
+    "id": "65692607-131e-4964-a41d-5f1abe349768",
+    "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+    "event_type": "subscription_created",
+    "tier": "premium",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-04-23T17:03:44.89802+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-04-23T17:03:44.89802+00:00"
+  }
+]

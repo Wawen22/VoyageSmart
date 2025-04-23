@@ -11,9 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDate, formatCurrency } from '@/lib/utils';
-import { useToast } from '@/components/ui/use-toast';
-import DirectCheckoutButton from '@/components/subscription/DirectCheckoutButton';
-import CustomerPortalButton from '@/components/subscription/CustomerPortalButton';
+import { toast } from '@/components/ui/use-toast';
+import TestWebhook from './test-webhook';
 import {
   CheckIcon,
   XIcon,
@@ -31,29 +30,86 @@ export default function SubscriptionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
-  const { subscription, isSubscribed, upgradeSubscription, manageSubscription } = useSubscription();
+  const { subscription, isSubscribed, upgradeSubscription, cancelSubscription, getSubscriptionHistory, refreshSubscription } = useSubscription();
   const [activeTab, setActiveTab] = useState('overview');
-  const { toast } = useToast();
+  const [history, setHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Check for success or canceled parameters
+  // Controlla se c'è un parametro di successo o cancellazione nella URL
   useEffect(() => {
-    const success = searchParams.get('success');
-    const canceled = searchParams.get('canceled');
+    const handleSubscriptionResult = async () => {
+      const success = searchParams.get('success');
+      const canceled = searchParams.get('canceled');
 
-    if (success) {
-      toast({
-        title: 'Subscription successful!',
-        description: 'Your subscription has been activated.',
-        variant: 'default',
-      });
-    } else if (canceled) {
-      toast({
-        title: 'Subscription canceled',
-        description: 'Your subscription process was canceled.',
-        variant: 'destructive',
-      });
+      if (success === 'true') {
+        // Forza l'aggiornamento dei dati della sottoscrizione
+        if (user) {
+          try {
+            setLoading(true);
+            await refreshSubscription();
+            setLoading(false);
+
+            toast({
+              title: 'Subscription Updated',
+              description: 'Your subscription has been successfully updated.',
+              variant: 'default',
+            });
+          } catch (error) {
+            console.error('Error refreshing subscription after upgrade:', error);
+            toast({
+              title: 'Subscription Status Update',
+              description: 'Your payment was successful, but we need to refresh your subscription status. Please wait a moment.',
+              variant: 'default',
+            });
+
+            // Riprova dopo un breve ritardo
+            setTimeout(async () => {
+              try {
+                await refreshSubscription();
+              } catch (innerError) {
+                console.error('Error in delayed subscription refresh:', innerError);
+              }
+            }, 3000);
+          }
+        } else {
+          toast({
+            title: 'Subscription Updated',
+            description: 'Your subscription has been successfully updated.',
+            variant: 'default',
+          });
+        }
+      } else if (canceled === 'true') {
+        toast({
+          title: 'Checkout Canceled',
+          description: 'You have canceled the checkout process.',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    handleSubscriptionResult();
+  }, [searchParams, user, refreshSubscription]);
+
+  // Carica la cronologia delle sottoscrizioni
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user) return;
+
+      try {
+        setLoading(true);
+        const historyData = await getSubscriptionHistory();
+        setHistory(historyData);
+      } catch (error) {
+        console.error('Error loading subscription history:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (activeTab === 'history') {
+      loadHistory();
     }
-  }, [searchParams, toast]);
+  }, [user, activeTab, getSubscriptionHistory]);
 
   if (!user) {
     return (
@@ -62,6 +118,39 @@ export default function SubscriptionPage() {
       </div>
     );
   }
+
+  const handleUpgrade = async (plan: 'free' | 'premium' | 'ai') => {
+    try {
+      await upgradeSubscription(plan);
+    } catch (error) {
+      console.error('Error upgrading subscription:', error);
+      toast({
+        title: 'Error',
+        description: 'There was an error processing your request. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!subscription?.stripeSubscriptionId) return;
+
+    try {
+      await cancelSubscription();
+      toast({
+        title: 'Subscription Canceled',
+        description: 'Your subscription will be canceled at the end of the current billing period.',
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      toast({
+        title: 'Error',
+        description: 'There was an error canceling your subscription. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const PricingFeature = ({ included, children }: { included: boolean; children: React.ReactNode }) => (
     <div className="flex items-center space-x-2">
@@ -144,24 +233,23 @@ export default function SubscriptionPage() {
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-muted-foreground mb-2">Status</h3>
-                          <p className="text-lg font-medium capitalize">{subscription.status}</p>
+                          <p className="text-lg font-medium capitalize">
+                            {subscription.status}
+                            {subscription.cancelAtPeriodEnd && (
+                              <span className="ml-2 text-sm text-muted-foreground">(Cancels at period end)</span>
+                            )}
+                          </p>
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-muted-foreground mb-2">Valid Until</h3>
-                          <p className="text-lg font-medium">
-                            {subscription.currentPeriodEnd
-                              ? formatDate(subscription.currentPeriodEnd.toISOString())
-                              : formatDate(subscription.validUntil.toISOString())}
-                          </p>
+                          <p className="text-lg font-medium">{formatDate(subscription.validUntil.toISOString())}</p>
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-muted-foreground mb-2">Next Payment</h3>
                           <p className="text-lg font-medium">
-                            {subscription.tier === 'free'
-                              ? 'No payment required'
-                              : subscription.currentPeriodEnd
-                                ? formatDate(subscription.currentPeriodEnd.toISOString())
-                                : formatDate(subscription.validUntil.toISOString())}
+                            {subscription.tier === 'free' ? 'No payment required' :
+                             subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd.toISOString()) :
+                             formatDate(subscription.validUntil.toISOString())}
                           </p>
                         </div>
                       </div>
@@ -186,18 +274,25 @@ export default function SubscriptionPage() {
                 </CardContent>
                 <CardFooter className="flex flex-col sm:flex-row gap-3">
                   {subscription?.tier === 'free' ? (
-                    <DirectCheckoutButton tier="premium" className="w-full sm:w-auto">
+                    <Button onClick={() => handleUpgrade('premium')} className="w-full sm:w-auto">
                       Upgrade to Premium
-                    </DirectCheckoutButton>
+                    </Button>
+                  ) : subscription?.cancelAtPeriodEnd ? (
+                    <Button variant="outline" disabled className="w-full sm:w-auto">
+                      Cancellation Pending
+                    </Button>
                   ) : (
-                    <CustomerPortalButton className="w-full sm:w-auto">
-                      Manage Subscription
-                    </CustomerPortalButton>
+                    <Button variant="outline" onClick={handleCancel} className="w-full sm:w-auto">
+                      Cancel Subscription
+                    </Button>
                   )}
                   <Button variant="outline" asChild className="w-full sm:w-auto">
                     <Link href="/pricing">View All Plans</Link>
                   </Button>
                 </CardFooter>
+
+                {/* Componente di test per il webhook */}
+                {process.env.NODE_ENV === 'development' && <TestWebhook />}
               </Card>
 
               <Card>
@@ -272,12 +367,13 @@ export default function SubscriptionPage() {
                     {subscription?.tier === 'free' ? (
                       <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
                     ) : (
-                      <CustomerPortalButton
+                      <Button
                         variant="outline"
                         className="w-full"
+                        onClick={() => handleUpgrade('free')}
                       >
                         Downgrade
-                      </CustomerPortalButton>
+                      </Button>
                     )}
                   </CardFooter>
                 </Card>
@@ -311,12 +407,12 @@ export default function SubscriptionPage() {
                     {subscription?.tier === 'premium' ? (
                       <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
                     ) : (
-                      <DirectCheckoutButton
-                        tier="premium"
+                      <Button
                         className="w-full"
+                        onClick={() => handleUpgrade('premium')}
                       >
                         Upgrade
-                      </DirectCheckoutButton>
+                      </Button>
                     )}
                   </CardFooter>
                 </Card>
@@ -360,45 +456,51 @@ export default function SubscriptionPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {subscription?.tier === 'free' ? (
+                  {loading ? (
+                    <div className="text-center py-6">
+                      <p className="text-muted-foreground">Loading payment history...</p>
+                    </div>
+                  ) : subscription?.tier === 'free' ? (
                     <div className="text-center py-6">
                       <p className="text-muted-foreground">No payment history available for Free plan</p>
-                      <DirectCheckoutButton tier="premium" className="mt-4">
+                      <Button onClick={() => handleUpgrade('premium')} className="mt-4">
                         Upgrade to Premium
-                      </DirectCheckoutButton>
+                      </Button>
                     </div>
-                  ) : subscription?.stripeSubscriptionId ? (
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-4 p-4 border border-border rounded-lg">
-                        <div className="bg-primary/10 p-2 rounded-full">
-                          <CreditCardIcon className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">Premium Subscription</p>
-                              <p className="text-sm text-muted-foreground">
-                                {subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd.toISOString()) : 'Active'}
-                              </p>
-                            </div>
-                            <p className="font-medium">{formatCurrency(4.99, 'EUR')}</p>
-                          </div>
-                          <div className="mt-2 flex justify-between items-center">
-                            <p className="text-sm text-muted-foreground">Next billing date: {subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd.toISOString()) : 'N/A'}</p>
-                            <Badge variant="outline" className="text-xs">{subscription.status}</Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-center mt-4">
-                        <CustomerPortalButton>
-                          View Full Billing History
-                        </CustomerPortalButton>
-                      </div>
-                    </div>
-                  ) : (
+                  ) : history.length === 0 ? (
                     <div className="text-center py-6">
                       <p className="text-muted-foreground">No payment history available yet</p>
-                      <p className="text-xs text-muted-foreground mt-2">Your payment history will appear here after your first payment</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {history
+                        .filter(item => ['payment_succeeded', 'payment_failed'].includes(item.event_type))
+                        .map((item, index) => (
+                          <div key={index} className="flex items-start gap-4 p-3 border border-border rounded-md">
+                            <div className={`bg-${item.event_type === 'payment_succeeded' ? 'green' : 'red'}-100 p-2 rounded-full`}>
+                              <CreditCardIcon className={`h-5 w-5 text-${item.event_type === 'payment_succeeded' ? 'green' : 'red'}-500`} />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between">
+                                <p className="font-medium">
+                                  {item.event_type === 'payment_succeeded' ? 'Payment Succeeded' : 'Payment Failed'}
+                                </p>
+                                <Badge variant={item.event_type === 'payment_succeeded' ? 'default' : 'destructive'}>
+                                  {item.event_type === 'payment_succeeded' ? 'Paid' : 'Failed'}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {formatDate(item.event_timestamp)}
+                              </p>
+                              {item.details?.amount_total && (
+                                <p className="text-sm font-medium mt-1">
+                                  {formatCurrency(item.details.amount_total / 100, item.details.currency || 'EUR')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      }
                     </div>
                   )}
                 </CardContent>
@@ -412,22 +514,68 @@ export default function SubscriptionPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-4">
-                      <div className="bg-primary/10 p-2 rounded-full">
-                        <TagIcon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Subscription Created</p>
-                        <p className="text-sm text-muted-foreground">
-                          {subscription ? formatDate(subscription.validUntil.toISOString()) : 'Loading...'}
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {`Initial ${subscription?.tier || ''} plan created`}
-                        </p>
-                      </div>
+                  {loading ? (
+                    <div className="text-center py-6">
+                      <p className="text-muted-foreground">Loading subscription history...</p>
                     </div>
-                  </div>
+                  ) : history.length === 0 ? (
+                    <div className="text-center py-6">
+                      <p className="text-muted-foreground">No subscription history available</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {history
+                        .filter(item => !['payment_succeeded', 'payment_failed'].includes(item.event_type))
+                        .map((item, index) => {
+                          let icon = <TagIcon className="h-5 w-5 text-primary" />;
+                          let title = 'Subscription Updated';
+                          let bgColor = 'bg-primary/10';
+
+                          if (item.event_type === 'subscription_created') {
+                            icon = <TagIcon className="h-5 w-5 text-primary" />;
+                            title = 'Subscription Created';
+                            bgColor = 'bg-primary/10';
+                          } else if (item.event_type === 'subscription_updated') {
+                            icon = <SettingsIcon className="h-5 w-5 text-amber-500" />;
+                            title = 'Subscription Updated';
+                            bgColor = 'bg-amber-100';
+                          } else if (item.event_type === 'subscription_canceled' || item.event_type === 'subscription_deleted') {
+                            icon = <XIcon className="h-5 w-5 text-red-500" />;
+                            title = item.event_type === 'subscription_canceled' ? 'Subscription Canceled' : 'Subscription Deleted';
+                            bgColor = 'bg-red-100';
+                          } else if (item.event_type === 'checkout_completed') {
+                            icon = <CheckIcon className="h-5 w-5 text-green-500" />;
+                            title = 'Checkout Completed';
+                            bgColor = 'bg-green-100';
+                          }
+
+                          return (
+                            <div key={index} className="flex items-start gap-4">
+                              <div className={`${bgColor} p-2 rounded-full`}>
+                                {icon}
+                              </div>
+                              <div>
+                                <p className="font-medium">{title}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {formatDate(item.event_timestamp)}
+                                </p>
+                                {item.tier && (
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {`Plan: ${item.tier.charAt(0).toUpperCase() + item.tier.slice(1)}`}
+                                  </p>
+                                )}
+                                {item.status && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {`Status: ${item.status.charAt(0).toUpperCase() + item.status.slice(1)}`}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      }
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

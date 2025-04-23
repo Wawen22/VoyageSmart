@@ -3,7 +3,22 @@
 import { useSubscription } from '@/lib/subscription';
 import { Badge } from '@/components/ui/badge';
 import { LockIcon, SparklesIcon } from 'lucide-react';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+
+// Dynamically import tooltip components to handle cases where they might not be available
+let TooltipProvider: any;
+let Tooltip: any;
+let TooltipTrigger: any;
+let TooltipContent: any;
+
+try {
+  const tooltipModule = require('@/components/ui/tooltip');
+  TooltipProvider = tooltipModule.TooltipProvider;
+  Tooltip = tooltipModule.Tooltip;
+  TooltipTrigger = tooltipModule.TooltipTrigger;
+  TooltipContent = tooltipModule.TooltipContent;
+} catch (error) {
+  console.warn('Tooltip components not available');
+}
 
 interface PremiumIndicatorProps {
   feature?: 'accommodations' | 'transportation' | 'unlimited_trips';
@@ -87,7 +102,7 @@ export default function PremiumIndicator({
               className="text-xs text-primary font-medium mt-1 hover:underline"
               onClick={(e) => {
                 e.stopPropagation();
-                upgradeSubscription('premium');
+                upgradeSubscription();
               }}
             >
               Upgrade now
