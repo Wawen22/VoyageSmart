@@ -160,27 +160,32 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
   const cancelSubscription = async (): Promise<void> => {
     if (!user || !subscription?.stripeSubscriptionId) {
+      console.log('Provider - Cannot cancel subscription: no user or subscription ID');
       return;
     }
 
     try {
-      const success = await cancelStripeSubscription(subscription.stripeSubscriptionId);
+      console.log('Provider - Attempting to cancel subscription:', subscription.stripeSubscriptionId);
+      // La funzione cancelStripeSubscription ora lancia un errore in caso di fallimento
+      // invece di restituire false
+      await cancelStripeSubscription(subscription.stripeSubscriptionId);
 
-      if (success) {
-        // Aggiorna lo stato locale
-        setSubscription(prev => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            cancelAtPeriodEnd: true,
-          };
-        });
-      } else {
-        throw new Error('Failed to cancel subscription');
-      }
+      console.log('Provider - Subscription canceled successfully, updating local state');
+      // Aggiorna lo stato locale
+      setSubscription(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          tier: 'free', // Imposta immediatamente il tier a free
+          cancelAtPeriodEnd: true,
+          validUntil: prev.currentPeriodEnd || prev.validUntil, // Imposta validUntil uguale a currentPeriodEnd
+        };
+      });
     } catch (error) {
-      console.error('Error canceling subscription:', error);
+      console.error('Provider - Error canceling subscription:', error);
       setError(error as Error);
+      // Rilanciamo l'errore per permettere al chiamante di gestirlo
+      throw error;
     }
   };
 

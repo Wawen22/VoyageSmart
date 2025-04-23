@@ -133,20 +133,34 @@ export default function SubscriptionPage() {
   };
 
   const handleCancel = async () => {
-    if (!subscription?.stripeSubscriptionId) return;
-
-    try {
-      await cancelSubscription();
-      toast({
-        title: 'Subscription Canceled',
-        description: 'Your subscription will be canceled at the end of the current billing period.',
-        variant: 'default',
-      });
-    } catch (error) {
-      console.error('Error canceling subscription:', error);
+    if (!subscription?.stripeSubscriptionId) {
+      console.log('Page - Cannot cancel subscription: no subscription ID');
       toast({
         title: 'Error',
-        description: 'There was an error canceling your subscription. Please try again.',
+        description: 'No active subscription found to cancel.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      console.log('Page - Attempting to cancel subscription:', subscription.stripeSubscriptionId);
+      await cancelSubscription();
+      console.log('Page - Subscription canceled successfully');
+
+      // Aggiorna la cronologia
+      await loadHistory();
+
+      toast({
+        title: 'Subscription Canceled',
+        description: 'Your subscription has been canceled and downgraded to the free plan.',
+        variant: 'default',
+      });
+    } catch (error: any) {
+      console.error('Page - Error canceling subscription:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'There was an error canceling your subscription. Please try again.',
         variant: 'destructive',
       });
     }
@@ -278,8 +292,8 @@ export default function SubscriptionPage() {
                       Upgrade to Premium
                     </Button>
                   ) : subscription?.cancelAtPeriodEnd ? (
-                    <Button variant="outline" disabled className="w-full sm:w-auto">
-                      Cancellation Pending
+                    <Button variant="outline" onClick={() => handleUpgrade('premium')} className="w-full sm:w-auto">
+                      Resubscribe
                     </Button>
                   ) : (
                     <Button variant="outline" onClick={handleCancel} className="w-full sm:w-auto">

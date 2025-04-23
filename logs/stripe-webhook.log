@@ -3203,3 +3203,5440 @@
   "current_period_end": "2025-05-23T17:46:53+00:00"
 }
 [2025-04-23T17:45:44.248Z] Checkout session completed for user 3cd16c84-225a-4a07-aa44-e51699d139b2
+[2025-04-23T18:00:31.608Z] Stripe webhook received
+[2025-04-23T18:00:31.609Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5789",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431305,v1=a121a3cff9d2ffbb91d71307cb20c021dd2e93e1a7e9ad05c3547e87a961599d,v0=9d633ee23a6dcf837dad57c72e0cefc6b8713f541a2c65e231b771f38b2900e4",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:00:31.610Z] Webhook signature: "Present"
+[2025-04-23T18:00:31.611Z] Using webhook secret for verification
+[2025-04-23T18:00:31.612Z] Webhook event type: customer.subscription.updated
+[2025-04-23T18:00:31.612Z] Processing event type: customer.subscription.updated
+[2025-04-23T18:00:31.613Z] Event data:: {
+  "id": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745430413,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748022413,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745431305,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745430413,
+  "currency": "eur",
+  "customer": "cus_SBULVn5L1vvpJc",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7NpQ4CpdRSiZ7dT7FWTti",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUMokJAvkLORa",
+        "object": "subscription_item",
+        "created": 1745430414,
+        "current_period_end": 1748022413,
+        "current_period_start": 1745430413,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7NpQ4CpdRSiZ7jxy8qYgp"
+  },
+  "latest_invoice": "in_1RH7NqQ4CpdRSiZ74Tx5Fbv6",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745430413,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:00:31.614Z] Handling customer.subscription.updated event
+[2025-04-23T18:00:31.615Z] Processing customer.subscription.updated: {
+  "id": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745430413,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748022413,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745431305,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745430413,
+  "currency": "eur",
+  "customer": "cus_SBULVn5L1vvpJc",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7NpQ4CpdRSiZ7dT7FWTti",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUMokJAvkLORa",
+        "object": "subscription_item",
+        "created": 1745430414,
+        "current_period_end": 1748022413,
+        "current_period_start": 1745430413,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7NpQ4CpdRSiZ7jxy8qYgp"
+  },
+  "latest_invoice": "in_1RH7NqQ4CpdRSiZ74Tx5Fbv6",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745430413,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:00:31.615Z] Customer ID: cus_SBULVn5L1vvpJc
+[2025-04-23T18:00:31.675Z] Found user ID: 3cd16c84-225a-4a07-aa44-e51699d139b2
+[2025-04-23T18:00:31.677Z] Updating subscription for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "userId": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "customerId": "cus_SBULVn5L1vvpJc",
+  "subscriptionId": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp"
+}
+[2025-04-23T18:00:31.813Z] Found existing subscription for user 3cd16c84-225a-4a07-aa44-e51699d139b2: {
+  "id": "281fd1f8-e53c-42d6-a47d-4f2aa12cd424",
+  "user_id": "3cd16c84-225a-4a07-aa44-e51699d139b2",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T10:29:54.249+00:00",
+  "created_at": "2025-04-23T10:31:07.65444+00:00",
+  "updated_at": "2025-04-23T17:14:43.122+00:00",
+  "stripe_customer_id": "cus_SBULVn5L1vvpJc",
+  "stripe_subscription_id": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+  "cancel_at_period_end": true,
+  "current_period_end": "2025-05-23T17:46:53+00:00"
+}
+[2025-04-23T18:00:31.814Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:00:31.814Z] Error in updateSubscription: Invalid time value: {}
+[2025-04-23T18:09:31.195Z] Stripe webhook received
+[2025-04-23T18:09:31.197Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5552",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431844,v1=1f687d5ae17a990b9e9cee05e28dd6d6a667084b19cafe53cfa1e7ae8f3978a5,v0=65147ccf7a3edf70e2a00b86f7c2af1d0cdfe5886c37cf21ad99e03f97bb9e73",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:09:31.197Z] Webhook signature: "Present"
+[2025-04-23T18:09:31.197Z] Using webhook secret for verification
+[2025-04-23T18:09:31.199Z] Webhook event type: customer.subscription.deleted
+[2025-04-23T18:09:31.199Z] Processing event type: customer.subscription.deleted
+[2025-04-23T18:09:31.199Z] Event data:: {
+  "id": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745430413,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": 1745431305,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745430413,
+  "currency": "eur",
+  "customer": "cus_SBULVn5L1vvpJc",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7NpQ4CpdRSiZ7dT7FWTti",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": 1745431843,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUMokJAvkLORa",
+        "object": "subscription_item",
+        "created": 1745430414,
+        "current_period_end": 1748022413,
+        "current_period_start": 1745430413,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7NpQ4CpdRSiZ7jxy8qYgp"
+  },
+  "latest_invoice": "in_1RH7NqQ4CpdRSiZ74Tx5Fbv6",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745430413,
+  "status": "canceled",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:09:31.200Z] Handling customer.subscription.deleted event
+[2025-04-23T18:09:31.201Z] Processing customer.subscription.deleted: {
+  "id": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745430413,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": 1745431305,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745430413,
+  "currency": "eur",
+  "customer": "cus_SBULVn5L1vvpJc",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7NpQ4CpdRSiZ7dT7FWTti",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": 1745431843,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUMokJAvkLORa",
+        "object": "subscription_item",
+        "created": 1745430414,
+        "current_period_end": 1748022413,
+        "current_period_start": 1745430413,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7NpQ4CpdRSiZ7jxy8qYgp",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7NpQ4CpdRSiZ7jxy8qYgp"
+  },
+  "latest_invoice": "in_1RH7NqQ4CpdRSiZ74Tx5Fbv6",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745430413,
+  "status": "canceled",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:09:31.201Z] Customer ID: cus_SBULVn5L1vvpJc
+[2025-04-23T18:09:31.344Z] Error finding user for customer cus_SBULVn5L1vvpJc: JSON object requested, multiple (or no) rows returned: {
+  "code": "PGRST116",
+  "details": "The result contains 0 rows",
+  "hint": null,
+  "message": "JSON object requested, multiple (or no) rows returned"
+}
+[2025-04-23T18:09:48.413Z] Stripe webhook received
+[2025-04-23T18:09:48.414Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "1176",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431862,v1=5941e45d86721c08c97ad4261b94d203696c7bfe2daef63a24dc4ae68a4255b0,v0=22ae34343a1ec9871a5763de0563a877b6dbc8949d8d911e3cc7165b59147812",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:09:48.414Z] Webhook signature: "Present"
+[2025-04-23T18:09:48.415Z] Using webhook secret for verification
+[2025-04-23T18:09:48.416Z] Webhook event type: customer.deleted
+[2025-04-23T18:09:48.416Z] Processing event type: customer.deleted
+[2025-04-23T18:09:48.416Z] Event data:: {
+  "id": "cus_SBULVn5L1vvpJc",
+  "object": "customer",
+  "address": null,
+  "balance": 0,
+  "created": 1745430377,
+  "currency": "eur",
+  "default_source": null,
+  "delinquent": false,
+  "description": null,
+  "discount": null,
+  "email": "r.nebili22@gmail.com",
+  "invoice_prefix": "BE4BDAFB",
+  "invoice_settings": {
+    "custom_fields": null,
+    "default_payment_method": null,
+    "footer": null,
+    "rendering_options": null
+  },
+  "livemode": false,
+  "metadata": {
+    "supabaseUserId": "3cd16c84-225a-4a07-aa44-e51699d139b2"
+  },
+  "name": null,
+  "phone": null,
+  "preferred_locales": [],
+  "shipping": null,
+  "tax_exempt": "none",
+  "test_clock": null
+}
+[2025-04-23T18:09:48.417Z] Unhandled event type: customer.deleted
+[2025-04-23T18:11:04.847Z] Stripe webhook received
+[2025-04-23T18:11:04.848Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "1155",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431938,v1=8fadb2e2253fad3b0dd1a708bf683eadec7aa781ae1bca7b9d7243f3106813f7,v0=2738b6b0fa00b4b0cf065278999bbc3810adf14d52420b509504812bf87741d2",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:04.848Z] Webhook signature: "Present"
+[2025-04-23T18:11:04.849Z] Using webhook secret for verification
+[2025-04-23T18:11:04.850Z] Webhook event type: customer.created
+[2025-04-23T18:11:04.850Z] Processing event type: customer.created
+[2025-04-23T18:11:04.850Z] Event data:: {
+  "id": "cus_SBUlGmNVDUw6qm",
+  "object": "customer",
+  "address": null,
+  "balance": 0,
+  "created": 1745431938,
+  "currency": null,
+  "default_source": null,
+  "delinquent": false,
+  "description": null,
+  "discount": null,
+  "email": "r.nebili22@gmail.com",
+  "invoice_prefix": "2FC06158",
+  "invoice_settings": {
+    "custom_fields": null,
+    "default_payment_method": null,
+    "footer": null,
+    "rendering_options": null
+  },
+  "livemode": false,
+  "metadata": {
+    "supabaseUserId": "5ea883cb-6d3b-4f65-a41d-273811e92780"
+  },
+  "name": null,
+  "phone": null,
+  "preferred_locales": [],
+  "shipping": null,
+  "tax_exempt": "none",
+  "test_clock": null
+}
+[2025-04-23T18:11:04.851Z] Unhandled event type: customer.created
+[2025-04-23T18:11:33.022Z] Stripe webhook received
+[2025-04-23T18:11:33.023Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "3777",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=e826688ffd134d1619bfaf4002a3f5cc1d3aa5fa0db83c89f53abaabe4caaf8f,v0=90349b3203bdfab57e130ea62c86f890f3451dae9587c1b9d02bbc7d503d1ed3",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.023Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.024Z] Using webhook secret for verification
+[2025-04-23T18:11:33.025Z] Webhook event type: charge.succeeded
+[2025-04-23T18:11:33.025Z] Processing event type: charge.succeeded
+[2025-04-23T18:11:33.025Z] Event data:: {
+  "id": "ch_3RH7mpQ4CpdRSiZ72MuuUMif",
+  "object": "charge",
+  "amount": 499,
+  "amount_captured": 499,
+  "amount_refunded": 0,
+  "application": null,
+  "application_fee": null,
+  "application_fee_amount": null,
+  "balance_transaction": "txn_3RH7mpQ4CpdRSiZ72OU72rPw",
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": "IT",
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "email": "r.nebili22@gmail.com",
+    "name": "Obay Nebili",
+    "phone": null,
+    "tax_id": null
+  },
+  "calculated_statement_descriptor": "Stripe",
+  "captured": true,
+  "created": 1745431964,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "description": "Subscription creation",
+  "destination": null,
+  "dispute": null,
+  "disputed": false,
+  "failure_balance_transaction": null,
+  "failure_code": null,
+  "failure_message": null,
+  "fraud_details": {},
+  "livemode": false,
+  "metadata": {},
+  "on_behalf_of": null,
+  "order": null,
+  "outcome": {
+    "advice_code": null,
+    "network_advice_code": null,
+    "network_decline_code": null,
+    "network_status": "approved_by_network",
+    "reason": null,
+    "risk_level": "normal",
+    "risk_score": 42,
+    "seller_message": "Payment complete.",
+    "type": "authorized"
+  },
+  "paid": true,
+  "payment_intent": "pi_3RH7mpQ4CpdRSiZ72cIhvBO4",
+  "payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "payment_method_details": {
+    "card": {
+      "amount_authorized": 499,
+      "authorization_code": null,
+      "brand": "visa",
+      "checks": {
+        "address_line1_check": null,
+        "address_postal_code_check": null,
+        "cvc_check": "pass"
+      },
+      "country": "US",
+      "exp_month": 12,
+      "exp_year": 2030,
+      "extended_authorization": {
+        "status": "disabled"
+      },
+      "fingerprint": "PbdjuFdVPGkeq9xw",
+      "funding": "credit",
+      "incremental_authorization": {
+        "status": "unavailable"
+      },
+      "installments": null,
+      "last4": "4242",
+      "mandate": null,
+      "multicapture": {
+        "status": "unavailable"
+      },
+      "network": "visa",
+      "network_token": {
+        "used": false
+      },
+      "network_transaction_id": "809810010611770",
+      "overcapture": {
+        "maximum_amount_capturable": 499,
+        "status": "unavailable"
+      },
+      "regulated_status": "unregulated",
+      "three_d_secure": null,
+      "wallet": null
+    },
+    "type": "card"
+  },
+  "radar_options": {},
+  "receipt_email": null,
+  "receipt_number": null,
+  "receipt_url": "https://pay.stripe.com/receipts/invoices/CAcaFwoVYWNjdF8xUkdxMnNRNENwZFJTaVo3KJ_bpMAGMgasMVH5gnA6LBbf2HGuIo7fSEHxYSemOGqacqOSJuO74ITyedjaHKDWRc6SZoYuWwsWKNFE?s=ap",
+  "refunded": false,
+  "review": null,
+  "shipping": null,
+  "source": null,
+  "source_transfer": null,
+  "statement_descriptor": null,
+  "statement_descriptor_suffix": null,
+  "status": "succeeded",
+  "transfer_data": null,
+  "transfer_group": null
+}
+[2025-04-23T18:11:33.026Z] Unhandled event type: charge.succeeded
+[2025-04-23T18:11:33.067Z] Stripe webhook received
+[2025-04-23T18:11:33.068Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "3429",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=9f84274f0581565aa1cabe5153a9b84614ffb628c2799abed806902e76ddd874,v0=078492795cefb1fd4e1f41a006666141cc1a03c05798e4ba020fbcce1af3b5c4",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.068Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.069Z] Using webhook secret for verification
+[2025-04-23T18:11:33.069Z] Webhook event type: checkout.session.completed
+[2025-04-23T18:11:33.070Z] Processing event type: checkout.session.completed
+[2025-04-23T18:11:33.070Z] Event data:: {
+  "id": "cs_test_a1ob4NTbPBL8wzRH8zYT1xYnI9MZDPBYTyRaE1ZlJLHGpWabdcqyvwEF8r",
+  "object": "checkout.session",
+  "adaptive_pricing": null,
+  "after_expiration": null,
+  "allow_promotion_codes": null,
+  "amount_subtotal": 499,
+  "amount_total": 499,
+  "automatic_tax": {
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "billing_address_collection": null,
+  "cancel_url": "http://localhost:3000/subscription?canceled=true",
+  "client_reference_id": null,
+  "client_secret": null,
+  "collected_information": {
+    "shipping_details": null
+  },
+  "consent": null,
+  "consent_collection": null,
+  "created": 1745431939,
+  "currency": "eur",
+  "currency_conversion": null,
+  "custom_fields": [],
+  "custom_text": {
+    "after_submit": null,
+    "shipping_address": null,
+    "submit": null,
+    "terms_of_service_acceptance": null
+  },
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "customer_creation": null,
+  "customer_details": {
+    "address": {
+      "city": null,
+      "country": "IT",
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "email": "r.nebili22@gmail.com",
+    "name": "Obay Nebili",
+    "phone": null,
+    "tax_exempt": "none",
+    "tax_ids": []
+  },
+  "customer_email": null,
+  "discounts": [],
+  "expires_at": 1745518339,
+  "invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "invoice_creation": null,
+  "livemode": false,
+  "locale": null,
+  "metadata": {
+    "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780"
+  },
+  "mode": "subscription",
+  "payment_intent": null,
+  "payment_link": null,
+  "payment_method_collection": "always",
+  "payment_method_configuration_details": {
+    "id": "pmc_1RGq3OQ4CpdRSiZ7RDgIRCll",
+    "parent": null
+  },
+  "payment_method_options": {
+    "card": {
+      "request_three_d_secure": "automatic"
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "link"
+  ],
+  "payment_status": "paid",
+  "permissions": null,
+  "phone_number_collection": {
+    "enabled": false
+  },
+  "recovered_from": null,
+  "saved_payment_method_options": {
+    "allow_redisplay_filters": [
+      "always"
+    ],
+    "payment_method_remove": null,
+    "payment_method_save": null
+  },
+  "setup_intent": null,
+  "shipping_address_collection": null,
+  "shipping_cost": null,
+  "shipping_options": [],
+  "status": "complete",
+  "submit_type": null,
+  "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "success_url": "http://localhost:3000/subscription?success=true?session_id={CHECKOUT_SESSION_ID}",
+  "total_details": {
+    "amount_discount": 0,
+    "amount_shipping": 0,
+    "amount_tax": 0
+  },
+  "ui_mode": "hosted",
+  "url": null,
+  "wallet_options": null
+}
+[2025-04-23T18:11:33.070Z] Handling checkout.session.completed event
+[2025-04-23T18:11:33.071Z] Processing checkout.session.completed: {
+  "id": "cs_test_a1ob4NTbPBL8wzRH8zYT1xYnI9MZDPBYTyRaE1ZlJLHGpWabdcqyvwEF8r",
+  "object": "checkout.session",
+  "adaptive_pricing": null,
+  "after_expiration": null,
+  "allow_promotion_codes": null,
+  "amount_subtotal": 499,
+  "amount_total": 499,
+  "automatic_tax": {
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "billing_address_collection": null,
+  "cancel_url": "http://localhost:3000/subscription?canceled=true",
+  "client_reference_id": null,
+  "client_secret": null,
+  "collected_information": {
+    "shipping_details": null
+  },
+  "consent": null,
+  "consent_collection": null,
+  "created": 1745431939,
+  "currency": "eur",
+  "currency_conversion": null,
+  "custom_fields": [],
+  "custom_text": {
+    "after_submit": null,
+    "shipping_address": null,
+    "submit": null,
+    "terms_of_service_acceptance": null
+  },
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "customer_creation": null,
+  "customer_details": {
+    "address": {
+      "city": null,
+      "country": "IT",
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "email": "r.nebili22@gmail.com",
+    "name": "Obay Nebili",
+    "phone": null,
+    "tax_exempt": "none",
+    "tax_ids": []
+  },
+  "customer_email": null,
+  "discounts": [],
+  "expires_at": 1745518339,
+  "invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "invoice_creation": null,
+  "livemode": false,
+  "locale": null,
+  "metadata": {
+    "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780"
+  },
+  "mode": "subscription",
+  "payment_intent": null,
+  "payment_link": null,
+  "payment_method_collection": "always",
+  "payment_method_configuration_details": {
+    "id": "pmc_1RGq3OQ4CpdRSiZ7RDgIRCll",
+    "parent": null
+  },
+  "payment_method_options": {
+    "card": {
+      "request_three_d_secure": "automatic"
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "link"
+  ],
+  "payment_status": "paid",
+  "permissions": null,
+  "phone_number_collection": {
+    "enabled": false
+  },
+  "recovered_from": null,
+  "saved_payment_method_options": {
+    "allow_redisplay_filters": [
+      "always"
+    ],
+    "payment_method_remove": null,
+    "payment_method_save": null
+  },
+  "setup_intent": null,
+  "shipping_address_collection": null,
+  "shipping_cost": null,
+  "shipping_options": [],
+  "status": "complete",
+  "submit_type": null,
+  "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "success_url": "http://localhost:3000/subscription?success=true?session_id={CHECKOUT_SESSION_ID}",
+  "total_details": {
+    "amount_discount": 0,
+    "amount_shipping": 0,
+    "amount_tax": 0
+  },
+  "ui_mode": "hosted",
+  "url": null,
+  "wallet_options": null
+}
+[2025-04-23T18:11:33.072Z] Found userId in session metadata: 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:11:33.111Z] Stripe webhook received
+[2025-04-23T18:11:33.113Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "1634",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=621cc77b0b7c094fe26d9c45c6d14dbcdcff578b03bed63d2f82ea389ff98bfd,v0=2c27b8f3214d15de6f4d4942b37f6186e946c555db0a5fd9a0b2712f89a8e55c",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.113Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.114Z] Using webhook secret for verification
+[2025-04-23T18:11:33.114Z] Webhook event type: payment_method.attached
+[2025-04-23T18:11:33.115Z] Processing event type: payment_method.attached
+[2025-04-23T18:11:33.115Z] Event data:: {
+  "id": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "object": "payment_method",
+  "allow_redisplay": "limited",
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": "IT",
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "email": "r.nebili22@gmail.com",
+    "name": "Obay Nebili",
+    "phone": null,
+    "tax_id": null
+  },
+  "card": {
+    "brand": "visa",
+    "checks": {
+      "address_line1_check": null,
+      "address_postal_code_check": null,
+      "cvc_check": "pass"
+    },
+    "country": "US",
+    "display_brand": "visa",
+    "exp_month": 12,
+    "exp_year": 2030,
+    "fingerprint": "PbdjuFdVPGkeq9xw",
+    "funding": "credit",
+    "generated_from": null,
+    "last4": "4242",
+    "networks": {
+      "available": [
+        "visa"
+      ],
+      "preferred": null
+    },
+    "regulated_status": "unregulated",
+    "three_d_secure_usage": {
+      "supported": true
+    },
+    "wallet": null
+  },
+  "created": 1745431962,
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "livemode": false,
+  "metadata": {},
+  "type": "card"
+}
+[2025-04-23T18:11:33.115Z] Unhandled event type: payment_method.attached
+[2025-04-23T18:11:33.126Z] Stripe webhook received
+[2025-04-23T18:11:33.127Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "1181",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=2756d73a0d1b880343dbd497978581e45a7548b53d2e852e1754a50fcd6ae965,v0=3eed6652c59e1d67f3c57e9d6abc093a9aaf54a29db4724e9efcd00db70ff159",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.127Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.128Z] Using webhook secret for verification
+[2025-04-23T18:11:33.128Z] Webhook event type: customer.updated
+[2025-04-23T18:11:33.129Z] Processing event type: customer.updated
+[2025-04-23T18:11:33.129Z] Event data:: {
+  "id": "cus_SBUlGmNVDUw6qm",
+  "object": "customer",
+  "address": null,
+  "balance": 0,
+  "created": 1745431938,
+  "currency": "eur",
+  "default_source": null,
+  "delinquent": false,
+  "description": null,
+  "discount": null,
+  "email": "r.nebili22@gmail.com",
+  "invoice_prefix": "2FC06158",
+  "invoice_settings": {
+    "custom_fields": null,
+    "default_payment_method": null,
+    "footer": null,
+    "rendering_options": null
+  },
+  "livemode": false,
+  "metadata": {
+    "supabaseUserId": "5ea883cb-6d3b-4f65-a41d-273811e92780"
+  },
+  "name": null,
+  "phone": null,
+  "preferred_locales": [],
+  "shipping": null,
+  "tax_exempt": "none",
+  "test_clock": null
+}
+[2025-04-23T18:11:33.129Z] Unhandled event type: customer.updated
+[2025-04-23T18:11:33.208Z] Stripe webhook received
+[2025-04-23T18:11:33.209Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5515",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=52e83b0e9b8ec5b46f0af28ed6d1d56680df6347618c797ad1214f583f45ad6c,v0=16871319aed9e9d6deafce992dc7b032674c5dc1a34d4b9072788a43e499dd25",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.210Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.210Z] Using webhook secret for verification
+[2025-04-23T18:11:33.211Z] Webhook event type: customer.subscription.created
+[2025-04-23T18:11:33.211Z] Processing event type: customer.subscription.created
+[2025-04-23T18:11:33.212Z] Event data:: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": null,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": null
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": null,
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "incomplete",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:11:33.212Z] Handling customer.subscription.created event
+[2025-04-23T18:11:33.213Z] Processing customer.subscription.created: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": null,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": null
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": null,
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "incomplete",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:11:33.213Z] Customer ID: cus_SBUlGmNVDUw6qm
+[2025-04-23T18:11:33.235Z] Found existing subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2026-04-23T18:11:01.335+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": null,
+  "stripe_subscription_id": null,
+  "cancel_at_period_end": false,
+  "current_period_end": null
+}
+[2025-04-23T18:11:33.273Z] Stripe webhook received
+[2025-04-23T18:11:33.274Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5639",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=df27655115ee4dfe173ab124bc927df2b1b201dd3df58ae8e4d13717900430b6,v0=3bd1e77027f71cad90a9d54183c627bd3b87fac36c9e2fa34752e6a43ed30b1a",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.274Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.274Z] Using webhook secret for verification
+[2025-04-23T18:11:33.275Z] Webhook event type: customer.subscription.updated
+[2025-04-23T18:11:33.275Z] Processing event type: customer.subscription.updated
+[2025-04-23T18:11:33.276Z] Event data:: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": null,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": null
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:11:33.276Z] Handling customer.subscription.updated event
+[2025-04-23T18:11:33.277Z] Processing customer.subscription.updated: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": null,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": null
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:11:33.277Z] Customer ID: cus_SBUlGmNVDUw6qm
+[2025-04-23T18:11:33.291Z] Checkout session history recorded for user 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:11:33.292Z] Session has subscription ID: sub_1RH7mpQ4CpdRSiZ707nWXyXT
+[2025-04-23T18:11:33.301Z] Error finding user for customer cus_SBUlGmNVDUw6qm: JSON object requested, multiple (or no) rows returned: {
+  "code": "PGRST116",
+  "details": "The result contains 0 rows",
+  "hint": null,
+  "message": "JSON object requested, multiple (or no) rows returned"
+}
+[2025-04-23T18:11:33.324Z] Stripe webhook received
+[2025-04-23T18:11:33.325Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "2072",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=80c4dce9fbb7a70d465c7b479395779eac4e943482529a694d84afcc1af0cf4b,v0=e8f7064c87debb21d6581074e1bf68bde6acbe9e18464f98fc094f150b1e4050",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.325Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.326Z] Using webhook secret for verification
+[2025-04-23T18:11:33.326Z] Webhook event type: payment_intent.succeeded
+[2025-04-23T18:11:33.327Z] Processing event type: payment_intent.succeeded
+[2025-04-23T18:11:33.327Z] Event data:: {
+  "id": "pi_3RH7mpQ4CpdRSiZ72cIhvBO4",
+  "object": "payment_intent",
+  "amount": 499,
+  "amount_capturable": 0,
+  "amount_details": {
+    "tip": {}
+  },
+  "amount_received": 499,
+  "application": null,
+  "application_fee_amount": null,
+  "automatic_payment_methods": null,
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic",
+  "client_secret": "pi_3RH7mpQ4CpdRSiZ72cIhvBO4_secret_TY3h9Nw7aCfToNDi8p5e4Vsrr",
+  "confirmation_method": "automatic",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "description": "Subscription creation",
+  "last_payment_error": null,
+  "latest_charge": "ch_3RH7mpQ4CpdRSiZ72MuuUMif",
+  "livemode": false,
+  "metadata": {},
+  "next_action": null,
+  "on_behalf_of": null,
+  "payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "payment_method_configuration_details": null,
+  "payment_method_options": {
+    "card": {
+      "installments": null,
+      "mandate_options": null,
+      "network": null,
+      "request_three_d_secure": "automatic",
+      "setup_future_usage": "off_session"
+    },
+    "link": {
+      "persistent_token": null
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "link"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "review": null,
+  "setup_future_usage": "off_session",
+  "shipping": null,
+  "source": null,
+  "statement_descriptor": null,
+  "statement_descriptor_suffix": null,
+  "status": "succeeded",
+  "transfer_data": null,
+  "transfer_group": null
+}
+[2025-04-23T18:11:33.327Z] Unhandled event type: payment_intent.succeeded
+[2025-04-23T18:11:33.372Z] Error finding user for customer cus_SBUlGmNVDUw6qm: JSON object requested, multiple (or no) rows returned: {
+  "code": "PGRST116",
+  "details": "The result contains 0 rows",
+  "hint": null,
+  "message": "JSON object requested, multiple (or no) rows returned"
+}
+[2025-04-23T18:11:33.377Z] Stripe webhook received
+[2025-04-23T18:11:33.378Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "1985",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=3a088c3cc12a43feeea1b54259ba483820c8ba1ded933530d0aa0e9bef051461,v0=dce691ac87a4955eeb560e0c791825622c3c9515941e5c8ab0cf3629ddc7777d",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.378Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.379Z] Using webhook secret for verification
+[2025-04-23T18:11:33.379Z] Webhook event type: payment_intent.created
+[2025-04-23T18:11:33.380Z] Processing event type: payment_intent.created
+[2025-04-23T18:11:33.380Z] Event data:: {
+  "id": "pi_3RH7mpQ4CpdRSiZ72cIhvBO4",
+  "object": "payment_intent",
+  "amount": 499,
+  "amount_capturable": 0,
+  "amount_details": {
+    "tip": {}
+  },
+  "amount_received": 0,
+  "application": null,
+  "application_fee_amount": null,
+  "automatic_payment_methods": null,
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic",
+  "client_secret": "pi_3RH7mpQ4CpdRSiZ72cIhvBO4_secret_TY3h9Nw7aCfToNDi8p5e4Vsrr",
+  "confirmation_method": "automatic",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "description": "Subscription creation",
+  "last_payment_error": null,
+  "latest_charge": null,
+  "livemode": false,
+  "metadata": {},
+  "next_action": null,
+  "on_behalf_of": null,
+  "payment_method": null,
+  "payment_method_configuration_details": null,
+  "payment_method_options": {
+    "card": {
+      "installments": null,
+      "mandate_options": null,
+      "network": null,
+      "request_three_d_secure": "automatic"
+    },
+    "link": {
+      "persistent_token": null
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "link"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "review": null,
+  "setup_future_usage": "off_session",
+  "shipping": null,
+  "source": null,
+  "statement_descriptor": null,
+  "statement_descriptor_suffix": null,
+  "status": "requires_payment_method",
+  "transfer_data": null,
+  "transfer_group": null
+}
+[2025-04-23T18:11:33.381Z] Unhandled event type: payment_intent.created
+[2025-04-23T18:11:33.468Z] Stripe webhook received
+[2025-04-23T18:11:33.469Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5555",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=fff4aeefe3a7f7b60aa76ffddc5dca483f05a4d1c0d9994c347662f0d3ffde1c,v0=d0ad38b2f10ba58e4832d7a6604686430821a4486112b5afd6df10d42971306b",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.470Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.470Z] Using webhook secret for verification
+[2025-04-23T18:11:33.471Z] Webhook event type: invoice.created
+[2025-04-23T18:11:33.471Z] Processing event type: invoice.created
+[2025-04-23T18:11:33.471Z] Event data:: {
+  "id": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "object": "invoice",
+  "account_country": "IT",
+  "account_name": "Voyage Smart sandbox",
+  "account_tax_ids": null,
+  "amount_due": 499,
+  "amount_overpaid": 0,
+  "amount_paid": 0,
+  "amount_remaining": 499,
+  "amount_shipping": 0,
+  "application": null,
+  "attempt_count": 0,
+  "attempted": false,
+  "auto_advance": false,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "automatically_finalizes_at": null,
+  "billing_reason": "subscription_create",
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "custom_fields": null,
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "customer_address": null,
+  "customer_email": "r.nebili22@gmail.com",
+  "customer_name": null,
+  "customer_phone": null,
+  "customer_shipping": null,
+  "customer_tax_exempt": "none",
+  "customer_tax_ids": [],
+  "default_payment_method": null,
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "due_date": null,
+  "effective_at": 1745431963,
+  "ending_balance": 0,
+  "footer": null,
+  "from_invoice": null,
+  "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y?s=ap",
+  "invoice_pdf": "https://pay.stripe.com/invoice/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y/pdf?s=ap",
+  "issuer": {
+    "type": "self"
+  },
+  "last_finalization_error": null,
+  "latest_revision": null,
+  "lines": {
+    "object": "list",
+    "data": [
+      {
+        "id": "il_1RH7mpQ4CpdRSiZ7tVc3hLza",
+        "object": "line_item",
+        "amount": 499,
+        "currency": "eur",
+        "description": "1 × Premium (at €4.99 / month)",
+        "discount_amounts": [],
+        "discountable": true,
+        "discounts": [],
+        "invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "invoice_item_details": null,
+          "subscription_item_details": {
+            "invoice_item": null,
+            "proration": false,
+            "proration_details": {
+              "credited_items": null
+            },
+            "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+            "subscription_item": "si_SBUmoDjAXxC3F5"
+          },
+          "type": "subscription_item_details"
+        },
+        "period": {
+          "end": 1748023963,
+          "start": 1745431963
+        },
+        "pretax_credit_amounts": [],
+        "pricing": {
+          "price_details": {
+            "price": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+            "product": "prod_SBCWb2yz0tNKFl"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "taxes": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/invoices/in_1RH7mpQ4CpdRSiZ7fzO63SjA/lines"
+  },
+  "livemode": false,
+  "metadata": {},
+  "next_payment_attempt": null,
+  "number": "5A2E53B7-0018",
+  "on_behalf_of": null,
+  "parent": {
+    "quote_details": null,
+    "subscription_details": {
+      "metadata": {},
+      "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+    },
+    "type": "subscription_details"
+  },
+  "payment_settings": {
+    "default_mandate": null,
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null
+  },
+  "period_end": 1745431963,
+  "period_start": 1745431963,
+  "post_payment_credit_notes_amount": 0,
+  "pre_payment_credit_notes_amount": 0,
+  "receipt_number": null,
+  "rendering": null,
+  "shipping_cost": null,
+  "shipping_details": null,
+  "starting_balance": 0,
+  "statement_descriptor": null,
+  "status": "open",
+  "status_transitions": {
+    "finalized_at": 1745431963,
+    "marked_uncollectible_at": null,
+    "paid_at": null,
+    "voided_at": null
+  },
+  "subtotal": 499,
+  "subtotal_excluding_tax": 499,
+  "test_clock": null,
+  "total": 499,
+  "total_discount_amounts": [],
+  "total_excluding_tax": 499,
+  "total_pretax_credit_amounts": [],
+  "total_taxes": [],
+  "webhooks_delivered_at": null
+}
+[2025-04-23T18:11:33.472Z] Unhandled event type: invoice.created
+[2025-04-23T18:11:33.497Z] Stripe webhook received
+[2025-04-23T18:11:33.498Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5557",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=128536dac9b963c2325b4892d059e76153a0036bae8b17c7da93afd07925e247,v0=1886ba2a6b572eb0960c8585f29d87de266b4dcc2afc2f62000527baa0ba5884",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.498Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.498Z] Using webhook secret for verification
+[2025-04-23T18:11:33.499Z] Webhook event type: invoice.finalized
+[2025-04-23T18:11:33.499Z] Processing event type: invoice.finalized
+[2025-04-23T18:11:33.500Z] Event data:: {
+  "id": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "object": "invoice",
+  "account_country": "IT",
+  "account_name": "Voyage Smart sandbox",
+  "account_tax_ids": null,
+  "amount_due": 499,
+  "amount_overpaid": 0,
+  "amount_paid": 0,
+  "amount_remaining": 499,
+  "amount_shipping": 0,
+  "application": null,
+  "attempt_count": 0,
+  "attempted": false,
+  "auto_advance": false,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "automatically_finalizes_at": null,
+  "billing_reason": "subscription_create",
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "custom_fields": null,
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "customer_address": null,
+  "customer_email": "r.nebili22@gmail.com",
+  "customer_name": null,
+  "customer_phone": null,
+  "customer_shipping": null,
+  "customer_tax_exempt": "none",
+  "customer_tax_ids": [],
+  "default_payment_method": null,
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "due_date": null,
+  "effective_at": 1745431963,
+  "ending_balance": 0,
+  "footer": null,
+  "from_invoice": null,
+  "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y?s=ap",
+  "invoice_pdf": "https://pay.stripe.com/invoice/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y/pdf?s=ap",
+  "issuer": {
+    "type": "self"
+  },
+  "last_finalization_error": null,
+  "latest_revision": null,
+  "lines": {
+    "object": "list",
+    "data": [
+      {
+        "id": "il_1RH7mpQ4CpdRSiZ7tVc3hLza",
+        "object": "line_item",
+        "amount": 499,
+        "currency": "eur",
+        "description": "1 × Premium (at €4.99 / month)",
+        "discount_amounts": [],
+        "discountable": true,
+        "discounts": [],
+        "invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "invoice_item_details": null,
+          "subscription_item_details": {
+            "invoice_item": null,
+            "proration": false,
+            "proration_details": {
+              "credited_items": null
+            },
+            "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+            "subscription_item": "si_SBUmoDjAXxC3F5"
+          },
+          "type": "subscription_item_details"
+        },
+        "period": {
+          "end": 1748023963,
+          "start": 1745431963
+        },
+        "pretax_credit_amounts": [],
+        "pricing": {
+          "price_details": {
+            "price": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+            "product": "prod_SBCWb2yz0tNKFl"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "taxes": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/invoices/in_1RH7mpQ4CpdRSiZ7fzO63SjA/lines"
+  },
+  "livemode": false,
+  "metadata": {},
+  "next_payment_attempt": null,
+  "number": "5A2E53B7-0018",
+  "on_behalf_of": null,
+  "parent": {
+    "quote_details": null,
+    "subscription_details": {
+      "metadata": {},
+      "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+    },
+    "type": "subscription_details"
+  },
+  "payment_settings": {
+    "default_mandate": null,
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null
+  },
+  "period_end": 1745431963,
+  "period_start": 1745431963,
+  "post_payment_credit_notes_amount": 0,
+  "pre_payment_credit_notes_amount": 0,
+  "receipt_number": null,
+  "rendering": null,
+  "shipping_cost": null,
+  "shipping_details": null,
+  "starting_balance": 0,
+  "statement_descriptor": null,
+  "status": "open",
+  "status_transitions": {
+    "finalized_at": 1745431963,
+    "marked_uncollectible_at": null,
+    "paid_at": null,
+    "voided_at": null
+  },
+  "subtotal": 499,
+  "subtotal_excluding_tax": 499,
+  "test_clock": null,
+  "total": 499,
+  "total_discount_amounts": [],
+  "total_excluding_tax": 499,
+  "total_pretax_credit_amounts": [],
+  "total_taxes": [],
+  "webhooks_delivered_at": null
+}
+[2025-04-23T18:11:33.500Z] Unhandled event type: invoice.finalized
+[2025-04-23T18:11:33.573Z] Stripe webhook received
+[2025-04-23T18:11:33.574Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5789",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=3c29e965318fdc5daacdf5be6e8fca7744c3e2331c098aeb4d7ad88d0820e079,v0=4912c6e2bb19229f0554e13cf5e372e89b05e2246de1675999bace5422e4a8da",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.574Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.574Z] Using webhook secret for verification
+[2025-04-23T18:11:33.575Z] Webhook event type: invoice.updated
+[2025-04-23T18:11:33.575Z] Processing event type: invoice.updated
+[2025-04-23T18:11:33.576Z] Event data:: {
+  "id": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "object": "invoice",
+  "account_country": "IT",
+  "account_name": "Voyage Smart sandbox",
+  "account_tax_ids": null,
+  "amount_due": 499,
+  "amount_overpaid": 0,
+  "amount_paid": 499,
+  "amount_remaining": 0,
+  "amount_shipping": 0,
+  "application": null,
+  "attempt_count": 1,
+  "attempted": true,
+  "auto_advance": false,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "automatically_finalizes_at": null,
+  "billing_reason": "subscription_create",
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "custom_fields": null,
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "customer_address": null,
+  "customer_email": "r.nebili22@gmail.com",
+  "customer_name": null,
+  "customer_phone": null,
+  "customer_shipping": null,
+  "customer_tax_exempt": "none",
+  "customer_tax_ids": [],
+  "default_payment_method": null,
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "due_date": null,
+  "effective_at": 1745431963,
+  "ending_balance": 0,
+  "footer": null,
+  "from_invoice": null,
+  "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y?s=ap",
+  "invoice_pdf": "https://pay.stripe.com/invoice/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y/pdf?s=ap",
+  "issuer": {
+    "type": "self"
+  },
+  "last_finalization_error": null,
+  "latest_revision": null,
+  "lines": {
+    "object": "list",
+    "data": [
+      {
+        "id": "il_1RH7mpQ4CpdRSiZ7tVc3hLza",
+        "object": "line_item",
+        "amount": 499,
+        "currency": "eur",
+        "description": "1 × Premium (at €4.99 / month)",
+        "discount_amounts": [],
+        "discountable": true,
+        "discounts": [],
+        "invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "invoice_item_details": null,
+          "subscription_item_details": {
+            "invoice_item": null,
+            "proration": false,
+            "proration_details": {
+              "credited_items": null
+            },
+            "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+            "subscription_item": "si_SBUmoDjAXxC3F5"
+          },
+          "type": "subscription_item_details"
+        },
+        "period": {
+          "end": 1748023963,
+          "start": 1745431963
+        },
+        "pretax_credit_amounts": [],
+        "pricing": {
+          "price_details": {
+            "price": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+            "product": "prod_SBCWb2yz0tNKFl"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "taxes": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/invoices/in_1RH7mpQ4CpdRSiZ7fzO63SjA/lines"
+  },
+  "livemode": false,
+  "metadata": {},
+  "next_payment_attempt": null,
+  "number": "5A2E53B7-0018",
+  "on_behalf_of": null,
+  "parent": {
+    "quote_details": null,
+    "subscription_details": {
+      "metadata": {},
+      "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+    },
+    "type": "subscription_details"
+  },
+  "payment_settings": {
+    "default_mandate": null,
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null
+  },
+  "period_end": 1745431963,
+  "period_start": 1745431963,
+  "post_payment_credit_notes_amount": 0,
+  "pre_payment_credit_notes_amount": 0,
+  "receipt_number": null,
+  "rendering": null,
+  "shipping_cost": null,
+  "shipping_details": null,
+  "starting_balance": 0,
+  "statement_descriptor": null,
+  "status": "paid",
+  "status_transitions": {
+    "finalized_at": 1745431963,
+    "marked_uncollectible_at": null,
+    "paid_at": 1745431965,
+    "voided_at": null
+  },
+  "subtotal": 499,
+  "subtotal_excluding_tax": 499,
+  "test_clock": null,
+  "total": 499,
+  "total_discount_amounts": [],
+  "total_excluding_tax": 499,
+  "total_pretax_credit_amounts": [],
+  "total_taxes": [],
+  "webhooks_delivered_at": null
+}
+[2025-04-23T18:11:33.576Z] Unhandled event type: invoice.updated
+[2025-04-23T18:11:33.652Z] Stripe webhook received
+[2025-04-23T18:11:33.653Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5557",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=0356f4f0d1eacbdab58d2395d04574b956dd1a73e86842abc0ff0006a1ee26f6,v0=68bb465c54f8b9adb2a71feef76704cb60422e387e1ab0dbec32842f78319a8d",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.653Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.654Z] Using webhook secret for verification
+[2025-04-23T18:11:33.654Z] Webhook event type: invoice.paid
+[2025-04-23T18:11:33.654Z] Processing event type: invoice.paid
+[2025-04-23T18:11:33.655Z] Event data:: {
+  "id": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "object": "invoice",
+  "account_country": "IT",
+  "account_name": "Voyage Smart sandbox",
+  "account_tax_ids": null,
+  "amount_due": 499,
+  "amount_overpaid": 0,
+  "amount_paid": 499,
+  "amount_remaining": 0,
+  "amount_shipping": 0,
+  "application": null,
+  "attempt_count": 1,
+  "attempted": true,
+  "auto_advance": false,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "automatically_finalizes_at": null,
+  "billing_reason": "subscription_create",
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "custom_fields": null,
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "customer_address": null,
+  "customer_email": "r.nebili22@gmail.com",
+  "customer_name": null,
+  "customer_phone": null,
+  "customer_shipping": null,
+  "customer_tax_exempt": "none",
+  "customer_tax_ids": [],
+  "default_payment_method": null,
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "due_date": null,
+  "effective_at": 1745431963,
+  "ending_balance": 0,
+  "footer": null,
+  "from_invoice": null,
+  "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y?s=ap",
+  "invoice_pdf": "https://pay.stripe.com/invoice/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y/pdf?s=ap",
+  "issuer": {
+    "type": "self"
+  },
+  "last_finalization_error": null,
+  "latest_revision": null,
+  "lines": {
+    "object": "list",
+    "data": [
+      {
+        "id": "il_1RH7mpQ4CpdRSiZ7tVc3hLza",
+        "object": "line_item",
+        "amount": 499,
+        "currency": "eur",
+        "description": "1 × Premium (at €4.99 / month)",
+        "discount_amounts": [],
+        "discountable": true,
+        "discounts": [],
+        "invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "invoice_item_details": null,
+          "subscription_item_details": {
+            "invoice_item": null,
+            "proration": false,
+            "proration_details": {
+              "credited_items": null
+            },
+            "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+            "subscription_item": "si_SBUmoDjAXxC3F5"
+          },
+          "type": "subscription_item_details"
+        },
+        "period": {
+          "end": 1748023963,
+          "start": 1745431963
+        },
+        "pretax_credit_amounts": [],
+        "pricing": {
+          "price_details": {
+            "price": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+            "product": "prod_SBCWb2yz0tNKFl"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "taxes": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/invoices/in_1RH7mpQ4CpdRSiZ7fzO63SjA/lines"
+  },
+  "livemode": false,
+  "metadata": {},
+  "next_payment_attempt": null,
+  "number": "5A2E53B7-0018",
+  "on_behalf_of": null,
+  "parent": {
+    "quote_details": null,
+    "subscription_details": {
+      "metadata": {},
+      "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+    },
+    "type": "subscription_details"
+  },
+  "payment_settings": {
+    "default_mandate": null,
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null
+  },
+  "period_end": 1745431963,
+  "period_start": 1745431963,
+  "post_payment_credit_notes_amount": 0,
+  "pre_payment_credit_notes_amount": 0,
+  "receipt_number": null,
+  "rendering": null,
+  "shipping_cost": null,
+  "shipping_details": null,
+  "starting_balance": 0,
+  "statement_descriptor": null,
+  "status": "paid",
+  "status_transitions": {
+    "finalized_at": 1745431963,
+    "marked_uncollectible_at": null,
+    "paid_at": 1745431965,
+    "voided_at": null
+  },
+  "subtotal": 499,
+  "subtotal_excluding_tax": 499,
+  "test_clock": null,
+  "total": 499,
+  "total_discount_amounts": [],
+  "total_excluding_tax": 499,
+  "total_pretax_credit_amounts": [],
+  "total_taxes": [],
+  "webhooks_delivered_at": null
+}
+[2025-04-23T18:11:33.655Z] Unhandled event type: invoice.paid
+[2025-04-23T18:11:33.664Z] Retrieved customer from Stripe: {
+  "id": "cus_SBUlGmNVDUw6qm",
+  "object": "customer",
+  "address": null,
+  "balance": 0,
+  "created": 1745431938,
+  "currency": "eur",
+  "default_source": null,
+  "delinquent": false,
+  "description": null,
+  "discount": null,
+  "email": "r.nebili22@gmail.com",
+  "invoice_prefix": "2FC06158",
+  "invoice_settings": {
+    "custom_fields": null,
+    "default_payment_method": null,
+    "footer": null,
+    "rendering_options": null
+  },
+  "livemode": false,
+  "metadata": {
+    "supabaseUserId": "5ea883cb-6d3b-4f65-a41d-273811e92780"
+  },
+  "name": null,
+  "phone": null,
+  "preferred_locales": [],
+  "shipping": null,
+  "tax_exempt": "none",
+  "test_clock": null
+}
+[2025-04-23T18:11:33.665Z] Found user ID in customer metadata: 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:11:33.687Z] Retrieved subscription details from Stripe: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "billing_thresholds": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": null,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": null
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "current_period_end": 1748023963,
+  "current_period_start": 1745431963,
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discount": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "billing_thresholds": null,
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "aggregate_usage": null,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "aggregate_usage": null,
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "aggregate_usage": null,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:11:33.687Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:11:33.693Z] Stripe webhook received
+[2025-04-23T18:11:33.694Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5570",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745431967,v1=bed8b148511f1a475cf42fb8e152259df93e8bc998a5c166adc93629193d7859,v0=10a1bed4a679da20cab57d375207f59c713617a194f26a0e81a1960b70677917",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:11:33.694Z] Webhook signature: "Present"
+[2025-04-23T18:11:33.695Z] Using webhook secret for verification
+[2025-04-23T18:11:33.695Z] Webhook event type: invoice.payment_succeeded
+[2025-04-23T18:11:33.695Z] Processing event type: invoice.payment_succeeded
+[2025-04-23T18:11:33.696Z] Event data:: {
+  "id": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "object": "invoice",
+  "account_country": "IT",
+  "account_name": "Voyage Smart sandbox",
+  "account_tax_ids": null,
+  "amount_due": 499,
+  "amount_overpaid": 0,
+  "amount_paid": 499,
+  "amount_remaining": 0,
+  "amount_shipping": 0,
+  "application": null,
+  "attempt_count": 1,
+  "attempted": true,
+  "auto_advance": false,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "automatically_finalizes_at": null,
+  "billing_reason": "subscription_create",
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "custom_fields": null,
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "customer_address": null,
+  "customer_email": "r.nebili22@gmail.com",
+  "customer_name": null,
+  "customer_phone": null,
+  "customer_shipping": null,
+  "customer_tax_exempt": "none",
+  "customer_tax_ids": [],
+  "default_payment_method": null,
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "due_date": null,
+  "effective_at": 1745431963,
+  "ending_balance": 0,
+  "footer": null,
+  "from_invoice": null,
+  "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y?s=ap",
+  "invoice_pdf": "https://pay.stripe.com/invoice/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y/pdf?s=ap",
+  "issuer": {
+    "type": "self"
+  },
+  "last_finalization_error": null,
+  "latest_revision": null,
+  "lines": {
+    "object": "list",
+    "data": [
+      {
+        "id": "il_1RH7mpQ4CpdRSiZ7tVc3hLza",
+        "object": "line_item",
+        "amount": 499,
+        "currency": "eur",
+        "description": "1 × Premium (at €4.99 / month)",
+        "discount_amounts": [],
+        "discountable": true,
+        "discounts": [],
+        "invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "invoice_item_details": null,
+          "subscription_item_details": {
+            "invoice_item": null,
+            "proration": false,
+            "proration_details": {
+              "credited_items": null
+            },
+            "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+            "subscription_item": "si_SBUmoDjAXxC3F5"
+          },
+          "type": "subscription_item_details"
+        },
+        "period": {
+          "end": 1748023963,
+          "start": 1745431963
+        },
+        "pretax_credit_amounts": [],
+        "pricing": {
+          "price_details": {
+            "price": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+            "product": "prod_SBCWb2yz0tNKFl"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "taxes": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/invoices/in_1RH7mpQ4CpdRSiZ7fzO63SjA/lines"
+  },
+  "livemode": false,
+  "metadata": {},
+  "next_payment_attempt": null,
+  "number": "5A2E53B7-0018",
+  "on_behalf_of": null,
+  "parent": {
+    "quote_details": null,
+    "subscription_details": {
+      "metadata": {},
+      "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+    },
+    "type": "subscription_details"
+  },
+  "payment_settings": {
+    "default_mandate": null,
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null
+  },
+  "period_end": 1745431963,
+  "period_start": 1745431963,
+  "post_payment_credit_notes_amount": 0,
+  "pre_payment_credit_notes_amount": 0,
+  "receipt_number": null,
+  "rendering": null,
+  "shipping_cost": null,
+  "shipping_details": null,
+  "starting_balance": 0,
+  "statement_descriptor": null,
+  "status": "paid",
+  "status_transitions": {
+    "finalized_at": 1745431963,
+    "marked_uncollectible_at": null,
+    "paid_at": 1745431965,
+    "voided_at": null
+  },
+  "subtotal": 499,
+  "subtotal_excluding_tax": 499,
+  "test_clock": null,
+  "total": 499,
+  "total_discount_amounts": [],
+  "total_excluding_tax": 499,
+  "total_pretax_credit_amounts": [],
+  "total_taxes": [],
+  "webhooks_delivered_at": null
+}
+[2025-04-23T18:11:33.696Z] Handling invoice.payment_succeeded event
+[2025-04-23T18:11:33.697Z] Processing invoice.payment_succeeded: {
+  "id": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "object": "invoice",
+  "account_country": "IT",
+  "account_name": "Voyage Smart sandbox",
+  "account_tax_ids": null,
+  "amount_due": 499,
+  "amount_overpaid": 0,
+  "amount_paid": 499,
+  "amount_remaining": 0,
+  "amount_shipping": 0,
+  "application": null,
+  "attempt_count": 1,
+  "attempted": true,
+  "auto_advance": false,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null,
+    "provider": null,
+    "status": null
+  },
+  "automatically_finalizes_at": null,
+  "billing_reason": "subscription_create",
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "custom_fields": null,
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "customer_address": null,
+  "customer_email": "r.nebili22@gmail.com",
+  "customer_name": null,
+  "customer_phone": null,
+  "customer_shipping": null,
+  "customer_tax_exempt": "none",
+  "customer_tax_ids": [],
+  "default_payment_method": null,
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "due_date": null,
+  "effective_at": 1745431963,
+  "ending_balance": 0,
+  "footer": null,
+  "from_invoice": null,
+  "hosted_invoice_url": "https://invoice.stripe.com/i/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y?s=ap",
+  "invoice_pdf": "https://pay.stripe.com/invoice/acct_1RGq2sQ4CpdRSiZ7/test_YWNjdF8xUkdxMnNRNENwZFJTaVo3LF9TQlVtVGx4TDNGV0lHRWF0SWxsOGRNNHgyS1o2aTlRLDEzNTk3Mjc2Nw0200QUe7l32y/pdf?s=ap",
+  "issuer": {
+    "type": "self"
+  },
+  "last_finalization_error": null,
+  "latest_revision": null,
+  "lines": {
+    "object": "list",
+    "data": [
+      {
+        "id": "il_1RH7mpQ4CpdRSiZ7tVc3hLza",
+        "object": "line_item",
+        "amount": 499,
+        "currency": "eur",
+        "description": "1 × Premium (at €4.99 / month)",
+        "discount_amounts": [],
+        "discountable": true,
+        "discounts": [],
+        "invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "invoice_item_details": null,
+          "subscription_item_details": {
+            "invoice_item": null,
+            "proration": false,
+            "proration_details": {
+              "credited_items": null
+            },
+            "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+            "subscription_item": "si_SBUmoDjAXxC3F5"
+          },
+          "type": "subscription_item_details"
+        },
+        "period": {
+          "end": 1748023963,
+          "start": 1745431963
+        },
+        "pretax_credit_amounts": [],
+        "pricing": {
+          "price_details": {
+            "price": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+            "product": "prod_SBCWb2yz0tNKFl"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "taxes": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/invoices/in_1RH7mpQ4CpdRSiZ7fzO63SjA/lines"
+  },
+  "livemode": false,
+  "metadata": {},
+  "next_payment_attempt": null,
+  "number": "5A2E53B7-0018",
+  "on_behalf_of": null,
+  "parent": {
+    "quote_details": null,
+    "subscription_details": {
+      "metadata": {},
+      "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+    },
+    "type": "subscription_details"
+  },
+  "payment_settings": {
+    "default_mandate": null,
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null
+  },
+  "period_end": 1745431963,
+  "period_start": 1745431963,
+  "post_payment_credit_notes_amount": 0,
+  "pre_payment_credit_notes_amount": 0,
+  "receipt_number": null,
+  "rendering": null,
+  "shipping_cost": null,
+  "shipping_details": null,
+  "starting_balance": 0,
+  "statement_descriptor": null,
+  "status": "paid",
+  "status_transitions": {
+    "finalized_at": 1745431963,
+    "marked_uncollectible_at": null,
+    "paid_at": 1745431965,
+    "voided_at": null
+  },
+  "subtotal": 499,
+  "subtotal_excluding_tax": 499,
+  "test_clock": null,
+  "total": 499,
+  "total_discount_amounts": [],
+  "total_excluding_tax": 499,
+  "total_pretax_credit_amounts": [],
+  "total_taxes": [],
+  "webhooks_delivered_at": null
+}
+[2025-04-23T18:11:33.698Z] Invoice does not have a subscription, skipping
+[2025-04-23T18:11:33.700Z] Retrieved customer from Stripe: {
+  "id": "cus_SBUlGmNVDUw6qm",
+  "object": "customer",
+  "address": null,
+  "balance": 0,
+  "created": 1745431938,
+  "currency": "eur",
+  "default_source": null,
+  "delinquent": false,
+  "description": null,
+  "discount": null,
+  "email": "r.nebili22@gmail.com",
+  "invoice_prefix": "2FC06158",
+  "invoice_settings": {
+    "custom_fields": null,
+    "default_payment_method": null,
+    "footer": null,
+    "rendering_options": null
+  },
+  "livemode": false,
+  "metadata": {
+    "supabaseUserId": "5ea883cb-6d3b-4f65-a41d-273811e92780"
+  },
+  "name": null,
+  "phone": null,
+  "preferred_locales": [],
+  "shipping": null,
+  "tax_exempt": "none",
+  "test_clock": null
+}
+[2025-04-23T18:11:33.700Z] Found user ID in customer metadata: 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:11:33.735Z] User subscription updated for user 5ea883cb-6d3b-4f65-a41d-273811e92780 to tier premium: [
+  {
+    "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+    "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+    "tier": "premium",
+    "status": "active",
+    "valid_until": "2026-04-23T18:11:01.335+00:00",
+    "created_at": "2025-04-23T18:12:15.706263+00:00",
+    "updated_at": "2025-04-23T18:12:15.706263+00:00",
+    "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+    "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-05-23T18:12:43+00:00"
+  }
+]
+[2025-04-23T18:11:33.750Z] Updated customer ID for user 5ea883cb-6d3b-4f65-a41d-273811e92780: [
+  {
+    "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+    "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+    "tier": "premium",
+    "status": "active",
+    "valid_until": "2026-04-23T18:11:01.335+00:00",
+    "created_at": "2025-04-23T18:12:15.706263+00:00",
+    "updated_at": "2025-04-23T18:12:15.706263+00:00",
+    "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+    "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-05-23T18:12:43+00:00"
+  }
+]
+[2025-04-23T18:11:33.751Z] Updating subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "customerId": "cus_SBUlGmNVDUw6qm",
+  "subscriptionId": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+}
+[2025-04-23T18:11:33.766Z] Updated customer ID for user 5ea883cb-6d3b-4f65-a41d-273811e92780: [
+  {
+    "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+    "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+    "tier": "premium",
+    "status": "active",
+    "valid_until": "2026-04-23T18:11:01.335+00:00",
+    "created_at": "2025-04-23T18:12:15.706263+00:00",
+    "updated_at": "2025-04-23T18:12:15.706263+00:00",
+    "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+    "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-05-23T18:12:43+00:00"
+  }
+]
+[2025-04-23T18:11:33.767Z] Updating subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "customerId": "cus_SBUlGmNVDUw6qm",
+  "subscriptionId": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+}
+[2025-04-23T18:11:33.780Z] Current subscription state after update: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T18:11:01.335+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+  "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T18:12:43+00:00"
+}
+[2025-04-23T18:11:33.780Z] Checkout session completed for user 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:11:33.846Z] Found existing subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T18:11:01.335+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+  "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T18:12:43+00:00"
+}
+[2025-04-23T18:11:33.846Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:11:33.847Z] Error in updateSubscription: Invalid time value: {}
+[2025-04-23T18:11:33.871Z] Found existing subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T18:11:01.335+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+  "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T18:12:43+00:00"
+}
+[2025-04-23T18:11:33.872Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:11:33.872Z] Error in updateSubscription: Invalid time value: {}
+[2025-04-23T18:14:40.630Z] Stripe webhook received
+[2025-04-23T18:14:40.631Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5789",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745432154,v1=4f2a93ea34d01df090bc1affda0a539f55b05f69dd10cb70da9f59b126eba770,v0=b3239fa4e4391f9515e6d68484baa7568f898855465abc1b17e0a9eea47949f1",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:14:40.632Z] Webhook signature: "Present"
+[2025-04-23T18:14:40.632Z] Using webhook secret for verification
+[2025-04-23T18:14:40.633Z] Webhook event type: customer.subscription.updated
+[2025-04-23T18:14:40.634Z] Processing event type: customer.subscription.updated
+[2025-04-23T18:14:40.634Z] Event data:: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748023963,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745432154,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:14:40.635Z] Handling customer.subscription.updated event
+[2025-04-23T18:14:40.635Z] Processing customer.subscription.updated: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748023963,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745432154,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:14:40.635Z] Customer ID: cus_SBUlGmNVDUw6qm
+[2025-04-23T18:14:40.688Z] Found user ID: 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:14:40.689Z] Updating subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "customerId": "cus_SBUlGmNVDUw6qm",
+  "subscriptionId": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+}
+[2025-04-23T18:14:40.795Z] Found existing subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T18:11:01.335+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+  "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T18:12:43+00:00"
+}
+[2025-04-23T18:14:40.795Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:14:40.796Z] Error in updateSubscription: Invalid time value: {}
+[2025-04-23T18:15:17.964Z] Stripe webhook received
+[2025-04-23T18:15:17.965Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5669",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745432192,v1=c190862be7cd4cd2e896fb117ba543c82a9f810bcd444aa4ffee19ae3cf8812c,v0=15d03d2b88f0b0b9f04c97d6bdfaeeb1962e0c18472cdba5fb120fe8d4215fe3",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:15:17.965Z] Webhook signature: "Present"
+[2025-04-23T18:15:17.966Z] Using webhook secret for verification
+[2025-04-23T18:15:17.967Z] Webhook event type: customer.subscription.updated
+[2025-04-23T18:15:17.967Z] Processing event type: customer.subscription.updated
+[2025-04-23T18:15:17.967Z] Event data:: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748023963,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745432191,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:15:17.968Z] Handling customer.subscription.updated event
+[2025-04-23T18:15:17.968Z] Processing customer.subscription.updated: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748023963,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745432191,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:15:17.968Z] Customer ID: cus_SBUlGmNVDUw6qm
+[2025-04-23T18:15:18.053Z] Found user ID: 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:15:18.054Z] Updating subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "customerId": "cus_SBUlGmNVDUw6qm",
+  "subscriptionId": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+}
+[2025-04-23T18:15:18.248Z] Found existing subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T18:11:01.335+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+  "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T18:12:43+00:00"
+}
+[2025-04-23T18:15:18.249Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:15:18.249Z] Error in updateSubscription: Invalid time value: {}
+[2025-04-23T18:15:55.104Z] Stripe webhook received
+[2025-04-23T18:15:55.105Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5669",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745432229,v1=cd2bbd2dba77da3a4ae36314bffb31675b1b53b399e1b3b235bcc84307b930dc,v0=b65647866bbed7406bada1074d8441b2eadb0a4d3cb86c7d521e5a98e3d399e8",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:15:55.106Z] Webhook signature: "Present"
+[2025-04-23T18:15:55.106Z] Using webhook secret for verification
+[2025-04-23T18:15:55.107Z] Webhook event type: customer.subscription.updated
+[2025-04-23T18:15:55.107Z] Processing event type: customer.subscription.updated
+[2025-04-23T18:15:55.107Z] Event data:: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748023963,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745432228,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:15:55.108Z] Handling customer.subscription.updated event
+[2025-04-23T18:15:55.108Z] Processing customer.subscription.updated: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748023963,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745432228,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:15:55.109Z] Customer ID: cus_SBUlGmNVDUw6qm
+[2025-04-23T18:15:55.228Z] Found user ID: 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:15:55.228Z] Updating subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "customerId": "cus_SBUlGmNVDUw6qm",
+  "subscriptionId": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+}
+[2025-04-23T18:15:55.414Z] Found existing subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T18:11:01.335+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+  "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T18:12:43+00:00"
+}
+[2025-04-23T18:15:55.415Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:15:55.415Z] Error in updateSubscription: Invalid time value: {}
+[2025-04-23T18:18:38.894Z] Stripe webhook received
+[2025-04-23T18:18:38.896Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5771",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745432392,v1=c8844f69874deff8a14111b9f66a08efe1b16288b0cc152f83b04ed56854d301,v0=caa29b3a551a56f38615814698c6bfde1ee312a6518cd925d5eebcd1f4eb72c0",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:18:38.897Z] Webhook signature: "Present"
+[2025-04-23T18:18:38.897Z] Using webhook secret for verification
+[2025-04-23T18:18:38.899Z] Webhook event type: customer.subscription.updated
+[2025-04-23T18:18:38.899Z] Processing event type: customer.subscription.updated
+[2025-04-23T18:18:38.899Z] Event data:: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": null,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": null
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:18:38.900Z] Handling customer.subscription.updated event
+[2025-04-23T18:18:38.901Z] Processing customer.subscription.updated: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "canceled_at": null,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": null
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:18:38.901Z] Customer ID: cus_SBUlGmNVDUw6qm
+[2025-04-23T18:18:39.170Z] Found user ID: 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:18:39.171Z] Updating subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "customerId": "cus_SBUlGmNVDUw6qm",
+  "subscriptionId": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+}
+[2025-04-23T18:18:39.300Z] Found existing subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-23T18:11:01.335+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+  "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-05-23T18:12:43+00:00"
+}
+[2025-04-23T18:18:39.301Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:18:39.301Z] Error in updateSubscription: Invalid time value: {}
+[2025-04-23T18:21:16.959Z] Stripe webhook received
+[2025-04-23T18:21:16.961Z] Webhook headers: {
+  "accept": "*/*; q=0.5, application/xml",
+  "accept-encoding": "gzip",
+  "cache-control": "no-cache",
+  "content-length": "5789",
+  "content-type": "application/json; charset=utf-8",
+  "host": "localhost:3000",
+  "stripe-signature": "t=1745432550,v1=fe4dda90ff6291ebb14cd814bff946731f18951bdbf522a803b261bbfb4b075c,v0=43cc553445823532ad6f25470288deac68f5311ddf232aff8668e0b3dac2fa8a",
+  "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
+  "x-forwarded-for": "::1",
+  "x-forwarded-host": "localhost:3000",
+  "x-forwarded-port": "3000",
+  "x-forwarded-proto": "http"
+}
+[2025-04-23T18:21:16.962Z] Webhook signature: "Present"
+[2025-04-23T18:21:16.962Z] Using webhook secret for verification
+[2025-04-23T18:21:16.963Z] Webhook event type: customer.subscription.updated
+[2025-04-23T18:21:16.963Z] Processing event type: customer.subscription.updated
+[2025-04-23T18:21:16.964Z] Event data:: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748023963,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745432550,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:21:16.964Z] Handling customer.subscription.updated event
+[2025-04-23T18:21:16.965Z] Processing customer.subscription.updated: {
+  "id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "object": "subscription",
+  "application": null,
+  "application_fee_percent": null,
+  "automatic_tax": {
+    "disabled_reason": null,
+    "enabled": false,
+    "liability": null
+  },
+  "billing_cycle_anchor": 1745431963,
+  "billing_cycle_anchor_config": null,
+  "cancel_at": 1748023963,
+  "cancel_at_period_end": true,
+  "canceled_at": 1745432550,
+  "cancellation_details": {
+    "comment": null,
+    "feedback": null,
+    "reason": "cancellation_requested"
+  },
+  "collection_method": "charge_automatically",
+  "created": 1745431963,
+  "currency": "eur",
+  "customer": "cus_SBUlGmNVDUw6qm",
+  "days_until_due": null,
+  "default_payment_method": "pm_1RH7moQ4CpdRSiZ7xcu7LKBi",
+  "default_source": null,
+  "default_tax_rates": [],
+  "description": null,
+  "discounts": [],
+  "ended_at": null,
+  "invoice_settings": {
+    "account_tax_ids": null,
+    "issuer": {
+      "type": "self"
+    }
+  },
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_SBUmoDjAXxC3F5",
+        "object": "subscription_item",
+        "created": 1745431963,
+        "current_period_end": 1748023963,
+        "current_period_start": 1745431963,
+        "discounts": [],
+        "metadata": {},
+        "plan": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "plan",
+          "active": true,
+          "amount": 499,
+          "amount_decimal": "499",
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "interval": "month",
+          "interval_count": 1,
+          "livemode": false,
+          "metadata": {},
+          "meter": null,
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "tiers_mode": null,
+          "transform_usage": null,
+          "trial_period_days": null,
+          "usage_type": "licensed"
+        },
+        "price": {
+          "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1745364068,
+          "currency": "eur",
+          "custom_unit_amount": null,
+          "livemode": false,
+          "lookup_key": null,
+          "metadata": {},
+          "nickname": null,
+          "product": "prod_SBCWb2yz0tNKFl",
+          "recurring": {
+            "interval": "month",
+            "interval_count": 1,
+            "meter": null,
+            "trial_period_days": null,
+            "usage_type": "licensed"
+          },
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "recurring",
+          "unit_amount": 499,
+          "unit_amount_decimal": "499"
+        },
+        "quantity": 1,
+        "subscription": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+        "tax_rates": []
+      }
+    ],
+    "has_more": false,
+    "total_count": 1,
+    "url": "/v1/subscription_items?subscription=sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+  },
+  "latest_invoice": "in_1RH7mpQ4CpdRSiZ7fzO63SjA",
+  "livemode": false,
+  "metadata": {},
+  "next_pending_invoice_item_invoice": null,
+  "on_behalf_of": null,
+  "pause_collection": null,
+  "payment_settings": {
+    "payment_method_options": {
+      "acss_debit": null,
+      "bancontact": null,
+      "card": {
+        "network": null,
+        "request_three_d_secure": "automatic"
+      },
+      "customer_balance": null,
+      "konbini": null,
+      "sepa_debit": null,
+      "us_bank_account": null
+    },
+    "payment_method_types": null,
+    "save_default_payment_method": "off"
+  },
+  "pending_invoice_item_interval": null,
+  "pending_setup_intent": null,
+  "pending_update": null,
+  "plan": {
+    "id": "price_1RGq7kQ4CpdRSiZ7ZqlZu3o1",
+    "object": "plan",
+    "active": true,
+    "amount": 499,
+    "amount_decimal": "499",
+    "billing_scheme": "per_unit",
+    "created": 1745364068,
+    "currency": "eur",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": false,
+    "metadata": {},
+    "meter": null,
+    "nickname": null,
+    "product": "prod_SBCWb2yz0tNKFl",
+    "tiers_mode": null,
+    "transform_usage": null,
+    "trial_period_days": null,
+    "usage_type": "licensed"
+  },
+  "quantity": 1,
+  "schedule": null,
+  "start_date": 1745431963,
+  "status": "active",
+  "test_clock": null,
+  "transfer_data": null,
+  "trial_end": null,
+  "trial_settings": {
+    "end_behavior": {
+      "missing_payment_method": "create_invoice"
+    }
+  },
+  "trial_start": null
+}
+[2025-04-23T18:21:16.965Z] Customer ID: cus_SBUlGmNVDUw6qm
+[2025-04-23T18:21:17.021Z] Found user ID: 5ea883cb-6d3b-4f65-a41d-273811e92780
+[2025-04-23T18:21:17.022Z] Updating subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "userId": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "customerId": "cus_SBUlGmNVDUw6qm",
+  "subscriptionId": "sub_1RH7mpQ4CpdRSiZ707nWXyXT"
+}
+[2025-04-23T18:21:17.119Z] Found existing subscription for user 5ea883cb-6d3b-4f65-a41d-273811e92780: {
+  "id": "a4e7c98f-a053-4143-8c8c-806ae7ed287a",
+  "user_id": "5ea883cb-6d3b-4f65-a41d-273811e92780",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2025-05-23T18:12:43+00:00",
+  "created_at": "2025-04-23T18:12:15.706263+00:00",
+  "updated_at": "2025-04-23T18:12:15.706263+00:00",
+  "stripe_customer_id": "cus_SBUlGmNVDUw6qm",
+  "stripe_subscription_id": "sub_1RH7mpQ4CpdRSiZ707nWXyXT",
+  "cancel_at_period_end": true,
+  "current_period_end": "2025-05-23T18:12:43+00:00"
+}
+[2025-04-23T18:21:17.120Z] Determined tier from price ID price_1RGq7kQ4CpdRSiZ7ZqlZu3o1: premium
+[2025-04-23T18:21:17.121Z] Error in updateSubscription: Invalid time value: {}

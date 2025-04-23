@@ -234,13 +234,17 @@ export async function initiateCheckout(tier: SubscriptionTier): Promise<string |
 
 export async function cancelStripeSubscription(subscriptionId: string): Promise<boolean> {
   try {
+    console.log('Client - Canceling subscription:', subscriptionId);
     // Ottieni la sessione corrente per il token di accesso
     const { data: { session } } = await supabase.auth.getSession();
     const accessToken = session?.access_token;
 
     if (!accessToken) {
+      console.error('Client - No active session found');
       throw new Error('No active session found');
     }
+
+    console.log('Client - Got access token, proceeding with cancellation');
 
     const response = await fetch('/api/stripe/cancel', {
       method: 'POST',
@@ -252,15 +256,19 @@ export async function cancelStripeSubscription(subscriptionId: string): Promise<
     });
 
     const data = await response.json();
+    console.log('Client - Cancellation response:', data);
 
     if (!response.ok) {
-      throw new Error(data.error || 'Error canceling subscription');
+      console.error('Client - Error response from cancellation API:', data);
+      throw new Error(data.error || data.details || 'Error canceling subscription');
     }
 
+    console.log('Client - Subscription canceled successfully');
     return true;
-  } catch (error) {
-    console.error('Error canceling subscription:', error);
-    return false;
+  } catch (error: any) {
+    console.error('Client - Error canceling subscription:', error);
+    // Rilanciamo l'errore per permettere al chiamante di gestirlo
+    throw error;
   }
 }
 
