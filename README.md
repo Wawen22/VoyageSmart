@@ -253,6 +253,9 @@ trip_media
   - Ottimizzazione percorsi avanzata
   - Analisi predittiva costi e affluenza
 
+- **Automazione sottoscrizioni**
+  - [To Do] Configurare un cron job (es. Vercel Cron Jobs, AWS Lambda con EventBridge, ecc.) che chiami periodicamente l'endpoint `/api/cron/check-subscriptions` (ad esempio una volta al giorno) per verificare e aggiornare tutte le sottoscrizioni scadute.
+
 - **Assistente virtuale**
   - Chatbot per domande frequenti
   - NLP per query in linguaggio naturale
