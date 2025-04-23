@@ -14,6 +14,21 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Voyage Smart - Travel Planning Made Easy',
   description: 'Plan your trips, manage expenses, and collaborate with friends all in one place.',
+  icons: {
+    icon: '/images/logo-voyage_smart.png',
+    apple: '/images/logo-voyage_smart.png',
+  },
+  openGraph: {
+    title: 'Voyage Smart - Travel Planning Made Easy',
+    description: 'Plan your trips, manage expenses, and collaborate with friends all in one place.',
+    images: ['/images/logo-voyage_smart.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Voyage Smart - Travel Planning Made Easy',
+    description: 'Plan your trips, manage expenses, and collaborate with friends all in one place.',
+    images: ['/images/logo-voyage_smart.png'],
+  },
 };
 
 export default function RootLayout({

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
@@ -41,8 +42,16 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-xl font-bold text-primary hover:text-primary/90 transition-colors">
-                Voyage Smart
+              <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+                <Image
+                  src="/images/logo-voyage_smart.png"
+                  alt="Voyage Smart Logo"
+                  width={200}
+                  height={60}
+                  className="h-12 w-auto"
+                  priority
+                />
+                <span className="sr-only">Voyage Smart</span>
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

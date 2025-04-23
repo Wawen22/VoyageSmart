@@ -84,10 +84,16 @@ export default function Home() {
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="flex flex-col items-center text-center">
-            <div className="animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-600 mb-6 animate-pulse-once">
-                Voyage Smart
-              </h1>
+            <div className="animate-fade-in flex flex-col items-center">
+              <Image
+                src="/images/logo-voyage_smart.png"
+                alt="Voyage Smart Logo"
+                width={400}
+                height={120}
+                className="h-auto w-auto max-w-[320px] md:max-w-[400px] mb-8"
+                priority
+              />
+              <h1 className="sr-only">Voyage Smart</h1>
             </div>
 
             <p className="text-xl md:text-2xl text-foreground/80 max-w-3xl mx-auto mb-8 animate-slide-in-bottom delay-200">
@@ -228,7 +234,15 @@ export default function Home() {
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <p className="text-lg font-semibold text-primary">Voyage Smart</p>
+              <div className="flex items-center">
+                <Image
+                  src="/images/logo-voyage_smart.png"
+                  alt="Voyage Smart Logo"
+                  width={160}
+                  height={40}
+                  className="h-8 w-auto"
+                />
+              </div>
               <p className="text-sm text-muted-foreground">Travel planning made easy</p>
             </div>
 

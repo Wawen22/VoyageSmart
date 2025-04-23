@@ -1,6 +1,7 @@
  'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation'; // Import useRouter and useSearchParams
 import { signUpUser } from '@/lib/auth-utils';
@@ -83,6 +84,16 @@ export default function Register() {
     <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-md p-6 sm:p-8 space-y-6 bg-card rounded-lg shadow-md border border-border">
         <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/images/logo-voyage_smart.png"
+              alt="Voyage Smart Logo"
+              width={240}
+              height={70}
+              className="h-16 w-auto"
+              priority
+            />
+          </div>
           <h1 className="text-2xl font-bold text-foreground">Create an Account</h1>
           <p className="mt-2 text-muted-foreground">Join Voyage Smart to start planning your trips</p>
         </div>
