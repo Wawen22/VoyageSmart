@@ -67,14 +67,14 @@ export default function Navbar() {
                 New Trip
               </Link>
               <Link
-                href="/pricing"
+                href={user ? "/subscription" : "/pricing"}
                 className={`nav-indicator ${
-                  pathname === '/pricing'
+                  pathname === '/pricing' || pathname === '/subscription'
                     ? 'border-primary text-foreground active'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
-                Pricing
+                {user ? "Subscription" : "Pricing"}
               </Link>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function Navbar() {
                       Your Profile
                     </Link>
                     <Link
-                      href="/pricing"
+                      href="/subscription"
                       className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                       role="menuitem"
                       onClick={() => setIsProfileMenuOpen(false)}
@@ -176,9 +176,9 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href="/pricing"
-              className={`p-2 rounded-md ${pathname === '/pricing' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
-              aria-label="Pricing"
+              href={user ? "/subscription" : "/pricing"}
+              className={`p-2 rounded-md ${pathname === '/pricing' || pathname === '/subscription' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
+              aria-label={user ? "Subscription" : "Pricing"}
             >
               <TagIcon className="h-5 w-5" />
             </Link>
