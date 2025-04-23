@@ -104,7 +104,8 @@ export async function POST(request: NextRequest) {
       const { error: updateError } = await supabase
         .from('user_subscriptions')
         .update({
-          tier: 'free',
+          // Manteniamo il tier corrente fino alla fine del periodo pagato
+          // tier: 'free',
           cancel_at_period_end: true,
           valid_until: currentPeriodEnd, // Aggiorna valid_until per corrispondere alla fine del periodo corrente
         })
@@ -126,14 +127,14 @@ export async function POST(request: NextRequest) {
       const { error: historyError } = await supabase.from('subscription_history').insert({
         user_id: user.id,
         event_type: 'subscription_canceled',
-        tier: 'free', // Aggiornato a free
+        tier: subscriptionData.tier, // Manteniamo il tier corrente
         status: 'active', // Rimane attiva fino alla fine del periodo
         stripe_subscription_id: subscriptionId,
         stripe_customer_id: subscriptionData.stripe_customer_id,
         details: {
           cancel_at_period_end: true,
           current_period_end: currentPeriodEnd,
-          previous_tier: subscriptionData.tier
+          will_downgrade_to: 'free'
         },
       });
 

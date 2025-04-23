@@ -153,7 +153,7 @@ export default function SubscriptionPage() {
 
       toast({
         title: 'Subscription Canceled',
-        description: 'Your subscription has been canceled and downgraded to the free plan.',
+        description: `Your subscription has been canceled. You will continue to have Premium access until ${formatDate(subscription.currentPeriodEnd?.toISOString() || subscription.validUntil.toISOString())}.`,
         variant: 'default',
       });
     } catch (error: any) {
@@ -250,7 +250,9 @@ export default function SubscriptionPage() {
                           <p className="text-lg font-medium capitalize">
                             {subscription.status}
                             {subscription.cancelAtPeriodEnd && (
-                              <span className="ml-2 text-sm text-muted-foreground">(Cancels at period end)</span>
+                              <span className="ml-2 text-sm text-muted-foreground">
+                                (Cancels on {formatDate(subscription.currentPeriodEnd?.toISOString() || subscription.validUntil.toISOString())})
+                              </span>
                             )}
                           </p>
                         </div>
@@ -275,8 +277,8 @@ export default function SubscriptionPage() {
                           <PricingFeature included={true}>Expense tracking</PricingFeature>
                           <PricingFeature included={true}>Trip collaboration</PricingFeature>
                           <PricingFeature included={subscription.tier !== 'free'}>Unlimited trips</PricingFeature>
-                          <PricingFeature included={subscription.tier !== 'free'}>Accommodations management</PricingFeature>
-                          <PricingFeature included={subscription.tier !== 'free'}>Transportation tracking</PricingFeature>
+                          <PricingFeature included={subscription.tier !== 'free' || subscription.cancelAtPeriodEnd}>Accommodations management</PricingFeature>
+                          <PricingFeature included={subscription.tier !== 'free' || subscription.cancelAtPeriodEnd}>Transportation tracking</PricingFeature>
                         </div>
                       </div>
                     </>

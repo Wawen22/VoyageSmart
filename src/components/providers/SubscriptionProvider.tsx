@@ -14,6 +14,7 @@ import {
   cancelStripeSubscription,
   getSubscriptionHistory
 } from '@/lib/subscription';
+import { checkUserSubscription } from '@/lib/subscription-utils';
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -32,6 +33,13 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
     try {
       setLoading(true);
+
+      // Verifica se la sottoscrizione dell'utente è scaduta
+      // Questo aggiorna automaticamente il tier a 'free' se necessario
+      const wasExpired = await checkUserSubscription(user.id);
+      if (wasExpired) {
+        console.log('Subscription was expired and has been updated to free tier');
+      }
 
       // Get user's subscription
       // La funzione getUserSubscription ora gestisce internamente la creazione
@@ -101,6 +109,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       return true;
     }
 
+    // Se la sottoscrizione è stata cancellata ma è ancora nel periodo pagato
+    // l'utente mantiene l'accesso al tier corrente
+    if (subscription.cancelAtPeriodEnd) {
+      if (subscription.tier === 'premium' && (tier === 'premium' || tier === 'free')) {
+        return true;
+      }
+      if (subscription.tier === 'ai') {
+        return true;
+      }
+    }
+
     // Otherwise, check if the user's tier matches the requested tier
     return subscription.tier === tier;
   };
@@ -119,8 +138,18 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   };
 
   const canAccessFeature = (feature: 'accommodations' | 'transportation'): boolean => {
-    // Only premium users can access accommodations and transportation
-    return isSubscribed('premium');
+    // Premium users can access accommodations and transportation
+    // Anche gli utenti con sottoscrizione cancellata ma ancora valida possono accedere
+    if (isSubscribed('premium')) {
+      return true;
+    }
+
+    // Se la sottoscrizione è stata cancellata ma è ancora nel periodo pagato
+    if (subscription?.cancelAtPeriodEnd && subscription.tier === 'premium') {
+      return true;
+    }
+
+    return false;
   };
 
   const upgradeSubscription = async (tier: SubscriptionTier): Promise<void> => {
@@ -176,7 +205,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         if (!prev) return null;
         return {
           ...prev,
-          tier: 'free', // Imposta immediatamente il tier a free
+          // Manteniamo il tier corrente fino alla fine del periodo pagato
+          // tier: 'free',
           cancelAtPeriodEnd: true,
           validUntil: prev.currentPeriodEnd || prev.validUntil, // Imposta validUntil uguale a currentPeriodEnd
         };
