@@ -31,6 +31,7 @@ export default function Dashboard() {
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('upcoming');
   const [searchTerm, setSearchTerm] = useState('');
   const [tripCount, setTripCount] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<string>('created_desc');
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -117,6 +118,25 @@ export default function Dashboard() {
     }
 
     return true;
+  }).sort((a, b) => {
+    // Apply sorting
+    switch (sortBy) {
+      case 'created_desc':
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case 'created_asc':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      case 'name_asc':
+        return a.name.localeCompare(b.name);
+      case 'name_desc':
+        return b.name.localeCompare(a.name);
+      case 'date_asc':
+        // Sort by start date (nearest first)
+        if (!a.start_date) return 1;
+        if (!b.start_date) return -1;
+        return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+      default:
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
   });
 
   // Get upcoming trips (for the special section)
@@ -128,14 +148,17 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border">
+      <header className="bg-gradient-to-r from-card to-card/80 border-b border-border sticky top-0 z-10 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0 animate-content-fade-in">
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Trips</h1>
+              <div className="relative">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">My Trips</h1>
+                <div className="absolute -bottom-1 left-0 w-1/3 h-1 bg-primary rounded-full"></div>
+              </div>
               {subscription?.tier === 'free' && tripCount !== null && (
-                <div className="flex items-center text-sm text-muted-foreground bg-muted px-2 py-1 rounded">
-                  <InfoIcon className="h-4 w-4 mr-1" />
+                <div className="flex items-center text-sm text-muted-foreground bg-muted/80 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm border border-border/50 transition-all hover:bg-muted">
+                  <InfoIcon className="h-4 w-4 mr-1 text-primary" />
                   <span>{tripCount}/3 trips</span>
                 </div>
               )}
@@ -149,7 +172,7 @@ export default function Dashboard() {
               <RippleButton
                 asChild
                 feedbackType="ripple"
-                className="px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent rounded-full shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center transition-all duration-300 hover:scale-105"
               >
                 <Link href="/trips/new">
                   <PlusIcon className="h-4 w-4 mr-1" />
@@ -161,37 +184,58 @@ export default function Dashboard() {
 
           <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 animate-content-fade-in" style={{ animationDelay: '100ms' }}>
             <div className="relative flex-grow">
-              <input
-                type="text"
-                placeholder="Search trips..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full rounded-md border-input bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary text-xs sm:text-sm py-1.5 px-3 transition-all duration-200 focus:scale-[1.01]"
-              />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <SearchIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="relative group">
+                <input
+                  type="text"
+                  placeholder="Search trips..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="block w-full rounded-full border-input bg-background/80 backdrop-blur-sm text-foreground shadow-sm focus:border-primary focus:ring-primary text-xs sm:text-sm py-2 px-4 transition-all duration-300 focus:scale-[1.01] pr-10"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                  {searchTerm ? (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                      </svg>
+                    </button>
+                  ) : (
+                    <SearchIcon className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-primary rounded-full transition-all duration-300 group-focus-within:w-[calc(100%-16px)]"></div>
               </div>
             </div>
 
-            <div className="flex space-x-1 sm:space-x-2 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
+            <div className="flex space-x-2 sm:space-x-3 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
               <RippleButton
                 variant="ghost"
                 onClick={() => setFilter('all')}
-                className={`px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium rounded-md whitespace-nowrap transition-all duration-200 ${filter === 'all' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
+                className={`px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium rounded-full whitespace-nowrap transition-all duration-300 ${filter === 'all'
+                  ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                  : 'bg-secondary/80 backdrop-blur-sm text-foreground hover:bg-accent hover:scale-105'}`}
               >
                 All Trips
               </RippleButton>
               <RippleButton
                 variant="ghost"
                 onClick={() => setFilter('upcoming')}
-                className={`px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium rounded-md whitespace-nowrap transition-all duration-200 ${filter === 'upcoming' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
+                className={`px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium rounded-full whitespace-nowrap transition-all duration-300 ${filter === 'upcoming'
+                  ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                  : 'bg-secondary/80 backdrop-blur-sm text-foreground hover:bg-accent hover:scale-105'}`}
               >
                 Upcoming
               </RippleButton>
               <RippleButton
                 variant="ghost"
                 onClick={() => setFilter('past')}
-                className={`px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium rounded-md whitespace-nowrap transition-all duration-200 ${filter === 'past' ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground hover:bg-accent'}`}
+                className={`px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium rounded-full whitespace-nowrap transition-all duration-300 ${filter === 'past'
+                  ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                  : 'bg-secondary/80 backdrop-blur-sm text-foreground hover:bg-accent hover:scale-105'}`}
               >
                 Past
               </RippleButton>
@@ -200,41 +244,112 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-4 px-3 sm:py-8 sm:px-6 lg:px-8">
         {error && (
-          <div className="bg-destructive/10 border-l-4 border-destructive p-3 text-destructive mb-4 sm:mb-6 text-sm sm:text-base rounded-r-md">
+          <div className="bg-destructive/10 border-l-4 border-destructive p-3 text-destructive mb-4 sm:mb-6 text-sm sm:text-base rounded-r-md shadow-sm animate-slide-in-right">
             <p>{error}</p>
           </div>
         )}
 
         {/* Trips Section */}
         <div className="mb-6 sm:mb-8 animate-content-fade-in" style={{ animationDelay: '200ms' }}>
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">
-            {filter === 'all' ? 'All Trips' : filter === 'upcoming' ? 'Upcoming Trips' : 'Past Trips'}
-            {searchTerm && <span className="text-sm sm:text-base"> matching "{searchTerm}"</span>}
-          </h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
+            <div className="flex items-center gap-2 mb-3 sm:mb-0">
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground relative">
+                <span className="relative">
+                  {filter === 'all' ? 'All Trips' : filter === 'upcoming' ? 'Upcoming Trips' : 'Past Trips'}
+                  <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary/30 rounded-full"></span>
+                </span>
+                {searchTerm && <span className="text-sm sm:text-base ml-2 text-muted-foreground"> matching "{searchTerm}"</span>}
+              </h2>
+              <span className="text-sm text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+                {filteredTrips.length} {filteredTrips.length === 1 ? 'trip' : 'trips'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="relative group">
+                <select
+                  className="text-xs sm:text-sm bg-secondary/80 backdrop-blur-sm text-foreground rounded-full px-3 py-1.5 pl-8 border border-border/50 focus:outline-none focus:ring-1 focus:ring-primary transition-all duration-300 appearance-none cursor-pointer"
+                  onChange={(e) => setSortBy(e.target.value)}
+                  value={sortBy}
+                >
+                  <option value="created_desc">Newest first</option>
+                  <option value="created_asc">Oldest first</option>
+                  <option value="name_asc">Name (A-Z)</option>
+                  <option value="name_desc">Name (Z-A)</option>
+                  <option value="date_asc">Date (nearest first)</option>
+                </select>
+                <div className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-primary pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m3 16 4 4 4-4"/>
+                    <path d="M7 20V4"/>
+                    <path d="m21 8-4-4-4 4"/>
+                    <path d="M17 4v16"/>
+                  </svg>
+                </div>
+                <div className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none transition-transform duration-300 group-hover:rotate-180">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m6 9 6 6 6-6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {loading ? (
-            <div className="text-center py-12 bg-card rounded-lg shadow animate-pulse">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-muted-foreground">Loading your trips...</p>
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-card rounded-lg shadow-sm overflow-hidden border border-border/50 animate-pulse">
+                  <div className="p-4 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div className="h-6 bg-muted rounded w-2/3"></div>
+                      <div className="h-5 bg-muted rounded w-1/4"></div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="h-4 w-4 bg-muted rounded-full mr-2"></div>
+                      <div className="h-4 bg-muted rounded w-1/2"></div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="h-4 w-4 bg-muted rounded-full mr-2"></div>
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                    </div>
+                    <div className="h-10 bg-muted rounded w-full"></div>
+                    <div className="pt-3 flex justify-between items-center border-t border-border">
+                      <div className="h-3 bg-muted rounded w-1/4"></div>
+                      <div className="h-4 bg-muted rounded w-1/4"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : trips.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-lg shadow animate-fade-in">
+            <div className="text-center py-12 bg-card/50 backdrop-blur-sm rounded-lg shadow-sm border border-border/50 animate-fade-in">
+              <div className="w-20 h-20 mx-auto mb-4 text-primary/50">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+              </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">No trips found</h3>
               <p className="text-muted-foreground mb-6">Start planning your first adventure!</p>
               <RippleButton
                 asChild
                 feedbackType="ripple"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                className="px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 hover:scale-105"
               >
                 <Link href="/trips/new">
+                  <PlusIcon className="h-4 w-4 mr-1 inline-block" />
                   Create New Trip
                 </Link>
               </RippleButton>
             </div>
           ) : filteredTrips.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-lg shadow animate-fade-in">
+            <div className="text-center py-12 bg-card/50 backdrop-blur-sm rounded-lg shadow-sm border border-border/50 animate-fade-in">
+              <div className="w-20 h-20 mx-auto mb-4 text-muted-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">No matching trips</h3>
               <p className="text-muted-foreground">Try adjusting your filters or search term</p>
             </div>
