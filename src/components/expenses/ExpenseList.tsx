@@ -28,9 +28,10 @@ type ExpenseListProps = {
   participants: Participant[];
   currency: string;
   onDelete: (id: string) => void;
+  onEdit: (expense: Expense) => void;
 };
 
-export default function ExpenseList({ expenses, participants, currency, onDelete }: ExpenseListProps) {
+export default function ExpenseList({ expenses, participants, currency, onDelete, onEdit }: ExpenseListProps) {
 
   if (expenses.length === 0) {
     return (
@@ -55,6 +56,7 @@ export default function ExpenseList({ expenses, participants, currency, onDelete
           key={expense.id}
           expense={expense}
           onDelete={onDelete}
+          onEdit={onEdit}
         />
       ))}
     </div>

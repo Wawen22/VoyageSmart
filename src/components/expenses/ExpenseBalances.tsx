@@ -31,13 +31,15 @@ type ExpenseBalancesProps = {
   settlements: Settlement[];
   currency: string;
   currentUserId?: string;
+  onMarkAsPaid?: (fromId: string, toId: string, amount: number) => void;
 };
 
 export default function ExpenseBalances({
   balances,
   settlements,
   currency,
-  currentUserId
+  currentUserId,
+  onMarkAsPaid
 }: ExpenseBalancesProps) {
   // Sort balances by amount (highest to lowest)
   const sortedBalances = [...balances].sort((a, b) => b.balance - a.balance);
@@ -162,10 +164,29 @@ export default function ExpenseBalances({
                         <div className="text-xs text-muted-foreground">Receives</div>
                       </div>
                     </div>
-                    <div className="text-right bg-muted/50 px-4 py-2 rounded-md">
-                      <span className="font-semibold text-foreground">
-                        {formatCurrency(settlement.amount, currency)}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <div className="text-right bg-muted/50 px-4 py-2 rounded-md">
+                        <span className="font-semibold text-foreground">
+                          {formatCurrency(settlement.amount, currency)}
+                        </span>
+                      </div>
+                      {onMarkAsPaid && (settlement.from_id === currentUserId || settlement.to_id === currentUserId) && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Mark as Paid button clicked', {
+                              fromId: settlement.from_id,
+                              toId: settlement.to_id,
+                              amount: settlement.amount
+                            });
+                            onMarkAsPaid(settlement.from_id, settlement.to_id, settlement.amount);
+                          }}
+                          className="px-3 py-1.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-800/50 transition-colors"
+                        >
+                          Mark as Paid
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

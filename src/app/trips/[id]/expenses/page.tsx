@@ -10,9 +10,12 @@ import ExpenseList from '@/components/expenses/ExpenseList';
 import ExpensesSkeleton from '@/components/expenses/ExpensesSkeleton';
 import ExpenseBalances from '@/components/expenses/ExpenseBalances';
 import AddExpenseModal from '@/components/expenses/AddExpenseModal';
+import EditExpenseModal from '@/components/expenses/EditExpenseModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, ReceiptIcon, BarChart3Icon, UsersIcon, DollarSignIcon } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { Toaster } from '@/components/ui/toaster';
 
 type DatabaseUser = {
   full_name: string;
@@ -98,6 +101,7 @@ export default function ExpensesPage() {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   interface Trip {
@@ -115,6 +119,8 @@ export default function ExpensesPage() {
   const [balances, setBalances] = useState<Balance[]>([]);
   const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
+  const [isEditExpenseModalOpen, setIsEditExpenseModalOpen] = useState(false);
+  const [currentExpense, setCurrentExpense] = useState<Expense | null>(null);
   const [activeTab, setActiveTab] = useState('expenses');
 
   useEffect(() => {
@@ -420,64 +426,138 @@ export default function ExpensesPage() {
         }
 
         // Refresh expenses
-        const { data: updatedExpenses, error: fetchError } = await supabase
-          .from('expenses')
-          .select(`
-            *,
-            users!inner(*),
-            expense_participants!inner(
-              user_id,
-              amount,
-              is_paid,
-              users:user_id!inner(*)
-            )
-          `)
-          .eq('trip_id', id)
-          .order('date', { ascending: false });
-
-        if (fetchError) throw fetchError;
-
-        const formattedExpenses: Expense[] = (updatedExpenses || []).map((e: any) => ({
-          id: e.id,
-          trip_id: e.trip_id,
-          category: e.category,
-          amount: e.amount,
-          currency: e.currency,
-          date: e.date,
-          description: e.description,
-          paid_by: e.paid_by,
-          split_type: e.split_type,
-          receipt_url: e.receipt_url,
-          status: e.status,
-          created_at: e.created_at,
-          updated_at: e.updated_at,
-          paid_by_name: e.users.full_name,
-          participants: (e.expense_participants || []).map((p: any) => ({
-            user_id: p.user_id,
-            amount: p.amount,
-            is_paid: p.is_paid,
-            full_name: p.users.full_name
-          }))
-        }));
-
-        setExpenses(formattedExpenses);
-
-        // Recalculate balances
-        calculateBalances(formattedExpenses, participants);
-
-        // Invalidate cache
-        try {
-          const expensesCacheKey = `expenses_data_${id}`;
-          sessionStorage.removeItem(expensesCacheKey);
-        } catch (e) {
-          console.error('Error invalidating cache:', e);
-        }
+        await refreshExpenses();
       }
 
       setIsAddExpenseModalOpen(false);
     } catch (err) {
       console.error('Error adding expense:', err);
       setError('Failed to add expense. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to refresh expenses data
+  const refreshExpenses = async () => {
+    try {
+      const { data: updatedExpenses, error: fetchError } = await supabase
+        .from('expenses')
+        .select(`
+          *,
+          users!inner(*),
+          expense_participants!inner(
+            user_id,
+            amount,
+            is_paid,
+            users:user_id!inner(*)
+          )
+        `)
+        .eq('trip_id', id)
+        .order('date', { ascending: false });
+
+      if (fetchError) throw fetchError;
+
+      // Format expenses data
+      const formattedExpenses: Expense[] = (updatedExpenses || []).map((e: any) => ({
+        id: e.id,
+        trip_id: e.trip_id,
+        category: e.category,
+        amount: e.amount,
+        currency: e.currency,
+        date: e.date,
+        description: e.description,
+        paid_by: e.paid_by,
+        split_type: e.split_type,
+        receipt_url: e.receipt_url,
+        status: e.status,
+        created_at: e.created_at,
+        updated_at: e.updated_at,
+        paid_by_name: e.users.full_name,
+        participants: (e.expense_participants || []).map((p: any) => ({
+          user_id: p.user_id,
+          amount: p.amount,
+          is_paid: p.is_paid,
+          full_name: p.users.full_name
+        }))
+      }));
+
+      setExpenses(formattedExpenses);
+
+      // Recalculate balances
+      calculateBalances(formattedExpenses, participants);
+
+      // Invalidate cache
+      try {
+        const expensesCacheKey = `expenses_data_${id}`;
+        sessionStorage.removeItem(expensesCacheKey);
+      } catch (e) {
+        console.error('Error invalidating cache:', e);
+      }
+
+      return formattedExpenses;
+    } catch (error) {
+      console.error('Error refreshing expenses:', error);
+      throw error;
+    }
+  };
+
+  const handleEditExpense = async (updatedExpense: any) => {
+    try {
+      setLoading(true);
+
+      // Update the expense
+      const { error } = await supabase
+        .from('expenses')
+        .update({
+          category: updatedExpense.category,
+          amount: parseFloat(updatedExpense.amount),
+          currency: updatedExpense.currency,
+          date: updatedExpense.date,
+          description: updatedExpense.description,
+          paid_by: updatedExpense.paidBy,
+          split_type: updatedExpense.splitType,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', updatedExpense.id);
+
+      if (error) throw error;
+
+      // First delete existing expense participants
+      const { error: deleteError } = await supabase
+        .from('expense_participants')
+        .delete()
+        .eq('expense_id', updatedExpense.id);
+
+      if (deleteError) throw deleteError;
+
+      // Calculate the amount per person
+      const amountPerPerson = parseFloat(updatedExpense.amount) / updatedExpense.participants.length;
+
+      // Create new expense participants
+      const expenseParticipants = updatedExpense.participants.map((userId: string) => ({
+        expense_id: updatedExpense.id,
+        user_id: userId,
+        amount: amountPerPerson,
+        currency: updatedExpense.currency,
+        is_paid: userId === updatedExpense.paidBy, // The payer has already paid their share
+      }));
+
+      // Insert new expense participants
+      const { error: participantsError } = await supabase
+        .from('expense_participants')
+        .insert(expenseParticipants);
+
+      if (participantsError) throw participantsError;
+
+      // Refresh expenses
+      await refreshExpenses();
+
+      setIsEditExpenseModalOpen(false);
+      setCurrentExpense(null);
+    } catch (err) {
+      console.error('Error updating expense:', err);
+      setError('Failed to update expense. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -526,6 +606,94 @@ export default function ExpensesPage() {
     } catch (err) {
       console.error('Error deleting expense:', err);
       setError('Failed to delete expense. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMarkAsPaid = async (fromId: string, toId: string, amount: number) => {
+    console.log('handleMarkAsPaid called with:', { fromId, toId, amount });
+
+    if (!confirm('Are you sure you want to mark this payment as completed?')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log('Creating a simple settlement record');
+
+      // Approccio semplificato: creiamo direttamente una spesa di tipo settlement
+      // Questo è più affidabile e non richiede di cercare spese esistenti
+
+      // Creiamo una spesa fittizia per registrare il pagamento
+      const { data: newExpense, error: newExpenseError } = await supabase
+        .from('expenses')
+        .insert([
+          {
+            trip_id: id,
+            category: 'settlement',
+            amount: amount,
+            currency: trip?.preferences?.currency || 'USD',
+            date: new Date().toISOString().split('T')[0],
+            description: `Settlement payment`,
+            paid_by: fromId,
+            split_type: 'custom',
+            status: 'settled',
+          }
+        ])
+        .select();
+
+      if (newExpenseError) {
+        console.error('Error creating settlement expense:', newExpenseError);
+        throw newExpenseError;
+      }
+
+      console.log('Settlement expense created:', newExpense);
+
+      if (newExpense && newExpense[0]) {
+        // Creiamo i partecipanti alla spesa
+        const { data: participant, error: participantError } = await supabase
+          .from('expense_participants')
+          .insert([
+            {
+              expense_id: newExpense[0].id,
+              user_id: toId,
+              amount: amount,
+              currency: trip?.preferences?.currency || 'USD',
+              is_paid: true, // Già pagato
+            }
+          ])
+          .select();
+
+        if (participantError) {
+          console.error('Error creating expense participant:', participantError);
+          throw participantError;
+        }
+
+        console.log('Expense participant created:', participant);
+      }
+
+      // Refresh expenses to update the UI
+      console.log('Refreshing expenses');
+      await refreshExpenses();
+
+      // Show success message
+      toast({
+        title: 'Payment marked as completed',
+        description: `The payment has been successfully marked as completed.`,
+        variant: 'success',
+      });
+
+      console.log('Payment marked as completed successfully');
+    } catch (err) {
+      console.error('Error marking payment as paid:', err);
+      setError('Failed to mark payment as paid. Please try again.');
+
+      toast({
+        title: 'Error',
+        description: 'Failed to mark payment as paid. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
@@ -627,6 +795,10 @@ export default function ExpensesPage() {
                 participants={participants}
                 currency={trip?.preferences?.currency || 'USD'}
                 onDelete={handleDeleteExpense}
+                onEdit={(expense) => {
+                  setCurrentExpense(expense);
+                  setIsEditExpenseModalOpen(true);
+                }}
               />
             </TabsContent>
 
@@ -636,6 +808,7 @@ export default function ExpensesPage() {
                 settlements={settlements}
                 currency={trip?.preferences?.currency || 'USD'}
                 currentUserId={user?.id}
+                onMarkAsPaid={handleMarkAsPaid}
               />
             </TabsContent>
           </Tabs>
@@ -650,6 +823,20 @@ export default function ExpensesPage() {
         currentUserId={user?.id}
         currency={trip?.preferences?.currency || 'USD'}
       />
+
+      <EditExpenseModal
+        isOpen={isEditExpenseModalOpen}
+        onClose={() => {
+          setIsEditExpenseModalOpen(false);
+          setCurrentExpense(null);
+        }}
+        onSubmit={handleEditExpense}
+        expense={currentExpense}
+        participants={participants}
+        currentUserId={user?.id}
+        currency={trip?.preferences?.currency || 'USD'}
+      />
+      <Toaster />
     </div>
   );
 }

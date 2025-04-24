@@ -9,7 +9,8 @@ import {
   Trash2Icon,
   CalendarIcon,
   UserIcon,
-  UsersIcon
+  UsersIcon,
+  EditIcon
 } from 'lucide-react';
 
 type Expense = {
@@ -27,9 +28,10 @@ type Expense = {
 interface ExpenseCardProps {
   expense: Expense;
   onDelete: (id: string) => void;
+  onEdit: (expense: Expense) => void;
 }
 
-function ExpenseCard({ expense, onDelete }: ExpenseCardProps) {
+function ExpenseCard({ expense, onDelete, onEdit }: ExpenseCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const getCategoryIcon = (category: string) => {
@@ -156,15 +158,25 @@ function ExpenseCard({ expense, onDelete }: ExpenseCardProps) {
               </div>
             </div>
 
-            {/* Delete button moved inline */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive h-7 px-2"
-              onClick={() => onDelete(expense.id)}
-            >
-              <Trash2Icon className="h-4 w-4" />
-            </Button>
+            {/* Action buttons */}
+            <div className="flex space-x-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary hover:bg-primary/10 hover:text-primary h-7 px-2"
+                onClick={() => onEdit(expense)}
+              >
+                <EditIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive h-7 px-2"
+                onClick={() => onDelete(expense.id)}
+              >
+                <Trash2Icon className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

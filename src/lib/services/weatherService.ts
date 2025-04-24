@@ -1,9 +1,9 @@
 // Weather API service for OpenWeatherMap
 // Documentation: https://openweathermap.org/api
 
-// Utilizziamo direttamente la chiave API per il debug
-const WEATHER_API_KEY = '5c93d68d9ce76cb02c3effa25e6e4dd2';
-console.log('Weather API Key:', WEATHER_API_KEY); // Per debug
+// Utilizziamo la chiave API dall'ambiente
+const WEATHER_API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
+console.log('Weather API Key:', WEATHER_API_KEY ? 'Configurata' : 'Non configurata'); // Per debug
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 export interface WeatherData {

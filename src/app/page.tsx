@@ -11,7 +11,6 @@ import RippleButton from '@/components/ui/RippleButton';
 import AnimatedList from '@/components/ui/AnimatedList';
 import ParallaxSection from '@/components/ui/ParallaxSection';
 import Accordion from '@/components/ui/Accordion';
-import WeatherApiTest from '@/components/weather/WeatherApiTest';
 import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -33,7 +32,10 @@ import {
   MousePointerIcon,
   PhoneIcon,
   RocketIcon,
-  SparklesIcon
+  SparklesIcon,
+  CloudIcon,
+  Sun,
+  Thermometer
 } from 'lucide-react';
 
 export default function Home() {
@@ -226,10 +228,8 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Weather API Test */}
-      <div className="container mx-auto px-4 sm:px-6 py-4 mt-20">
-        <WeatherApiTest />
-      </div>
+      {/* Spacer for fixed header */}
+      <div className="h-20"></div>
 
       {/* Hero Section */}
       <ParallaxSection
@@ -360,6 +360,103 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* New Features Section */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/10 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-muted/30 to-transparent"></div>
+        <div className="absolute bottom-0 right-0 w-72 h-72 bg-primary/5 rounded-full filter blur-3xl"></div>
+        <div className="absolute top-1/3 left-1/4 w-48 h-48 bg-primary/5 rounded-full filter blur-2xl"></div>
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 px-3 py-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">New</Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">Latest Features</h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              We're constantly improving VoyageSmart with new features to enhance your travel planning experience
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-lg p-6 order-2 md:order-1">
+              <div className="flex items-center mb-4">
+                <div className="p-3 bg-primary/10 rounded-full mr-4">
+                  <MapPinIcon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold">Multiple Destinations</h3>
+              </div>
+              <p className="text-muted-foreground mb-6">
+                Plan trips with multiple destinations and easily keep track of all your stops. Perfect for road trips, backpacking adventures, or multi-city business trips.
+              </p>
+              <div className="bg-muted/30 rounded-lg p-4 border border-border">
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center">
+                    <span className="inline-flex items-center font-medium text-primary">
+                      1. Paris, France
+                      <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">Primary</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="inline-flex items-center">
+                      2. Lyon, France
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="inline-flex items-center">
+                      3. Nice, France
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-lg p-6 order-1 md:order-2">
+              <div className="flex items-center mb-4">
+                <div className="p-3 bg-primary/10 rounded-full mr-4">
+                  <CloudIcon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold">Enhanced Weather Forecast</h3>
+              </div>
+              <p className="text-muted-foreground mb-6">
+                Get accurate weather forecasts for all your destinations in a beautiful, modern interface. Plan your activities with confidence knowing the weather conditions.
+              </p>
+              <div className="bg-gradient-to-r from-primary/5 to-transparent rounded-lg p-4 border border-border overflow-hidden relative">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 rounded-full bg-primary/10">
+                      <CloudIcon className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="font-medium">Weather Forecast</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex -space-x-2">
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary border border-background">P</div>
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary border border-background">L</div>
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary border border-background">N</div>
+                    </div>
+                    <button className="text-muted-foreground p-1 rounded-full hover:bg-muted/20">
+                      <ChevronDownIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center">
+                      <Sun className="h-8 w-8 text-yellow-400" />
+                    </div>
+                    <div className="flex items-center">
+                      <Thermometer className="h-3 w-3 mr-1 text-primary" />
+                      <span className="text-sm font-medium">24°C</span>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Paris, France
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
