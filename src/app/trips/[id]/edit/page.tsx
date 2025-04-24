@@ -6,11 +6,14 @@ import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import DestinationSelector from '@/components/destination/DestinationSelector';
+import { TripDestinations } from '@/lib/types/destination';
 
 type TripFormData = {
   name: string;
   description: string;
-  destination: string;
+  destination: string; // For backward compatibility
+  destinations: TripDestinations;
   startDate: string;
   endDate: string;
   isPrivate: boolean;
@@ -36,6 +39,7 @@ export default function EditTrip() {
     name: '',
     description: '',
     destination: '',
+    destinations: { destinations: [], primary: undefined },
     startDate: '',
     endDate: '',
     isPrivate: true,
@@ -71,11 +75,33 @@ export default function EditTrip() {
           return;
         }
 
+        // Get destinations from preferences or create from destination string
+        let destinations: TripDestinations = { destinations: [], primary: undefined };
+
+        if (tripData.preferences?.destinations) {
+          // Use stored destinations if available
+          destinations = tripData.preferences.destinations as TripDestinations;
+        } else if (tripData.destination) {
+          // Create a destination from the legacy destination field
+          const uuid = crypto.randomUUID();
+          destinations = {
+            destinations: [
+              {
+                id: uuid,
+                name: tripData.destination,
+                coordinates: { lat: 0, lng: 0 } // Default coordinates
+              }
+            ],
+            primary: uuid
+          };
+        }
+
         // Format the data for the form
         setFormData({
           name: tripData.name || '',
           description: tripData.description || '',
           destination: tripData.destination || '',
+          destinations: destinations,
           startDate: tripData.start_date || '',
           endDate: tripData.end_date || '',
           isPrivate: tripData.is_private,
@@ -111,6 +137,14 @@ export default function EditTrip() {
         [name]: value,
       });
     }
+  };
+
+  // Handle destinations change from the DestinationSelector component
+  const handleDestinationsChange = (destinations: TripDestinations) => {
+    setFormData({
+      ...formData,
+      destinations,
+    });
   };
 
   // Function to update itinerary days based on trip dates
@@ -274,13 +308,20 @@ export default function EditTrip() {
         return;
       }
 
+      // Get primary destination name for backward compatibility
+      const primaryDestination = formData.destinations.primary
+        ? formData.destinations.destinations.find(d => d.id === formData.destinations.primary)?.name
+        : formData.destinations.destinations.length > 0
+          ? formData.destinations.destinations[0].name
+          : null;
+
       // Update the trip
       const { error: updateError } = await supabase
         .from('trips')
         .update({
           name: formData.name,
           description: formData.description || null,
-          destination: formData.destination || null,
+          destination: primaryDestination, // For backward compatibility
           start_date: formData.startDate || null,
           end_date: formData.endDate || null,
           is_private: formData.isPrivate,
@@ -289,7 +330,8 @@ export default function EditTrip() {
             currency: formData.currency,
             trip_type: formData.tripType,
             accommodation: formData.accommodation,
-            notes: formData.notes
+            notes: formData.notes,
+            destinations: formData.destinations // Store full destinations data in preferences
           },
           updated_at: new Date().toISOString(),
         })
@@ -428,17 +470,9 @@ export default function EditTrip() {
               </div>
 
               <div>
-                <label htmlFor="destination" className="block text-sm font-medium text-foreground">
-                  Destination
-                </label>
-                <input
-                  type="text"
-                  name="destination"
-                  id="destination"
-                  value={formData.destination}
-                  onChange={handleChange}
-                  className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
-                  placeholder="Paris, France"
+                <DestinationSelector
+                  value={formData.destinations}
+                  onChange={handleDestinationsChange}
                 />
               </div>
 

@@ -8,6 +8,8 @@ import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import TripLimitPrompt from '@/components/subscription/TripLimitPrompt';
+import DestinationSelector from '@/components/destination/DestinationSelector';
+import { TripDestinations } from '@/lib/types/destination';
 
 export default function NewTrip() {
   const { user } = useAuth();
@@ -20,7 +22,7 @@ export default function NewTrip() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    destination: '',
+    destinations: { destinations: [], primary: undefined } as TripDestinations,
     startDate: '',
     endDate: '',
     isPrivate: true,
@@ -62,6 +64,14 @@ export default function NewTrip() {
     }
   };
 
+  // Handle destinations change from the DestinationSelector component
+  const handleDestinationsChange = (destinations: TripDestinations) => {
+    setFormData({
+      ...formData,
+      destinations,
+    });
+  };
+
   const nextStep = () => {
     // Validate current step
     if (currentStep === 1) {
@@ -100,6 +110,13 @@ export default function NewTrip() {
 
       console.log('Creating trip with data:', formData);
 
+      // Get primary destination name for backward compatibility
+      const primaryDestination = formData.destinations.primary
+        ? formData.destinations.destinations.find(d => d.id === formData.destinations.primary)?.name
+        : formData.destinations.destinations.length > 0
+          ? formData.destinations.destinations[0].name
+          : null;
+
       // Create the trip
       const { data, error: insertError } = await supabase
         .from('trips')
@@ -107,7 +124,7 @@ export default function NewTrip() {
           {
             name: formData.name,
             description: formData.description || null,
-            destination: formData.destination || null,
+            destination: primaryDestination, // For backward compatibility
             start_date: formData.startDate || null,
             end_date: formData.endDate || null,
             is_private: formData.isPrivate,
@@ -117,7 +134,8 @@ export default function NewTrip() {
               currency: formData.currency,
               trip_type: formData.tripType,
               accommodation: formData.accommodation,
-              notes: formData.notes
+              notes: formData.notes,
+              destinations: formData.destinations // Store full destinations data in preferences
             }
           },
         ])
@@ -260,17 +278,9 @@ export default function NewTrip() {
                   </div>
 
                   <div>
-                    <label htmlFor="destination" className="block text-sm font-medium text-foreground">
-                      Destination
-                    </label>
-                    <input
-                      type="text"
-                      name="destination"
-                      id="destination"
-                      value={formData.destination}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
-                      placeholder="Paris, France"
+                    <DestinationSelector
+                      value={formData.destinations}
+                      onChange={handleDestinationsChange}
                     />
                   </div>
 

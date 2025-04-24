@@ -9,6 +9,8 @@ import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import UnreadBadge from '@/components/chat/UnreadBadge';
 import PremiumIndicator from '@/components/subscription/PremiumIndicator';
+import TripWeather from '@/components/weather/TripWeather';
+import { TripDestinations } from '@/lib/types/destination';
 import {
   MapPinIcon,
   CalendarIcon,
@@ -39,6 +41,13 @@ type Trip = {
   owner_id: string;
   created_at: string;
   updated_at: string;
+  preferences?: {
+    currency?: string;
+    trip_type?: string;
+    accommodation?: string;
+    notes?: string;
+    destinations?: TripDestinations;
+  };
 };
 
 type Participant = {
@@ -289,6 +298,14 @@ export default function TripDetails() {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {/* Weather Forecast - Moved to top */}
+        <div className="mb-6 animate-content-fade-in" style={{ animationDelay: '50ms' }}>
+          <TripWeather
+            destinations={trip.preferences?.destinations}
+            className="bg-gradient-to-r from-primary/5 to-transparent rounded-lg shadow-sm"
+          />
+        </div>
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Trip Details */}
           <div className="bg-card shadow overflow-hidden sm:rounded-lg lg:col-span-2 animate-content-fade-in relative">
@@ -312,10 +329,25 @@ export default function TripDetails() {
                     <div className="p-1.5 rounded-md bg-primary/10 mr-2 group-hover:bg-primary/20 transition-colors">
                       <MapPinIcon className="h-4 w-4 text-primary" />
                     </div>
-                    Destination
+                    Destinations
                   </dt>
                   <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2 group-hover:text-primary/90 transition-colors">
-                    {trip.destination || 'Not specified'}
+                    {trip.preferences?.destinations?.destinations?.length > 0 ? (
+                      <div className="flex flex-col space-y-2">
+                        {trip.preferences.destinations.destinations.map((dest, index) => (
+                          <div key={dest.id} className="flex items-center">
+                            <span className={`inline-flex items-center ${trip.preferences?.destinations?.primary === dest.id ? 'font-medium text-primary' : ''}`}>
+                              {index + 1}. {dest.name}
+                              {trip.preferences?.destinations?.primary === dest.id && (
+                                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">Primary</span>
+                              )}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      trip.destination || 'Not specified'
+                    )}
                   </dd>
                 </div>
                 <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors group stagger-content-item">
@@ -368,7 +400,7 @@ export default function TripDetails() {
             </div>
           </div>
 
-          {/* Participants */}
+          {/* Participants - Moved to right column */}
           <div className="bg-card shadow overflow-hidden sm:rounded-lg animate-content-fade-in relative" style={{ animationDelay: '100ms' }}>
             {/* Card decoration */}
             <div className="absolute top-0 left-0 w-20 h-20 bg-primary/5 rounded-br-full"></div>

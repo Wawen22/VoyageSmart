@@ -11,6 +11,7 @@ import RippleButton from '@/components/ui/RippleButton';
 import AnimatedList from '@/components/ui/AnimatedList';
 import ParallaxSection from '@/components/ui/ParallaxSection';
 import Accordion from '@/components/ui/Accordion';
+import WeatherApiTest from '@/components/weather/WeatherApiTest';
 import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -224,6 +225,11 @@ export default function Home() {
           </div>
         </div>
       </nav>
+
+      {/* Weather API Test */}
+      <div className="container mx-auto px-4 sm:px-6 py-4 mt-20">
+        <WeatherApiTest />
+      </div>
 
       {/* Hero Section */}
       <ParallaxSection
@@ -487,7 +493,7 @@ export default function Home() {
                 <PricingFeature included={true}>Budget forecasting</PricingFeature>
                 <PricingFeature included={true}>Personalized travel insights</PricingFeature>
                 <PricingFeature included={true}>Weather alerts</PricingFeature>
-                <PricingFeature included={true}>24/7 AI travel assistant</PricingFeature>              
+                <PricingFeature included={true}>24/7 AI travel assistant</PricingFeature>
               </CardContent>
               <CardFooter className="flex justify-center pt-4 relative z-1">
                 <Button variant="outline" className="px-4 py-2 opacity-75 cursor-not-allowed" disabled>
