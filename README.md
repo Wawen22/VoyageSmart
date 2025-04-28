@@ -210,11 +210,11 @@ trip_media
   - ✅ Notifiche per modifiche
   - ✅ Chat di gruppo
 
-### Fase 2: Espansione (In corso) 🔄
-- **Miglioramento itinerari** 🔄
+### Fase 2: Espansione ✅
+- **Miglioramento itinerari** ✅
   - ✅ Ottimizzazione percorsi
-  - 🔄 Filtri e ricerca POI
-  - 🔄 Avvisi per pianificazione irrealistica
+  - ✅ Filtri e ricerca POI
+  - ✅ Avvisi per pianificazione irrealistica
 
 - **Gestione spese avanzata** ✅
   - ✅ Supporto multi-valuta
@@ -224,12 +224,12 @@ trip_media
 - **Gestione documenti** ✅
   - ✅ System upload multipli
   - ✅ OCR per estrazione dati
-  - 🔄 Reminder documenti necessari
+  - ✅ Reminder documenti necessari
 
 - **Collaborazione avanzata** ✅
   - ✅ Chat di gruppo
   - ✅ Sistema commenti
-  - 🔄 Polling e voti per decisioni
+  - ✅ Polling e voti per decisioni
 
 - **Diario di viaggio e media** ✅
   - ✅ Diario giornaliero
@@ -238,8 +238,8 @@ trip_media
 
 - **Integrazioni API esterne** ✅
   - ✅ Dati meteo con supporto per destinazioni multiple
-  - 🔄 Tassi di cambio
-  - 🔄 Informazioni trasporti
+  - ✅ Tassi di cambio
+  - ✅ Informazioni trasporti
 
 - **UI/UX Avanzata** ✅
   - ✅ Tema chiaro/scuro
@@ -249,36 +249,42 @@ trip_media
   - ✅ Visualizzazione migliorata delle destinazioni multiple
   - ✅ Interfaccia meteo moderna e compatta
 
-### Fase 3: Funzionalità Avanzate (12 mesi post-lancio)
-- **Integrazione IA**
-  - Servizio generazione itinerari
-  - Ottimizzazione percorsi avanzata
-  - Analisi predittiva costi e affluenza
+### Fase 3: Funzionalità Avanzate (In corso) 🔄
+- **Integrazione IA** 🔄
+  - 🔄 Servizio generazione itinerari
+  - 🔄 Ottimizzazione percorsi avanzata
+  - 🔄 Analisi predittiva costi e affluenza
 
-- **Automazione sottoscrizioni**
-  - [To Do] Configurare un cron job (es. Vercel Cron Jobs, AWS Lambda con EventBridge, ecc.) che chiami periodicamente l'endpoint `/api/cron/check-subscriptions` (ad esempio una volta al giorno) per verificare e aggiornare tutte le sottoscrizioni scadute.
+- **Automazione sottoscrizioni** 🔄
+  - 🔄 Configurare un cron job (es. Vercel Cron Jobs, AWS Lambda con EventBridge, ecc.) che chiami periodicamente l'endpoint `/api/cron/check-subscriptions` (ad esempio una volta al giorno) per verificare e aggiornare tutte le sottoscrizioni scadute.
 
-- **Assistente virtuale**
-  - Chatbot per domande frequenti
-  - NLP per query in linguaggio naturale
-  - Suggerimenti pro-attivi
+- **Ottimizzazione prestazioni** ✅
+  - ✅ Implementazione Code Splitting e Lazy Loading
+  - ✅ Ottimizzazione bundle size
+  - ✅ Miglioramento tempi di caricamento
+  - ✅ Implementazione skeleton loaders
+
+- **Assistente virtuale** 🔄
+  - 🔄 Chatbot per domande frequenti
+  - 🔄 NLP per query in linguaggio naturale
+  - 🔄 Suggerimenti pro-attivi
 
 - **Monetizzazione e piani premium** ✅
   - ✅ Sistema abbonamenti con Supabase
   - ✅ Paywall per funzionalità premium (Accommodations, Transportation)
   - ✅ Limite di 3 viaggi per utenti free
   - ✅ Pagina Pricing con piani Free, Premium e AI (coming soon)
-  - Dashboard amministrativa ricavi
+  - 🔄 Dashboard amministrativa ricavi
 
-- **Funzionalità innovative**
-  - Modalità esplorazione con realtà aumentata
-  - Calcolo impronta carbonio
-  - Filtri accessibilità avanzati
+- **Funzionalità innovative** 🔄
+  - 🔄 Modalità esplorazione con realtà aumentata
+  - 🔄 Calcolo impronta carbonio
+  - 🔄 Filtri accessibilità avanzati
 
-- **Espansione piattaforma**
-  - API pubblica
-  - Widget embedabili
-  - Marketplace template viaggi
+- **Espansione piattaforma** 🔄
+  - 🔄 API pubblica
+  - 🔄 Widget embedabili
+  - 🔄 Marketplace template viaggi
 
 ## 💰 Modello di Business
 

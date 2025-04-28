@@ -97,75 +97,53 @@
 
 ## Pending Tasks (In Priority Order)
 
-### High Priority
-1. [x] Implement trip details page
-   - [x] Design and create the trip overview section
-   - [x] Add itinerary management functionality
-   - [x] Implement basic expense tracking UI
-   - [x] Add participant management section
+### Pre-Launch Tasks
+1. [ ] Final testing and bug fixes
+   - [ ] Cross-browser testing (Chrome, Firefox, Safari, Edge)
+   - [ ] Cross-device testing (Desktop, Tablet, Mobile)
+   - [ ] Performance testing and optimization
+   - [ ] Security testing and vulnerability assessment
 
-### Medium Priority
-2. [x] Enhance trip collaboration features
-   - [x] Implement user invitation system
-   - [x] Implement email notification system for invitations and trip changes
-   - [x] Improve invitation acceptance page for better user experience
-   - [x] Implement role-based permissions for trip participants
-   - [x] Add real-time updates for shared trips
-   - [x] Add commenting/discussion feature for trips
+2. [ ] Subscription management automation
+   - [ ] Implement cron job for checking expired subscriptions
+   - [ ] Add email notifications for subscription status changes
+   - [ ] Improve subscription management UI
 
-### UI/UX Improvements
-3. [x] Improve mobile experience
-   - [x] Optimize layouts for smaller screens
-   - [x] Add touch-friendly interactions
-   - [x] Implement responsive navigation
-   - [x] Add animations and visual feedback
-   - [x] Improve loading states and transitions
+3. [ ] Documentation and help resources
+   - [ ] Create user guide/documentation
+   - [ ] Add tooltips and help text throughout the app
+   - [ ] Create onboarding flow for new users
 
-### Additional Features
-4. [x] Location and mapping features
-   - [x] Integrate maps for trip planning
-   - [x] Add location search and suggestions
-   - [ ] Implement route planning
-5. [x] Advanced expense management
-   - [x] Add multiple currency support
-   - [x] Implement expense splitting
-   - [x] Create expense reports and summaries
-6. [x] Collaboration features
-   - [x] Implement activity comments system
-   - [x] Add group chat for trip participants
-   - [x] Implement real-time updates for shared content
-7. [x] Document management
-   - [x] Implement document upload and storage
-   - [x] Add document sharing with trip participants
-   - [x] Create document categories (tickets, reservations, etc.)
-8. [x] Accommodations management
-   - [x] Create accommodations section with CRUD operations
-   - [x] Implement file upload for accommodation documents
-   - [x] Add map integration for accommodation locations
-   - [x] Create modern and user-friendly UI for accommodations
-   - [x] Fix map markers to show all accommodations
-   - [x] Implement proper storage bucket for documents
-9. [x] Transportation management
-   - [x] Create transportation section with CRUD operations
-   - [x] Implement file upload for transportation documents
-   - [x] Add map integration for transportation routes
-   - [x] Create modern and user-friendly UI for transportation
-   - [x] Implement stops management for multi-leg journeys
-   - [x] Add support for different transportation types
+### Post-Launch Improvements
+4. [ ] Advanced route planning
+   - [ ] Implement route optimization for daily itineraries
+   - [ ] Add turn-by-turn directions
+   - [ ] Integrate public transportation options
+
+5. [ ] Analytics and monitoring
+   - [ ] Implement usage analytics
+   - [ ] Add error tracking and monitoring
+   - [ ] Create admin dashboard for monitoring app health
+
+6. [ ] AI features (Future)
+   - [ ] Implement AI-assisted itinerary planning
+   - [ ] Add smart recommendations based on user preferences
+   - [ ] Develop natural language processing for trip planning
 
 ## Current Focus
-- Implementing route planning with Mapbox integration
-- Enhancing collaboration features with real-time updates
-- Implementing advanced search and filtering functionality
-- Optimizing bundle size with code splitting
+- Preparing for app launch with final optimizations
+- Implementing cron job for subscription management
+- Enhancing error handling and edge cases
+- Final UI/UX polish for all sections
+- Comprehensive testing across devices and browsers
 
 ## Recently Completed
-- Improved UI/UX across the entire application with consistent design
-- Added icons to all section titles for better visual hierarchy
+- Implemented Code Splitting and Lazy Loading for improved performance
+- Optimized bundle size for faster initial loading
+- Implemented Journal/Diary functionality with daily entries and photo gallery
 - Enhanced Trip Details page with better layout and visual feedback
-- Removed hamburger menu from mobile view for a cleaner interface
-- Added Dark Mode selector to the Your Profile page for mobile view
-- Fixed HTML structure issues in accommodations and transportation pages
+- Improved landing page with full-height hero section and better navigation
+- Fixed double menu issue on landing page
 - Implemented transportation management with map integration
 - Added support for different transportation types (flight, train, bus, car, ferry)
 - Implemented accommodations management with map integration
@@ -175,3 +153,8 @@
 - Improved overall user experience with advanced animations and transitions
 - Implemented skeleton loaders for all main sections (Itinerary, Accommodations, Transportation, Expenses)
 - Created reusable animation components and hooks for consistent animations across the app
+- Implemented comprehensive dark mode support
+- Enhanced mobile experience with optimized layouts and navigation
+- Implemented collaboration features with chat and comments
+- Added expense splitting functionality with "who owes what" algorithm
+- Implemented subscription management with Stripe integration
