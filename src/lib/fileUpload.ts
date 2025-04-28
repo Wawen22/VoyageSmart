@@ -21,8 +21,15 @@ export async function uploadFile(
     const fileName = `${uuidv4()}.${fileExt}`;
     const filePath = `${path}/${fileName}`;
 
-    // Always use the correct bucket name regardless of what was passed
-    const actualBucket = 'trip-documents';
+    // Use the appropriate bucket based on the path
+    let actualBucket = bucket;
+
+    // For backward compatibility, if the path contains certain keywords, use specific buckets
+    if (path.includes('chat')) {
+      actualBucket = 'trip-media'; // Use trip-media for chat attachments
+    } else if (path.includes('accommodations') || path.includes('transportation')) {
+      actualBucket = 'trip-documents';
+    }
 
     console.log('Using bucket:', actualBucket, 'for upload');
     console.log('File path for upload:', filePath);
@@ -85,8 +92,15 @@ export async function deleteFile(url: string, bucket: string): Promise<void> {
       return;
     }
 
-    // Always use the correct bucket name regardless of what was passed
-    const actualBucket = 'trip-documents';
+    // Use the appropriate bucket based on the URL
+    let actualBucket = bucket;
+
+    // For backward compatibility, determine the bucket from the URL
+    if (url.includes('trip-media')) {
+      actualBucket = 'trip-media';
+    } else if (url.includes('trip-documents')) {
+      actualBucket = 'trip-documents';
+    }
 
     // Extract the file path from the URL
     try {

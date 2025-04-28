@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,23 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { SendIcon, PaperclipIcon, InfoIcon } from 'lucide-react';
+// Import icons from lucide-react
+import {
+  Send as SendIcon,
+  Paperclip as PaperclipIcon,
+  Info as InfoIcon,
+  Image as ImageIcon,
+  File as FileIcon,
+  X as XIcon,
+  FileText as FileTextIcon,
+  FileImage as FileImageIcon,
+  FileType as FilePdfIcon,
+  Archive as FileArchiveIcon,
+  Video as FileVideoIcon,
+  Music as FileAudioIcon
+} from 'lucide-react';
 import LoginPrompt from '@/components/auth/LoginPrompt';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ChatMessage {
   id: string;
@@ -41,8 +56,11 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [participants, setParticipants] = useState<any[]>([]);
   const [isParticipant, setIsParticipant] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Fetch messages and set up real-time subscription
   useEffect(() => {
@@ -205,6 +223,11 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
   const handleSendMessage = async () => {
     if (!user || !newMessage.trim() || !isParticipant) return;
 
+    // If there's a file attached, use the attachment handler instead
+    if (selectedFile) {
+      return handleSendMessageWithAttachment();
+    }
+
     try {
       setSending(true);
       const messageContent = newMessage.trim();
@@ -273,11 +296,173 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
       .toUpperCase();
   };
 
+  // Handle file selection
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+    }
+  };
+
+  // Remove selected file
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Open file selector
+  const handleOpenFileSelector = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Get file icon based on file type
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('image/')) return <FileImageIcon className="h-4 w-4" />;
+    if (fileType.startsWith('video/')) return <FileVideoIcon className="h-4 w-4" />;
+    if (fileType.startsWith('audio/')) return <FileAudioIcon className="h-4 w-4" />;
+    if (fileType === 'application/pdf') return <FilePdfIcon className="h-4 w-4" />;
+    if (fileType.includes('zip') || fileType.includes('compressed')) return <FileArchiveIcon className="h-4 w-4" />;
+    if (fileType.includes('text') || fileType.includes('document')) return <FileTextIcon className="h-4 w-4" />;
+    return <FileIcon className="h-4 w-4" />;
+  };
+
+  // Upload file to Supabase storage
+  const uploadFileToStorage = async (file: File): Promise<{ url: string; type: string } | null> => {
+    try {
+      setUploadingFile(true);
+
+      // Create a unique file name
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `${tripId}/${fileName}`;
+
+      // Upload to trip-media bucket (we'll use this for chat attachments too)
+      const { data, error } = await supabase.storage
+        .from('trip-media')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (error) {
+        console.error('Error uploading file:', error);
+        toast({
+          title: 'Upload failed',
+          description: 'Failed to upload file. Please try again.',
+          variant: 'destructive',
+        });
+        return null;
+      }
+
+      // Get the public URL
+      const { data: urlData } = supabase.storage
+        .from('trip-media')
+        .getPublicUrl(filePath);
+
+      return {
+        url: urlData.publicUrl,
+        type: file.type,
+      };
+    } catch (error) {
+      console.error('Error in file upload:', error);
+      toast({
+        title: 'Upload failed',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  // Send a message with attachment
+  const handleSendMessageWithAttachment = async () => {
+    if (!user || !selectedFile || !isParticipant) return;
+
+    try {
+      setSending(true);
+
+      // Upload the file first
+      const uploadResult = await uploadFileToStorage(selectedFile);
+
+      if (!uploadResult) {
+        throw new Error('File upload failed');
+      }
+
+      // Prepare message content
+      const messageContent = newMessage.trim() || `Shared a file: ${selectedFile.name}`;
+
+      // Clear input immediately for better UX
+      setNewMessage('');
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+      // Insert the message with attachment
+      const { data, error } = await supabase
+        .from('trip_chat_messages')
+        .insert([
+          {
+            trip_id: tripId,
+            user_id: user.id,
+            content: messageContent,
+            is_system_message: false,
+            attachment_url: uploadResult.url,
+            attachment_type: uploadResult.type,
+          },
+        ])
+        .select(`
+          *,
+          users:user_id (
+            id,
+            full_name,
+            avatar_url
+          )
+        `);
+
+      if (error) throw error;
+
+      // Add the new message to the local state immediately
+      if (data && data.length > 0) {
+        setMessages(prev => [...prev, data[0]]);
+
+        // Update read receipt for the current user
+        await supabase
+          .from('trip_chat_read_receipts')
+          .upsert({
+            trip_id: tripId,
+            user_id: user.id,
+            last_read_message_id: data[0].id,
+            last_read_at: new Date().toISOString()
+          }, {
+            onConflict: 'trip_id,user_id'
+          });
+      }
+    } catch (error) {
+      console.error('Error sending message with attachment:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send message with attachment. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSending(false);
+    }
+  };
+
   // Handle key press (Enter to send, Shift+Enter for new line)
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      if (selectedFile) {
+        handleSendMessageWithAttachment();
+      } else {
+        handleSendMessage();
+      }
     }
   };
 
@@ -385,20 +570,40 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
                     {message.attachment_url && (
                       <div className="mt-2">
                         {message.attachment_type?.startsWith('image/') ? (
-                          <img
-                            src={message.attachment_url}
-                            alt="Attachment"
-                            className="max-w-full rounded-md max-h-48 object-contain"
-                          />
+                          <div className="relative">
+                            <img
+                              src={message.attachment_url}
+                              alt="Attachment"
+                              className="max-w-full rounded-md max-h-48 object-contain cursor-pointer"
+                              onClick={() => window.open(message.attachment_url, '_blank')}
+                            />
+                            <div className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-2 py-0.5 rounded">
+                              Click to view
+                            </div>
+                          </div>
+                        ) : message.attachment_type?.startsWith('video/') ? (
+                          <div className="mt-2">
+                            <video
+                              controls
+                              className="max-w-full rounded-md max-h-48"
+                              preload="metadata"
+                            >
+                              <source src={message.attachment_url} type={message.attachment_type} />
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
                         ) : (
                           <a
                             href={message.attachment_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center text-xs underline"
+                            className="flex items-center gap-2 p-2 bg-background/50 rounded-md border text-sm hover:bg-background/80 transition-colors"
                           >
-                            <PaperclipIcon className="h-3 w-3 mr-1" />
-                            Attachment
+                            {getFileIcon(message.attachment_type || '')}
+                            <span className="flex-1 truncate">
+                              {message.attachment_url.split('/').pop()?.split('-').pop() || 'Attachment'}
+                            </span>
+                            <FileIcon className="h-3 w-3 opacity-50" />
                           </a>
                         )}
                       </div>
@@ -414,21 +619,90 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
 
       {/* Message input */}
       <div className="p-3 border-t">
+        {/* File preview if a file is selected */}
+        {selectedFile && (
+          <div className="mb-3 p-2 border rounded-md bg-muted/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {selectedFile.type.startsWith('image/') ? (
+                  <div className="relative w-12 h-12 rounded-md overflow-hidden bg-background">
+                    <img
+                      src={URL.createObjectURL(selectedFile)}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 rounded-md bg-background flex items-center justify-center">
+                    {getFileIcon(selectedFile.type)}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(selectedFile.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRemoveFile}
+                className="h-8 w-8 p-0"
+              >
+                <XIcon className="h-4 w-4" />
+                <span className="sr-only">Remove file</span>
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="flex space-x-2">
-          <Textarea
-            placeholder="Type a message..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-            className="min-h-[80px] resize-none"
-            disabled={!isParticipant}
-          />
+          <div className="flex-1 flex flex-col">
+            <Textarea
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              className="min-h-[80px] resize-none"
+              disabled={!isParticipant}
+            />
+
+            <div className="flex justify-between items-center mt-2">
+              <p className="text-xs text-muted-foreground">
+                Press Enter to send, Shift+Enter for a new line
+              </p>
+
+              {/* Hidden file input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                className="hidden"
+                accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-zip-compressed"
+              />
+
+              {/* Attachment button */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleOpenFileSelector}
+                disabled={!isParticipant || sending}
+                className="h-8 px-2"
+              >
+                <PaperclipIcon className="h-4 w-4 mr-1" />
+                <span className="text-xs">Attach</span>
+              </Button>
+            </div>
+          </div>
+
           <Button
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim() || sending || !isParticipant}
+            onClick={selectedFile ? handleSendMessageWithAttachment : handleSendMessage}
+            disabled={((!newMessage.trim() && !selectedFile) || sending || !isParticipant)}
             className="self-end"
           >
-            {sending ? (
+            {sending || uploadingFile ? (
               <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
             ) : (
               <SendIcon className="h-4 w-4" />
@@ -436,9 +710,6 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
             <span className="sr-only">Send</span>
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          Press Enter to send, Shift+Enter for a new line
-        </p>
       </div>
     </div>
   );
