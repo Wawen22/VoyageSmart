@@ -13,7 +13,8 @@ import {
   PlaneTakeoffIcon,
   MessageCircleIcon,
   SparklesIcon,
-  LockIcon
+  LockIcon,
+  BookOpenIcon
 } from 'lucide-react';
 
 export default function MobileNavbar() {
@@ -27,7 +28,7 @@ export default function MobileNavbar() {
     pathname === '/register' ||
     pathname === '/forgot-password'
   ) {
-    return null;
+    return <div></div>;
   }
 
   // Check if we're in a trip detail page
@@ -35,7 +36,7 @@ export default function MobileNavbar() {
   const tripId = isTripPage ? pathname.split('/')[2] : null;
 
   // Determine which section of a trip we're in
-  const isItineraryPage = pathname.includes('/itinerary');
+  const isTripPlannerPage = pathname.includes('/itinerary') || pathname.includes('/journal');
   const isExpensesPage = pathname.includes('/expenses');
   const isAccommodationsPage = pathname.includes('/accommodations');
   const isTransportationPage = pathname.includes('/transportation');
@@ -50,16 +51,19 @@ export default function MobileNavbar() {
     <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
       <div className="flex justify-around items-center h-16 px-1">
         {/* Trip-specific navigation */}
-        {/* Itinerary */}
+        {/* Trip Planner */}
         <Link
           href={`/trips/${tripId}/itinerary`}
           className={`flex flex-col items-center justify-center w-full h-full ${
-            isItineraryPage
+            isTripPlannerPage
               ? 'text-primary mobile-nav-active'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <CalendarIcon className="h-5 w-5" />
+          <div className="relative">
+            <CalendarIcon className="h-5 w-5" />
+            <BookOpenIcon className="h-3 w-3 absolute -bottom-1 -right-1 bg-background rounded-full p-0.5" />
+          </div>
           <span className="text-xs mt-1">Trip Planner</span>
         </Link>
 

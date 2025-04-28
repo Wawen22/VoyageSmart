@@ -15,6 +15,11 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
+  // Return empty div for landing page and auth pages
+  if (pathname === '/' || pathname === '/login' || pathname === '/register' || pathname === '/forgot-password') {
+    return <div></div>;
+  }
+
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen(!isProfileMenuOpen);
   };
@@ -30,11 +35,6 @@ export default function Navbar() {
       alert('There was an error signing out. Please try again.');
     }
   };
-
-  // Don't show navbar on auth pages
-  if (pathname === '/login' || pathname === '/register' || pathname === '/forgot-password') {
-    return null;
-  }
 
   return (
     <nav className="bg-background border-b border-border transition-colors">
