@@ -231,10 +231,10 @@ trip_media
   - ✅ Sistema commenti
   - 🔄 Polling e voti per decisioni
 
-- **Diario di viaggio e media** 🔄
-  - 🔄 Diario giornaliero
-  - 🔄 Galleria foto organizzata
-  - 🔄 Timeline ricordi post-viaggio
+- **Diario di viaggio e media** ✅
+  - ✅ Diario giornaliero
+  - ✅ Galleria foto organizzata
+  - ✅ Timeline ricordi post-viaggio
 
 - **Integrazioni API esterne** ✅
   - ✅ Dati meteo con supporto per destinazioni multiple

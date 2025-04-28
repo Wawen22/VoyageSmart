@@ -60,7 +60,7 @@ export default function MobileNavbar() {
           }`}
         >
           <CalendarIcon className="h-5 w-5" />
-          <span className="text-xs mt-1">Itinerario</span>
+          <span className="text-xs mt-1">Trip Planner</span>
         </Link>
 
         {/* Accommodations */}

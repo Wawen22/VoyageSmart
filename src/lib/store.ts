@@ -5,6 +5,7 @@ import tripReducer from './features/tripSlice';
 import itineraryReducer from './features/itinerarySlice';
 import accommodationReducer from './features/accommodationSlice';
 import transportationReducer from './features/transportationSlice';
+import journalReducer from './features/journalSlice';
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     itinerary: itineraryReducer,
     accommodations: accommodationReducer,
     transportation: transportationReducer,
+    journal: journalReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

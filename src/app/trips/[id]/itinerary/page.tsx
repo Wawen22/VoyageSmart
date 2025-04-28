@@ -7,10 +7,15 @@ import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { format, parseISO, isValid, addDays } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, BookOpenIcon, ImageIcon, ClockIcon, BookIcon, PlusIcon, ListIcon } from 'lucide-react';
 import { it } from 'date-fns/locale';
 import DaySchedule from '@/components/itinerary/DaySchedule';
 import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/lib/store';
+import { fetchJournalEntries, fetchJournalMedia, JournalEntry } from '@/lib/features/journalSlice';
 
 // Lazy load heavy components
 const ActivityModal = lazy(() => import('@/components/itinerary/ActivityModal'));
@@ -18,6 +23,11 @@ const DayModal = lazy(() => import('@/components/itinerary/DayModal'));
 const MoveActivityModal = lazy(() => import('@/components/itinerary/MoveActivityModal'));
 const CalendarView = lazy(() => import('@/components/itinerary/CalendarView'));
 const ActivityDetailsModal = lazy(() => import('@/components/activity/ActivityDetailsModal'));
+const JournalEntryForm = lazy(() => import('@/components/journal/JournalEntryForm'));
+const JournalEntryCard = lazy(() => import('@/components/journal/JournalEntryCard'));
+const SimpleMediaUploader = lazy(() => import('@/components/journal/SimpleMediaUploader'));
+const MediaGallery = lazy(() => import('@/components/journal/MediaGallery'));
+const MemoriesTimeline = lazy(() => import('@/components/journal/MemoriesTimeline'));
 
 type Trip = {
   id: string;
@@ -59,6 +69,9 @@ export default function TripItinerary() {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
+  const { entries, media, loading: journalLoading } = useSelector((state: RootState) => state.journal);
+
   const [trip, setTrip] = useState<Trip | null>(null);
   const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +85,31 @@ export default function TripItinerary() {
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentDayId, setCurrentDayId] = useState<string>('');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+
+  // Journal states
+  const [activeTab, setActiveTab] = useState('itinerary');
+  const [journalTab, setJournalTab] = useState('entries');
+  const [showEntryForm, setShowEntryForm] = useState(false);
+  const [currentEntry, setCurrentEntry] = useState<JournalEntry | null>(null);
+  const [showMediaUploader, setShowMediaUploader] = useState(false);
+
+  useEffect(() => {
+    // Load journal data
+    dispatch(fetchJournalEntries(id as string));
+    dispatch(fetchJournalMedia(id as string));
+  }, [dispatch, id]);
+
+  // Check for tab parameter in URL
+  useEffect(() => {
+    // Get the URL search params
+    const searchParams = new URLSearchParams(window.location.search);
+    const tabParam = searchParams.get('tab');
+
+    // If tab parameter exists and is valid, set the active tab
+    if (tabParam === 'journal') {
+      setActiveTab('journal');
+    }
+  }, []);
 
   useEffect(() => {
     // Create a cache key for this trip
@@ -482,6 +520,26 @@ export default function TripItinerary() {
     setShowDetailsModal(true);
   };
 
+  // Journal methods
+  const handleAddEntry = () => {
+    setCurrentEntry(null);
+    setShowEntryForm(true);
+  };
+
+  const handleEditEntry = (entry: JournalEntry) => {
+    setCurrentEntry(entry);
+    setShowEntryForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowEntryForm(false);
+    setCurrentEntry(null);
+  };
+
+  const handleToggleMediaUploader = () => {
+    setShowMediaUploader(!showMediaUploader);
+  };
+
   const handleMoveActivitySubmit = async (activityId: string, newDayId: string) => {
     try {
       // Find the activity to move
@@ -586,54 +644,19 @@ export default function TripItinerary() {
             {/* Title */}
             <div className="overflow-hidden">
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground truncate flex items-center">
-                <CalendarIcon className="h-6 w-6 mr-2" />
-                Itinerario
+                <div className="relative">
+                  <CalendarIcon className="h-6 w-6 mr-2" />
+                  <BookOpenIcon className="h-3 w-3 absolute -bottom-1 -right-1 bg-card rounded-full p-0.5" />
+                </div>
+                Trip Planner
               </h1>
               <p className="text-sm text-muted-foreground truncate">
                 {trip.name} {trip.destination && `• ${trip.destination}`}
               </p>
             </div>
 
-            {/* Controls */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-              {/* View toggle */}
-              <div className="flex items-center bg-secondary rounded-md p-1">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-2 py-1 text-xs sm:text-sm font-medium rounded-md transition-colors ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
-                  aria-label="List view"
-                >
-                  <span className="hidden xs:inline">Lista</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 xs:hidden" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('calendar')}
-                  className={`px-2 py-1 text-xs sm:text-sm font-medium rounded-md transition-colors ${viewMode === 'calendar' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
-                  aria-label="Calendar view"
-                >
-                  <span className="hidden xs:inline">Calendario</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 xs:hidden" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-              {/* Add day button */}
-              <button
-                onClick={() => {
-                  setCurrentDay(null);
-                  setShowDayModal(true);
-                }}
-                className="bg-primary py-1 px-2 sm:py-2 sm:px-4 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors flex items-center"
-                aria-label="Add a new day"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                <span>Aggiungi Giorno</span>
-              </button>
-            </div>
+            {/* No controls here anymore */}
+            <div></div>
           </div>
         </div>
       </header>
@@ -645,7 +668,123 @@ export default function TripItinerary() {
           </div>
         )}
 
-        {itineraryDays.length === 0 ? (
+        <div className="w-full mb-8">
+          <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-4 sm:gap-6">
+            <button
+              onClick={() => setActiveTab('itinerary')}
+              className={`group relative px-5 py-4 sm:px-8 sm:py-5 rounded-xl flex items-center gap-4 transition-all duration-300 border-2 ${
+                activeTab === 'itinerary'
+                  ? 'bg-primary/10 text-primary border-primary shadow-md transform scale-105'
+                  : 'bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground border-transparent hover:border-muted'
+              }`}
+            >
+              <div className={`p-3 rounded-full ${
+                activeTab === 'itinerary'
+                  ? 'bg-primary/20'
+                  : 'bg-muted group-hover:bg-muted/80'
+              } transition-colors duration-300`}>
+                <CalendarIcon className={`h-6 w-6 ${
+                  activeTab === 'itinerary' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                }`} />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-base sm:text-lg">Itinerary</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Plan your daily activities</span>
+              </div>
+              {activeTab === 'itinerary' && (
+                <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-primary rounded-l-full"></div>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab('journal')}
+              className={`group relative px-5 py-4 sm:px-8 sm:py-5 rounded-xl flex items-center gap-4 transition-all duration-300 border-2 ${
+                activeTab === 'journal'
+                  ? 'bg-primary/10 text-primary border-primary shadow-md transform scale-105'
+                  : 'bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground border-transparent hover:border-muted'
+              }`}
+            >
+              <div className={`p-3 rounded-full ${
+                activeTab === 'journal'
+                  ? 'bg-primary/20'
+                  : 'bg-muted group-hover:bg-muted/80'
+              } transition-colors duration-300`}>
+                <BookOpenIcon className={`h-6 w-6 ${
+                  activeTab === 'journal' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                }`} />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-base sm:text-lg">Journal</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Keep a diary and photos</span>
+              </div>
+              {activeTab === 'journal' && (
+                <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-primary rounded-l-full"></div>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {activeTab === 'itinerary' && (
+          <div className="mt-0">
+            {/* Itinerary Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 bg-card p-4 rounded-lg shadow-sm border border-border">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <CalendarIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Itinerary View</h3>
+                  <p className="text-xs text-muted-foreground">Choose how to display your schedule</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* View toggle */}
+                <div className="flex items-center bg-muted/50 rounded-md p-1">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-1 ${
+                      viewMode === 'list'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-foreground hover:bg-muted'
+                    }`}
+                    aria-label="List view"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <span>List</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('calendar')}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-1 ${
+                      viewMode === 'calendar'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-foreground hover:bg-muted'
+                    }`}
+                    aria-label="Calendar view"
+                  >
+                    <CalendarIcon className="h-4 w-4 mr-1" />
+                    <span>Calendar</span>
+                  </button>
+                </div>
+
+                {/* Add day button */}
+                <button
+                  onClick={() => {
+                    setCurrentDay(null);
+                    setShowDayModal(true);
+                  }}
+                  className="bg-primary py-1.5 px-4 rounded-md shadow-sm text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all duration-200 flex items-center gap-1"
+                  aria-label="Add a new day"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>Add Day</span>
+                </button>
+              </div>
+            </div>
+
+          {itineraryDays.length === 0 ? (
           <div className="bg-card shadow rounded-lg p-4 sm:p-6 text-center">
             <h2 className="text-xl font-semibold mb-4">Nessun giorno nell'itinerario</h2>
             <p className="text-muted-foreground mb-6">
@@ -710,6 +849,121 @@ export default function TripItinerary() {
               onViewActivityDetails={handleViewActivityDetails}
             />
           </Suspense>
+        )}
+          </div>
+        )}
+
+        {activeTab === 'journal' && (
+          <div className="mt-0 w-full">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+              <div className="flex bg-muted/30 p-1 rounded-lg shadow-sm">
+                <button
+                  onClick={() => setJournalTab('entries')}
+                  className={`px-3 py-2 text-sm font-medium flex items-center gap-1 rounded-md transition-all duration-200 ${
+                    journalTab === 'entries'
+                      ? 'bg-card shadow-sm text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  <BookOpenIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Entries</span>
+                </button>
+                <button
+                  onClick={() => setJournalTab('gallery')}
+                  className={`px-3 py-2 text-sm font-medium flex items-center gap-1 rounded-md transition-all duration-200 ${
+                    journalTab === 'gallery'
+                      ? 'bg-card shadow-sm text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Gallery</span>
+                </button>
+                <button
+                  onClick={() => setJournalTab('timeline')}
+                  className={`px-3 py-2 text-sm font-medium flex items-center gap-1 rounded-md transition-all duration-200 ${
+                    journalTab === 'timeline'
+                      ? 'bg-card shadow-sm text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  <ClockIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Timeline</span>
+                </button>
+              </div>
+
+              <div>
+                {journalTab === 'entries' && (
+                  <Button onClick={handleAddEntry} className="flex items-center gap-1 bg-primary hover:bg-primary/90 transition-colors">
+                    <PlusIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">New Entry</span>
+                    <span className="sm:hidden">Entry</span>
+                  </Button>
+                )}
+                {journalTab === 'gallery' && (
+                  <Button onClick={handleToggleMediaUploader} className="flex items-center gap-1 bg-primary hover:bg-primary/90 transition-colors">
+                    <PlusIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">Upload Media</span>
+                    <span className="sm:hidden">Upload</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {journalTab === 'entries' && (
+              <div className="space-y-6">
+                {journalLoading && entries.length === 0 ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                ) : entries.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground mb-4">
+                      You haven't created any journal entries for this trip yet.
+                    </p>
+                    <Button onClick={handleAddEntry}>
+                      <PlusIcon className="h-4 w-4 mr-2" />
+                      Create your first entry
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6">
+                    {entries.map((entry) => (
+                      <JournalEntryCard
+                        key={entry.id}
+                        entry={entry}
+                        onEdit={handleEditEntry}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {journalTab === 'gallery' && (
+              <div>
+                {showMediaUploader && (
+                  <div className="mb-6">
+                    <SimpleMediaUploader
+                      tripId={id as string}
+                      onUploadComplete={() => {
+                        setShowMediaUploader(false);
+                        dispatch(fetchJournalMedia(id as string));
+                      }}
+                    />
+                  </div>
+                )}
+                <MediaGallery
+                  media={media}
+                  tripId={id as string}
+                />
+              </div>
+            )}
+
+            {journalTab === 'timeline' && (
+              <MemoriesTimeline tripId={id as string} />
+            )}
+          </div>
         )}
       </main>
 
@@ -778,6 +1032,16 @@ export default function TripItinerary() {
               setCurrentDayId(activity.day_id);
               setShowActivityModal(true);
             }}
+          />
+        )}
+
+        {/* Journal Entry Form */}
+        {showEntryForm && (
+          <JournalEntryForm
+            isOpen={showEntryForm}
+            onClose={handleCloseForm}
+            tripId={id as string}
+            entry={currentEntry}
           />
         )}
       </Suspense>

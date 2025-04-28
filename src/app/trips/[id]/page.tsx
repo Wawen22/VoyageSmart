@@ -26,6 +26,7 @@ import {
   MessageCircleIcon,
   ArrowLeft,
   InfoIcon,
+  BookOpenIcon,
   SparklesIcon
 } from 'lucide-react';
 
@@ -501,7 +502,7 @@ export default function TripDetails() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <Link href={`/trips/${id}/itinerary`} className="group">
               <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
                 {/* Card background decoration */}
@@ -510,12 +511,15 @@ export default function TripDetails() {
 
                 <div className="flex flex-col items-center text-center mb-4 relative">
                   <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <CalendarIcon className="h-8 w-8 text-primary" />
+                    <div className="relative">
+                      <CalendarIcon className="h-8 w-8 text-primary" />
+                      <BookOpenIcon className="h-4 w-4 text-primary absolute -bottom-1 -right-1 bg-background rounded-full p-0.5" />
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Itinerary</h3>
+                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Trip Planner</h3>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground relative text-center">
-                  Plan your daily activities and schedule
+                  Plan activities, keep a journal and photo gallery
                 </p>
               </div>
             </Link>
@@ -597,6 +601,8 @@ export default function TripDetails() {
                 </p>
               </div>
             </Link>
+
+
 
             <Link href={`/trips/${id}/chat`} className="group">
               <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
