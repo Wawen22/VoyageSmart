@@ -27,6 +27,10 @@ import {
 import LoginPrompt from '@/components/auth/LoginPrompt';
 import { v4 as uuidv4 } from 'uuid';
 
+// Costante per la dimensione massima del file (5MB)
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+const MAX_FILE_SIZE_LABEL = '5MB';
+
 interface ChatMessage {
   id: string;
   trip_id: string;
@@ -300,6 +304,22 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+
+      // Verifica della dimensione del file
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          title: "File troppo grande",
+          description: `La dimensione massima consentita è ${MAX_FILE_SIZE_LABEL}. Il file selezionato è ${(file.size / (1024 * 1024)).toFixed(2)}MB.`,
+          variant: "destructive",
+        });
+
+        // Reset dell'input file
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
       setSelectedFile(file);
     }
   };
@@ -331,6 +351,16 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
   // Upload file to Supabase storage
   const uploadFileToStorage = async (file: File): Promise<{ url: string; type: string } | null> => {
     try {
+      // Verifica della dimensione del file (doppio controllo)
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          title: "File troppo grande",
+          description: `La dimensione massima consentita è ${MAX_FILE_SIZE_LABEL}.`,
+          variant: "destructive",
+        });
+        return null;
+      }
+
       setUploadingFile(true);
 
       // Create a unique file name
@@ -529,7 +559,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No messages yet. Start the conversation!</p>
+            <p className="text-muted-foreground">Nessun messaggio. Inizia la conversazione!</p>
           </div>
         ) : (
           messages.map((message) => (
@@ -578,7 +608,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
                               onClick={() => window.open(message.attachment_url, '_blank')}
                             />
                             <div className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-2 py-0.5 rounded">
-                              Click to view
+                              Clicca per visualizzare
                             </div>
                           </div>
                         ) : message.attachment_type?.startsWith('video/') ? (
@@ -660,7 +690,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         <div className="flex space-x-2">
           <div className="flex-1 flex flex-col">
             <Textarea
-              placeholder="Type a message..."
+              placeholder="Scrivi un messaggio..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={handleKeyPress}
@@ -670,7 +700,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
 
             <div className="flex justify-between items-center mt-2">
               <p className="text-xs text-muted-foreground">
-                Press Enter to send, Shift+Enter for a new line
+                Premi Invio per inviare, Shift+Invio per una nuova riga
               </p>
 
               {/* Hidden file input */}
@@ -682,18 +712,25 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
                 accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-zip-compressed"
               />
 
-              {/* Attachment button */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleOpenFileSelector}
-                disabled={!isParticipant || sending}
-                className="h-8 px-2"
-              >
-                <PaperclipIcon className="h-4 w-4 mr-1" />
-                <span className="text-xs">Attach</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                {/* File size info */}
+                <span className="text-xs text-muted-foreground">
+                  Max: {MAX_FILE_SIZE_LABEL}
+                </span>
+
+                {/* Attachment button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleOpenFileSelector}
+                  disabled={!isParticipant || sending}
+                  className="h-8 px-2"
+                >
+                  <PaperclipIcon className="h-4 w-4 mr-1" />
+                  <span className="text-xs">Allega</span>
+                </Button>
+              </div>
             </div>
           </div>
 
