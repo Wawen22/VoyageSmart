@@ -22,7 +22,6 @@
   - Removed hamburger menu from mobile view for a cleaner interface
   - Added Dark Mode selector to the Your Profile page for mobile view
   - Fixed HTML structure issues in accommodations and transportation pages
-
 - [x] Fixed RLS policy for trips table that was causing infinite recursion
   - Issue: The policy was incorrectly comparing `trip_participants.trip_id = trip_participants.id`
   - Fix: Updated to correctly compare `trip_participants.trip_id = trips.id`
@@ -94,20 +93,37 @@
   - Standardized back button position across all pages
   - Fixed overflow issues in calendar view
   - Improved overall mobile layout consistency
+- [x] Implemented Code Splitting and Lazy Loading for improved performance
+- [x] Optimized bundle size for faster initial loading
+- [x] Implemented Journal/Diary functionality with daily entries and photo gallery
+- [x] Enhanced Trip Details page with better layout and visual feedback
+- [x] Improved landing page with full-height hero section and better navigation
+- [x] Fixed double menu issue on landing page
+- [x] Implemented transportation management with map integration
+- [x] Added support for different transportation types (flight, train, bus, car, ferry)
+- [x] Implemented accommodations management with map integration
+- [x] Added document upload and storage for accommodations and transportation
+- [x] Integrated Mapbox for location visualization
+- [x] Added modern UI for accommodations and transportation sections with list and map views
+- [x] Implemented collaboration features with chat and comments
+- [x] Added expense splitting functionality with "who owes what" algorithm
+- [x] Implemented subscription management with Stripe integration
+- [x] Created subscription history tracking system
+- [x] Implemented subscription expiration check functionality
 
 ## Pending Tasks (In Priority Order)
 
 ### Pre-Launch Tasks
-1. [ ] Final testing and bug fixes
+1. [ ] Subscription management automation
+   - [ ] Configure cron job to call `/api/cron/check-subscriptions` endpoint daily
+   - [ ] Add email notifications for subscription status changes
+   - [ ] Test subscription lifecycle (creation, renewal, cancellation, expiration)
+
+2. [ ] Final testing and bug fixes
    - [ ] Cross-browser testing (Chrome, Firefox, Safari, Edge)
    - [ ] Cross-device testing (Desktop, Tablet, Mobile)
    - [ ] Performance testing and optimization
    - [ ] Security testing and vulnerability assessment
-
-2. [ ] Subscription management automation
-   - [ ] Implement cron job for checking expired subscriptions
-   - [ ] Add email notifications for subscription status changes
-   - [ ] Improve subscription management UI
 
 3. [ ] Documentation and help resources
    - [ ] Create user guide/documentation
@@ -115,46 +131,25 @@
    - [ ] Create onboarding flow for new users
 
 ### Post-Launch Improvements
-4. [ ] Advanced route planning
-   - [ ] Implement route optimization for daily itineraries
-   - [ ] Add turn-by-turn directions
-   - [ ] Integrate public transportation options
+4. [ ] AI features implementation
+   - [ ] Integrate OpenAI/Gemini API for itinerary suggestions
+   - [ ] Implement route optimization for daily activities
+   - [ ] Add smart recommendations based on user preferences
+   - [ ] Create AI assistant interface for natural language trip planning
 
 5. [ ] Analytics and monitoring
    - [ ] Implement usage analytics
    - [ ] Add error tracking and monitoring
    - [ ] Create admin dashboard for monitoring app health
 
-6. [ ] AI features (Future)
-   - [ ] Implement AI-assisted itinerary planning
-   - [ ] Add smart recommendations based on user preferences
-   - [ ] Develop natural language processing for trip planning
+6. [ ] Advanced route planning
+   - [ ] Implement route optimization for daily itineraries
+   - [ ] Add turn-by-turn directions
+   - [ ] Integrate public transportation options
 
 ## Current Focus
+- Configuring cron job for subscription management automation
 - Preparing for app launch with final optimizations
-- Implementing cron job for subscription management
 - Enhancing error handling and edge cases
 - Final UI/UX polish for all sections
 - Comprehensive testing across devices and browsers
-
-## Recently Completed
-- Implemented Code Splitting and Lazy Loading for improved performance
-- Optimized bundle size for faster initial loading
-- Implemented Journal/Diary functionality with daily entries and photo gallery
-- Enhanced Trip Details page with better layout and visual feedback
-- Improved landing page with full-height hero section and better navigation
-- Fixed double menu issue on landing page
-- Implemented transportation management with map integration
-- Added support for different transportation types (flight, train, bus, car, ferry)
-- Implemented accommodations management with map integration
-- Added document upload and storage for accommodations and transportation
-- Integrated Mapbox for location visualization
-- Added modern UI for accommodations and transportation sections with list and map views
-- Improved overall user experience with advanced animations and transitions
-- Implemented skeleton loaders for all main sections (Itinerary, Accommodations, Transportation, Expenses)
-- Created reusable animation components and hooks for consistent animations across the app
-- Implemented comprehensive dark mode support
-- Enhanced mobile experience with optimized layouts and navigation
-- Implemented collaboration features with chat and comments
-- Added expense splitting functionality with "who owes what" algorithm
-- Implemented subscription management with Stripe integration

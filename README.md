@@ -256,7 +256,9 @@ trip_media
   - 🔄 Analisi predittiva costi e affluenza
 
 - **Automazione sottoscrizioni** 🔄
-  - 🔄 Configurare un cron job (es. Vercel Cron Jobs, AWS Lambda con EventBridge, ecc.) che chiami periodicamente l'endpoint `/api/cron/check-subscriptions` (ad esempio una volta al giorno) per verificare e aggiornare tutte le sottoscrizioni scadute.
+  - 🔄 Implementazione endpoint `/api/cron/check-subscriptions` ✅
+  - 🔄 Configurare un cron job (es. Vercel Cron Jobs, AWS Lambda con EventBridge, ecc.) che chiami periodicamente l'endpoint per verificare e aggiornare tutte le sottoscrizioni scadute
+  - 🔄 Aggiungere notifiche email per cambiamenti di stato delle sottoscrizioni
 
 - **Ottimizzazione prestazioni** ✅
   - ✅ Implementazione Code Splitting e Lazy Loading
@@ -270,10 +272,11 @@ trip_media
   - 🔄 Suggerimenti pro-attivi
 
 - **Monetizzazione e piani premium** ✅
-  - ✅ Sistema abbonamenti con Supabase
+  - ✅ Sistema abbonamenti con Supabase e Stripe
   - ✅ Paywall per funzionalità premium (Accommodations, Transportation)
   - ✅ Limite di 3 viaggi per utenti free
   - ✅ Pagina Pricing con piani Free, Premium e AI (coming soon)
+  - ✅ Sistema di tracciamento cronologia sottoscrizioni
   - 🔄 Dashboard amministrativa ricavi
 
 - **Funzionalità innovative** 🔄
