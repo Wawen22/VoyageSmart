@@ -247,29 +247,29 @@ export default function Home() {
 
       {/* Hero Section */}
       <ParallaxSection
-        className="h-[100vh] w-full flex items-center justify-center overflow-hidden"
+        className="min-h-screen w-full flex items-center justify-center overflow-hidden py-20"
         bgImage="/images/hero-bg.jpg"
         speed={0.3}
         overlayOpacity={0.7}
       >
-        <div className="container mx-auto px-4 sm:px-6 relative z-10 h-full flex flex-col justify-center pt-16">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 flex flex-col justify-center">
           <div className="flex flex-col items-center text-center">
             <div className="animate-fade-in flex flex-col items-center">
-              <div className="relative mb-8">
+              <div className="relative mb-6">
                 <div className="absolute inset-0 bg-primary/20 rounded-full filter blur-3xl animate-pulse-slow"></div>
                 <Image
                   src="/images/logo-voyage_smart.png"
                   alt="Voyage Smart Logo"
                   width={450}
                   height={135}
-                  className="h-auto w-auto max-w-[350px] md:max-w-[450px] relative z-10"
+                  className="h-auto w-auto max-w-[220px] sm:max-w-[250px] md:max-w-[280px] lg:max-w-[350px] xl:max-w-[450px] relative z-10"
                   priority
                 />
               </div>
               <h1 className="sr-only">Voyage Smart</h1>
             </div>
 
-            <p className="text-xl md:text-3xl text-white max-w-3xl mx-auto mb-10 animate-slide-in-bottom delay-200 font-light leading-relaxed drop-shadow-md">
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white max-w-3xl mx-auto mb-8 animate-slide-in-bottom delay-200 font-light leading-relaxed drop-shadow-md">
               Your <span className="text-primary font-medium">complete travel planning solution</span>. Plan trips, manage expenses, and collaborate with friends all in one place.
             </p>
 
