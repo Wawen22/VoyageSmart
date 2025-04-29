@@ -47,7 +47,7 @@ Voyage Smart è un'applicazione mobile e web dedicata alla pianificazione comple
 - **Serverless Functions**: Supabase Edge Functions (Deno)
 - **Realtime**: Supabase Realtime
 
-### Servizi di AI/ML
+### Servizi di AI/MLM
 - **Generazione itinerari**: OpenAI API / Google Gemini API
 - **OCR per documenti**: Tesseract.js / Cloud Vision API
 - **Analisi predittiva**: Modelli personalizzati con TensorFlow
@@ -449,4 +449,4 @@ Questo progetto è proprietario e confidenziale. Tutti i diritti riservati.
 
 ---
 
-© 2025 Voyage Smart. Tutti i diritti riservati.
+© 2025 Voyage Smart (Wawen22). Tutti i diritti riservati.
