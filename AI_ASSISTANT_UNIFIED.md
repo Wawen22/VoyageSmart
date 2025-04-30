@@ -315,9 +315,9 @@ L'assistente ora ha accesso al contesto completo del viaggio, inclusi:
 
 ### Fase 3: Implementare Funzionalità Specifiche
 
-- **Generazione di itinerari** basati su destinazione, durata e preferenze
+- **Generazione di itinerari** basati su destinazione, durata e preferenze ✅
 - **Ottimizzazione dei percorsi** per attività giornaliere
-- **Suggerimenti personalizzati** basati sulle preferenze dell'utente
+- **Suggerimenti personalizzati** basati sulle preferenze dell'utente ✅
 - **Integrazione con dati meteo** per consigli basati sulle condizioni atmosferiche
 
 ### Fase 4: Migliorare l'Interfaccia Utente
@@ -362,8 +362,8 @@ L'interfaccia utente è stata migliorata per offrire una migliore esperienza ute
 5. ✅ Aggiunto pulsante per cancellare la conversazione
 
 Ulteriori miglioramenti pianificati:
-1. Aggiungere animazioni e transizioni più fluide
-2. Implementare un tema personalizzabile (chiaro/scuro)
+1. ✅ Aggiungere animazioni e transizioni più fluide
+2. ✅ Implementare un tema personalizzabile (chiaro/scuro)
 3. Aggiungere notifiche per nuovi messaggi
 
 ### 3. Migliorare il Prompt di Sistema ✅
@@ -384,7 +384,7 @@ Ulteriori miglioramenti pianificati:
 
 Una volta completata l'implementazione base, possiamo aggiungere funzionalità avanzate:
 
-1. **Generazione di itinerari**: Implementare la generazione automatica di itinerari basati su destinazione, durata e preferenze
+1. ✅ **Wizard per Generazione di Attività**: Implementato un wizard guidato che utilizza l'AI per generare automaticamente attività personalizzate per l'itinerario
 2. **Ottimizzazione percorsi**: Aggiungere l'ottimizzazione dei percorsi giornalieri
 3. **Suggerimenti proattivi**: Fornire suggerimenti proattivi basati sul contesto
 4. **Analisi predittiva**: Implementare l'analisi predittiva per costi e affluenza
@@ -434,10 +434,35 @@ L'Assistente AI di VoyageSmart è stato ulteriormente migliorato con ottimizzazi
 
 L'assistente continua ad avere accesso al contesto completo del viaggio, inclusi dettagli, partecipanti, alloggi, trasporti, itinerario e spese, permettendogli di fornire risposte personalizzate e specifiche per ogni viaggio.
 
-I prossimi passi includono l'aggiunta di esempi di domande e risposte nel prompt, l'implementazione di funzionalità avanzate come la generazione di itinerari e l'ottimizzazione dei percorsi, e il continuo miglioramento dell'interfaccia utente per renderla ancora più intuitiva e piacevole da utilizzare.
+I prossimi passi includono l'aggiunta di esempi di domande e risposte nel prompt, il miglioramento delle funzionalità avanzate già implementate come il Wizard per la generazione di attività, e il continuo miglioramento dell'interfaccia utente per renderla ancora più intuitiva e piacevole da utilizzare.
+
+## Wizard per Generazione Automatica di Attività
+
+È stato implementato un Wizard guidato per la generazione automatica di attività negli Itinerari. Questa funzionalità avanzata utilizza l'AI per creare attività personalizzate in base alle preferenze dell'utente e al contesto del viaggio.
+
+### Caratteristiche principali:
+
+1. **Interfaccia conversazionale**: L'utente interagisce con il wizard come se fosse un chatbot, rispondendo a domande specifiche per personalizzare le attività.
+2. **Processo guidato step-by-step**:
+   - Raccolta delle preferenze dell'utente (interessi, tipo di attività)
+   - Selezione dei giorni per cui generare attività
+   - Raccolta di preferenze aggiuntive (budget, ritmo, orari preferiti)
+   - Generazione delle attività con l'AI
+   - Visualizzazione di un riepilogo delle attività generate
+   - Conferma e salvataggio nel database
+3. **Integrazione con il contesto del viaggio**: Il wizard utilizza tutte le informazioni disponibili sul viaggio per generare attività pertinenti e realistiche.
+4. **Personalizzazione avanzata**: Le attività generate sono personalizzate in base agli interessi specifici dell'utente e alle caratteristiche della destinazione.
+
+### Componenti principali:
+
+- `src/components/ai/ItineraryWizard.tsx`: Componente React che implementa l'interfaccia utente del wizard
+- `src/app/api/ai/generate-activities/route.ts`: Endpoint API che utilizza Gemini AI per generare le attività
+- `src/app/api/activities/batch/route.ts`: Endpoint API per salvare in batch le attività generate
 
 Per qualsiasi problema o domanda sull'implementazione, consulta il codice sorgente nei file:
 - `src/components/ai/ChatBot.tsx`
 - `src/app/api/ai/chat/route.ts`
 - `src/lib/services/tripContextService.ts`
 - `src/lib/services/geminiService.ts`
+- `src/components/ai/ItineraryWizard.tsx`
+- `src/app/api/ai/generate-activities/route.ts`

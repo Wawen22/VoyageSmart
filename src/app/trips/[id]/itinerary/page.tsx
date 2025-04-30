@@ -7,12 +7,13 @@ import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { format, parseISO, isValid, addDays } from 'date-fns';
-import { CalendarIcon, BookOpenIcon, ImageIcon, ClockIcon, BookIcon, PlusIcon, ListIcon } from 'lucide-react';
+import { CalendarIcon, BookOpenIcon, ImageIcon, ClockIcon, BookIcon, PlusIcon, ListIcon, Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 import DaySchedule from '@/components/itinerary/DaySchedule';
 import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import ItineraryWizard from '@/components/ai/ItineraryWizard';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
 import { fetchJournalEntries, fetchJournalMedia, JournalEntry } from '@/lib/features/journalSlice';
@@ -85,6 +86,9 @@ export default function TripItinerary() {
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentDayId, setCurrentDayId] = useState<string>('');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+
+  // Wizard states
+  const [showWizard, setShowWizard] = useState(false);
 
   // Journal states
   const [activeTab, setActiveTab] = useState('itinerary');
@@ -769,6 +773,16 @@ export default function TripItinerary() {
                   </button>
                 </div>
 
+                {/* AI Wizard button */}
+                <button
+                  onClick={() => setShowWizard(true)}
+                  className="bg-gradient-to-r from-purple-500 to-indigo-600 py-1.5 px-4 rounded-md shadow-sm text-sm font-medium text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 flex items-center gap-1"
+                  aria-label="Generate activities with AI"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>AI Wizard</span>
+                </button>
+
                 {/* Add day button */}
                 <button
                   onClick={() => {
@@ -1045,6 +1059,46 @@ export default function TripItinerary() {
           />
         )}
       </Suspense>
+
+      {/* AI Wizard */}
+      {showWizard && (
+        <ItineraryWizard
+          tripId={id as string}
+          tripData={trip}
+          itineraryDays={itineraryDays}
+          onClose={() => setShowWizard(false)}
+          onActivitiesGenerated={(activities) => {
+            // Aggiorna lo stato con le nuove attività
+            setItineraryDays(prevDays => {
+              // Crea una copia profonda dell'array dei giorni
+              const updatedDays = [...prevDays];
+
+              // Per ogni attività generata, aggiungila al giorno corrispondente
+              activities.forEach(activity => {
+                const dayIndex = updatedDays.findIndex(day => day.id === activity.day_id);
+                if (dayIndex !== -1) {
+                  // Se il giorno esiste, aggiungi l'attività
+                  updatedDays[dayIndex] = {
+                    ...updatedDays[dayIndex],
+                    activities: [
+                      ...(updatedDays[dayIndex].activities || []),
+                      activity
+                    ].sort((a, b) =>
+                      (a.start_time && b.start_time) ?
+                        new Date(a.start_time).getTime() - new Date(b.start_time).getTime() : 0
+                    )
+                  };
+                }
+              });
+
+              return updatedDays;
+            });
+
+            // Chiudi il wizard
+            setShowWizard(false);
+          }}
+        />
+      )}
     </div>
   );
 }
