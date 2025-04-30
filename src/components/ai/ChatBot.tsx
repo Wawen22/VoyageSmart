@@ -1,12 +1,21 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2 } from 'lucide-react';
+import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   role: 'user' | 'assistant';
   content: string;
+  timestamp?: Date;
 };
+
+// Suggested questions that will appear after AI responses
+interface SuggestedQuestion {
+  text: string;
+  action: () => void;
+}
 
 interface TripData {
   id: string;
@@ -177,7 +186,16 @@ export default function ChatBot({
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<SuggestedQuestion[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Genera domande suggerite quando il contesto è caricato
+  useEffect(() => {
+    if (contextLoaded && tripData) {
+      generateSuggestedQuestions();
+    }
+  }, [contextLoaded, tripData]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -189,19 +207,31 @@ export default function ChatBot({
     }
   }, [messages, tripId]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async (messageText?: string) => {
+    // Use provided message or input field value
+    const messageToSend = messageText || input;
+    if (!messageToSend.trim()) return;
 
     // Add user message
-    const userMessage: Message = { role: 'user', content: input };
+    const userMessage: Message = {
+      role: 'user',
+      content: messageToSend,
+      timestamp: new Date()
+    };
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
+
+    // Clear input field only if we're using it (not for suggested questions)
+    if (!messageText) {
+      setInput('');
+    }
+
     setIsLoading(true);
+    setIsTyping(true);
 
     try {
       // Call API
       console.log('Sending message to API:', {
-        message: input,
+        message: messageToSend,
         tripId,
         tripName,
         hasTripData: !!tripData
@@ -209,7 +239,7 @@ export default function ChatBot({
 
       // Prepara i dati da inviare all'API
       const apiData: any = {
-        message: input,
+        message: messageToSend,
         tripId,
         tripName,
         isInitialMessage: false // Indica che non è il messaggio iniziale
@@ -241,11 +271,23 @@ export default function ChatBot({
 
       const data = await response.json();
 
-      // Add assistant message
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.message || 'Mi dispiace, non sono riuscito a elaborare una risposta.'
-      }]);
+      // Simula l'effetto di digitazione
+      setIsTyping(true);
+
+      // Aggiungi un piccolo ritardo per simulare la digitazione
+      setTimeout(() => {
+        // Add assistant message
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: data.message || 'Mi dispiace, non sono riuscito a elaborare una risposta.',
+          timestamp: new Date()
+        }]);
+
+        // Genera nuove domande suggerite dopo ogni risposta
+        generateSuggestedQuestions();
+
+        setIsTyping(false);
+      }, 500); // Ritardo di 500ms per simulare la digitazione
     } catch (error: any) {
       console.error('Error sending message:', error);
 
@@ -260,8 +302,11 @@ export default function ChatBot({
 
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: errorMessage
+        content: errorMessage,
+        timestamp: new Date()
       }]);
+
+      setIsTyping(false);
     } finally {
       setIsLoading(false);
     }
@@ -278,6 +323,57 @@ export default function ChatBot({
   };
 
   // Funzione per cancellare la conversazione
+  // Genera domande suggerite in base al contesto del viaggio
+  const generateSuggestedQuestions = () => {
+    const questions: SuggestedQuestion[] = [];
+
+    // Domande base sempre disponibili
+    questions.push({
+      text: "Cosa posso fare a " + (tripData?.destination || "destinazione"),
+      action: () => {
+        const question = "Cosa posso fare a " + (tripData?.destination || "destinazione") + "?";
+        setInput(question);
+        handleSendMessage(question);
+      }
+    });
+
+    questions.push({
+      text: "Mostrami il mio itinerario",
+      action: () => {
+        const question = "Mostrami il mio itinerario completo";
+        setInput(question);
+        handleSendMessage(question);
+      }
+    });
+
+    // Se ci sono alloggi, aggiungi una domanda sugli alloggi
+    if (tripData?.accommodations && tripData.accommodations.length > 0) {
+      questions.push({
+        text: "Dettagli sui miei alloggi",
+        action: () => {
+          const question = "Mostrami i dettagli dei miei alloggi";
+          setInput(question);
+          handleSendMessage(question);
+        }
+      });
+    }
+
+    // Se ci sono trasporti, aggiungi una domanda sui trasporti
+    if (tripData?.transportation && tripData.transportation.length > 0) {
+      questions.push({
+        text: "Info sui miei trasporti",
+        action: () => {
+          const question = "Mostrami le informazioni sui miei trasporti";
+          setInput(question);
+          handleSendMessage(question);
+        }
+      });
+    }
+
+    // Limita a massimo 4 domande
+    setSuggestedQuestions(questions.slice(0, 4));
+  };
+
   const clearConversation = () => {
     if (window.confirm('Sei sicuro di voler cancellare questa conversazione?')) {
       // Rimuovi i messaggi dal localStorage
@@ -291,6 +387,9 @@ export default function ChatBot({
 
       // Ricarica il contesto
       setContextLoaded(false);
+
+      // Rigenera le domande suggerite
+      generateSuggestedQuestions();
     }
   };
 
@@ -298,10 +397,11 @@ export default function ChatBot({
     return (
       <button
         onClick={toggleMinimize}
-        className="fixed bottom-4 right-4 bg-primary text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2"
+        className="fixed sm:bottom-4 bottom-20 right-4 bg-primary text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-all duration-300 animate-float"
+        aria-label="Apri assistente AI"
       >
-        <Sparkles size={20} />
-        <span>{contextLoaded ? 'Assistente AI' : 'Assistente AI (Caricamento...)'}</span>
+        <Sparkles size={20} className="animate-pulse" />
+        <span className="sm:inline hidden">{contextLoaded ? 'Assistente AI' : 'Assistente AI (Caricamento...)'}</span>
       </button>
     );
   }
@@ -309,36 +409,60 @@ export default function ChatBot({
   return (
     <div
       className={`
-        fixed ${isExpanded ? 'inset-4' : 'bottom-4 right-4 w-80 h-[450px]'}
-        bg-background border border-border rounded-lg shadow-lg z-50
+        fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 bottom-20 right-4 w-80 sm:h-[450px] h-[400px]'}
+        bg-background border border-border rounded-lg shadow-xl z-50
         flex flex-col transition-all duration-300 ease-in-out
+        glass-effect animate-fade-in
       `}
+      aria-label="Assistente AI di viaggio"
     >
       {/* Header */}
-      <div className="p-3 border-b flex items-center justify-between bg-muted/30">
+      <div className="p-3 border-b flex items-center justify-between bg-primary/5 rounded-t-lg">
         <div className="flex items-center gap-2">
-          <Sparkles className="text-primary" size={18} />
-          <h3 className="font-medium">
+          <div className="bg-primary/10 p-1.5 rounded-full">
+            <Sparkles className="text-primary" size={18} />
+          </div>
+          <h3 className="font-medium text-sm">
             {contextLoaded
               ? `Assistente Viaggio: ${tripName}`
               : <span className="flex items-center gap-1">Caricamento contesto <Loader2 size={14} className="animate-spin" /></span>
-            }</h3>
-          {/* Pulsante di test rimosso */}
+            }
+          </h3>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={clearConversation} className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-destructive" title="Cancella conversazione">
+          <button
+            onClick={clearConversation}
+            className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-destructive transition-colors"
+            title="Cancella conversazione"
+            aria-label="Cancella conversazione"
+          >
             <Trash2 size={16} />
           </button>
           {isExpanded ? (
-            <button onClick={toggleExpand} className="p-1 hover:bg-muted rounded" title="Riduci">
+            <button
+              onClick={toggleExpand}
+              className="p-1.5 hover:bg-muted rounded transition-colors"
+              title="Riduci"
+              aria-label="Riduci finestra"
+            >
               <Minimize2 size={16} />
             </button>
           ) : (
-            <button onClick={toggleExpand} className="p-1 hover:bg-muted rounded" title="Espandi">
+            <button
+              onClick={toggleExpand}
+              className="p-1.5 hover:bg-muted rounded transition-colors"
+              title="Espandi"
+              aria-label="Espandi finestra"
+            >
               <Maximize2 size={16} />
             </button>
           )}
-          <button onClick={toggleMinimize} className="p-1 hover:bg-muted rounded" title="Minimizza">
+          <button
+            onClick={toggleMinimize}
+            className="p-1.5 hover:bg-muted rounded transition-colors"
+            title="Minimizza"
+            aria-label="Minimizza finestra"
+          >
             <X size={16} />
           </button>
         </div>
@@ -353,10 +477,10 @@ export default function ChatBot({
           >
             <div
               className={`
-                max-w-[80%] p-3 rounded-lg
+                max-w-[80%] p-3 rounded-lg shadow-sm
                 ${message.role === 'user'
-                  ? 'bg-primary text-primary-foreground ml-4'
-                  : 'bg-muted mr-4'
+                  ? 'bg-primary text-primary-foreground ml-4 animate-slide-in-left'
+                  : 'bg-muted mr-4 animate-slide-in-right'
                 }
               `}
             >
@@ -369,12 +493,48 @@ export default function ChatBot({
                 <span className="text-xs font-medium">
                   {message.role === 'assistant' ? 'Assistente' : 'Tu'}
                 </span>
+                {message.timestamp && (
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
               </div>
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+
+              {/* Markdown rendering for assistant messages */}
+              {message.role === 'assistant' ? (
+                <div className="text-sm prose prose-sm dark:prose-invert max-w-full">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              )}
             </div>
           </div>
         ))}
-        {isLoading && (
+
+        {/* Typing indicator */}
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="bg-muted p-3 rounded-lg max-w-[80%] mr-4 animate-pulse">
+              <div className="flex items-center gap-2 mb-1">
+                <Bot size={16} className="text-primary" />
+                <span className="text-xs font-medium">Assistente</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading indicator */}
+        {isLoading && !isTyping && (
           <div className="flex justify-start">
             <div className="bg-muted p-3 rounded-lg max-w-[80%] mr-4">
               <div className="flex items-center gap-2 mb-1">
@@ -383,39 +543,66 @@ export default function ChatBot({
               </div>
               <div className="flex items-center gap-2">
                 <Loader2 size={16} className="animate-spin" />
-                <p className="text-sm">Sto pensando...</p>
+                <p className="text-sm">Sto elaborando la risposta...</p>
               </div>
             </div>
           </div>
         )}
+
+        {/* Suggested questions */}
+        {suggestedQuestions.length > 0 && !isLoading && !isTyping && (
+          <div className="flex flex-wrap gap-2 mt-2 mb-1">
+            {suggestedQuestions.map((question, index) => (
+              <button
+                key={index}
+                onClick={question.action}
+                className="text-xs bg-muted hover:bg-muted/80 text-foreground px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+              >
+                <HelpCircle size={12} />
+                {question.text}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t">
+      <div className="p-3 border-t bg-muted/20">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
           }}
-          className="flex gap-2"
+          className="flex gap-2 items-center"
         >
-          <input
+          <input              
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Chiedi qualcosa sul tuo viaggio..."
-            className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            className="text-xs flex-1 px-4 py-2.5 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-background shadow-sm"
             disabled={isLoading}
+            aria-label="Messaggio per l'assistente AI"
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="bg-primary text-white p-2 rounded-md disabled:opacity-50"
+            className="bg-primary text-white p-2.5 rounded-full disabled:opacity-50 hover:bg-primary/90 transition-colors shadow-sm"
+            aria-label="Invia messaggio"
           >
-            <Send size={18} />
+            {isLoading ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Send size={18} />
+            )}
           </button>
         </form>
+        <div className="text-xs text-center mt-2 text-muted-foreground">
+          <MessageSquare size={12} className="inline mr-1" />
+          Assistente AI di VoyageSmart - Powered by Gemini
+        </div>
       </div>
     </div>
   );

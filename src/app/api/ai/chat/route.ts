@@ -434,6 +434,8 @@ LINEE GUIDA PER LA FORMATTAZIONE DELLE RISPOSTE:
 - Usa il formato markdown per migliorare la leggibilità: **testo in grassetto** per i titoli o informazioni importanti.
 - Separa le diverse sezioni della tua risposta con righe vuote.
 - Quando fornisci dettagli su date, orari o luoghi, assicurati che siano ben evidenziati e non nascosti all'interno di un testo lungo.
+- Usa sempre una linea vuota tra elementi di un elenco quando contengono più di una riga di informazioni.
+- Usa separatori come "---" o "***" tra sezioni principali della risposta per migliorare la leggibilità.
 
 Per risposte a domande generiche sul viaggio, usa questo formato:
 
@@ -453,12 +455,15 @@ Formatta SEMPRE la risposta sugli alloggi in questo modo:
 
 **Alloggi prenotati per il viaggio:**
 
-- **Nome alloggio 1** (tipo): Check-in il [data], check-out il [data]
+- **Nome alloggio 1** (tipo)
+  Check-in: **[data]**, Check-out: **[data]**
   Indirizzo: [indirizzo completo]
 
-- **Nome alloggio 2** (tipo): Check-in il [data], check-out il [data]
+- **Nome alloggio 2** (tipo)
+  Check-in: **[data]**, Check-out: **[data]**
   Indirizzo: [indirizzo completo]
 
+Usa SEMPRE una linea vuota tra un alloggio e l'altro per migliorare la leggibilità.
 Se ci sono informazioni aggiuntive rilevanti, aggiungile sotto ciascun alloggio.
 
 IMPORTANTE PER DOMANDE SUI TRASPORTI:
@@ -468,14 +473,15 @@ Formatta SEMPRE la risposta sui trasporti in questo modo:
 
 **Trasporti prenotati per il viaggio:**
 
-- **[Tipo di trasporto 1]** con [provider]:
-  Da: **[luogo di partenza]** il [data e ora]
-  A: **[luogo di arrivo]** il [data e ora]
+- **[Tipo di trasporto 1]** con [provider]
+  **Partenza:** [luogo di partenza] - **Data/ora:** [data e ora]
+  **Arrivo:** [luogo di arrivo] - **Data/ora:** [data e ora]
 
-- **[Tipo di trasporto 2]** con [provider]:
-  Da: **[luogo di partenza]** il [data e ora]
-  A: **[luogo di arrivo]** il [data e ora]
+- **[Tipo di trasporto 2]** con [provider]
+  **Partenza:** [luogo di partenza] - **Data/ora:** [data e ora]
+  **Arrivo:** [luogo di arrivo] - **Data/ora:** [data e ora]
 
+Usa SEMPRE una linea vuota tra un trasporto e l'altro per migliorare la leggibilità.
 Se ci sono informazioni aggiuntive rilevanti, aggiungile sotto ciascun trasporto.
 
 IMPORTANTE PER DOMANDE SULL'ITINERARIO:
@@ -490,17 +496,35 @@ Formatta SEMPRE la risposta sull'itinerario in questo modo:
 
 **Itinerario del viaggio:**
 
-**GIORNO 1 ([data]):**
-- **[Nome attività 1]** a [luogo] dalle [ora inizio] alle [ora fine]
-  [Note aggiuntive se presenti]
-- **[Nome attività 2]** a [luogo] dalle [ora inizio] alle [ora fine]
+***
+
+### **GIORNO 1 ([data])**
+
+- **[Nome attività 1]**
+  **Luogo:** [luogo]
+  **Orario:** [ora inizio] - [ora fine]
   [Note aggiuntive se presenti]
 
-**GIORNO 2 ([data]):**
-- **[Nome attività 1]** a [luogo] dalle [ora inizio] alle [ora fine]
+- **[Nome attività 2]**
+  **Luogo:** [luogo]
+  **Orario:** [ora inizio] - [ora fine]
   [Note aggiuntive se presenti]
-- **[Nome attività 2]** a [luogo] dalle [ora inizio] alle [ora fine]
+
+***
+
+### **GIORNO 2 ([data])**
+
+- **[Nome attività 1]**
+  **Luogo:** [luogo]
+  **Orario:** [ora inizio] - [ora fine]
   [Note aggiuntive se presenti]
+
+- **[Nome attività 2]**
+  **Luogo:** [luogo]
+  **Orario:** [ora inizio] - [ora fine]
+  [Note aggiuntive se presenti]
+
+Usa SEMPRE i separatori "***" tra i giorni e una linea vuota tra un'attività e l'altra per migliorare la leggibilità.
 
 Se l'utente chiede informazioni su un giorno specifico, mostra solo le attività di quel giorno ma mantieni lo stesso formato.
 
