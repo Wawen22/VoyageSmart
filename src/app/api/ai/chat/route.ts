@@ -416,6 +416,11 @@ Menziona SOLO il nome del viaggio, le date e i partecipanti in una frase molto b
 NON menzionare altri dettagli come alloggi, trasporti o budget a meno che non vengano richiesti specificamente.
 Il tuo messaggio iniziale deve essere di massimo 2-3 frasi in totale.
 
+Formatta il messaggio iniziale in questo modo:
+**Benvenuto al tuo assistente di viaggio per "[nome viaggio]"!**
+
+Sono qui per aiutarti con il tuo viaggio dal [data inizio] al [data fine] con [partecipanti].
+
 Domanda dell'utente: ${message}`;
     } else {
       promptText += `
@@ -423,13 +428,55 @@ Rispondi in modo conciso, amichevole e utile. Fornisci suggerimenti pratici e pe
 Usa un tono conversazionale ma professionale.
 NON ripetere i dettagli del viaggio all'inizio di ogni risposta. Rispondi direttamente alla domanda dell'utente.
 
+LINEE GUIDA PER LA FORMATTAZIONE DELLE RISPOSTE:
+- Quando devi elencare più elementi (alloggi, trasporti, attività), usa SEMPRE un elenco puntato con ogni elemento su una nuova riga.
+- NON elencare mai più elementi in un'unica frase o paragrafo.
+- Usa il formato markdown per migliorare la leggibilità: **testo in grassetto** per i titoli o informazioni importanti.
+- Separa le diverse sezioni della tua risposta con righe vuote.
+- Quando fornisci dettagli su date, orari o luoghi, assicurati che siano ben evidenziati e non nascosti all'interno di un testo lungo.
+
+Per risposte a domande generiche sul viaggio, usa questo formato:
+
+**[Titolo della risposta]**
+
+[Contenuto principale della risposta]
+
+Se la risposta contiene più punti o suggerimenti:
+- **Punto 1**: [dettagli]
+- **Punto 2**: [dettagli]
+- **Punto 3**: [dettagli]
+
 IMPORTANTE PER DOMANDE SUGLI ALLOGGI:
 Se l'utente chiede informazioni sugli alloggi, utilizza SEMPRE le informazioni dettagliate fornite nella sezione "Alloggi prenotati" sopra.
 Assicurati di menzionare tutti gli alloggi disponibili con i loro dettagli (nome, tipo, date di check-in/check-out, indirizzo).
+Formatta SEMPRE la risposta sugli alloggi in questo modo:
+
+**Alloggi prenotati per il viaggio:**
+
+- **Nome alloggio 1** (tipo): Check-in il [data], check-out il [data]
+  Indirizzo: [indirizzo completo]
+
+- **Nome alloggio 2** (tipo): Check-in il [data], check-out il [data]
+  Indirizzo: [indirizzo completo]
+
+Se ci sono informazioni aggiuntive rilevanti, aggiungile sotto ciascun alloggio.
 
 IMPORTANTE PER DOMANDE SUI TRASPORTI:
 Se l'utente chiede informazioni sui trasporti, utilizza SEMPRE le informazioni dettagliate fornite nella sezione "Trasporti prenotati" sopra.
 Assicurati di menzionare tutti i trasporti disponibili con i loro dettagli (tipo, provider, orari, luoghi di partenza/arrivo).
+Formatta SEMPRE la risposta sui trasporti in questo modo:
+
+**Trasporti prenotati per il viaggio:**
+
+- **[Tipo di trasporto 1]** con [provider]:
+  Da: **[luogo di partenza]** il [data e ora]
+  A: **[luogo di arrivo]** il [data e ora]
+
+- **[Tipo di trasporto 2]** con [provider]:
+  Da: **[luogo di partenza]** il [data e ora]
+  A: **[luogo di arrivo]** il [data e ora]
+
+Se ci sono informazioni aggiuntive rilevanti, aggiungile sotto ciascun trasporto.
 
 IMPORTANTE PER DOMANDE SULL'ITINERARIO:
 Se l'utente chiede informazioni sull'itinerario o sulle attività pianificate, utilizza SEMPRE le informazioni dettagliate fornite nella sezione "ITINERARIO DEL VIAGGIO" sopra.
@@ -438,6 +485,24 @@ Quando l'utente chiede dell'itinerario, NON dire mai che non ci sono attività p
 Se ci sono attività nell'itinerario, elencale SEMPRE in modo dettagliato.
 RICORDA: L'itinerario è organizzato per giorni, e ogni giorno può avere più attività. Quando rispondi a domande sull'itinerario, specifica sempre il giorno e poi elenca le attività di quel giorno.
 Se l'utente chiede "cosa c'è in programma" o "quali sono le attività pianificate", elenca TUTTE le attività di TUTTI i giorni in modo organizzato.
+
+Formatta SEMPRE la risposta sull'itinerario in questo modo:
+
+**Itinerario del viaggio:**
+
+**GIORNO 1 ([data]):**
+- **[Nome attività 1]** a [luogo] dalle [ora inizio] alle [ora fine]
+  [Note aggiuntive se presenti]
+- **[Nome attività 2]** a [luogo] dalle [ora inizio] alle [ora fine]
+  [Note aggiuntive se presenti]
+
+**GIORNO 2 ([data]):**
+- **[Nome attività 1]** a [luogo] dalle [ora inizio] alle [ora fine]
+  [Note aggiuntive se presenti]
+- **[Nome attività 2]** a [luogo] dalle [ora inizio] alle [ora fine]
+  [Note aggiuntive se presenti]
+
+Se l'utente chiede informazioni su un giorno specifico, mostra solo le attività di quel giorno ma mantieni lo stesso formato.
 
 Domanda dell'utente: ${message}`;
     }
