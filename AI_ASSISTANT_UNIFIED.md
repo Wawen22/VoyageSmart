@@ -2,7 +2,7 @@
 
 Questo documento fornisce una documentazione completa dell'Assistente AI implementato in VoyageSmart, inclusa l'implementazione attuale, le funzionalità, i prossimi passi e le guide per il test.
 
-**Ultimo aggiornamento:** Implementazione dell'assistente in tutte le pagine del viaggio, miglioramento del contesto degli alloggi e ottimizzazione del messaggio iniziale per renderlo più conciso.
+**Ultimo aggiornamento:** Implementazione dell'assistente in tutte le pagine del viaggio, miglioramento del contesto degli alloggi, ottimizzazione del messaggio iniziale, aggiunta della persistenza della chat tra le diverse pagine e integrazione dell'itinerario nel contesto.
 
 ## Indice
 - [Panoramica](#panoramica)
@@ -31,7 +31,7 @@ L'Assistente AI di VoyageSmart è stato migliorato per utilizzare il contesto co
 - **Itinerario**: giorni, attività pianificate
 - **Spese**: budget totale, spese effettuate, categorie
 
-L'assistente è ora disponibile in tutte le pagine del viaggio, non solo nella pagina principale, grazie all'implementazione di un layout condiviso. Inoltre, è stato migliorato per evitare di ripetere il contesto del viaggio in ogni risposta e per utilizzare correttamente le informazioni sugli alloggi e i trasporti. Il messaggio iniziale dell'assistente è stato ottimizzato per essere più conciso, menzionando solo le informazioni essenziali (nome del viaggio, date e partecipanti).
+L'assistente è ora disponibile in tutte le pagine del viaggio, non solo nella pagina principale, grazie all'implementazione di un layout condiviso. Inoltre, è stato migliorato per evitare di ripetere il contesto del viaggio in ogni risposta e per utilizzare correttamente le informazioni sugli alloggi, trasporti e itinerario. Il messaggio iniziale dell'assistente è stato ottimizzato per essere più conciso, menzionando solo le informazioni essenziali (nome del viaggio, date e partecipanti). La conversazione con l'assistente persiste ora tra le diverse pagine del viaggio, permettendo all'utente di continuare la conversazione senza interruzioni quando naviga tra le sezioni. L'assistente ha ora accesso all'itinerario completo del viaggio, incluse tutte le attività pianificate, permettendogli di rispondere a domande specifiche sul programma del viaggio.
 
 ## Componenti Principali
 
@@ -85,6 +85,8 @@ Funzionalità principali:
 - Indicatore di caricamento durante la generazione della risposta
 - Possibilità di minimizzare, espandere o chiudere la finestra di chat
 - Disponibile in tutte le pagine del viaggio grazie all'implementazione nel layout condiviso (`src/app/trips/[id]/layout.tsx`)
+- Persistenza della conversazione tra le diverse pagine del viaggio tramite localStorage
+- Pulsante per cancellare la conversazione e ricominciare da capo
 
 ## Funzionalità
 
@@ -280,12 +282,15 @@ L'assistente ora ha accesso al contesto completo del viaggio, inclusi:
 - **Disponibilità in tutte le pagine del viaggio** ✅
 - **Miglioramento delle risposte per evitare ripetizioni** ✅
 - **Ottimizzazione del messaggio iniziale per renderlo più conciso** ✅
+- **Persistenza della conversazione tra le diverse pagine del viaggio** ✅
+- **Integrazione dell'itinerario nel contesto dell'assistente** ✅
 
-### Fase 2: Aggiungere Persistenza e Memoria
+### Fase 2: Aggiungere Persistenza e Memoria ✅
 
-- **Salvare la cronologia dei messaggi** nel database
-- **Caricare la cronologia** quando l'utente ritorna alla pagina
+- **Salvare la cronologia dei messaggi** in localStorage ✅
+- **Caricare la cronologia** quando l'utente naviga tra le pagine ✅
 - **Implementare memoria contestuale** per riferimenti a messaggi precedenti
+- **Aggiungere la possibilità di cancellare la conversazione** ✅
 
 ### Fase 3: Implementare Funzionalità Specifiche
 
@@ -321,6 +326,9 @@ La versione attuale utilizza un contesto di viaggio completo che recupera i dati
 4. ✅ Implementato l'assistente in tutte le pagine del viaggio
 5. ✅ Migliorato il prompt per utilizzare correttamente le informazioni sugli alloggi e i trasporti
 6. ✅ Ottimizzato il messaggio iniziale dell'assistente per renderlo più conciso
+7. ✅ Implementata la persistenza della conversazione tra le diverse pagine del viaggio
+8. ✅ Aggiunta la possibilità di cancellare la conversazione
+9. ✅ Integrato l'itinerario completo nel contesto dell'assistente
 
 ### 2. Migliorare l'Interfaccia Utente
 

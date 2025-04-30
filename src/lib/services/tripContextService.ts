@@ -142,7 +142,94 @@ export async function getTripContext(tripId: string) {
       console.error('Eccezione nel recupero dei trasporti:', transportationError);
     }
 
-    console.log('Contesto del viaggio recuperato con successo (versione semplificata)');
+    // Proviamo a recuperare l'itinerario (giorni e attività)
+    try {
+      // Recupera i giorni dell'itinerario
+      const { data: itineraryDays, error: itineraryDaysError } = await supabase
+        .from('itinerary_days')
+        .select('*')
+        .eq('trip_id', tripId)
+        .order('day_date', { ascending: true });
+
+      if (itineraryDaysError) {
+        console.error('Errore nel recupero dei giorni dell\'itinerario:', itineraryDaysError);
+      } else if (itineraryDays && itineraryDays.length > 0) {
+        console.log('Giorni dell\'itinerario recuperati:', itineraryDays.length);
+
+        // Recupera le attività
+        const { data: activities, error: activitiesError } = await supabase
+          .from('activities')
+          .select('*')
+          .eq('trip_id', tripId)
+          .order('start_time', { ascending: true });
+
+        if (activitiesError) {
+          console.error('Errore nel recupero delle attività:', activitiesError);
+        } else {
+          console.log('Attività recuperate:', activities ? activities.length : 0);
+
+          // Log dei dati per debug
+          if (activities && activities.length > 0) {
+            console.log('Esempio di attività:', JSON.stringify(activities[0]));
+          }
+
+          // Raggruppa le attività per giorno
+          const activitiesByDay = {};
+          if (activities) {
+            activities.forEach(activity => {
+              if (!activitiesByDay[activity.day_id]) {
+                activitiesByDay[activity.day_id] = [];
+              }
+              activitiesByDay[activity.day_id].push(activity);
+            });
+          }
+
+          // Combina i giorni con le loro attività
+          tripContext.itinerary = itineraryDays.map(day => {
+            const dayActivities = activitiesByDay[day.id] || [];
+            return {
+              id: day.id,
+              day_date: day.day_date,
+              date: day.day_date,
+              notes: day.notes,
+              activities: dayActivities.map(activity => ({
+                id: activity.id,
+                name: activity.name,
+                type: activity.type,
+                start_time: activity.start_time,
+                startTime: activity.start_time,
+                end_time: activity.end_time,
+                endTime: activity.end_time,
+                location: activity.location,
+                notes: activity.notes,
+                day_id: activity.day_id
+              }))
+            };
+          });
+
+          // Log dell'itinerario per debug
+          console.log('Itinerario completo:', {
+            daysCount: tripContext.itinerary.length,
+            totalActivities: activities ? activities.length : 0,
+            sampleDay: tripContext.itinerary.length > 0 ?
+              JSON.stringify({
+                date: tripContext.itinerary[0].date,
+                activitiesCount: tripContext.itinerary[0].activities.length
+              }) : null
+          });
+        }
+      } else {
+        // Se non ci sono giorni dell'itinerario, imposta un array vuoto
+        tripContext.itinerary = [];
+        console.log('Nessun giorno dell\'itinerario trovato per questo viaggio');
+      }
+    } catch (itineraryError) {
+      console.error('Eccezione nel recupero dell\'itinerario:', itineraryError);
+      // In caso di errore, imposta un array vuoto
+      tripContext.itinerary = [];
+    }
+
+    console.log('Contesto del viaggio recuperato con successo (versione completa)');
     return tripContext;
   } catch (error) {
     console.error('Errore nel recupero del contesto del viaggio:', error);

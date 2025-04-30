@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
             arrivalTime: t.arrival_time || t.arrivalTime || '',
             arrivalLocation: t.arrival_location || t.arrivalLocation || ''
           })) : [],
+        // Gestisci sia le attività dirette che l'itinerario completo
         activities: Array.isArray(tripData.activities) ?
           tripData.activities.map(a => ({
             name: a.name || 'Attività',
@@ -82,6 +83,27 @@ export async function POST(request: NextRequest) {
             startTime: a.start_time || a.startTime || '',
             endTime: a.end_time || a.endTime || '',
             location: a.location || ''
+          })) : [],
+        // Aggiungi l'itinerario completo se disponibile
+        itinerary: Array.isArray(tripData.itinerary) ?
+          tripData.itinerary.map(day => ({
+            id: day.id,
+            day_date: day.day_date || day.date,
+            date: day.day_date || day.date,
+            notes: day.notes,
+            activities: Array.isArray(day.activities) ?
+              day.activities.map(activity => ({
+                id: activity.id,
+                name: activity.name || 'Attività',
+                type: activity.type || '',
+                start_time: activity.start_time || activity.startTime || '',
+                startTime: activity.start_time || activity.startTime || '',
+                end_time: activity.end_time || activity.endTime || '',
+                endTime: activity.end_time || activity.endTime || '',
+                location: activity.location || '',
+                notes: activity.notes || '',
+                day_id: activity.day_id
+              })) : []
           })) : [],
         expenses: {
           items: [],
@@ -127,7 +149,22 @@ export async function POST(request: NextRequest) {
       startDate: tripContext.trip?.startDate,
       endDate: tripContext.trip?.endDate,
       participantsCount: tripContext.participants?.length || 0,
-      participants: tripContext.participants?.map(p => p.name || p.full_name || p.email || 'Partecipante')
+      participants: tripContext.participants?.map(p => p.name || p.full_name || p.email || 'Partecipante'),
+      accommodationsCount: tripContext.accommodations?.length || 0,
+      transportationCount: tripContext.transportation?.length || 0,
+      itineraryDaysCount: tripContext.itinerary?.length || 0,
+      itinerarySample: tripContext.itinerary && tripContext.itinerary.length > 0
+        ? {
+            dayDate: tripContext.itinerary[0].day_date,
+            activitiesCount: tripContext.itinerary[0].activities?.length || 0,
+            activitySample: tripContext.itinerary[0].activities && tripContext.itinerary[0].activities.length > 0
+              ? {
+                  name: tripContext.itinerary[0].activities[0].name,
+                  location: tripContext.itinerary[0].activities[0].location
+                }
+              : 'No activities'
+          }
+        : 'No itinerary days'
     });
 
     // Prepara il prompt con il contesto del viaggio
@@ -160,10 +197,18 @@ IMPORTANTE: Ricorda sempre questi dettagli del viaggio nelle tue risposte e non 
 - Trasporti: ${tripContext.transportation.map(t => `${t.type || 'Trasporto'} ${t.provider ? `con ${t.provider}` : ''}`).join(', ')}`;
     }
 
-    // Aggiungi dettagli sulle attività se disponibili
-    if (tripContext.activities && tripContext.activities.length > 0) {
+    // Aggiungi dettagli sull'itinerario se disponibile
+    if (tripContext.itinerary && tripContext.itinerary.length > 0) {
+      // Conta le attività totali
+      let totalActivities = 0;
+      tripContext.itinerary.forEach(day => {
+        if (day.activities && Array.isArray(day.activities)) {
+          totalActivities += day.activities.length;
+        }
+      });
+
       promptText += `
-- Attività: ${tripContext.activities.map(a => a.name).join(', ')}`;
+- Itinerario: ${tripContext.itinerary.length} giorni pianificati con ${totalActivities} attività`;
     }
 
     promptText += `
@@ -183,7 +228,8 @@ MOLTO IMPORTANTE: NON iniziare le tue risposte con "Ciao! Per il tuo viaggio a..
       destination: tripContext.trip?.destination,
       hasParticipants: tripContext.participants?.length > 0,
       hasAccommodations: tripContext.accommodations?.length > 0,
-      hasTransportation: tripContext.transportation?.length > 0
+      hasTransportation: tripContext.transportation?.length > 0,
+      hasItinerary: tripContext.itinerary?.length > 0
     });
 
     // Aggiungi dettagli del viaggio
@@ -219,17 +265,135 @@ ${tripContext.transportation.map(t => `- ${t.type} con ${t.provider}: da ${t.dep
 
     // Aggiungi itinerario
     if (tripContext.itinerary && tripContext.itinerary.length > 0) {
+      // Log itinerary data for debugging
+      console.log('Itinerary data in prompt:', {
+        daysCount: tripContext.itinerary.length,
+        sampleDay: tripContext.itinerary.length > 0 ? JSON.stringify(tripContext.itinerary[0]).substring(0, 200) : null
+      });
+
+      // Stampa l'itinerario completo per debug
+      console.log('Itinerario completo:', JSON.stringify(tripContext.itinerary));
+
+      try {
+        // Conta le attività totali
+        let totalActivities = 0;
+        tripContext.itinerary.forEach(day => {
+          if (day.activities && Array.isArray(day.activities)) {
+            totalActivities += day.activities.length;
+          }
+        });
+
+        // Log dettagliato dell'itinerario per debug
+        console.log('Dettaglio itinerario per prompt:');
+        tripContext.itinerary.forEach((day, idx) => {
+          console.log(`Giorno ${idx + 1} (${day.day_date}): ${day.activities?.length || 0} attività`);
+          if (day.activities && day.activities.length > 0) {
+            day.activities.forEach((act, actIdx) => {
+              console.log(`  - Attività ${actIdx + 1}: ${act.name} a ${act.location || 'N/A'}`);
+            });
+          }
+        });
+
+        if (totalActivities > 0) {
+          promptText += `
+ITINERARIO DEL VIAGGIO (MOLTO IMPORTANTE):
+Questo viaggio ha ${tripContext.itinerary.length} giorni pianificati con un totale di ${totalActivities} attività.
+
+`;
+
+          // Aggiungi ogni giorno con le sue attività
+          tripContext.itinerary.forEach((day, index) => {
+            try {
+              const dayDate = day.day_date || day.date;
+              promptText += `GIORNO ${index + 1} (${dayDate}):\n`;
+
+              // Verifica se ci sono attività e come sono strutturate
+              const activities = day.activities || [];
+              if (activities.length > 0) {
+                activities.forEach((activity, actIndex) => {
+                  try {
+                    const name = activity.name || 'Attività';
+                    const location = activity.location || '';
+                    let startTime = '';
+                    let endTime = '';
+
+                    // Gestisci diversi formati di orario
+                    if (activity.start_time) {
+                      if (activity.start_time.includes('T')) {
+                        startTime = activity.start_time.split('T')[1].substring(0, 5);
+                      } else {
+                        startTime = activity.start_time;
+                      }
+                    } else if (activity.startTime) {
+                      if (activity.startTime.includes('T')) {
+                        startTime = activity.startTime.split('T')[1].substring(0, 5);
+                      } else {
+                        startTime = activity.startTime;
+                      }
+                    }
+
+                    if (activity.end_time) {
+                      if (activity.end_time.includes('T')) {
+                        endTime = activity.end_time.split('T')[1].substring(0, 5);
+                      } else {
+                        endTime = activity.end_time;
+                      }
+                    } else if (activity.endTime) {
+                      if (activity.endTime.includes('T')) {
+                        endTime = activity.endTime.split('T')[1].substring(0, 5);
+                      } else {
+                        endTime = activity.endTime;
+                      }
+                    }
+
+                    let timeInfo = '';
+                    if (startTime && endTime) {
+                      timeInfo = ` dalle ${startTime} alle ${endTime}`;
+                    } else if (startTime) {
+                      timeInfo = ` alle ${startTime}`;
+                    }
+
+                    let locationInfo = location ? ` a ${location}` : '';
+                    let notesInfo = activity.notes ? ` - Note: ${activity.notes}` : '';
+
+                    promptText += `  - Attività ${actIndex + 1}: ${name}${locationInfo}${timeInfo}${notesInfo}\n`;
+                  } catch (activityError) {
+                    console.error('Errore nella formattazione dell\'attività:', activityError);
+                    promptText += `  - Attività ${actIndex + 1}: Dettagli non disponibili\n`;
+                  }
+                });
+              } else {
+                promptText += `  Nessuna attività pianificata per questo giorno\n`;
+              }
+
+              // Aggiungi note del giorno se disponibili
+              if (day.notes) {
+                promptText += `  Note del giorno: ${day.notes}\n`;
+              }
+
+              promptText += `\n`;
+            } catch (dayError) {
+              console.error('Errore nella formattazione del giorno:', dayError);
+              promptText += `GIORNO ${index + 1}: Dettagli non disponibili\n\n`;
+            }
+          });
+        } else {
+          promptText += `
+ITINERARIO DEL VIAGGIO:
+Ci sono ${tripContext.itinerary.length} giorni pianificati ma nessuna attività specifica programmata.
+`;
+        }
+      } catch (itineraryError) {
+        console.error('Errore nella formattazione dell\'itinerario:', itineraryError);
+        promptText += `
+ITINERARIO DEL VIAGGIO:
+Informazioni disponibili ma non formattabili correttamente.
+`;
+      }
+    } else {
       promptText += `
-Itinerario:
-${tripContext.itinerary.map(day => {
-  let dayText = `- Giorno ${day.dayNumber} (${day.date}): `;
-  if (day.activities && day.activities.length > 0) {
-    dayText += day.activities.map(a => a.name).join(', ');
-  } else {
-    dayText += 'Nessuna attività pianificata';
-  }
-  return dayText;
-}).join('\n')}
+ITINERARIO DEL VIAGGIO:
+Nessun giorno pianificato per questo viaggio.
 `;
     }
 
@@ -266,6 +430,14 @@ Assicurati di menzionare tutti gli alloggi disponibili con i loro dettagli (nome
 IMPORTANTE PER DOMANDE SUI TRASPORTI:
 Se l'utente chiede informazioni sui trasporti, utilizza SEMPRE le informazioni dettagliate fornite nella sezione "Trasporti prenotati" sopra.
 Assicurati di menzionare tutti i trasporti disponibili con i loro dettagli (tipo, provider, orari, luoghi di partenza/arrivo).
+
+IMPORTANTE PER DOMANDE SULL'ITINERARIO:
+Se l'utente chiede informazioni sull'itinerario o sulle attività pianificate, utilizza SEMPRE le informazioni dettagliate fornite nella sezione "ITINERARIO DEL VIAGGIO" sopra.
+Assicurati di menzionare tutte le attività pianificate con i loro dettagli (nome, luogo, orario).
+Quando l'utente chiede dell'itinerario, NON dire mai che non ci sono attività pianificate a meno che non sia esplicitamente indicato che non ci sono attività.
+Se ci sono attività nell'itinerario, elencale SEMPRE in modo dettagliato.
+RICORDA: L'itinerario è organizzato per giorni, e ogni giorno può avere più attività. Quando rispondi a domande sull'itinerario, specifica sempre il giorno e poi elenca le attività di quel giorno.
+Se l'utente chiede "cosa c'è in programma" o "quali sono le attività pianificate", elenca TUTTE le attività di TUTTI i giorni in modo organizzato.
 
 Domanda dell'utente: ${message}`;
     }

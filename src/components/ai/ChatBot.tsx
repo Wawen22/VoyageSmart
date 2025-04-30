@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2 } from 'lucide-react';
+import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2 } from 'lucide-react';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -25,6 +25,7 @@ interface TripData {
   accommodations?: any[]; // Array di alloggi
   transportation?: any[]; // Array di trasporti
   activities?: any[]; // Array di attività
+  itinerary?: any[]; // Array di giorni dell'itinerario con attività
 }
 
 // Funzione per generare un saluto casuale
@@ -55,17 +56,43 @@ export default function ChatBot({
   // Debug info
   console.log('ChatBot inizializzato con Trip ID:', tripId, 'Trip Name:', tripName);
   console.log('Trip Data passati direttamente:', tripData);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Sto caricando le informazioni del tuo viaggio...`
+
+  // Carica i messaggi dal localStorage o inizializza con un messaggio di default
+  const [messages, setMessages] = useState<Message[]>(() => {
+    // Controlla se ci sono messaggi salvati per questo viaggio
+    if (typeof window !== 'undefined') {
+      const savedMessages = localStorage.getItem(`chat_messages_${tripId}`);
+      if (savedMessages) {
+        try {
+          const parsedMessages = JSON.parse(savedMessages);
+          console.log('Messaggi caricati dal localStorage:', parsedMessages.length);
+          return parsedMessages;
+        } catch (error) {
+          console.error('Errore nel parsing dei messaggi salvati:', error);
+        }
+      }
     }
-  ]);
+
+    // Se non ci sono messaggi salvati o c'è stato un errore, inizializza con il messaggio di default
+    return [
+      {
+        role: 'assistant',
+        content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Sto caricando le informazioni del tuo viaggio...`
+      }
+    ];
+  });
 
   // Carica il contesto del viaggio all'avvio
   useEffect(() => {
     const loadContext = async () => {
       try {
+        // Controlla se abbiamo già dei messaggi salvati (più di uno significa che c'è stata interazione)
+        if (messages.length > 1) {
+          console.log('Conversazione esistente trovata, non ricarico il contesto');
+          setContextLoaded(true);
+          return;
+        }
+
         // Se abbiamo i dati del viaggio passati direttamente, li utilizziamo
         if (tripData) {
           console.log('Utilizzo i dati del viaggio passati direttamente');
@@ -145,7 +172,7 @@ export default function ChatBot({
     };
 
     loadContext();
-  }, [tripId, tripName, tripData]);
+  }, [tripId, tripName, tripData, messages.length]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -155,7 +182,12 @@ export default function ChatBot({
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+
+    // Salva i messaggi nel localStorage quando cambiano
+    if (messages.length > 0 && typeof window !== 'undefined') {
+      localStorage.setItem(`chat_messages_${tripId}`, JSON.stringify(messages));
+    }
+  }, [messages, tripId]);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -245,6 +277,23 @@ export default function ChatBot({
     if (isMinimized) setIsMinimized(false);
   };
 
+  // Funzione per cancellare la conversazione
+  const clearConversation = () => {
+    if (window.confirm('Sei sicuro di voler cancellare questa conversazione?')) {
+      // Rimuovi i messaggi dal localStorage
+      localStorage.removeItem(`chat_messages_${tripId}`);
+
+      // Reimposta i messaggi con solo il messaggio iniziale
+      setMessages([{
+        role: 'assistant',
+        content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
+      }]);
+
+      // Ricarica il contesto
+      setContextLoaded(false);
+    }
+  };
+
   if (isMinimized) {
     return (
       <button
@@ -277,16 +326,19 @@ export default function ChatBot({
           {/* Pulsante di test rimosso */}
         </div>
         <div className="flex items-center gap-1">
+          <button onClick={clearConversation} className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-destructive" title="Cancella conversazione">
+            <Trash2 size={16} />
+          </button>
           {isExpanded ? (
-            <button onClick={toggleExpand} className="p-1 hover:bg-muted rounded">
+            <button onClick={toggleExpand} className="p-1 hover:bg-muted rounded" title="Riduci">
               <Minimize2 size={16} />
             </button>
           ) : (
-            <button onClick={toggleExpand} className="p-1 hover:bg-muted rounded">
+            <button onClick={toggleExpand} className="p-1 hover:bg-muted rounded" title="Espandi">
               <Maximize2 size={16} />
             </button>
           )}
-          <button onClick={toggleMinimize} className="p-1 hover:bg-muted rounded">
+          <button onClick={toggleMinimize} className="p-1 hover:bg-muted rounded" title="Minimizza">
             <X size={16} />
           </button>
         </div>

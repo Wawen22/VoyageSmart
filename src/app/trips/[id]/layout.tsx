@@ -47,12 +47,53 @@ export default function TripLayout({
 
         if (transportationError) throw transportationError;
 
-        // Add accommodations and transportation to trip data
+        // Fetch itinerary days
+        const { data: itineraryDaysData, error: itineraryDaysError } = await supabase
+          .from('itinerary_days')
+          .select('*')
+          .eq('trip_id', id)
+          .order('day_date', { ascending: true });
+
+        if (itineraryDaysError) throw itineraryDaysError;
+
+        // Fetch activities
+        const { data: activitiesData, error: activitiesError } = await supabase
+          .from('activities')
+          .select('*')
+          .eq('trip_id', id)
+          .order('start_time', { ascending: true });
+
+        if (activitiesError) throw activitiesError;
+
+        // Group activities by day_id
+        const activitiesByDay = (activitiesData || []).reduce((acc: any, activity: any) => {
+          if (!acc[activity.day_id]) {
+            acc[activity.day_id] = [];
+          }
+          acc[activity.day_id].push(activity);
+          return acc;
+        }, {});
+
+        // Combine days with their activities
+        const daysWithActivities = (itineraryDaysData || []).map((day: any) => ({
+          ...day,
+          activities: activitiesByDay[day.id] || []
+        }));
+
+        // Add accommodations, transportation and itinerary to trip data
         const tripWithDetails = {
           ...tripData,
           accommodations: accommodationsData || [],
-          transportation: transportationData || []
+          transportation: transportationData || [],
+          itinerary: daysWithActivities || []
         };
+
+        // Log itinerary data for debugging
+        console.log('Itinerary data:', {
+          daysCount: daysWithActivities.length,
+          activitiesCount: activitiesData ? activitiesData.length : 0,
+          sampleDay: daysWithActivities.length > 0 ? daysWithActivities[0] : null
+        });
 
         setTrip(tripWithDetails);
 
@@ -117,7 +158,7 @@ export default function TripLayout({
             owner: trip.owner_id,
             accommodations: trip.accommodations || [],
             transportation: trip.transportation || [],
-            activities: trip.activities || []
+            itinerary: trip.itinerary || []
           } : undefined}
         />
       )}
