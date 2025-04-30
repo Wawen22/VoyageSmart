@@ -72,6 +72,7 @@ export default function TripDetails() {
   const [isOwner, setIsOwner] = useState(false);
   const [tripCount, setTripCount] = useState<number | null>(null);
 
+
   useEffect(() => {
     const fetchTripDetails = async () => {
       try {
@@ -627,6 +628,8 @@ export default function TripDetails() {
           </div>
         </div>
       </main>
+
+
     </div>
   );
 }

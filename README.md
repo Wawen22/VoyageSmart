@@ -251,6 +251,10 @@ trip_media
 
 ### Fase 3: Funzionalità Avanzate (In corso) 🔄
 - **Integrazione IA** 🔄
+  - ✅ Assistente virtuale AI con Gemini API
+  - ✅ Chatbot integrato nella pagina del viaggio
+  - ✅ Integrazione avanzata del contesto del viaggio nell'assistente AI
+  - ✅ Supporto per destinazioni multiple, budget e partecipanti
   - 🔄 Servizio generazione itinerari
   - 🔄 Ottimizzazione percorsi avanzata
   - 🔄 Analisi predittiva costi e affluenza
@@ -266,9 +270,10 @@ trip_media
   - ✅ Miglioramento tempi di caricamento
   - ✅ Implementazione skeleton loaders
 
-- **Assistente virtuale** 🔄
-  - 🔄 Chatbot per domande frequenti
-  - 🔄 NLP per query in linguaggio naturale
+- **Assistente virtuale** ✅
+  - ✅ Chatbot per domande frequenti
+  - ✅ NLP per query in linguaggio naturale
+  - ✅ Interfaccia intuitiva con minimizzazione/espansione
   - 🔄 Suggerimenti pro-attivi
 
 - **Monetizzazione e piani premium** ✅
