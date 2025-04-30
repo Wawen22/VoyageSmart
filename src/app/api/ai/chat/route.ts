@@ -183,6 +183,16 @@ IMPORTANTE: Ricorda sempre questi dettagli del viaggio nelle tue risposte e non 
 - Partecipanti: ${tripContext.participants && tripContext.participants.length > 0
     ? tripContext.participants.map(p => p.name || p.full_name || p.email || 'Partecipante').join(', ')
     : 'non specificati'}
+
+MOLTO IMPORTANTE:
+1. NON iniziare MAI le tue risposte con "Ciao!" o simili saluti.
+2. Rispondi direttamente alla domanda dell'utente in modo naturale e conversazionale.
+3. Quando mostri elenchi di elementi (alloggi, trasporti, attività), usa una formattazione chiara con:
+   - Interruzioni di riga tra elementi diversi
+   - Asterischi (**) per evidenziare i titoli delle sezioni
+   - Elenchi puntati per elementi multipli dello stesso tipo
+4. Mantieni le risposte concise ma complete, evitando ripetizioni inutili.
+5. Usa sempre una linea vuota tra elementi di un elenco quando contengono più di una riga di informazioni.
 `;
 
     // Aggiungi dettagli sugli alloggi se disponibili
@@ -416,6 +426,11 @@ Menziona SOLO il nome del viaggio, le date e i partecipanti in una frase molto b
 NON menzionare altri dettagli come alloggi, trasporti o budget a meno che non vengano richiesti specificamente.
 Il tuo messaggio iniziale deve essere di massimo 2-3 frasi in totale.
 
+MOLTO IMPORTANTE:
+1. NON iniziare il messaggio con "Ciao!" o altri saluti generici.
+2. Vai diretto al punto, presentandoti come assistente di viaggio.
+3. Mantieni il messaggio estremamente conciso.
+
 Formatta il messaggio iniziale in questo modo:
 **Benvenuto al tuo assistente di viaggio per "[nome viaggio]"!**
 
@@ -427,6 +442,7 @@ Domanda dell'utente: ${message}`;
 Rispondi in modo conciso, amichevole e utile. Fornisci suggerimenti pratici e pertinenti basati sulle informazioni del viaggio.
 Usa un tono conversazionale ma professionale.
 NON ripetere i dettagli del viaggio all'inizio di ogni risposta. Rispondi direttamente alla domanda dell'utente.
+NON iniziare MAI le tue risposte con "Ciao!" o altri saluti generici.
 
 LINEE GUIDA PER LA FORMATTAZIONE DELLE RISPOSTE:
 - Quando devi elencare più elementi (alloggi, trasporti, attività), usa SEMPRE un elenco puntato con ogni elemento su una nuova riga.
@@ -436,6 +452,7 @@ LINEE GUIDA PER LA FORMATTAZIONE DELLE RISPOSTE:
 - Quando fornisci dettagli su date, orari o luoghi, assicurati che siano ben evidenziati e non nascosti all'interno di un testo lungo.
 - Usa sempre una linea vuota tra elementi di un elenco quando contengono più di una riga di informazioni.
 - Usa separatori come "---" o "***" tra sezioni principali della risposta per migliorare la leggibilità.
+- Quando mostri più elementi dello stesso tipo (come alloggi o trasporti), assicurati di formattarli in modo coerente e con una chiara separazione tra di essi.
 
 Per risposte a domande generiche sul viaggio, usa questo formato:
 
