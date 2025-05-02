@@ -1,12 +1,17 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, ArrowRight, Calendar, Check } from 'lucide-react';
+import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, ArrowRight, Calendar, Check, Edit, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { supabase } from '@/lib/supabase';
+import ActivityPreviewCard from './ActivityPreviewCard';
+import ActivityTimeline from './ActivityTimeline';
+import TravelThemeButtons from './TravelThemeButtons';
+import DaySelectionButtons from './DaySelectionButtons';
+import ActivityEditModal from './ActivityEditModal';
 
 // Tipi di messaggi nel wizard
 type Message = {
@@ -108,6 +113,8 @@ export default function ItineraryWizard({
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<GeneratedActivity | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change
@@ -164,9 +171,18 @@ export default function ItineraryWizard({
         // Aggiungi messaggio dell'assistente per chiedere le preferenze
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: `Ottimo! Per creare un itinerario personalizzato, ho bisogno di conoscere le tue preferenze.\n\n**Che tipo di attività ti interessano maggiormente?**\n\nPuoi scegliere tra:\n- Culturali (musei, monumenti, siti storici)\n- Naturalistiche (parchi, escursioni, spiagge)\n- Gastronomiche (ristoranti, degustazioni, corsi di cucina)\n- Shopping\n- Relax (spa, terme)\n- Avventura (sport, attività all'aperto)\n\nPuoi indicare più opzioni!`,
+          content: `Ottimo! Per creare un itinerario personalizzato, ho bisogno di conoscere le tue preferenze.\n\n**Che tipo di attività ti interessano maggiormente?**\n\nPuoi scegliere tra:\n- Culturali (musei, monumenti, siti storici)\n- Naturalistiche (parchi, escursioni, spiagge)\n- Gastronomiche (ristoranti, degustazioni, corsi di cucina)\n- Shopping\n- Relax (spa, terme)\n- Avventura (sport, attività all'aperto)\n\nPuoi indicare più opzioni o selezionare uno dei temi predefiniti qui sotto!`,
           timestamp: new Date()
         }]);
+
+        // Aggiungi un messaggio con i pulsanti dei temi
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `<travel-theme-buttons />`, // Questo verrà sostituito con i pulsanti dei temi
+            timestamp: new Date()
+          }]);
+        }, 500);
         break;
 
       case 'preferences':
@@ -181,40 +197,29 @@ export default function ItineraryWizard({
           step: 'days'
         }));
 
-        // Mostra i giorni disponibili
-        const daysMessage = generateDaysSelectionMessage(itineraryDays);
+        // Mostra i giorni disponibili con pulsanti di selezione
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: daysMessage,
+          content: `**Per quali giorni vorresti generare le attività?**\n\nSeleziona uno o più giorni per cui desideri generare attività:`,
           timestamp: new Date()
         }]);
+
+        // Aggiungi un messaggio con i pulsanti di selezione dei giorni
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `<day-selection-buttons />`, // Questo verrà sostituito con i pulsanti di selezione
+            timestamp: new Date()
+          }]);
+        }, 500);
         break;
 
       case 'days':
-        // Processa la selezione dei giorni
-        const selectedDays = processSelectedDays(message, itineraryDays);
-
-        if (selectedDays.length === 0) {
-          // Se non sono stati selezionati giorni validi, chiedi di nuovo
-          setMessages(prev => [...prev, {
-            role: 'assistant',
-            content: `Non ho capito quali giorni hai selezionato. Per favore, indica i numeri dei giorni (es. "1, 3, 5") o scrivi "tutti" per selezionare tutti i giorni.`,
-            timestamp: new Date()
-          }]);
-          return;
-        }
-
-        // Salva i giorni selezionati
-        setWizardState(prev => ({
-          ...prev,
-          selectedDays,
-          step: 'activities'
-        }));
-
-        // Chiedi dettagli sulle attività
+        // La selezione dei giorni ora avviene tramite i pulsanti interattivi
+        // Questo caso viene mantenuto per retrocompatibilità, ma non dovrebbe essere più utilizzato
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: `Grazie! Hai selezionato ${selectedDays.length} ${selectedDays.length === 1 ? 'giorno' : 'giorni'}.\n\n**Ora dimmi qualcosa in più sulle attività che vorresti fare:**\n\n- Hai preferenze per attività mattutine o serali?\n- C'è un budget specifico che vorresti rispettare per le attività?\n- Preferisci un ritmo rilassato o intenso per la giornata?\n\nPuoi rispondere liberamente con tutte le informazioni che ritieni utili.`,
+          content: `Per favore, utilizza i pulsanti qui sopra per selezionare i giorni.`,
           timestamp: new Date()
         }]);
         break;
@@ -243,11 +248,15 @@ export default function ItineraryWizard({
 
       case 'summary':
         // Processa la conferma dell'utente
-        if (message.toLowerCase().includes('sì') ||
-            message.toLowerCase().includes('si') ||
-            message.toLowerCase().includes('ok') ||
-            message.toLowerCase().includes('procedi') ||
-            message.toLowerCase().includes('conferma')) {
+        const lowerMessage = message.toLowerCase().trim();
+
+        // Verifica se l'utente ha confermato
+        if (lowerMessage.includes('sì') ||
+            lowerMessage.includes('si') ||
+            lowerMessage === 'ok' ||
+            lowerMessage.includes('procedi') ||
+            lowerMessage.includes('conferma') ||
+            lowerMessage === 's') {
 
           // Passa allo step di salvataggio
           setWizardState(prev => ({
@@ -264,11 +273,33 @@ export default function ItineraryWizard({
 
           // Salva le attività
           await saveActivities();
-        } else {
-          // L'utente non ha confermato, chiedi di nuovo
+        }
+        // Verifica se l'utente ha rifiutato
+        else if (lowerMessage.includes('no') ||
+                lowerMessage === 'n' ||
+                lowerMessage.includes('annulla') ||
+                lowerMessage.includes('non salvare') ||
+                lowerMessage.includes('non procedere')) {
+
+          // Torna allo step delle preferenze
+          setWizardState(prev => ({
+            ...prev,
+            step: 'preferences'
+          }));
+
+          // Mostra messaggio di annullamento
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: `Non ho capito se vuoi procedere con il salvataggio delle attività. Per favore, conferma con "Sì" o "No".`,
+            content: `Ho annullato il salvataggio delle attività. Vuoi generare nuove attività con preferenze diverse?`,
+            timestamp: new Date()
+          }]);
+        }
+        // L'utente ha dato una risposta non chiara
+        else {
+          // Chiedi di nuovo con opzioni più chiare
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `Non ho capito se vuoi procedere con il salvataggio delle attività. Per favore, rispondi con "Sì" per salvare o "No" per annullare.`,
             timestamp: new Date()
           }]);
         }
@@ -334,56 +365,8 @@ export default function ItineraryWizard({
     return interests;
   };
 
-  // Genera il messaggio per la selezione dei giorni
-  const generateDaysSelectionMessage = (days: ItineraryDay[]): string => {
-    if (!days || days.length === 0) {
-      return `Non ci sono giorni disponibili nel tuo itinerario. Per favore, aggiungi prima dei giorni all'itinerario.`;
-    }
-
-    let message = `**Per quali giorni vorresti generare le attività?**\n\n`;
-
-    days.forEach((day, index) => {
-      const date = new Date(day.day_date);
-      const formattedDate = date.toLocaleDateString('it-IT', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-
-      message += `${index + 1}. ${formattedDate}\n`;
-    });
-
-    message += `\nPuoi indicare i numeri dei giorni (es. "1, 3, 5") o scrivere "tutti" per selezionare tutti i giorni.`;
-
-    return message;
-  };
-
-  // Processa la selezione dei giorni
-  const processSelectedDays = (message: string, days: ItineraryDay[]): string[] => {
-    if (!days || days.length === 0) {
-      return [];
-    }
-
-    // Se l'utente ha scritto "tutti", seleziona tutti i giorni
-    if (message.toLowerCase().includes('tutt')) {
-      return days.map(day => day.id);
-    }
-
-    // Altrimenti, cerca numeri nel messaggio
-    const numbers = message.match(/\d+/g);
-    if (!numbers) {
-      return [];
-    }
-
-    // Converti i numeri in indici (sottraendo 1) e prendi gli ID dei giorni corrispondenti
-    const selectedDays = numbers
-      .map(num => parseInt(num, 10) - 1)
-      .filter(index => index >= 0 && index < days.length)
-      .map(index => days[index].id);
-
-    return selectedDays;
-  };
+  // Funzioni di supporto per la selezione dei giorni sono state sostituite
+  // dai componenti interattivi DaySelectionButtons
 
   // Genera le attività in base alle preferenze
   const generateActivities = async () => {
@@ -440,12 +423,30 @@ export default function ItineraryWizard({
       }));
 
       // Mostra il riepilogo delle attività generate
-      const summaryMessage = generateActivitiesSummary(data.activities);
+      // Prima aggiungiamo un messaggio di introduzione
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: summaryMessage,
+        content: '**Ecco le attività generate in base alle tue preferenze:**',
         timestamp: new Date()
       }]);
+
+      // Poi aggiungiamo un messaggio speciale che mostrerà il componente ActivityTimeline
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: '<activity-timeline-component />',
+          timestamp: new Date()
+        }]);
+
+        // Infine aggiungiamo la domanda di conferma
+        setTimeout(() => {
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: '**Vuoi salvare queste attività nel tuo itinerario?** (Sì/No)',
+            timestamp: new Date()
+          }]);
+        }, 300);
+      }, 300);
     } catch (error) {
       console.error('Error generating activities:', error);
       setMessages(prev => [...prev, {
@@ -462,59 +463,48 @@ export default function ItineraryWizard({
     }
   };
 
-  // Genera il riepilogo delle attività
-  const generateActivitiesSummary = (activities: GeneratedActivity[]): string => {
-    if (!activities || activities.length === 0) {
-      return `Non è stato possibile generare attività in base alle tue preferenze. Riprova con preferenze diverse.`;
-    }
+  // La funzione generateActivitiesSummary è stata rimossa
+  // e sostituita con un approccio più diretto che aggiunge
+  // messaggi separati per il titolo, il componente e la domanda di conferma
 
-    // Raggruppa le attività per giorno
-    const activitiesByDay: Record<string, GeneratedActivity[]> = {};
+  // Funzione per modificare un'attività generata
+  const handleEditActivity = (activity: GeneratedActivity) => {
+    setEditingActivity(activity);
+    setIsEditModalOpen(true);
+  };
 
-    activities.forEach(activity => {
-      if (!activitiesByDay[activity.day_date]) {
-        activitiesByDay[activity.day_date] = [];
-      }
-      activitiesByDay[activity.day_date].push(activity);
-    });
-
-    // Genera il messaggio di riepilogo
-    let message = `**Ecco le attività generate in base alle tue preferenze:**\n\n`;
-
-    Object.entries(activitiesByDay).forEach(([date, dayActivities]) => {
-      const formattedDate = new Date(date).toLocaleDateString('it-IT', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-
-      message += `### ${formattedDate}\n\n`;
-
-      dayActivities.forEach((activity, index) => {
-        const startTime = activity.start_time ? new Date(activity.start_time).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : 'N/D';
-        const endTime = activity.end_time ? new Date(activity.end_time).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : 'N/D';
-
-        message += `**${index + 1}. ${activity.name}**\n`;
-        message += `- **Tipo:** ${activity.type}\n`;
-        message += `- **Orario:** ${startTime} - ${endTime}\n`;
-        message += `- **Luogo:** ${activity.location}\n`;
-
-        if (activity.cost) {
-          message += `- **Costo:** ${activity.cost} ${activity.currency || 'EUR'}\n`;
+  // Funzione per salvare un'attività modificata
+  const handleSaveEditedActivity = (updatedActivity: GeneratedActivity) => {
+    // Aggiorna l'attività nell'elenco
+    setWizardState(prev => ({
+      ...prev,
+      generatedActivities: prev.generatedActivities.map(activity => {
+        // Identifica l'attività da aggiornare (usando una combinazione di proprietà come chiave)
+        if (
+          activity.day_id === updatedActivity.day_id &&
+          activity.name === editingActivity?.name &&
+          activity.start_time === editingActivity?.start_time
+        ) {
+          return updatedActivity;
         }
+        return activity;
+      })
+    }));
 
-        if (activity.notes) {
-          message += `- **Note:** ${activity.notes}\n`;
-        }
+    // Chiudi il modale
+    setIsEditModalOpen(false);
+    setEditingActivity(null);
+  };
 
-        message += '\n';
-      });
-    });
-
-    message += `**Vuoi salvare queste attività nel tuo itinerario?** (Sì/No)`;
-
-    return message;
+  // Funzione per rimuovere un'attività generata
+  const handleRemoveActivity = (activity: GeneratedActivity) => {
+    // Rimuovi l'attività dall'elenco
+    setWizardState(prev => ({
+      ...prev,
+      generatedActivities: prev.generatedActivities.filter(a =>
+        !(a.day_id === activity.day_id && a.name === activity.name && a.start_time === activity.start_time)
+      )
+    }));
   };
 
   // Salva le attività nel database
@@ -660,15 +650,16 @@ export default function ItineraryWizard({
   }
 
   return (
-    <div
-      className={`
-        fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 bottom-20 right-4 w-96 sm:h-[550px] h-[500px]'}
-        bg-background border border-border rounded-lg shadow-xl z-50
-        flex flex-col transition-all duration-300 ease-in-out
-        glass-effect animate-fade-in
-      `}
-      aria-label="Wizard Generazione Attività"
-    >
+    <>
+      <div
+        className={`
+          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 bottom-20 right-4 w-96 sm:h-[550px] h-[500px]'}
+          bg-background border border-border rounded-lg shadow-xl z-50
+          flex flex-col transition-all duration-300 ease-in-out
+          glass-effect animate-fade-in
+        `}
+        aria-label="Wizard Generazione Attività"
+      >
       {/* Header */}
       <div className="p-3 border-b flex items-center justify-between bg-primary/5 rounded-t-lg">
         <div className="flex items-center gap-2">
@@ -745,9 +736,82 @@ export default function ItineraryWizard({
               {/* Markdown rendering for assistant messages */}
               {message.role === 'assistant' ? (
                 <div className="text-sm prose prose-sm dark:prose-invert max-w-full">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {message.content}
-                  </ReactMarkdown>
+                  {message.content === '<travel-theme-buttons />' ? (
+                    <TravelThemeButtons
+                      onSelectTheme={(preferences) => {
+                        // Imposta le preferenze selezionate
+                        setWizardState(prev => ({
+                          ...prev,
+                          preferences: {
+                            ...prev.preferences,
+                            ...preferences
+                          },
+                          step: 'days'
+                        }));
+
+                        // Aggiungi un messaggio che mostra le preferenze selezionate
+                        setMessages(prev => [...prev, {
+                          role: 'user',
+                          content: `Ho selezionato il tema: ${preferences.tripType}`,
+                          timestamp: new Date()
+                        }]);
+
+                        // Mostra i giorni disponibili con pulsanti di selezione
+                        setMessages(prev => [...prev, {
+                          role: 'assistant',
+                          content: `**Per quali giorni vorresti generare le attività?**\n\nSeleziona uno o più giorni per cui desideri generare attività:`,
+                          timestamp: new Date()
+                        }]);
+
+                        // Aggiungi un messaggio con i pulsanti di selezione dei giorni
+                        setTimeout(() => {
+                          setMessages(prev => [...prev, {
+                            role: 'assistant',
+                            content: `<day-selection-buttons />`,
+                            timestamp: new Date()
+                          }]);
+                        }, 500);
+                      }}
+                    />
+                  ) : message.content === '<day-selection-buttons />' ? (
+                    <DaySelectionButtons
+                      days={itineraryDays}
+                      onSelectDays={(selectedDayIds) => {
+                        // Imposta i giorni selezionati
+                        setWizardState(prev => ({
+                          ...prev,
+                          selectedDays: selectedDayIds,
+                          step: 'activities'
+                        }));
+
+                        // Aggiungi un messaggio che mostra i giorni selezionati
+                        setMessages(prev => [...prev, {
+                          role: 'user',
+                          content: `Ho selezionato ${selectedDayIds.length} ${selectedDayIds.length === 1 ? 'giorno' : 'giorni'}`,
+                          timestamp: new Date()
+                        }]);
+
+                        // Chiedi dettagli sulle attività
+                        setMessages(prev => [...prev, {
+                          role: 'assistant',
+                          content: `Grazie! Hai selezionato ${selectedDayIds.length} ${selectedDayIds.length === 1 ? 'giorno' : 'giorni'}.\n\n**Ora dimmi qualcosa in più sulle attività che vorresti fare:**\n\n- Hai preferenze per attività mattutine o serali?\n- C'è un budget specifico che vorresti rispettare per le attività?\n- Preferisci un ritmo rilassato o intenso per la giornata?\n\nPuoi rispondere liberamente con tutte le informazioni che ritieni utili.`,
+                          timestamp: new Date()
+                        }]);
+                      }}
+                    />
+                  ) : message.content.includes('<activity-timeline-component />') ? (
+                    <>
+                      <ActivityTimeline
+                        activities={wizardState.generatedActivities}
+                        onEditActivity={handleEditActivity}
+                        onRemoveActivity={handleRemoveActivity}
+                      />
+                    </>
+                  ) : (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {message.content}
+                    </ReactMarkdown>
+                  )}
                 </div>
               ) : (
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -811,6 +875,15 @@ export default function ItineraryWizard({
           Wizard Generazione Attività - Powered by Gemini
         </div>
       </div>
+
+      {/* Modale di modifica attività */}
+      <ActivityEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        activity={editingActivity}
+        onSave={handleSaveEditedActivity}
+      />
     </div>
+    </>
   );
 }
