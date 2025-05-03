@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import LocationAutocomplete from '@/components/map/LocationAutocomplete';
 
 type Activity = {
   id: string;
@@ -15,6 +16,7 @@ type Activity = {
   currency: string;
   notes: string | null;
   status: string;
+  coordinates?: string | { x: number; y: number } | null;
 };
 
 type ActivityFormData = {
@@ -29,6 +31,7 @@ type ActivityFormData = {
   currency: string;
   notes: string;
   status: string;
+  coordinates?: { x: number; y: number } | null;
 };
 
 type ActivityModalProps = {
@@ -40,13 +43,13 @@ type ActivityModalProps = {
   dayId: string;
 };
 
-export default function ActivityModal({ 
-  isOpen, 
-  onClose, 
-  onSave, 
-  activity, 
-  tripId, 
-  dayId 
+export default function ActivityModal({
+  isOpen,
+  onClose,
+  onSave,
+  activity,
+  tripId,
+  dayId
 }: ActivityModalProps) {
   const [formData, setFormData] = useState<ActivityFormData>({
     name: '',
@@ -60,12 +63,31 @@ export default function ActivityModal({
     currency: 'EUR',
     notes: '',
     status: 'planned',
+    coordinates: null,
   });
 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (activity) {
+      // Converti le coordinate se necessario
+      let coordinates = null;
+      if (activity.coordinates) {
+        if (typeof activity.coordinates === 'string') {
+          // Formato "(x,y)" da PostgreSQL
+          const match = activity.coordinates.replace(/[()]/g, '').split(',');
+          if (match.length === 2) {
+            coordinates = {
+              x: parseFloat(match[0]),
+              y: parseFloat(match[1])
+            };
+          }
+        } else {
+          // Già in formato oggetto
+          coordinates = activity.coordinates;
+        }
+      }
+
       setFormData({
         name: activity.name || '',
         type: activity.type || 'sightseeing',
@@ -78,16 +100,17 @@ export default function ActivityModal({
         currency: activity.currency || 'EUR',
         notes: activity.notes || '',
         status: activity.status || 'planned',
+        coordinates: coordinates
       });
     } else {
       // Set default time to current time rounded to nearest hour
       const now = new Date();
       now.setMinutes(0, 0, 0);
       const defaultStartTime = now.toISOString().slice(0, 16);
-      
+
       now.setHours(now.getHours() + 1);
       const defaultEndTime = now.toISOString().slice(0, 16);
-      
+
       setFormData({
         name: '',
         type: 'sightseeing',
@@ -100,6 +123,7 @@ export default function ActivityModal({
         currency: 'EUR',
         notes: '',
         status: 'planned',
+        coordinates: null
       });
     }
   }, [activity]);
@@ -112,20 +136,36 @@ export default function ActivityModal({
     });
   };
 
+  // Gestisce la selezione della location con le coordinate
+  const handleLocationSelect = (location: string, coordinates?: { x: number; y: number }) => {
+    setFormData({
+      ...formData,
+      location: location,
+      coordinates: coordinates || null
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name) {
       setError('Activity name is required');
       return;
     }
-    
+
     if (formData.start_time && formData.end_time && new Date(formData.start_time) > new Date(formData.end_time)) {
       setError('End time cannot be before start time');
       return;
     }
-    
-    onSave(formData);
+
+    console.log('Submitting form data:', formData);
+
+    try {
+      onSave(formData);
+    } catch (err) {
+      console.error('Error saving activity:', err);
+      setError('Failed to save activity. Please try again.');
+    }
   };
 
   if (!isOpen) return null;
@@ -136,13 +176,13 @@ export default function ActivityModal({
         <h2 className="text-xl font-semibold mb-4">
           {activity ? 'Edit Activity' : 'Add New Activity'}
         </h2>
-        
+
         {error && (
           <div className="bg-destructive/10 border-l-4 border-destructive p-3 text-destructive mb-4 text-sm">
             <p>{error}</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
@@ -159,7 +199,7 @@ export default function ActivityModal({
               required
             />
           </div>
-          
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="type" className="block text-sm font-medium text-foreground mb-1">
@@ -182,7 +222,7 @@ export default function ActivityModal({
                 <option value="other">Other</option>
               </select>
             </div>
-            
+
             <div>
               <label htmlFor="priority" className="block text-sm font-medium text-foreground mb-1">
                 Priority
@@ -200,7 +240,7 @@ export default function ActivityModal({
               </select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="start_time" className="block text-sm font-medium text-foreground mb-1">
@@ -215,7 +255,7 @@ export default function ActivityModal({
                 className="w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
               />
             </div>
-            
+
             <div>
               <label htmlFor="end_time" className="block text-sm font-medium text-foreground mb-1">
                 End Time
@@ -230,22 +270,19 @@ export default function ActivityModal({
               />
             </div>
           </div>
-          
+
           <div>
             <label htmlFor="location" className="block text-sm font-medium text-foreground mb-1">
               Location
             </label>
-            <input
-              type="text"
-              id="location"
-              name="location"
+            <LocationAutocomplete
               value={formData.location}
-              onChange={handleChange}
-              className="w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
+              onChange={handleLocationSelect}
               placeholder="e.g., Piazza del Colosseo, Roma"
+              className="w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm"
             />
           </div>
-          
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="cost" className="block text-sm font-medium text-foreground mb-1">
@@ -279,7 +316,7 @@ export default function ActivityModal({
                 </select>
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="booking_reference" className="block text-sm font-medium text-foreground mb-1">
                 Booking Reference
@@ -295,7 +332,7 @@ export default function ActivityModal({
               />
             </div>
           </div>
-          
+
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-foreground mb-1">
               Status
@@ -314,7 +351,7 @@ export default function ActivityModal({
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
-          
+
           <div>
             <label htmlFor="notes" className="block text-sm font-medium text-foreground mb-1">
               Notes
@@ -329,7 +366,7 @@ export default function ActivityModal({
               placeholder="Any additional notes..."
             ></textarea>
           </div>
-          
+
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"

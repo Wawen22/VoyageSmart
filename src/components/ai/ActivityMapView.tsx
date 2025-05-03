@@ -214,27 +214,30 @@ export default function ActivityMapView({
 
     // Crea popup con info sull'attività
     const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-      <div style="max-width: 250px;">
-        <strong style="font-size: 14px;">${activity.name}</strong>
-        <p style="font-size: 12px; margin: 4px 0;">
-          <span style="color: #6b7280;">Orario:</span>
+      <div style="max-width: 250px; background-color: #fff; color: #000; padding: 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <strong style="font-size: 14px; color: #000; display: block; margin-bottom: 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">${activity.name}</strong>
+        <p style="font-size: 12px; margin: 4px 0; color: #000;">
+          <span style="color: #6b7280; font-weight: 500;">Orario:</span>
           ${formatTime(activity.start_time)} - ${formatTime(activity.end_time)}
         </p>
-        <p style="font-size: 12px; margin: 4px 0;">
-          <span style="color: #6b7280;">Luogo:</span>
+        <p style="font-size: 12px; margin: 4px 0; color: #000;">
+          <span style="color: #6b7280; font-weight: 500;">Luogo:</span>
           ${activity.location}
         </p>
         ${activity.cost ? `
-          <p style="font-size: 12px; margin: 4px 0;">
-            <span style="color: #6b7280;">Costo:</span>
+          <p style="font-size: 12px; margin: 4px 0; color: #000;">
+            <span style="color: #6b7280; font-weight: 500;">Costo:</span>
             ${activity.cost} ${activity.currency || 'EUR'}
           </p>
         ` : ''}
         ${activity.notes ? `
-          <p style="font-size: 12px; margin: 4px 0; color: #6b7280;">
+          <p style="font-size: 12px; margin: 8px 0 0 0; color: #4b5563; background-color: #f3f4f6; padding: 4px 6px; border-radius: 3px;">
             ${activity.notes}
           </p>
         ` : ''}
+        <div style="font-size: 11px; margin-top: 8px; text-align: center; color: #6b7280;">
+          Clicca per maggiori dettagli
+        </div>
       </div>
     `);
 

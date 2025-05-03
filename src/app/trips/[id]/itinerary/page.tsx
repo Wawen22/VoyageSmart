@@ -23,6 +23,7 @@ const ActivityModal = lazy(() => import('@/components/itinerary/ActivityModal'))
 const DayModal = lazy(() => import('@/components/itinerary/DayModal'));
 const MoveActivityModal = lazy(() => import('@/components/itinerary/MoveActivityModal'));
 const CalendarView = lazy(() => import('@/components/itinerary/CalendarView'));
+const ItineraryMapView = lazy(() => import('@/components/itinerary/ItineraryMapView'));
 const ActivityDetailsModal = lazy(() => import('@/components/activity/ActivityDetailsModal'));
 const JournalEntryForm = lazy(() => import('@/components/journal/JournalEntryForm'));
 const JournalEntryCard = lazy(() => import('@/components/journal/JournalEntryCard'));
@@ -85,7 +86,7 @@ export default function TripItinerary() {
   const [currentDay, setCurrentDay] = useState<ItineraryDay | null>(null);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentDayId, setCurrentDayId] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'map'>('list');
 
   // Wizard states
   const [showWizard, setShowWizard] = useState(false);
@@ -423,6 +424,13 @@ export default function TripItinerary() {
 
   const handleSaveActivity = async (formData: any) => {
     try {
+      // Prepara le coordinate nel formato PostgreSQL point se presenti
+      let coordinatesValue = null;
+      if (formData.coordinates) {
+        coordinatesValue = `(${formData.coordinates.x},${formData.coordinates.y})`;
+        console.log('Saving coordinates:', coordinatesValue);
+      }
+
       const activityData = {
         trip_id: id,
         day_id: currentDayId,
@@ -437,17 +445,24 @@ export default function TripItinerary() {
         currency: formData.currency || 'EUR',
         notes: formData.notes || null,
         status: formData.status || 'planned',
+        coordinates: coordinatesValue,
       };
 
       if (currentActivity) {
         // Update existing activity
+        console.log('Updating activity with data:', activityData);
         const { data, error } = await supabase
           .from('activities')
           .update(activityData)
           .eq('id', currentActivity.id)
           .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error updating activity:', error);
+          throw error;
+        }
+
+        console.log('Activity updated successfully:', data);
 
         // Update the activity in the state
         setItineraryDays(itineraryDays.map(day => {
@@ -455,7 +470,11 @@ export default function TripItinerary() {
             return {
               ...day,
               activities: day.activities?.map(activity =>
-                activity.id === currentActivity.id ? data[0] : activity
+                activity.id === currentActivity.id ? {
+                  ...data[0],
+                  // Assicurati che le coordinate siano incluse nello stato
+                  coordinates: data[0].coordinates || activity.coordinates
+                } : activity
               ) || [],
             };
           }
@@ -463,19 +482,29 @@ export default function TripItinerary() {
         }));
       } else {
         // Create new activity
+        console.log('Creating new activity with data:', activityData);
         const { data, error } = await supabase
           .from('activities')
           .insert([activityData])
           .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error creating activity:', error);
+          throw error;
+        }
+
+        console.log('Activity created successfully:', data);
 
         // Add the new activity to the state
         setItineraryDays(itineraryDays.map(day => {
           if (day.id === currentDayId) {
             return {
               ...day,
-              activities: [...(day.activities || []), data[0]].sort((a, b) =>
+              activities: [...(day.activities || []), {
+                ...data[0],
+                // Assicurati che le coordinate siano incluse nello stato
+                coordinates: data[0].coordinates
+              }].sort((a, b) =>
                 (a.start_time && b.start_time) ?
                   new Date(a.start_time).getTime() - new Date(b.start_time).getTime() : 0
               ),
@@ -771,6 +800,21 @@ export default function TripItinerary() {
                     <CalendarIcon className="h-4 w-4 mr-1" />
                     <span>Calendar</span>
                   </button>
+                  <button
+                    onClick={() => setViewMode('map')}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-1 ${
+                      viewMode === 'map'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-foreground hover:bg-muted'
+                    }`}
+                    aria-label="Map view"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>Map</span>
+                  </button>
                 </div>
 
                 {/* AI Wizard button */}
@@ -840,7 +884,7 @@ export default function TripItinerary() {
               />
             ))}
           </div>
-        ) : (
+        ) : viewMode === 'calendar' ? (
           <Suspense fallback={<div className="p-8 text-center">Loading calendar view...</div>}>
             <CalendarView
               days={itineraryDays}
@@ -861,6 +905,63 @@ export default function TripItinerary() {
               onDeleteActivity={handleDeleteActivity}
               onMoveActivity={handleMoveActivity}
               onViewActivityDetails={handleViewActivityDetails}
+            />
+          </Suspense>
+        ) : (
+          <Suspense fallback={<div className="p-8 text-center">Loading map view...</div>}>
+            <ItineraryMapView
+              days={itineraryDays}
+              onViewActivityDetails={handleViewActivityDetails}
+              onUpdateCoordinates={(activity, coordinates) => {
+                // Aggiorna le coordinate dell'attività nel database
+                const updateActivity = async () => {
+                  try {
+                    // Converti le coordinate nel formato point di PostgreSQL
+                    const coordinatesString = `(${coordinates.x},${coordinates.y})`;
+                    console.log('Updating coordinates for activity:', activity.id, 'to:', coordinatesString);
+
+                    const { data, error } = await supabase
+                      .from('activities')
+                      .update({ coordinates: coordinatesString })
+                      .eq('id', activity.id)
+                      .select();
+
+                    if (error) {
+                      console.error('Supabase error updating coordinates:', error);
+                      throw error;
+                    }
+
+                    console.log('Coordinates updated successfully, response:', data);
+
+                    // Aggiorna lo stato locale
+                    setItineraryDays(prevDays => {
+                      return prevDays.map(day => {
+                        if (day.id === activity.day_id) {
+                          return {
+                            ...day,
+                            activities: day.activities?.map(act => {
+                              if (act.id === activity.id) {
+                                return {
+                                  ...act,
+                                  coordinates: coordinatesString
+                                };
+                              }
+                              return act;
+                            })
+                          };
+                        }
+                        return day;
+                      });
+                    });
+
+                    console.log('State updated with new coordinates');
+                  } catch (err) {
+                    console.error('Error updating coordinates:', err);
+                  }
+                };
+
+                updateActivity();
+              }}
             />
           </Suspense>
         )}
