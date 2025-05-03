@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   MapPin,
   Clock,
@@ -18,7 +19,11 @@ import {
   Music,
   Mountain,
   Compass,
-  Ticket
+  Ticket,
+  Star,
+  Info,
+  Calendar,
+  ExternalLink
 } from 'lucide-react';
 
 // Type for the activity
@@ -148,94 +153,205 @@ export default function ActivityPreviewCard({
     }).format(amount);
   };
 
-  return (
-    <Card
-      className={`mb-3 border-l-4 transition-all duration-200 hover-lift ${isHovered ? 'shadow-md' : 'shadow-sm'}`}
-      style={{ borderLeftColor: activity.priority === 1 ? '#ef4444' : activity.priority === 2 ? '#f97316' : '#3b82f6' }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <CardContent className="p-3">
-        <div className="flex justify-between items-start">
-          <div className="flex items-start space-x-2">
-            <div className={`p-1.5 rounded-full ${getActivityColor(activity.type)}`}>
-              {getActivityIcon(activity.type)}
-            </div>
-            <div>
-              <h4 className="font-medium text-sm">{activity.name}</h4>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
-                {activity.start_time && (
-                  <span className="inline-flex items-center text-[10px] text-muted-foreground">
-                    <Clock className="h-2.5 w-2.5 mr-0.5 text-muted-foreground" />
-                    {formatTime(activity.start_time)}
-                    {activity.end_time && ` - ${formatTime(activity.end_time)}`}
-                  </span>
-                )}
+  // Calcola la durata dell'attività
+  const calculateDuration = () => {
+    if (!activity.start_time || !activity.end_time) return null;
 
-                {activity.location && (
-                  <span className="inline-flex items-center text-[10px] text-muted-foreground">
-                    <MapPin className="h-2.5 w-2.5 mr-0.5 text-muted-foreground" />
-                    <span className="truncate max-w-[120px]">{activity.location}</span>
-                  </span>
-                )}
+    try {
+      const start = new Date(activity.start_time);
+      const end = new Date(activity.end_time);
+      const durationMs = end.getTime() - start.getTime();
+      const durationMinutes = Math.round(durationMs / 60000);
+
+      if (durationMinutes < 60) {
+        return `${durationMinutes} min`;
+      } else {
+        const hours = Math.floor(durationMinutes / 60);
+        const minutes = durationMinutes % 60;
+        return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+      }
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // Genera un link a Google Maps per la posizione
+  const getGoogleMapsLink = () => {
+    if (!activity.location) return null;
+    const query = encodeURIComponent(activity.location);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  };
+
+  // Durata dell'attività
+  const duration = calculateDuration();
+
+  // Link a Google Maps
+  const mapsLink = getGoogleMapsLink();
+
+  return (
+    <TooltipProvider>
+      <Card
+        className={`mb-3 border-l-4 transition-all duration-300 hover:scale-[1.01] ${isHovered ? 'shadow-md' : 'shadow-sm'}`}
+        style={{ borderLeftColor: activity.priority === 1 ? '#ef4444' : activity.priority === 2 ? '#f97316' : '#3b82f6' }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <CardContent className="p-3">
+          {/* Header con icona, nome e priorità */}
+          <div className="flex justify-between items-start">
+            <div className="flex items-start space-x-2">
+              <div className={`p-2 rounded-full ${getActivityColor(activity.type)}`}>
+                {getActivityIcon(activity.type)}
+              </div>
+              <div>
+                <h4 className="font-medium text-sm">{activity.name}</h4>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                  {activity.start_time && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex items-center text-[10px] text-muted-foreground">
+                          <Clock className="h-3 w-3 mr-0.5 text-muted-foreground" />
+                          {formatTime(activity.start_time)}
+                          {activity.end_time && ` - ${formatTime(activity.end_time)}`}
+                          {duration && ` (${duration})`}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p className="text-xs">Orario attività</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+
+                  {activity.location && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex items-center text-[10px] text-muted-foreground">
+                          <MapPin className="h-3 w-3 mr-0.5 text-muted-foreground" />
+                          <span className="truncate max-w-[120px]">{activity.location}</span>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p className="text-xs">Posizione</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
               </div>
             </div>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge className={`text-[10px] px-1.5 py-0.5 ${getPriorityColor(activity.priority)}`}>
+                  {getPriorityLabel(activity.priority)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                <p className="text-xs">Priorità: {getPriorityLabel(activity.priority)}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
 
-          <Badge className={`text-[10px] px-1.5 py-0.5 ${getPriorityColor(activity.priority)}`}>
-            {getPriorityLabel(activity.priority)}
-          </Badge>
-        </div>
-
-        {activity.notes && (
-          <p className="text-[10px] text-muted-foreground mt-1.5 line-clamp-2">{activity.notes}</p>
-        )}
-
-        <div className="mt-2 pt-1.5 border-t border-border flex justify-between items-center">
-          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-            {activity.cost !== undefined && (
-              <span className="inline-flex items-center">
-                <DollarSign className="h-2.5 w-2.5 mr-0.5" />
-                {formatCurrency(activity.cost, activity.currency)}
-              </span>
-            )}
-            {activity.booking_reference && (
-              <span className="inline-flex items-center">
-                <Ticket className="h-2.5 w-2.5 mr-0.5" />
-                <span className="truncate max-w-[60px]">{activity.booking_reference}</span>
-              </span>
-            )}
-          </div>
-
-          {showActions && (
-            <div className="flex items-center gap-1">
-              {onEdit && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 text-primary hover:bg-primary/10 transition-colors"
-                  onClick={() => onEdit(activity)}
-                  aria-label="Edit activity"
-                >
-                  <Edit className="h-3 w-3" />
-                </Button>
-              )}
-
-              {onRemove && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10 transition-colors"
-                  onClick={() => onRemove(activity)}
-                  aria-label="Remove activity"
-                >
-                  <Trash className="h-3 w-3" />
-                </Button>
-              )}
+          {/* Note dell'attività */}
+          {activity.notes && (
+            <div className="mt-2 bg-muted/30 p-1.5 rounded-sm">
+              <p className="text-[11px] text-muted-foreground line-clamp-2">{activity.notes}</p>
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* Footer con costo, riferimento e azioni */}
+          <div className="mt-2 pt-1.5 border-t border-border flex justify-between items-center">
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+              {activity.cost !== undefined && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center">
+                      <DollarSign className="h-3 w-3 mr-0.5" />
+                      {formatCurrency(activity.cost, activity.currency)}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p className="text-xs">Costo stimato</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {activity.booking_reference && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex items-center">
+                      <Ticket className="h-3 w-3 mr-0.5" />
+                      <span className="truncate max-w-[60px]">{activity.booking_reference}</span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p className="text-xs">Riferimento prenotazione</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {mapsLink && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      href={mapsLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center hover:text-primary transition-colors"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p className="text-xs">Apri in Google Maps</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+
+            {showActions && (
+              <div className="flex items-center gap-1">
+                {onEdit && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 text-primary hover:bg-primary/10 transition-colors"
+                        onClick={() => onEdit(activity)}
+                        aria-label="Edit activity"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p className="text-xs">Modifica attività</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+
+                {onRemove && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 transition-colors"
+                        onClick={() => onRemove(activity)}
+                        aria-label="Remove activity"
+                      >
+                        <Trash className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p className="text-xs">Rimuovi attività</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 }

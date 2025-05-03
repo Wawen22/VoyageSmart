@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, ArrowRight, Calendar, Check, Edit, Trash } from 'lucide-react';
+import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, ArrowRight, Calendar, Check, Edit, Trash, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { supabase } from '@/lib/supabase';
 import ActivityPreviewCard from './ActivityPreviewCard';
 import ActivityTimeline from './ActivityTimeline';
+import ActivityMapView from './ActivityMapView';
 import TravelThemeButtons from './TravelThemeButtons';
 import DaySelectionButtons from './DaySelectionButtons';
 import ActivityEditModal from './ActivityEditModal';
@@ -35,6 +37,7 @@ type GeneratedActivity = {
   status: string;
   day_id: string;
   day_date: string; // Per visualizzazione
+  coordinates?: { x: number; y: number } | null; // Coordinate per la mappa
 };
 
 // Tipo per i giorni dell'itinerario
@@ -507,25 +510,52 @@ export default function ItineraryWizard({
     }));
   };
 
+  // Funzione per aggiornare le coordinate di un'attività
+  const handleUpdateCoordinates = (activity: GeneratedActivity, coordinates: { x: number; y: number }) => {
+    console.log(`Aggiornamento coordinate per "${activity.name}":`, coordinates);
+
+    // Aggiorna le coordinate dell'attività
+    setWizardState(prev => ({
+      ...prev,
+      generatedActivities: prev.generatedActivities.map(a => {
+        if (a.day_id === activity.day_id && a.name === activity.name && a.start_time === activity.start_time) {
+          return { ...a, coordinates };
+        }
+        return a;
+      })
+    }));
+  };
+
   // Salva le attività nel database
   const saveActivities = async () => {
     try {
       // Prepara i dati per la richiesta
-      const activitiesToSave = wizardState.generatedActivities.map(activity => ({
-        trip_id: tripId,
-        day_id: activity.day_id,
-        name: activity.name,
-        type: activity.type,
-        start_time: activity.start_time,
-        end_time: activity.end_time,
-        location: activity.location,
-        booking_reference: activity.booking_reference || null,
-        priority: activity.priority,
-        cost: activity.cost || null,
-        currency: activity.currency || 'EUR',
-        notes: activity.notes || null,
-        status: activity.status || 'planned',
-      }));
+      const activitiesToSave = wizardState.generatedActivities.map(activity => {
+        // Prepara l'oggetto base
+        const activityData: any = {
+          trip_id: tripId,
+          day_id: activity.day_id,
+          name: activity.name,
+          type: activity.type,
+          start_time: activity.start_time,
+          end_time: activity.end_time,
+          location: activity.location,
+          booking_reference: activity.booking_reference || null,
+          priority: activity.priority,
+          cost: activity.cost || null,
+          currency: activity.currency || 'EUR',
+          notes: activity.notes || null,
+          status: activity.status || 'planned',
+        };
+
+        // Aggiungi le coordinate se disponibili
+        if (activity.coordinates) {
+          // Converti le coordinate nel formato point di PostgreSQL
+          activityData.coordinates = `(${activity.coordinates.x},${activity.coordinates.y})`;
+        }
+
+        return activityData;
+      });
 
       console.log('Salvando attività:', activitiesToSave.length);
 
@@ -673,7 +703,7 @@ export default function ItineraryWizard({
     <>
       <div
         className={`
-          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 sm:right-[180px] bottom-[100px] right-4 w-96 sm:h-[550px] h-[500px]'}
+          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 sm:right-[180px] bottom-[100px] right-4 w-[400px] sm:h-[550px] h-[500px]'}
           bg-background border border-border rounded-lg shadow-xl z-50
           flex flex-col transition-all duration-300 ease-in-out
           glass-effect animate-fade-in
@@ -752,7 +782,10 @@ export default function ItineraryWizard({
           >
             <div
               className={`
-                max-w-[80%] p-3 rounded-lg shadow-sm
+                ${message.content.includes('<activity-timeline-component />')
+                  ? 'max-w-[95%] w-full' // Messaggi con mappa/timeline più larghi
+                  : 'max-w-[80%]'}
+                p-3 rounded-lg shadow-sm
                 ${message.role === 'user'
                   ? 'bg-primary text-primary-foreground ml-4 animate-slide-in-left'
                   : 'bg-muted mr-4 animate-slide-in-right'
@@ -843,11 +876,34 @@ export default function ItineraryWizard({
                     />
                   ) : message.content.includes('<activity-timeline-component />') ? (
                     <>
-                      <ActivityTimeline
-                        activities={wizardState.generatedActivities}
-                        onEditActivity={handleEditActivity}
-                        onRemoveActivity={handleRemoveActivity}
-                      />
+                      <div className="-mx-3 -my-2"> {/* Espandi oltre i margini del messaggio */}
+                        <Tabs defaultValue="timeline" className="w-full">
+                          <TabsList className="grid w-full grid-cols-2 mb-2">
+                            <TabsTrigger value="timeline" className="text-xs">
+                              <Calendar className="h-3.5 w-3.5 mr-1.5" />
+                              Timeline
+                            </TabsTrigger>
+                            <TabsTrigger value="map" className="text-xs">
+                              <Map className="h-3.5 w-3.5 mr-1.5" />
+                              Mappa
+                            </TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="timeline" className="mt-0 px-3">
+                            <ActivityTimeline
+                              activities={wizardState.generatedActivities}
+                              onEditActivity={handleEditActivity}
+                              onRemoveActivity={handleRemoveActivity}
+                            />
+                          </TabsContent>
+                          <TabsContent value="map" className="mt-0">
+                            <ActivityMapView
+                              activities={wizardState.generatedActivities}
+                              onMarkerClick={handleEditActivity}
+                              onCoordinatesUpdate={handleUpdateCoordinates}
+                            />
+                          </TabsContent>
+                        </Tabs>
+                      </div>
                     </>
                   ) : (
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>

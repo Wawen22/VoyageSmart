@@ -2,7 +2,7 @@
 
 Questo documento fornisce una documentazione completa dell'Assistente AI implementato in VoyageSmart, inclusa l'implementazione attuale, le funzionalità, i prossimi passi e le guide per il test.
 
-**Ultimo aggiornamento:** Miglioramento dell'interfaccia utente del Wizard di Generazione Attività con visualizzazione ricca delle attività, timeline interattiva, pulsanti di selezione dei giorni, funzionalità di modifica delle attività e pulsante per cancellare la conversazione. Risoluzione dei problemi di sovrapposizione tra i pulsanti dell'Assistente AI e del Wizard Itinerario.
+**Ultimo aggiornamento:** Implementazione di una mappa interattiva nel Wizard di Generazione Attività che utilizza Mapbox per visualizzare le attività generate, con geocodifica automatica delle location, visualizzazione dei percorsi e modalità fullscreen.
 
 ## Indice
 - [Panoramica](#panoramica)
@@ -391,6 +391,9 @@ Una volta completata l'implementazione base, possiamo aggiungere funzionalità a
    - ✅ Modifica delle attività generate prima del salvataggio
    - ✅ Pulsante per cancellare la conversazione e ripartire da zero
    - ✅ Risoluzione dei problemi di sovrapposizione tra i pulsanti dell'Assistente AI e del Wizard Itinerario
+   - ✅ Analisi avanzata delle richieste dell'utente per rispettare vincoli temporali
+   - ✅ Supporto per destinazioni specifiche all'interno di un viaggio con destinazioni multiple
+   - ✅ Estrazione intelligente di informazioni dalle preferenze dell'utente
 2. **Ottimizzazione percorsi**: Aggiungere l'ottimizzazione dei percorsi giornalieri
 3. **Suggerimenti proattivi**: Fornire suggerimenti proattivi basati sul contesto
 4. **Analisi predittiva**: Implementare l'analisi predittiva per costi e affluenza
@@ -401,7 +404,7 @@ Prima di rilasciare la funzionalità, dobbiamo testarla e ottimizzarla:
 
 1. Testare l'assistente con diversi tipi di domande e richieste
 2. Ottimizzare le prestazioni (ridurre i tempi di risposta)
-3. Implementare il caching per le risposte comuni
+3. Implementare il caching per le risposte comuninon m
 4. Aggiungere meccanismi di fallback in caso di errori
 
 ## Considerazioni Tecniche
@@ -476,44 +479,80 @@ I prossimi passi includono l'implementazione di funzionalità ancora più avanza
 ### Miglioramenti recenti:
 
 1. **Visualizzazione ricca delle attività**:
-   - Implementazione di un componente `ActivityPreviewCard` che mostra le attività con icone specifiche per tipo
-   - Visualizzazione di dettagli come orario, luogo, priorità e costo in un formato visivamente accattivante
+   - Implementazione di un componente `ActivityPreviewCard` migliorato con tooltip informativi
+   - Visualizzazione avanzata con calcolo automatico della durata dell'attività
+   - Integrazione con Google Maps per visualizzare la posizione dell'attività
    - Effetti hover e animazioni per migliorare l'esperienza utente
+   - Note dell'attività visualizzate in un formato più leggibile con sfondo evidenziato
 
-2. **Timeline interattiva**:
-   - Nuovo componente `ActivityTimeline` che mostra le attività organizzate per giorno in formato timeline
-   - Indicatori temporali per visualizzare facilmente la distribuzione delle attività durante la giornata
-   - Animazioni per l'apparizione progressiva delle attività nella timeline
+2. **Timeline interattiva avanzata**:
+   - Componente `ActivityTimeline` completamente rinnovato con navigazione tra giorni
+   - Visualizzazione a schede per giorni multipli con animazioni di transizione
+   - Indicatori di pausa tra le attività che mostrano il tempo disponibile
+   - Pulsanti rapidi per navigare tra i giorni dell'itinerario
+   - Animazioni fluide per il cambio di giorno nella timeline
 
-3. **Selezione dei giorni migliorata**:
-   - Implementazione di pulsanti interattivi per la selezione dei giorni (`DaySelectionButtons`)
-   - Possibilità di selezionare più giorni contemporaneamente
-   - Opzione "Seleziona tutti" per selezionare rapidamente tutti i giorni disponibili
+3. **Selezione dei giorni con calendario visivo**:
+   - Nuovo componente `DaySelectionButtons` con visualizzazione a calendario
+   - Possibilità di selezionare intervalli di giorni con il tasto destro
+   - Visualizzazione alternativa a lista per una selezione più dettagliata
+   - Indicatori visivi per i giorni selezionati e quelli disponibili
+   - Contatore del numero di giorni selezionati
 
-4. **Modifica delle attività**:
-   - Nuovo componente `ActivityEditModal` per modificare i dettagli delle attività generate
-   - Validazione dei campi per garantire dati corretti
-   - Possibilità di modificare nome, tipo, luogo, orari, priorità, costo e note
+4. **Temi di viaggio personalizzati**:
+   - Componente `TravelThemeButtons` completamente rinnovato con card visive
+   - Visualizzazione ricca con immagini di sfondo per ogni tema
+   - Descrizioni dettagliate e badge informativi per ogni tema
+   - Modale di dettaglio per visualizzare tutte le caratteristiche del tema
+   - Formattazione automatica degli interessi e delle preferenze in italiano
 
 5. **Miglioramenti dell'interfaccia utente**:
    - Pulsante per cancellare la conversazione e ripartire da zero
    - Risoluzione dei problemi di sovrapposizione tra i pulsanti dell'Assistente AI e del Wizard Itinerario
    - Differenziazione visiva dei pulsanti con colori distinti
    - Layout ottimizzato per dispositivi mobili
+   - Animazioni e transizioni fluide in tutta l'interfaccia
 
-6. **Gestione migliorata delle risposte**:
-   - Riconoscimento più preciso delle risposte positive e negative
-   - Feedback chiaro quando l'utente rifiuta di salvare le attività generate
-   - Possibilità di tornare indietro e generare nuove attività
+6. **Prompt AI ottimizzato**:
+   - Prompt completamente rinnovato per generare attività più dettagliate e pertinenti
+   - Inclusione automatica del ritmo del viaggio (rilassato, moderato, attivo, intenso)
+   - Considerazione degli orari preferiti dall'utente (mattina, pomeriggio, sera)
+   - Istruzioni dettagliate per generare attività con nomi reali di luoghi
+   - Miglioramento della formattazione delle note con dettagli culturali e storici
+
+7. **Mappa interattiva delle attività**:
+   - Visualizzazione di tutte le attività generate su una mappa Mapbox ottimizzata per lo spazio
+   - Geocodifica avanzata delle location per ottenere le coordinate precise
+   - Autocompletamento degli indirizzi durante la modifica delle attività
+   - Marker colorati in base al tipo di attività con numerazione progressiva
+   - Popup informativi con dettagli dell'attività al passaggio del mouse
+   - Funzione di ottimizzazione del percorso tra le attività
+   - Modalità fullscreen per una visualizzazione più ampia
+   - Integrazione con Google Maps per visualizzare le location
+   - Layout migliorato per massimizzare lo spazio disponibile per la mappa
+   - Interfaccia di modifica attività responsive con layout ottimizzato e pulsanti ben visibili
+
+8. **Analisi avanzata delle richieste dell'utente**:
+   - Estrazione intelligente di destinazioni specifiche dalle preferenze dell'utente
+   - Riconoscimento e rispetto dei vincoli temporali (es. "finire entro le 16:00")
+   - Identificazione di richieste specifiche per attività personalizzate
+   - Supporto per destinazioni multiple all'interno dello stesso viaggio
+   - Analisi semantica migliorata per comprendere meglio le intenzioni dell'utente
+   - Generazione di indirizzi completi e precisi per una corretta geocodifica
 
 ### Componenti principali:
 
 - `src/components/ai/ItineraryWizard.tsx`: Componente React che implementa l'interfaccia utente del wizard
-- `src/components/ai/ActivityPreviewCard.tsx`: Componente per la visualizzazione ricca delle attività
-- `src/components/ai/ActivityTimeline.tsx`: Componente per la visualizzazione delle attività in formato timeline
-- `src/components/ai/DaySelectionButtons.tsx`: Componente per la selezione interattiva dei giorni
+- `src/components/ai/ActivityPreviewCard.tsx`: Componente per la visualizzazione ricca delle attività con tooltip e link a Google Maps
+- `src/components/ai/ActivityTimeline.tsx`: Componente per la visualizzazione delle attività in formato timeline con navigazione tra giorni
+- `src/components/ai/ActivityMapView.tsx`: Componente per la visualizzazione delle attività su una mappa interattiva con Mapbox
+- `src/components/ai/DaySelectionButtons.tsx`: Componente per la selezione interattiva dei giorni con visualizzazione a calendario
+- `src/components/ai/TravelThemeButtons.tsx`: Componente per la selezione dei temi di viaggio con card visive e dettagli
 - `src/components/ai/ActivityEditModal.tsx`: Componente modale per la modifica delle attività
 - `src/app/api/ai/generate-activities/route.ts`: Endpoint API che utilizza Gemini AI per generare le attività
+  - `generatePrompt()`: Funzione che crea un prompt dettagliato per l'AI
+  - `analyzeAdditionalPreferences()`: Funzione che estrae informazioni chiave dalle preferenze dell'utente
+  - `processActivities()`: Funzione che normalizza e migliora le attività generate
 - `src/app/api/activities/batch/route.ts`: Endpoint API per salvare in batch le attività generate
 
 Per qualsiasi problema o domanda sull'implementazione, consulta il codice sorgente nei file:
