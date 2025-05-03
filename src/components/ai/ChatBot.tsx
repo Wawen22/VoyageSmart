@@ -397,7 +397,7 @@ export default function ChatBot({
     return (
       <button
         onClick={toggleMinimize}
-        className="fixed sm:bottom-4 bottom-20 right-4 bg-primary text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-all duration-300 animate-float"
+        className="fixed sm:bottom-4 bottom-[180px] right-4 bg-primary text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-all duration-300 animate-float"
         aria-label="Apri assistente AI"
       >
         <Sparkles size={20} className="animate-pulse" />
@@ -409,7 +409,7 @@ export default function ChatBot({
   return (
     <div
       className={`
-        fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 bottom-20 right-4 w-80 sm:h-[450px] h-[400px]'}
+        fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 bottom-[180px] right-4 w-80 sm:h-[450px] h-[400px]'}
         bg-background border border-border rounded-lg shadow-xl z-50
         flex flex-col transition-all duration-300 ease-in-out
         glass-effect animate-fade-in
@@ -577,7 +577,7 @@ export default function ChatBot({
           }}
           className="flex gap-2 items-center"
         >
-          <input              
+          <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}

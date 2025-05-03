@@ -636,11 +636,31 @@ export default function ItineraryWizard({
     if (isMinimized) setIsMinimized(false);
   };
 
+  // Funzione per cancellare la conversazione e ripartire da zero
+  const clearConversation = () => {
+    if (window.confirm('Sei sicuro di voler cancellare questa conversazione e ripartire da zero?')) {
+      // Reimposta lo stato del wizard
+      setWizardState({
+        step: 'intro',
+        preferences: {},
+        selectedDays: [],
+        generatedActivities: []
+      });
+
+      // Reimposta i messaggi con solo il messaggio iniziale
+      setMessages([{
+        role: 'assistant',
+        content: `**Benvenuto nel Wizard di Generazione Attività!**\n\nTi guiderò nella creazione di un itinerario personalizzato per il tuo viaggio a ${tripData?.destination || 'destinazione'}.\n\nPossiamo iniziare?`,
+        timestamp: new Date()
+      }]);
+    }
+  };
+
   if (isMinimized) {
     return (
       <button
         onClick={toggleMinimize}
-        className="fixed sm:bottom-4 bottom-20 right-4 bg-primary text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-all duration-300 animate-float"
+        className="fixed sm:bottom-4 sm:right-[180px] bottom-[100px] right-4 bg-[#8B5CF6] text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-[#7C3AED] transition-all duration-300 animate-float"
         aria-label="Apri wizard itinerario"
       >
         <Calendar size={20} className="animate-pulse" />
@@ -653,7 +673,7 @@ export default function ItineraryWizard({
     <>
       <div
         className={`
-          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 bottom-20 right-4 w-96 sm:h-[550px] h-[500px]'}
+          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 sm:right-[180px] bottom-[100px] right-4 w-96 sm:h-[550px] h-[500px]'}
           bg-background border border-border rounded-lg shadow-xl z-50
           flex flex-col transition-all duration-300 ease-in-out
           glass-effect animate-fade-in
@@ -671,6 +691,28 @@ export default function ItineraryWizard({
           </h3>
         </div>
         <div className="flex items-center gap-1">
+          <button
+            onClick={clearConversation}
+            className="p-1.5 hover:bg-muted rounded transition-colors text-muted-foreground hover:text-destructive"
+            title="Cancella conversazione"
+            aria-label="Cancella conversazione"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg>
+          </button>
           {isExpanded ? (
             <button
               onClick={toggleExpand}
