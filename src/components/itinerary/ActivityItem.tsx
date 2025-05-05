@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { MapPinIcon, ClockIcon, DollarSignIcon, FileIcon, TrashIcon, EditIcon, MoveIcon, EyeIcon } from 'lucide-react';
+import { MapPinIcon, ClockIcon, DollarSignIcon, FileIcon, TrashIcon, EditIcon, MoveIcon, EyeIcon, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 
 type Activity = {
   id: string;
@@ -28,9 +29,21 @@ type ActivityItemProps = {
   onDelete: (activityId: string) => void;
   onMove?: (activity: Activity) => void;
   onViewDetails?: (activity: Activity) => void;
+  isSelectable?: boolean;
+  isSelected?: boolean;
+  onSelectChange?: (activityId: string, isSelected: boolean) => void;
 };
 
-export default function ActivityItem({ activity, onEdit, onDelete, onMove, onViewDetails }: ActivityItemProps) {
+export default function ActivityItem({
+  activity,
+  onEdit,
+  onDelete,
+  onMove,
+  onViewDetails,
+  isSelectable = false,
+  isSelected = false,
+  onSelectChange
+}: ActivityItemProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const formatTime = (timeString: string | null) => {
@@ -97,10 +110,19 @@ export default function ActivityItem({ activity, onEdit, onDelete, onMove, onVie
 
   return (
     <div
-      className="border border-l-4 rounded-md p-3 hover:shadow-md transition-all hover-lift animate-fade-in"
+      className={`border border-l-4 rounded-md p-3 hover:shadow-md transition-all hover-lift animate-fade-in ${isSelected ? 'bg-primary/5 ring-1 ring-primary/20' : ''}`}
       style={{ borderLeftColor: getPriorityBorderColor(activity.priority) }}
     >
       <div className="flex justify-between items-start gap-2">
+        {isSelectable && (
+          <div className="pt-1">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={(checked) => onSelectChange?.(activity.id, checked === true)}
+              aria-label={`Seleziona ${activity.name}`}
+            />
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <h3 className="text-sm sm:text-base font-medium text-foreground truncate">{activity.name}</h3>
 

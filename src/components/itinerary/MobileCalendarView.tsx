@@ -42,7 +42,10 @@ type MobileCalendarViewProps = {
   onAddActivity: (dayId: string) => void;
   onEditActivity: (activity: Activity) => void;
   onDeleteActivity: (activityId: string) => void;
+  onDeleteMultipleActivities?: (activityIds: string[]) => void;
+  onDeleteAllActivities?: (dayId: string) => void;
   onMoveActivity?: (activity: Activity) => void;
+  onViewActivityDetails?: (activity: Activity) => void;
 };
 
 export default function MobileCalendarView({
@@ -51,7 +54,10 @@ export default function MobileCalendarView({
   onAddActivity,
   onEditActivity,
   onDeleteActivity,
-  onMoveActivity
+  onDeleteMultipleActivities,
+  onDeleteAllActivities,
+  onMoveActivity,
+  onViewActivityDetails
 }: MobileCalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -89,10 +95,10 @@ export default function MobileCalendarView({
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
-    
+
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX;
-    
+
     // Swipe orizzontale di almeno 50px
     if (Math.abs(diff) > 50) {
       if (diff > 0) {
@@ -103,12 +109,12 @@ export default function MobileCalendarView({
         setSelectedDate(subDays(selectedDate, 1));
       }
     }
-    
+
     touchStartX.current = null;
   };
 
   // Trova il giorno dell'itinerario corrispondente alla data selezionata
-  const selectedItineraryDay = days.find(day => 
+  const selectedItineraryDay = days.find(day =>
     isSameDay(parseISO(day.day_date), selectedDate)
   );
 
@@ -151,9 +157,9 @@ export default function MobileCalendarView({
     <div className="bg-card rounded-lg shadow overflow-hidden">
       {/* Header con mese e anno */}
       <div className="bg-muted/50 p-3 flex justify-between items-center">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => changeMonth(-1)}
           aria-label="Mese precedente"
         >
@@ -162,9 +168,9 @@ export default function MobileCalendarView({
         <h2 className="text-lg font-semibold">
           {format(currentDate, 'MMMM yyyy', { locale: it })}
         </h2>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => changeMonth(1)}
           aria-label="Mese successivo"
         >
@@ -173,7 +179,7 @@ export default function MobileCalendarView({
       </div>
 
       {/* Barra dei giorni scorrevole */}
-      <div 
+      <div
         ref={scrollRef}
         className="flex overflow-x-auto py-2 px-1 bg-muted/30 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
       >
@@ -182,16 +188,16 @@ export default function MobileCalendarView({
           const hasEvents = days.some(d => d.day_date === dateStr);
           const isSelected = isSameDay(day, selectedDate);
           const isToday = isSameDay(day, new Date());
-          
+
           return (
             <div
               key={dateStr}
               id={`day-${dateStr}`}
               className={`flex-shrink-0 flex flex-col items-center mx-1 p-1 rounded-md cursor-pointer transition-colors ${
-                isSelected 
-                  ? 'bg-primary text-primary-foreground' 
-                  : isToday 
-                    ? 'bg-primary/10 text-primary' 
+                isSelected
+                  ? 'bg-primary text-primary-foreground'
+                  : isToday
+                    ? 'bg-primary/10 text-primary'
                     : 'hover:bg-muted'
               }`}
               onClick={() => setSelectedDate(day)}
@@ -213,7 +219,7 @@ export default function MobileCalendarView({
       </div>
 
       {/* Contenuto del giorno selezionato */}
-      <div 
+      <div
         className="p-3"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -228,11 +234,11 @@ export default function MobileCalendarView({
             <ChevronLeftIcon className="h-4 w-4 mr-1" />
             <span className="hidden xs:inline">Precedente</span>
           </Button>
-          
+
           <h3 className="text-base font-medium">
             {formatDateHeader(selectedDate)}
           </h3>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -264,7 +270,7 @@ export default function MobileCalendarView({
                 <CalendarIcon className="h-3.5 w-3.5 mr-1" />
                 Modifica Giorno
               </Button>
-              
+
               <Button
                 variant="primary"
                 size="sm"
@@ -287,15 +293,15 @@ export default function MobileCalendarView({
                     return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
                   })
                   .map((activity) => (
-                    <Card 
-                      key={activity.id} 
+                    <Card
+                      key={activity.id}
                       className="border-l-4 hover:shadow-md transition-shadow"
-                      style={{ 
-                        borderLeftColor: activity.priority === 1 
-                          ? '#ef4444' 
-                          : activity.priority === 2 
-                            ? '#f97316' 
-                            : '#3b82f6' 
+                      style={{
+                        borderLeftColor: activity.priority === 1
+                          ? '#ef4444'
+                          : activity.priority === 2
+                            ? '#f97316'
+                            : '#3b82f6'
                       }}
                       onClick={() => onEditActivity(activity)}
                     >
@@ -314,14 +320,14 @@ export default function MobileCalendarView({
                                 {activity.end_time && ` - ${formatTime(activity.end_time)}`}
                               </span>
                             )}
-                            <Badge 
-                              variant="outline" 
+                            <Badge
+                              variant="outline"
                               className={`text-xs mt-1 ${getPriorityColor(activity.priority)}`}
                             >
-                              {activity.priority === 1 
-                                ? 'Alta' 
-                                : activity.priority === 2 
-                                  ? 'Media' 
+                              {activity.priority === 1
+                                ? 'Alta'
+                                : activity.priority === 2
+                                  ? 'Media'
                                   : 'Bassa'}
                             </Badge>
                           </div>

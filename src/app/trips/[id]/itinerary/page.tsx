@@ -543,6 +543,55 @@ export default function TripItinerary() {
     }
   };
 
+  const handleDeleteMultipleActivities = async (activityIds: string[]) => {
+    if (!activityIds.length) return;
+
+    try {
+      // Delete multiple activities using the .in() operator
+      const { error } = await supabase
+        .from('activities')
+        .delete()
+        .in('id', activityIds);
+
+      if (error) throw error;
+
+      // Remove the activities from the state
+      setItineraryDays(itineraryDays.map(day => ({
+        ...day,
+        activities: day.activities?.filter(activity => !activityIds.includes(activity.id)) || [],
+      })));
+    } catch (err) {
+      console.error('Error deleting multiple activities:', err);
+      setError('Failed to delete activities. Please try again.');
+    }
+  };
+
+  const handleDeleteAllActivities = async (dayId: string) => {
+    try {
+      // Delete all activities for a specific day
+      const { error } = await supabase
+        .from('activities')
+        .delete()
+        .eq('day_id', dayId);
+
+      if (error) throw error;
+
+      // Remove all activities for this day from the state
+      setItineraryDays(itineraryDays.map(day => {
+        if (day.id === dayId) {
+          return {
+            ...day,
+            activities: [],
+          };
+        }
+        return day;
+      }));
+    } catch (err) {
+      console.error('Error deleting all activities:', err);
+      setError('Failed to delete activities. Please try again.');
+    }
+  };
+
   const handleMoveActivity = (activity: Activity) => {
     setCurrentActivity(activity);
     setShowMoveModal(true);
@@ -879,6 +928,8 @@ export default function TripItinerary() {
                   setShowActivityModal(true);
                 }}
                 onDeleteActivity={handleDeleteActivity}
+                onDeleteMultipleActivities={handleDeleteMultipleActivities}
+                onDeleteAllActivities={handleDeleteAllActivities}
                 onMoveActivity={handleMoveActivity}
                 onViewActivityDetails={handleViewActivityDetails}
               />
@@ -903,6 +954,8 @@ export default function TripItinerary() {
                 setShowActivityModal(true);
               }}
               onDeleteActivity={handleDeleteActivity}
+              onDeleteMultipleActivities={handleDeleteMultipleActivities}
+              onDeleteAllActivities={handleDeleteAllActivities}
               onMoveActivity={handleMoveActivity}
               onViewActivityDetails={handleViewActivityDetails}
             />
@@ -912,6 +965,9 @@ export default function TripItinerary() {
             <ItineraryMapView
               days={itineraryDays}
               onViewActivityDetails={handleViewActivityDetails}
+              onDeleteActivity={handleDeleteActivity}
+              onDeleteMultipleActivities={handleDeleteMultipleActivities}
+              onDeleteAllActivities={handleDeleteAllActivities}
               onUpdateCoordinates={(activity, coordinates) => {
                 // Aggiorna le coordinate dell'attività nel database
                 const updateActivity = async () => {

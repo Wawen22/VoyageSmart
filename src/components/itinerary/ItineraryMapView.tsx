@@ -33,11 +33,11 @@ const adaptActivityForMap = (activity: Activity, dayDate: string) => {
     day_id: activity.day_id,
     day_date: dayDate,
     coordinates: activity.coordinates ? {
-      x: typeof activity.coordinates === 'string' 
-        ? parseFloat(activity.coordinates.replace(/[()]/g, '').split(',')[0]) 
+      x: typeof activity.coordinates === 'string'
+        ? parseFloat(activity.coordinates.replace(/[()]/g, '').split(',')[0])
         : activity.coordinates.x,
-      y: typeof activity.coordinates === 'string' 
-        ? parseFloat(activity.coordinates.replace(/[()]/g, '').split(',')[1]) 
+      y: typeof activity.coordinates === 'string'
+        ? parseFloat(activity.coordinates.replace(/[()]/g, '').split(',')[1])
         : activity.coordinates.y
     } : null
   };
@@ -47,19 +47,25 @@ interface ItineraryMapViewProps {
   days: ItineraryDay[];
   onViewActivityDetails: (activity: Activity) => void;
   onUpdateCoordinates?: (activity: Activity, coordinates: { x: number; y: number }) => void;
+  onDeleteActivity?: (activityId: string) => void;
+  onDeleteMultipleActivities?: (activityIds: string[]) => void;
+  onDeleteAllActivities?: (dayId: string) => void;
 }
 
-export default function ItineraryMapView({ 
-  days, 
+export default function ItineraryMapView({
+  days,
   onViewActivityDetails,
-  onUpdateCoordinates
+  onUpdateCoordinates,
+  onDeleteActivity,
+  onDeleteMultipleActivities,
+  onDeleteAllActivities
 }: ItineraryMapViewProps) {
   const [allActivities, setAllActivities] = useState<any[]>([]);
 
   // Prepara tutte le attività per la mappa
   useEffect(() => {
     const activities: any[] = [];
-    
+
     days.forEach(day => {
       if (day.activities && day.activities.length > 0) {
         day.activities.forEach(activity => {
@@ -67,7 +73,7 @@ export default function ItineraryMapView({
         });
       }
     });
-    
+
     setAllActivities(activities);
   }, [days]);
 
@@ -109,7 +115,7 @@ export default function ItineraryMapView({
           Visualizza tutte le attività del tuo itinerario sulla mappa
         </p>
       </div>
-      
+
       <div className="p-0">
         {allActivities.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -125,7 +131,7 @@ export default function ItineraryMapView({
             </p>
           </div>
         ) : (
-          <ActivityMapView 
+          <ActivityMapView
             activities={allActivities}
             height="500px"
             onMarkerClick={handleMarkerClick}

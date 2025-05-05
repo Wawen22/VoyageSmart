@@ -1,9 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import ActivityItem from './ActivityItem';
-import { ChevronDownIcon, ChevronUpIcon, CalendarIcon, PlusIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon, CalendarIcon, PlusIcon, Trash2, CheckSquare, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Activity = {
   id: string;
@@ -39,6 +50,8 @@ type DayScheduleProps = {
   onAddActivity: (dayId: string) => void;
   onEditActivity: (activity: Activity) => void;
   onDeleteActivity: (activityId: string) => void;
+  onDeleteMultipleActivities?: (activityIds: string[]) => void;
+  onDeleteAllActivities?: (dayId: string) => void;
   onMoveActivity?: (activity: Activity) => void;
   onViewActivityDetails?: (activity: Activity) => void;
 };
@@ -49,10 +62,78 @@ export default function DaySchedule({
   onAddActivity,
   onEditActivity,
   onDeleteActivity,
+  onDeleteMultipleActivities,
+  onDeleteAllActivities,
   onMoveActivity,
   onViewActivityDetails
 }: DayScheduleProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+
+  // Reset selection when day changes or collapses
+  useEffect(() => {
+    setSelectedActivities([]);
+    setSelectionMode(false);
+  }, [day.id, isCollapsed]);
+
+  const handleSelectActivity = (activityId: string, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedActivities(prev => [...prev, activityId]);
+    } else {
+      setSelectedActivities(prev => prev.filter(id => id !== activityId));
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (!day.activities) return;
+
+    if (selectedActivities.length === day.activities.length) {
+      // Deselect all
+      setSelectedActivities([]);
+    } else {
+      // Select all
+      setSelectedActivities(day.activities.map(activity => activity.id));
+    }
+  };
+
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
+    if (selectionMode) {
+      // Clear selections when exiting selection mode
+      setSelectedActivities([]);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedActivities.length === 0) return;
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteSelected = () => {
+    if (onDeleteMultipleActivities && selectedActivities.length > 0) {
+      onDeleteMultipleActivities(selectedActivities);
+      setSelectedActivities([]);
+      setSelectionMode(false);
+    }
+    setShowDeleteConfirm(false);
+  };
+
+  const handleDeleteAll = () => {
+    if (!day.activities || day.activities.length === 0) return;
+    setShowDeleteAllConfirm(true);
+  };
+
+  const confirmDeleteAll = () => {
+    if (onDeleteAllActivities) {
+      onDeleteAllActivities(day.id);
+      setSelectedActivities([]);
+      setSelectionMode(false);
+    }
+    setShowDeleteAllConfirm(false);
+  };
 
   const formatDate = (dateString: string) => {
     try {
@@ -117,25 +198,94 @@ export default function DaySchedule({
             </div>
 
             <div className="flex space-x-2 ml-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => onEditDay(day)}
-              >
-                <CalendarIcon className="h-3.5 w-3.5 mr-1" />
-                <span className="hidden xs:inline">Modifica</span>
-              </Button>
+              {!selectionMode ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => onEditDay(day)}
+                  >
+                    <CalendarIcon className="h-3.5 w-3.5 mr-1" />
+                    <span className="hidden xs:inline">Modifica</span>
+                  </Button>
 
-              <Button
-                variant="primary"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => onAddActivity(day.id)}
-              >
-                <PlusIcon className="h-3.5 w-3.5 mr-1" />
-                <span className="hidden xs:inline">Attività</span>
-              </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => onAddActivity(day.id)}
+                  >
+                    <PlusIcon className="h-3.5 w-3.5 mr-1" />
+                    <span className="hidden xs:inline">Attività</span>
+                  </Button>
+
+                  {day.activities && day.activities.length > 0 && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={toggleSelectionMode}
+                      >
+                        <CheckSquare className="h-3.5 w-3.5 mr-1" />
+                        <span className="hidden sm:inline">Seleziona</span>
+                      </Button>
+
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={handleDeleteAll}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1" />
+                        <span className="hidden sm:inline">Elimina tutte</span>
+                      </Button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant={selectedActivities.length === (day.activities?.length || 0) ? "default" : "outline"}
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={handleSelectAll}
+                  >
+                    {selectedActivities.length === (day.activities?.length || 0) ? (
+                      <>
+                        <Square className="h-3.5 w-3.5 mr-1" />
+                        <span className="hidden xs:inline">Deseleziona tutte</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckSquare className="h-3.5 w-3.5 mr-1" />
+                        <span className="hidden xs:inline">Seleziona tutte</span>
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={handleDeleteSelected}
+                    disabled={selectedActivities.length === 0}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    <span className="hidden xs:inline">Elimina {selectedActivities.length}</span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={toggleSelectionMode}
+                  >
+                    <span className="hidden xs:inline">Annulla</span>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
@@ -156,6 +306,9 @@ export default function DaySchedule({
                   onDelete={onDeleteActivity}
                   onMove={onMoveActivity}
                   onViewDetails={onViewActivityDetails}
+                  isSelectable={selectionMode}
+                  isSelected={selectedActivities.includes(activity.id)}
+                  onSelectChange={handleSelectActivity}
                 />
               ))}
             </div>
@@ -174,6 +327,44 @@ export default function DaySchedule({
           )}
         </div>
       )}
+
+      {/* Dialog di conferma per eliminazione multipla */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+            <AlertDialogDescription>
+              Stai per eliminare {selectedActivities.length} attività.
+              Questa azione non può essere annullata.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteSelected} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog di conferma per eliminazione di tutte le attività */}
+      <AlertDialog open={showDeleteAllConfirm} onOpenChange={setShowDeleteAllConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Elimina tutte le attività</AlertDialogTitle>
+            <AlertDialogDescription>
+              Stai per eliminare tutte le attività di questo giorno ({day.activities?.length || 0} attività).
+              Questa azione non può essere annullata.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Elimina tutte
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

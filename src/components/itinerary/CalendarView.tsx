@@ -72,7 +72,10 @@ type CalendarViewProps = {
   onAddActivity: (dayId: string) => void;
   onEditActivity: (activity: Activity) => void;
   onDeleteActivity: (activityId: string) => void;
+  onDeleteMultipleActivities?: (activityIds: string[]) => void;
+  onDeleteAllActivities?: (dayId: string) => void;
   onMoveActivity?: (activity: Activity) => void;
+  onViewActivityDetails?: (activity: Activity) => void;
 };
 
 export default function CalendarView({
@@ -81,7 +84,10 @@ export default function CalendarView({
   onAddActivity,
   onEditActivity,
   onDeleteActivity,
-  onMoveActivity
+  onDeleteMultipleActivities,
+  onDeleteAllActivities,
+  onMoveActivity,
+  onViewActivityDetails
 }: CalendarViewProps) {
   const [view, setView] = useState('month');
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -202,7 +208,10 @@ export default function CalendarView({
         onAddActivity={onAddActivity}
         onEditActivity={onEditActivity}
         onDeleteActivity={onDeleteActivity}
+        onDeleteMultipleActivities={onDeleteMultipleActivities}
+        onDeleteAllActivities={onDeleteAllActivities}
         onMoveActivity={onMoveActivity}
+        onViewActivityDetails={onViewActivityDetails}
       />
     );
   }

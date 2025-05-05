@@ -2,7 +2,7 @@
 
 Questo documento fornisce una documentazione completa dell'Assistente AI implementato in VoyageSmart, inclusa l'implementazione attuale, le funzionalità, i prossimi passi e le guide per il test.
 
-**Ultimo aggiornamento:** Implementazione di una mappa interattiva nel Wizard di Generazione Attività che utilizza Mapbox per visualizzare le attività generate, con geocodifica automatica delle location, visualizzazione dei percorsi e modalità fullscreen.
+**Ultimo aggiornamento:** Miglioramento dell'interfaccia utente del Wizard di Generazione Attività con visualizzazione a schede per giorni multipli, selezione di temi di viaggio con card visive, e risoluzione dei problemi di posizionamento su dispositivi mobili. Aggiunta la possibilità di visualizzare le attività generate su una mappa interattiva con Mapbox, con geocodifica automatica delle location, visualizzazione dei percorsi e modalità fullscreen.
 
 ## Indice
 - [Panoramica](#panoramica)
@@ -360,6 +360,8 @@ L'interfaccia utente è stata migliorata per offrire una migliore esperienza ute
 3. ✅ Migliorata la formattazione dei messaggi con separazione chiara tra elementi
 4. ✅ Implementata la persistenza della chat tra le diverse pagine
 5. ✅ Aggiunto pulsante per cancellare la conversazione
+6. ✅ Risolto il problema di posizionamento su dispositivi mobili
+7. ✅ Migliorata la separazione visiva tra i pulsanti dell'Assistente AI e del Wizard Itinerario
 
 Ulteriori miglioramenti pianificati:
 1. ✅ Aggiungere animazioni e transizioni più fluide
@@ -382,7 +384,7 @@ Ulteriori miglioramenti pianificati:
 
 ### 4. Implementare Funzionalità Avanzate
 
-Una volta completata l'implementazione base, possiamo aggiungere funzionalità avanzate:
+Sono state implementate diverse funzionalità avanzate, con altre pianificate per il futuro:
 
 1. ✅ **Wizard per Generazione di Attività**: Implementato un wizard guidato che utilizza l'AI per generare automaticamente attività personalizzate per l'itinerario
    - ✅ Visualizzazione ricca delle attività con icone e colori specifici per tipo
@@ -394,9 +396,17 @@ Una volta completata l'implementazione base, possiamo aggiungere funzionalità a
    - ✅ Analisi avanzata delle richieste dell'utente per rispettare vincoli temporali
    - ✅ Supporto per destinazioni specifiche all'interno di un viaggio con destinazioni multiple
    - ✅ Estrazione intelligente di informazioni dalle preferenze dell'utente
-2. **Ottimizzazione percorsi**: Aggiungere l'ottimizzazione dei percorsi giornalieri
-3. **Suggerimenti proattivi**: Fornire suggerimenti proattivi basati sul contesto
-4. **Analisi predittiva**: Implementare l'analisi predittiva per costi e affluenza
+   - ✅ Visualizzazione su mappa interattiva con Mapbox
+   - ✅ Selezione di temi di viaggio con card visive
+   - ✅ Visualizzazione a schede per giorni multipli con animazioni di transizione
+
+2. **Funzionalità pianificate per il futuro**:
+   - **Ottimizzazione percorsi**: Aggiungere l'ottimizzazione dei percorsi giornalieri
+   - **Suggerimenti proattivi**: Fornire suggerimenti proattivi basati sul contesto
+   - **Analisi predittiva**: Implementare l'analisi predittiva per costi e affluenza
+   - **Integrazione con dati meteo**: Suggerimenti basati sulle previsioni meteo
+   - **Packing list personalizzata**: Generazione automatica di liste di cose da portare
+   - **Assistente linguistico**: Frasi utili nella lingua locale della destinazione
 
 ### 5. Testare e Ottimizzare
 

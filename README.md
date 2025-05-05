@@ -255,7 +255,9 @@ trip_media
   - ✅ Chatbot integrato nella pagina del viaggio
   - ✅ Integrazione avanzata del contesto del viaggio nell'assistente AI
   - ✅ Supporto per destinazioni multiple, budget e partecipanti
-  - 🔄 Servizio generazione itinerari
+  - ✅ Wizard di generazione attività con AI
+  - ✅ Visualizzazione attività generate su timeline e mappa
+  - ✅ Selezione interattiva dei giorni e temi di viaggio
   - 🔄 Ottimizzazione percorsi avanzata
   - 🔄 Analisi predittiva costi e affluenza
 
