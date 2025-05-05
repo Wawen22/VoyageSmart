@@ -75,12 +75,29 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
   - Wizard AI per generazione attività nell'itinerario
 - Controllo del limite di viaggi nella pagina New Trip (limite di 3 per utenti Free)
 
+## Stato Attuale
+
+### Integrazione con Stripe ✅
+- ✅ Implementato il processo di pagamento con Stripe
+- ✅ Configurati webhook per aggiornamenti di abbonamento
+- ✅ Implementato sistema di fatturazione e ricevute
+- ✅ Creato sistema di tracciamento cronologia sottoscrizioni
+
+### Funzionalità AI ✅
+- ✅ Sviluppate le funzionalità AI per il piano AI
+- ✅ Implementata l'integrazione con Google Gemini
+- ✅ Creata un'interfaccia utente per l'assistente AI
+- ✅ Implementato il Wizard AI per generazione attività
+- ✅ Limitato l'accesso alle funzionalità AI solo agli utenti con piano AI
+- ✅ Implementata visualizzazione ricca delle attività generate
+- ✅ Aggiunta visualizzazione su mappa interattiva con Mapbox
+
 ## Prossimi Passi
 
-1. **Integrazione con Stripe**
-   - Implementare il processo di pagamento
-   - Gestire webhook per aggiornamenti di abbonamento
-   - Implementare fatturazione e ricevute
+1. **Automazione Sottoscrizioni**
+   - Configurare un cron job per verificare periodicamente le sottoscrizioni scadute
+   - Aggiungere notifiche email per cambiamenti di stato delle sottoscrizioni
+   - Implementare sistema di promemoria per abbonamenti in scadenza
 
 2. **Dashboard Amministrativa**
    - Creare una dashboard per monitorare gli abbonamenti
@@ -88,15 +105,11 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
    - Gestire gli abbonamenti degli utenti
 
 3. **Miglioramenti UX**
-   - Aggiungere notifiche per abbonamenti in scadenza
    - Implementare un processo di onboarding per nuovi utenti premium
    - Migliorare la pagina di pricing con più dettagli e testimonianze
+   - Aggiungere periodo di prova gratuito per il piano AI
 
-4. **Funzionalità AI**
-   - ✅ Sviluppare le funzionalità AI per il piano AI
-   - ✅ Implementare l'integrazione con Google Gemini
-   - ✅ Creare un'interfaccia utente per l'assistente AI
-   - ✅ Implementare il Wizard AI per generazione attività
-   - ✅ Limitare l'accesso alle funzionalità AI solo agli utenti con piano AI
-   - 🔄 Implementare suggerimenti proattivi basati sull'AI
-   - 🔄 Aggiungere funzionalità di ottimizzazione percorsi
+4. **Funzionalità AI Avanzate**
+   - Implementare suggerimenti proattivi basati sull'AI
+   - Aggiungere funzionalità di ottimizzazione percorsi
+   - Implementare analisi predittiva per costi e affluenza

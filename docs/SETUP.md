@@ -78,10 +78,14 @@ voyage-smart/
 
 For the mobile app with React Native and Expo, we will set up a separate directory structure. This will be implemented in a future phase.
 
-## Next Steps
+## Documentazione Aggiuntiva
 
-1. Complete the authentication system
-2. Implement the trip management features
-3. Develop the itinerary timeline
-4. Create the budget and expense tracking system
-5. Build the collaboration features
+Per ulteriori informazioni sul progetto, consulta i seguenti documenti nella cartella `docs/`:
+
+1. **[../README.md](../README.md)** - Panoramica completa del progetto
+2. **[TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md)** - Documentazione tecnica dettagliata
+3. **[DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md)** - Roadmap di sviluppo e prossimi passi
+4. **[AI_DOCUMENTATION.md](AI_DOCUMENTATION.md)** - Documentazione completa delle funzionalità AI
+5. **[SUBSCRIPTION_IMPLEMENTATION.md](SUBSCRIPTION_IMPLEMENTATION.md)** - Dettagli sull'implementazione del sistema di abbonamenti
+6. **[AI_FEATURES.md](AI_FEATURES.md)** - Panoramica delle funzionalità AI
+7. **[CRON_JOB_SETUP.md](CRON_JOB_SETUP.md)** - Guida alla configurazione del cron job per le sottoscrizioni

@@ -1,25 +1,143 @@
-# Prossimi Passi per VoyageSmart
+# VoyageSmart Development Roadmap
 
-Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageSmart, basati sull'analisi dello stato attuale del progetto e sulle esigenze future.
+Questo documento delinea la roadmap di sviluppo per l'applicazione VoyageSmart, includendo le attività completate, quelle in corso e i prossimi passi pianificati.
 
-## Miglioramenti UI/UX
+## Indice
+- [Attività Completate](#attività-completate)
+- [Attività in Corso](#attività-in-corso)
+- [Prossimi Passi](#prossimi-passi)
+  - [Pre-Launch](#pre-launch)
+  - [Post-Launch](#post-launch)
+- [Focus Attuale](#focus-attuale)
+- [Miglioramenti UI/UX](#miglioramenti-uiux)
+- [Nuove Funzionalità](#nuove-funzionalità)
+- [Miglioramenti Tecnici](#miglioramenti-tecnici)
+- [Monetizzazione e Abbonamenti](#monetizzazione-e-abbonamenti)
+- [Espansione della Piattaforma](#espansione-della-piattaforma)
+- [Priorità Consigliate](#priorità-consigliate)
 
-### 1. Animazioni e Transizioni ✅ (Implementato)
-- **Implementare animazioni di transizione tra pagine** ✅
-  - Utilizzare il componente PageTransition per gestire le transizioni tra le pagine ✅
-  - Aggiungere effetti di transizione personalizzati per diverse sezioni dell'app ✅
-  - Implementare animazioni di entrata/uscita per i componenti principali ✅
+## Attività Completate
 
-- **Migliorare il feedback visivo** ✅
-  - Aggiungere animazioni per gli stati di caricamento ✅
-  - Implementare effetti di hover più sofisticati ✅
-  - Migliorare le animazioni dei modali e dei drawer ✅
+### Configurazione e Setup
+- [x] Fixed itinerarySlice.ts missing module error
+- [x] Improved user experience with animations and visual feedback
+- [x] Improved UI/UX across the entire application
+- [x] Fixed RLS policy for trips table that was causing infinite recursion
+- [x] Fixed RLS policy for trip_participants table that was also causing infinite recursion
+- [x] Improved trips fetching in dashboard
+- [x] Fixed logout functionality
+- [x] Verify that the dashboard is now loading trips correctly
+- [x] Implemented comprehensive dark mode support
+- [x] Fixed infinite recursion in trip_participants RLS policy
 
-- **Ottimizzare le animazioni per dispositivi mobili**
-  - Ridurre la complessità delle animazioni su dispositivi meno potenti
-  - Implementare animazioni ottimizzate per touch
+### Funzionalità Core
+- [x] Implemented Edit Trip functionality
+- [x] Added Delete Trip functionality
+- [x] Implemented Itinerary Management functionality
+- [x] Fixed automatic redirection after login
+- [x] Enhanced itinerary day management
+- [x] Added confirmation dialog before deleting days with activities
+- [x] Implemented activity movement between days
+- [x] Implemented calendar view for itinerary
+- [x] Improved user experience for mobile devices
+- [x] Implemented Code Splitting and Lazy Loading for improved performance
+- [x] Optimized bundle size for faster initial loading
+- [x] Implemented Journal/Diary functionality with daily entries and photo gallery
+- [x] Enhanced Trip Details page with better layout and visual feedback
+- [x] Improved landing page with full-height hero section and better navigation
+- [x] Fixed double menu issue on landing page
+- [x] Implemented transportation management with map integration
+- [x] Added support for different transportation types (flight, train, bus, car, ferry)
+- [x] Implemented accommodations management with map integration
+- [x] Added document upload and storage for accommodations and transportation
+- [x] Integrated Mapbox for location visualization
+- [x] Added modern UI for accommodations and transportation sections with list and map views
+- [x] Implemented collaboration features with chat and comments
+- [x] Added expense splitting functionality with "who owes what" algorithm
+- [x] Implemented subscription management with Stripe integration
+- [x] Created subscription history tracking system
+- [x] Implemented subscription expiration check functionality
 
-### 2. Interazioni Touch
+### Funzionalità AI
+- [x] Integrate Gemini API for AI assistant
+- [x] Create AI assistant interface for natural language trip planning
+- [x] Implement simple chatbot with basic trip context
+- [x] Enhance AI assistant with full trip context integration
+- [x] Add support for multiple destinations, budget, and participants
+- [x] Implement Itinerary Wizard for AI-generated activities
+- [x] Add interactive day selection and travel theme buttons
+- [x] Create rich activity visualization with timeline and map views
+
+### Animazioni e Transizioni
+- [x] Implementare animazioni di transizione tra pagine
+  - Utilizzare il componente PageTransition per gestire le transizioni tra le pagine
+  - Aggiungere effetti di transizione personalizzati per diverse sezioni dell'app
+  - Implementare animazioni di entrata/uscita per i componenti principali
+
+- [x] Migliorare il feedback visivo
+  - Aggiungere animazioni per gli stati di caricamento
+  - Implementare effetti di hover più sofisticati
+  - Migliorare le animazioni dei modali e dei drawer
+
+### Performance
+- [x] Ottimizzare il caricamento iniziale
+  - Implementare lazy loading per componenti pesanti
+  - Aggiungere scheletri di caricamento per migliorare la percezione di velocità (Implementato per Itinerario, Alloggi, Trasporti e Spese)
+  - Ottimizzare il bundle size con code splitting
+
+- [x] Ottimizzare il caching e la gestione dello stato
+  - Estendere il caching a più sezioni dell'applicazione (Implementato per Itinerario, Alloggi, Trasporti e Spese)
+  - Implementare strategie di invalidazione della cache intelligenti (Implementato per Alloggi, Trasporti e Spese)
+  - Ottimizzare la gestione dello stato Redux per ridurre i re-render (Implementato memoizzazione per AccommodationCard, TransportationCard e ExpenseCard)
+
+## Attività in Corso
+
+### Pre-Launch
+1. [ ] Subscription management automation
+   - [ ] Configure cron job to call `/api/cron/check-subscriptions` endpoint daily
+   - [ ] Add email notifications for subscription status changes
+   - [ ] Test subscription lifecycle (creation, renewal, cancellation, expiration)
+
+2. [ ] Final testing and bug fixes
+   - [ ] Cross-browser testing (Chrome, Firefox, Safari, Edge)
+   - [ ] Cross-device testing (Desktop, Tablet, Mobile)
+   - [ ] Performance testing and optimization
+   - [ ] Security testing and vulnerability assessment
+
+3. [ ] Documentation and help resources
+   - [ ] Create user guide/documentation
+   - [ ] Add tooltips and help text throughout the app
+   - [ ] Create onboarding flow for new users
+
+### Post-Launch
+4. [ ] AI features implementation
+   - [x] Integrate Gemini API for AI assistant
+   - [x] Create AI assistant interface for natural language trip planning
+   - [x] Implement simple chatbot with basic trip context
+   - [x] Enhance AI assistant with full trip context integration
+   - [x] Add support for multiple destinations, budget, and participants
+   - [x] Implement Itinerary Wizard for AI-generated activities
+   - [x] Add interactive day selection and travel theme buttons
+   - [x] Create rich activity visualization with timeline and map views
+   - [ ] Add route optimization for daily activities
+   - [ ] Add smart recommendations based on user preferences
+   - [ ] Implement proactive suggestions for trip planning
+
+5. [ ] Analytics and monitoring
+   - [ ] Implement usage analytics
+   - [ ] Add error tracking and monitoring
+   - [ ] Create admin dashboard for monitoring app health
+
+6. [ ] Advanced route planning
+   - [ ] Implement route optimization for daily itineraries
+   - [ ] Add turn-by-turn directions
+   - [ ] Integrate public transportation options
+
+## Prossimi Passi
+
+### Miglioramenti UI/UX
+
+#### 1. Interazioni Touch
 - **Implementare gesti swipe**
   - Aggiungere supporto per gesti swipe per la navigazione tra le sezioni
   - Implementare swipe per eliminare o modificare elementi nelle liste
@@ -30,25 +148,15 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere gesti per la rotazione e l'inclinazione delle mappe
   - Migliorare l'interazione con i marker sulla mappa
 
-### 3. Performance
-- **Ottimizzare ulteriormente il caricamento iniziale** ✅ (Implementato)
-  - Implementare lazy loading per altri componenti pesanti ✅
-  - Aggiungere scheletri di caricamento per migliorare la percezione di velocità ✅ (Implementato per Itinerario, Alloggi, Trasporti e Spese)
-  - Ottimizzare il bundle size con code splitting
-
+#### 2. Performance
 - **Migliorare la performance delle liste**
   - Implementare virtualizzazione per liste lunghe
   - Ottimizzare il rendering dei componenti complessi
   - Implementare paginazione per ridurre il carico iniziale
 
-- **Ottimizzare il caching e la gestione dello stato**
-  - Estendere il caching a più sezioni dell'applicazione ✅ (Implementato per Itinerario, Alloggi, Trasporti e Spese)
-  - Implementare strategie di invalidazione della cache intelligenti ✅ (Implementato per Alloggi, Trasporti e Spese)
-  - Ottimizzare la gestione dello stato Redux per ridurre i re-render ✅ (Implementato memoizzazione per AccommodationCard, TransportationCard e ExpenseCard)
+### Nuove Funzionalità
 
-## Nuove Funzionalità
-
-### 1. Pianificazione Avanzata degli Itinerari
+#### 1. Pianificazione Avanzata degli Itinerari
 - **Implementare ottimizzazione dei percorsi**
   - Integrare algoritmi per ottimizzare l'ordine delle attività
   - Aggiungere suggerimenti per ridurre i tempi di spostamento
@@ -64,7 +172,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere raccomandazioni basate sulle preferenze dell'utente
   - Integrare dati esterni per suggerimenti contestuali
 
-### 2. Collaborazione Avanzata
+#### 2. Collaborazione Avanzata
 - **Implementare modifiche in tempo reale**
   - Aggiungere supporto per editing collaborativo in tempo reale
   - Implementare indicatori di presenza per vedere chi sta modificando cosa
@@ -80,7 +188,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere sistema di voto per attività proposte
   - Implementare dashboard per visualizzare le preferenze del gruppo
 
-### 3. Integrazione con Servizi Esterni
+#### 3. Integrazione con Servizi Esterni
 - **Aggiungere integrazione con servizi di prenotazione**
   - Implementare ricerca e prenotazione di alloggi
   - Aggiungere ricerca e prenotazione di voli e trasporti
@@ -96,7 +204,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere dizionario di frasi utili per la destinazione
   - Implementare riconoscimento e traduzione di testo da immagini
 
-### 4. Analisi e Reportistica
+#### 4. Analisi e Reportistica
 - **Implementare dashboard analitici**
   - Aggiungere visualizzazioni per l'analisi delle spese
   - Implementare grafici per la distribuzione del tempo
@@ -112,9 +220,9 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere suggerimenti per ottimizzare il budget
   - Implementare previsioni di affluenza per le attrazioni
 
-## Miglioramenti Tecnici
+### Miglioramenti Tecnici
 
-### 1. Ottimizzazione del Database
+#### 1. Ottimizzazione del Database
 - **Migliorare le query**
   - Ottimizzare le query complesse per ridurre il tempo di risposta
   - Implementare indici appropriati per migliorare le performance
@@ -125,7 +233,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Implementare rollback per migrazioni fallite
   - Aggiungere test automatici per le migrazioni
 
-### 2. Sicurezza
+#### 2. Sicurezza
 - **Migliorare le politiche RLS**
   - Rivedere e ottimizzare le politiche di sicurezza
   - Implementare test di sicurezza automatici
@@ -136,7 +244,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Implementare backup codes per il recupero dell'account
   - Aggiungere notifiche per login sospetti
 
-### 3. Testing e CI/CD
+#### 3. Testing e CI/CD
 - **Migliorare la copertura dei test**
   - Implementare test unitari per componenti critici
   - Aggiungere test di integrazione per flussi principali
@@ -147,7 +255,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere ambienti di staging per test pre-produzione
   - Implementare rollback automatico in caso di errori
 
-### 4. Monitoraggio e Logging
+#### 4. Monitoraggio e Logging
 - **Implementare monitoraggio avanzato**
   - Aggiungere tracciamento delle performance lato client
   - Implementare alerting per problemi critici
@@ -158,9 +266,9 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere correlazione tra log per tracciare richieste complete
   - Implementare rotazione e archiviazione dei log
 
-## Monetizzazione e Abbonamenti
+### Monetizzazione e Abbonamenti
 
-### 1. Integrazione con Stripe
+#### 1. Integrazione con Stripe
 - **Implementare pagamenti con Stripe**
   - Integrare Stripe API per gestione abbonamenti
   - Implementare webhook per gestire eventi di pagamento
@@ -171,7 +279,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Implementare trial gratuito per funzionalità premium
   - Aggiungere notifiche per abbonamenti in scadenza
 
-### 2. Dashboard Amministrativa
+#### 2. Dashboard Amministrativa
 - **Creare dashboard per monitoraggio abbonamenti**
   - Implementare visualizzazione di metriche chiave (conversione, churn, etc.)
   - Aggiungere gestione manuale degli abbonamenti
@@ -182,7 +290,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Implementare funnel di conversione
   - Creare segmentazione utenti per marketing mirato
 
-### 3. Piano AI
+#### 3. Piano AI
 - **Sviluppare funzionalità AI per piano premium**
   - Implementare assistente AI per pianificazione viaggi
   - Aggiungere ottimizzazione automatica degli itinerari
@@ -193,9 +301,9 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Aggiungere analisi predittiva per costi e affluenza
   - Implementare generazione automatica di riassunti di viaggio
 
-## Espansione della Piattaforma
+### Espansione della Piattaforma
 
-### 1. Applicazione Mobile Nativa
+#### 1. Applicazione Mobile Nativa
 - **Sviluppare app nativa con React Native**
   - Implementare versione nativa per iOS e Android
   - Ottimizzare l'esperienza utente per dispositivi mobili
@@ -206,7 +314,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Implementare cache per mappe e immagini
   - Aggiungere modalità offline per accesso ai documenti di viaggio
 
-### 2. API Pubblica
+#### 2. API Pubblica
 - **Creare API pubblica per integrazioni**
   - Implementare endpoints RESTful per accesso ai dati
   - Aggiungere autenticazione OAuth per servizi di terze parti
@@ -217,7 +325,7 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Implementare esempi di integrazione
   - Aggiungere supporto per webhook
 
-### 3. Marketplace
+#### 3. Marketplace
 - **Implementare marketplace per template di viaggio**
   - Creare sistema per condividere e vendere template
   - Implementare sistema di rating e recensioni
@@ -227,6 +335,13 @@ Questo documento delinea i prossimi passi di sviluppo per l'applicazione VoyageS
   - Implementare piattaforma per guide locali e servizi personalizzati
   - Aggiungere sistema di prenotazione e pagamento
   - Implementare verifica per fornitori di servizi
+
+## Focus Attuale
+- Configuring cron job for subscription management automation
+- Preparing for app launch with final optimizations
+- Enhancing error handling and edge cases
+- Final UI/UX polish for all sections
+- Comprehensive testing across devices and browsers
 
 ## Priorità Consigliate
 

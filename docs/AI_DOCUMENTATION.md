@@ -1,24 +1,63 @@
-# Assistente AI di VoyageSmart - Documentazione Completa
+# Documentazione Completa delle Funzionalità AI di VoyageSmart
 
-Questo documento fornisce una documentazione completa dell'Assistente AI implementato in VoyageSmart, inclusa l'implementazione attuale, le funzionalità, i prossimi passi e le guide per il test.
+Questo documento fornisce una documentazione completa delle funzionalità AI implementate in VoyageSmart, inclusa l'implementazione attuale, le funzionalità, i prossimi passi e le guide per il test.
 
 **Ultimo aggiornamento:** Miglioramento dell'interfaccia utente del Wizard di Generazione Attività con visualizzazione a schede per giorni multipli, selezione di temi di viaggio con card visive, e risoluzione dei problemi di posizionamento su dispositivi mobili. Aggiunta la possibilità di visualizzare le attività generate su una mappa interattiva con Mapbox, con geocodifica automatica delle location, visualizzazione dei percorsi e modalità fullscreen.
 
 ## Indice
 - [Panoramica](#panoramica)
+- [Funzionalità AI Disponibili](#funzionalità-ai-disponibili)
 - [Implementazione Attuale](#implementazione-attuale)
 - [Componenti Principali](#componenti-principali)
-- [Funzionalità](#funzionalità)
 - [Come Testare l'Assistente AI](#come-testare-lassistente-ai)
 - [Implementazione Tecnica](#implementazione-tecnica)
+- [Wizard per Generazione Automatica di Attività](#wizard-per-generazione-automatica-di-attività)
 - [Roadmap per Miglioramenti Futuri](#roadmap-per-miglioramenti-futuri)
-- [Prossimi Passi](#prossimi-passi)
+- [Restrizioni di Accesso](#restrizioni-di-accesso)
 - [Considerazioni Tecniche](#considerazioni-tecniche)
 - [Conclusione](#conclusione)
 
 ## Panoramica
 
+VoyageSmart integra funzionalità di intelligenza artificiale per migliorare l'esperienza di pianificazione dei viaggi. Queste funzionalità sono disponibili esclusivamente per gli utenti con abbonamento "AI Assistant", ora attivo e disponibile per tutti gli utenti.
+
 L'Assistente AI di VoyageSmart è un chatbot intelligente integrato nella pagina del viaggio che utilizza l'API Gemini di Google per generare risposte pertinenti alle domande degli utenti, con accesso al contesto completo del viaggio. L'assistente aiuta gli utenti nella pianificazione e gestione dei loro viaggi, fornendo informazioni, suggerimenti e risposte a domande specifiche sul viaggio.
+
+## Funzionalità AI Disponibili
+
+### 1. Assistente AI di Viaggio
+
+L'Assistente AI è un chatbot intelligente che fornisce informazioni e suggerimenti personalizzati sul viaggio dell'utente.
+
+**Caratteristiche principali:**
+- Accesso al contesto completo del viaggio (date, destinazioni, partecipanti, alloggi, trasporti, itinerario)
+- Risposte personalizzate basate sui dettagli specifici del viaggio
+- Interfaccia minimizzabile presente in tutte le pagine del viaggio
+- Domande suggerite per facilitare l'interazione
+- Persistenza dello stato di minimizzazione tra le sessioni
+
+**Implementazione tecnica:**
+- Integrazione con l'API Gemini di Google (modello gemini-1.5-flash-latest)
+- Componente React `ChatBot.tsx` per l'interfaccia utente
+- Endpoint API `/api/ai/chat` per l'elaborazione delle richieste
+
+### 2. Wizard di Generazione Attività
+
+Il Wizard di Generazione Attività è uno strumento guidato che utilizza l'AI per creare automaticamente attività personalizzate per l'itinerario di viaggio.
+
+**Caratteristiche principali:**
+- Interfaccia guidata passo-passo
+- Selezione di temi di viaggio predefiniti
+- Selezione interattiva dei giorni dell'itinerario
+- Generazione di attività personalizzate in base alle preferenze
+- Visualizzazione delle attività generate in formato timeline e mappa
+- Possibilità di modificare o rimuovere attività prima del salvataggio
+
+**Implementazione tecnica:**
+- Integrazione con l'API Gemini di Google
+- Componente React `ItineraryWizard.tsx` per l'interfaccia utente
+- Componenti ausiliari per la visualizzazione delle attività (`ActivityTimeline.tsx`, `ActivityMapView.tsx`)
+- Integrazione con Mapbox per la visualizzazione su mappa
 
 ## Implementazione Attuale
 
@@ -99,28 +138,6 @@ Funzionalità principali:
 - Disponibile in tutte le pagine del viaggio grazie all'implementazione nel layout condiviso (`src/app/trips/[id]/layout.tsx`)
 - Persistenza della conversazione tra le diverse pagine del viaggio tramite localStorage
 - Pulsante per cancellare la conversazione e ricominciare da capo
-
-## Funzionalità
-
-L'assistente AI può aiutare gli utenti con:
-
-1. **Informazioni sul viaggio**: Fornire dettagli su destinazioni, date, partecipanti, ecc.
-2. **Suggerimenti**: Offrire consigli su attività, ristoranti, attrazioni, ecc.
-3. **Pianificazione**: Aiutare nella pianificazione dell'itinerario
-4. **Gestione del budget**: Fornire consigli su come gestire le spese
-5. **Rispondere a domande**: Rispondere a domande generali sul viaggio
-
-L'assistente AI offre:
-
-- **Interfaccia utente intuitiva** con possibilità di minimizzare, espandere o chiudere la finestra
-- **Generazione di risposte** utilizzando l'API Gemini 1.5 Flash
-- **Contesto completo del viaggio**:
-  - Dettagli del viaggio (nome, destinazioni multiple, date, budget)
-  - Partecipanti (nomi, ruoli, email)
-  - Alloggi (se disponibili)
-  - Trasporti (se disponibili)
-  - Attività (se disponibili)
-- **Gestione degli errori** con messaggi di fallback in caso di problemi
 
 ## Come Testare l'Assistente AI
 
@@ -288,187 +305,6 @@ useEffect(() => {
 }, [tripId, tripName]);
 ```
 
-## Roadmap per Miglioramenti Futuri
-
-### Fase 1: Migliorare il Contesto del Viaggio ✅
-
-L'assistente ora ha accesso al contesto completo del viaggio, inclusi:
-
-- **Dettagli completi del viaggio**: destinazioni multiple, date, partecipanti ✅
-- **Budget**: totale e valuta ✅
-- **Partecipanti**: nomi, ruoli, email ✅
-- **Alloggi**: nomi, tipi, date (se disponibili) ✅
-- **Trasporti**: tipi, provider, orari (se disponibili) ✅
-- **Attività**: nomi, tipi, orari (se disponibili) ✅
-- **Disponibilità in tutte le pagine del viaggio** ✅
-- **Miglioramento delle risposte per evitare ripetizioni** ✅
-- **Ottimizzazione del messaggio iniziale per renderlo più conciso** ✅
-- **Persistenza della conversazione tra le diverse pagine del viaggio** ✅
-- **Integrazione dell'itinerario nel contesto dell'assistente** ✅
-
-### Fase 2: Aggiungere Persistenza e Memoria ✅
-
-- **Salvare la cronologia dei messaggi** in localStorage ✅
-- **Caricare la cronologia** quando l'utente naviga tra le pagine ✅
-- **Implementare memoria contestuale** per riferimenti a messaggi precedenti
-- **Aggiungere la possibilità di cancellare la conversazione** ✅
-
-### Fase 3: Implementare Funzionalità Specifiche
-
-- **Generazione di itinerari** basati su destinazione, durata e preferenze ✅
-- **Ottimizzazione dei percorsi** per attività giornaliere
-- **Suggerimenti personalizzati** basati sulle preferenze dell'utente ✅
-- **Integrazione con dati meteo** per consigli basati sulle condizioni atmosferiche
-
-### Fase 4: Migliorare l'Interfaccia Utente
-
-- **Supporto per messaggi formattati** (markdown, link, elenchi)
-- **Suggerimenti di domande predefinite**
-- **Tema personalizzabile** (chiaro/scuro)
-- **Notifiche per nuovi messaggi**
-- **Animazioni e transizioni** per un'esperienza più fluida
-
-### Fase 5: Ottimizzare le Prestazioni
-
-- **Implementare caching** per risposte comuni
-- **Utilizzare streaming** per risposte lunghe
-- **Ottimizzare i prompt** per ridurre i token utilizzati
-- **Implementare rate limiting** per evitare abusi
-
-## Prossimi Passi
-
-### 1. Completare l'Integrazione del Contesto del Viaggio ✅
-
-La versione attuale utilizza un contesto di viaggio completo che recupera i dati reali dal database:
-
-1. ✅ Risolti i problemi con la funzione `getTripContext` originale
-2. ✅ Testato il recupero dei dati per ogni tipo di informazione (partecipanti, alloggi, trasporti, attività, spese)
-3. ✅ Formattati correttamente i dati per l'uso con l'API Gemini
-4. ✅ Implementato l'assistente in tutte le pagine del viaggio
-5. ✅ Migliorato il prompt per utilizzare correttamente le informazioni sugli alloggi e i trasporti
-6. ✅ Ottimizzato il messaggio iniziale dell'assistente per renderlo più conciso
-7. ✅ Implementata la persistenza della conversazione tra le diverse pagine del viaggio
-8. ✅ Aggiunta la possibilità di cancellare la conversazione
-9. ✅ Integrato l'itinerario completo nel contesto dell'assistente
-
-### 2. Migliorare l'Interfaccia Utente ✅
-
-L'interfaccia utente è stata migliorata per offrire una migliore esperienza utente:
-
-1. ✅ Ottimizzata la visualizzazione dell'assistente in tutte le pagine del viaggio
-2. ✅ Aggiunto indicatore di digitazione durante il caricamento delle risposte
-3. ✅ Migliorata la formattazione dei messaggi con separazione chiara tra elementi
-4. ✅ Implementata la persistenza della chat tra le diverse pagine
-5. ✅ Aggiunto pulsante per cancellare la conversazione
-6. ✅ Risolto il problema di posizionamento su dispositivi mobili
-7. ✅ Migliorata la separazione visiva tra i pulsanti dell'Assistente AI e del Wizard Itinerario
-
-Ulteriori miglioramenti pianificati:
-1. ✅ Aggiungere animazioni e transizioni più fluide
-2. ✅ Implementare un tema personalizzabile (chiaro/scuro)
-3. Aggiungere notifiche per nuovi messaggi
-
-### 3. Migliorare il Prompt di Sistema ✅
-
-Il prompt di sistema è stato migliorato per ottenere risposte più pertinenti:
-
-1. ✅ Espanso il prompt con istruzioni dettagliate sul formato delle risposte
-2. ✅ Aggiunte istruzioni specifiche per evitare ripetizioni e saluti standard
-3. ✅ Incluse linee guida per la formattazione di elenchi e sezioni
-4. ✅ Ottimizzato per risposte più concise e dirette
-
-Ulteriori miglioramenti pianificati:
-1. Aggiungere esempi di domande e risposte nel prompt
-2. Includere istruzioni più specifiche per diversi tipi di richieste (informazioni, suggerimenti, pianificazione)
-3. Continuare a testare e iterare il prompt per migliorare ulteriormente la qualità delle risposte
-
-### 4. Implementare Funzionalità Avanzate
-
-Sono state implementate diverse funzionalità avanzate, con altre pianificate per il futuro:
-
-1. ✅ **Wizard per Generazione di Attività**: Implementato un wizard guidato che utilizza l'AI per generare automaticamente attività personalizzate per l'itinerario
-   - ✅ Visualizzazione ricca delle attività con icone e colori specifici per tipo
-   - ✅ Timeline interattiva per visualizzare le attività organizzate per giorno
-   - ✅ Selezione dei giorni tramite pulsanti interattivi
-   - ✅ Modifica delle attività generate prima del salvataggio
-   - ✅ Pulsante per cancellare la conversazione e ripartire da zero
-   - ✅ Risoluzione dei problemi di sovrapposizione tra i pulsanti dell'Assistente AI e del Wizard Itinerario
-   - ✅ Analisi avanzata delle richieste dell'utente per rispettare vincoli temporali
-   - ✅ Supporto per destinazioni specifiche all'interno di un viaggio con destinazioni multiple
-   - ✅ Estrazione intelligente di informazioni dalle preferenze dell'utente
-   - ✅ Visualizzazione su mappa interattiva con Mapbox
-   - ✅ Selezione di temi di viaggio con card visive
-   - ✅ Visualizzazione a schede per giorni multipli con animazioni di transizione
-
-2. **Funzionalità pianificate per il futuro**:
-   - **Ottimizzazione percorsi**: Aggiungere l'ottimizzazione dei percorsi giornalieri
-   - **Suggerimenti proattivi**: Fornire suggerimenti proattivi basati sul contesto
-   - **Analisi predittiva**: Implementare l'analisi predittiva per costi e affluenza
-   - **Integrazione con dati meteo**: Suggerimenti basati sulle previsioni meteo
-   - **Packing list personalizzata**: Generazione automatica di liste di cose da portare
-   - **Assistente linguistico**: Frasi utili nella lingua locale della destinazione
-
-### 5. Testare e Ottimizzare
-
-Prima di rilasciare la funzionalità, dobbiamo testarla e ottimizzarla:
-
-1. Testare l'assistente con diversi tipi di domande e richieste
-2. Ottimizzare le prestazioni (ridurre i tempi di risposta)
-3. Implementare il caching per le risposte comuninon m
-4. Aggiungere meccanismi di fallback in caso di errori
-
-## Considerazioni Tecniche
-
-### Gestione Token e Costi
-
-Le API di AI hanno costi basati sull'utilizzo. È importante:
-
-1. Implementare limiti di utilizzo per piano
-2. Monitorare l'utilizzo dei token
-3. Ottimizzare i prompt per ridurre i costi
-4. Implementare caching per richieste comuni
-
-### Privacy e Sicurezza
-
-1. Non inviare dati personali sensibili alle API esterne
-2. Implementare filtri per i contenuti generati
-3. Ottenere consenso esplicito dagli utenti per l'utilizzo dei loro dati
-
-### Prestazioni
-
-1. Implementare caching lato server per risposte comuni
-2. Utilizzare streaming per risposte lunghe
-3. Mostrare feedback visivo durante l'elaborazione
-4. Implementare fallback in caso di errori API
-
-## Conclusione
-
-Le funzionalità AI di VoyageSmart sono state significativamente migliorate, con particolare attenzione al Wizard di Generazione Attività e all'Assistente AI. Le principali migliorie includono:
-
-### Miglioramenti all'Assistente AI:
-1. **Interfaccia utente ottimizzata** con migliore accessibilità in tutte le pagine del viaggio
-2. **Prompt di sistema migliorato** per generare risposte più pertinenti e contestuali
-3. **Formattazione migliorata delle risposte** con chiara separazione tra elementi e utilizzo appropriato di elenchi
-4. **Messaggi iniziali più concisi** che includono solo le informazioni essenziali
-5. **Persistenza della conversazione** tra le diverse pagine del viaggio
-
-### Miglioramenti al Wizard di Generazione Attività:
-1. **Visualizzazione ricca delle attività** con icone specifiche per tipo, effetti hover e animazioni
-2. **Timeline interattiva** per visualizzare le attività organizzate per giorno con indicatori temporali
-3. **Selezione dei giorni migliorata** con pulsanti interattivi e possibilità di selezione multipla
-4. **Modifica delle attività** tramite un modale dedicato con validazione dei campi
-5. **Miglioramenti dell'interfaccia utente** con pulsante per cancellare la conversazione e risoluzione dei problemi di sovrapposizione
-6. **Gestione migliorata delle risposte** con riconoscimento più preciso delle risposte positive e negative
-
-### Miglioramenti generali:
-1. **Posizionamento ottimizzato dei pulsanti** per evitare sovrapposizioni, sia su desktop che su mobile
-2. **Differenziazione visiva dei pulsanti** con colori distinti per facilitare l'identificazione
-3. **Animazioni e transizioni fluide** per migliorare l'esperienza utente complessiva
-
-Entrambi i componenti continuano ad avere accesso al contesto completo del viaggio, inclusi dettagli, partecipanti, alloggi, trasporti, itinerario e spese, permettendo loro di fornire risposte e suggerimenti personalizzati e specifici per ogni viaggio.
-
-I prossimi passi includono l'implementazione di funzionalità ancora più avanzate come l'ottimizzazione dei percorsi giornalieri, suggerimenti proattivi basati sul contesto e analisi predittiva per costi e affluenza. Continueremo anche a migliorare l'interfaccia utente per renderla ancora più intuitiva e piacevole da utilizzare.
-
 ## Wizard per Generazione Automatica di Attività
 
 È stato implementato un Wizard guidato per la generazione automatica di attività negli Itinerari. Questa funzionalità avanzata utilizza l'AI per creare attività personalizzate in base alle preferenze dell'utente e al contesto del viaggio.
@@ -564,6 +400,114 @@ I prossimi passi includono l'implementazione di funzionalità ancora più avanza
   - `analyzeAdditionalPreferences()`: Funzione che estrae informazioni chiave dalle preferenze dell'utente
   - `processActivities()`: Funzione che normalizza e migliora le attività generate
 - `src/app/api/activities/batch/route.ts`: Endpoint API per salvare in batch le attività generate
+
+## Roadmap per Miglioramenti Futuri
+
+### Fase 1: Migliorare il Contesto del Viaggio ✅
+
+L'assistente ora ha accesso al contesto completo del viaggio, inclusi:
+
+- **Dettagli completi del viaggio**: destinazioni multiple, date, partecipanti ✅
+- **Budget**: totale e valuta ✅
+- **Partecipanti**: nomi, ruoli, email ✅
+- **Alloggi**: nomi, tipi, date (se disponibili) ✅
+- **Trasporti**: tipi, provider, orari (se disponibili) ✅
+- **Attività**: nomi, tipi, orari (se disponibili) ✅
+- **Disponibilità in tutte le pagine del viaggio** ✅
+- **Miglioramento delle risposte per evitare ripetizioni** ✅
+- **Ottimizzazione del messaggio iniziale per renderlo più conciso** ✅
+- **Persistenza della conversazione tra le diverse pagine del viaggio** ✅
+- **Integrazione dell'itinerario nel contesto dell'assistente** ✅
+
+### Fase 2: Aggiungere Persistenza e Memoria ✅
+
+- **Salvare la cronologia dei messaggi** in localStorage ✅
+- **Caricare la cronologia** quando l'utente naviga tra le pagine ✅
+- **Implementare memoria contestuale** per riferimenti a messaggi precedenti
+- **Aggiungere la possibilità di cancellare la conversazione** ✅
+
+### Fase 3: Implementare Funzionalità Specifiche
+
+- **Generazione di itinerari** basati su destinazione, durata e preferenze ✅
+- **Ottimizzazione dei percorsi** per attività giornaliere
+- **Suggerimenti personalizzati** basati sulle preferenze dell'utente ✅
+- **Integrazione con dati meteo** per consigli basati sulle condizioni atmosferiche
+
+### Fase 4: Migliorare l'Interfaccia Utente
+
+- **Supporto per messaggi formattati** (markdown, link, elenchi)
+- **Suggerimenti di domande predefinite**
+- **Tema personalizzabile** (chiaro/scuro)
+- **Notifiche per nuovi messaggi**
+- **Animazioni e transizioni** per un'esperienza più fluida
+
+### Fase 5: Ottimizzare le Prestazioni
+
+- **Implementare caching** per risposte comuni
+- **Utilizzare streaming** per risposte lunghe
+- **Ottimizzare i prompt** per ridurre i token utilizzati
+- **Implementare rate limiting** per evitare abusi
+
+## Restrizioni di Accesso
+
+Le funzionalità AI sono disponibili esclusivamente per gli utenti con abbonamento "AI Assistant". Gli utenti con piani Free o Premium non hanno accesso a queste funzionalità.
+
+**Implementazione delle restrizioni:**
+- Utilizzo del hook `useSubscription` per verificare il tipo di abbonamento dell'utente
+- Funzione `canAccessFeature('ai_assistant')` per controllare l'accesso
+- Componente `AIUpgradePrompt` per invitare gli utenti a fare l'upgrade quando tentano di accedere a funzionalità AI
+
+## Considerazioni Tecniche
+
+### Gestione Token e Costi
+
+Le API di AI hanno costi basati sull'utilizzo. È importante:
+
+1. Implementare limiti di utilizzo per piano
+2. Monitorare l'utilizzo dei token
+3. Ottimizzare i prompt per ridurre i costi
+4. Implementare caching per richieste comuni
+
+### Privacy e Sicurezza
+
+1. Non inviare dati personali sensibili alle API esterne
+2. Implementare filtri per i contenuti generati
+3. Ottenere consenso esplicito dagli utenti per l'utilizzo dei loro dati
+
+### Prestazioni
+
+1. Implementare caching lato server per risposte comuni
+2. Utilizzare streaming per risposte lunghe
+3. Mostrare feedback visivo durante l'elaborazione
+4. Implementare fallback in caso di errori API
+
+## Conclusione
+
+Le funzionalità AI di VoyageSmart sono state significativamente migliorate, con particolare attenzione al Wizard di Generazione Attività e all'Assistente AI. Le principali migliorie includono:
+
+### Miglioramenti all'Assistente AI:
+1. **Interfaccia utente ottimizzata** con migliore accessibilità in tutte le pagine del viaggio
+2. **Prompt di sistema migliorato** per generare risposte più pertinenti e contestuali
+3. **Formattazione migliorata delle risposte** con chiara separazione tra elementi e utilizzo appropriato di elenchi
+4. **Messaggi iniziali più concisi** che includono solo le informazioni essenziali
+5. **Persistenza della conversazione** tra le diverse pagine del viaggio
+
+### Miglioramenti al Wizard di Generazione Attività:
+1. **Visualizzazione ricca delle attività** con icone specifiche per tipo, effetti hover e animazioni
+2. **Timeline interattiva** per visualizzare le attività organizzate per giorno con indicatori temporali
+3. **Selezione dei giorni migliorata** con pulsanti interattivi e possibilità di selezione multipla
+4. **Modifica delle attività** tramite un modale dedicato con validazione dei campi
+5. **Miglioramenti dell'interfaccia utente** con pulsante per cancellare la conversazione e risoluzione dei problemi di sovrapposizione
+6. **Gestione migliorata delle risposte** con riconoscimento più preciso delle risposte positive e negative
+
+### Miglioramenti generali:
+1. **Posizionamento ottimizzato dei pulsanti** per evitare sovrapposizioni, sia su desktop che su mobile
+2. **Differenziazione visiva dei pulsanti** con colori distinti per facilitare l'identificazione
+3. **Animazioni e transizioni fluide** per migliorare l'esperienza utente complessiva
+
+Entrambi i componenti continuano ad avere accesso al contesto completo del viaggio, inclusi dettagli, partecipanti, alloggi, trasporti, itinerario e spese, permettendo loro di fornire risposte e suggerimenti personalizzati e specifici per ogni viaggio.
+
+I prossimi passi includono l'implementazione di funzionalità ancora più avanzate come l'ottimizzazione dei percorsi giornalieri, suggerimenti proattivi basati sul contesto e analisi predittiva per costi e affluenza. Continueremo anche a migliorare l'interfaccia utente per renderla ancora più intuitiva e piacevole da utilizzare.
 
 Per qualsiasi problema o domanda sull'implementazione, consulta il codice sorgente nei file:
 - `src/components/ai/ChatBot.tsx`

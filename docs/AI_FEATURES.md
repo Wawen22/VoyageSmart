@@ -51,6 +51,26 @@ Le funzionalità AI sono disponibili esclusivamente per gli utenti con abbonamen
 - Funzione `canAccessFeature('ai_assistant')` per controllare l'accesso
 - Componente `AIUpgradePrompt` per invitare gli utenti a fare l'upgrade quando tentano di accedere a funzionalità AI
 
+## Miglioramenti Recenti
+
+Le seguenti funzionalità AI sono state recentemente migliorate:
+
+1. **Assistente AI di Viaggio**
+   - Interfaccia utente ottimizzata con migliore accessibilità in tutte le pagine del viaggio
+   - Prompt di sistema migliorato per generare risposte più pertinenti e contestuali
+   - Formattazione migliorata delle risposte con chiara separazione tra elementi
+   - Messaggi iniziali più concisi che includono solo le informazioni essenziali
+   - Persistenza della conversazione tra le diverse pagine del viaggio
+
+2. **Wizard di Generazione Attività**
+   - Visualizzazione ricca delle attività con icone specifiche per tipo
+   - Timeline interattiva per visualizzare le attività organizzate per giorno
+   - Selezione dei giorni migliorata con pulsanti interattivi
+   - Visualizzazione su mappa interattiva con Mapbox
+   - Geocodifica automatica delle location per ottenere le coordinate precise
+   - Marker colorati in base al tipo di attività con numerazione progressiva
+   - Modalità fullscreen per una visualizzazione più ampia della mappa
+
 ## Prossimi Sviluppi
 
 Le seguenti funzionalità AI sono in fase di sviluppo:
@@ -58,14 +78,17 @@ Le seguenti funzionalità AI sono in fase di sviluppo:
 1. **Suggerimenti Proattivi**
    - Suggerimenti automatici basati sul contesto del viaggio
    - Notifiche intelligenti per attività imminenti
+   - Raccomandazioni personalizzate basate sulle preferenze dell'utente
 
 2. **Ottimizzazione Percorsi**
    - Analisi e ottimizzazione degli spostamenti
    - Suggerimenti per ridurre tempi di viaggio e costi
+   - Visualizzazione ottimizzata dei percorsi sulla mappa
 
 3. **Analisi Predittiva**
    - Previsione di costi e affluenza
    - Suggerimenti per evitare periodi di alta stagione
+   - Analisi del budget e suggerimenti per risparmiare
 
 ## Integrazione con il Sistema di Abbonamenti
 

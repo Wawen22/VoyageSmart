@@ -14,6 +14,7 @@
 - [Standard di Codice](#standard-di-codice)
 - [Setup del Progetto](#setup-del-progetto)
 - [Integrazione con Stripe](#integrazione-con-stripe)
+- [Documentazione](#documentazione)
 - [Licenza](#licenza)
 
 ## 📱 Panoramica
@@ -250,7 +251,7 @@ trip_media
   - ✅ Interfaccia meteo moderna e compatta
 
 ### Fase 3: Funzionalità Avanzate (In corso) 🔄
-- **Integrazione IA** 🔄
+- **Integrazione IA** ✅
   - ✅ Assistente virtuale AI con Gemini API
   - ✅ Chatbot integrato nella pagina del viaggio
   - ✅ Integrazione avanzata del contesto del viaggio nell'assistente AI
@@ -258,11 +259,14 @@ trip_media
   - ✅ Wizard di generazione attività con AI
   - ✅ Visualizzazione attività generate su timeline e mappa
   - ✅ Selezione interattiva dei giorni e temi di viaggio
+  - ✅ Visualizzazione su mappa interattiva con Mapbox
+  - ✅ Geocodifica automatica delle location
+  - ✅ Visualizzazione ricca delle attività con icone e timeline
   - 🔄 Ottimizzazione percorsi avanzata
   - 🔄 Analisi predittiva costi e affluenza
 
 - **Automazione sottoscrizioni** 🔄
-  - 🔄 Implementazione endpoint `/api/cron/check-subscriptions` ✅
+  - ✅ Implementazione endpoint `/api/cron/check-subscriptions`
   - 🔄 Configurare un cron job (es. Vercel Cron Jobs, AWS Lambda con EventBridge, ecc.) che chiami periodicamente l'endpoint per verificare e aggiornare tutte le sottoscrizioni scadute
   - 🔄 Aggiungere notifiche email per cambiamenti di stato delle sottoscrizioni
 
@@ -271,11 +275,15 @@ trip_media
   - ✅ Ottimizzazione bundle size
   - ✅ Miglioramento tempi di caricamento
   - ✅ Implementazione skeleton loaders
+  - ✅ Caching dei dati con session storage
+  - ✅ Memoizzazione dei componenti per ridurre i re-render
 
 - **Assistente virtuale** ✅
   - ✅ Chatbot per domande frequenti
   - ✅ NLP per query in linguaggio naturale
   - ✅ Interfaccia intuitiva con minimizzazione/espansione
+  - ✅ Persistenza della conversazione tra le pagine
+  - ✅ Formattazione migliorata delle risposte
   - 🔄 Suggerimenti pro-attivi
 
 - **Monetizzazione e piani premium** ✅
@@ -460,6 +468,18 @@ Scorri fino in fondo alla pagina per trovare il componente di test che ti permet
 - Verificare lo stato attuale della sottoscrizione
 - Simulare un upgrade a Premium
 - Eseguire test di debug per verificare le policy RLS e l'autenticazione
+
+## 📚 Documentazione
+
+La documentazione completa del progetto è disponibile nella cartella `docs/`:
+
+- **[docs/SETUP.md](docs/SETUP.md)** - Guida all'installazione e configurazione
+- **[docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md)** - Documentazione tecnica dettagliata
+- **[docs/DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP.md)** - Roadmap di sviluppo e prossimi passi
+- **[docs/AI_DOCUMENTATION.md](docs/AI_DOCUMENTATION.md)** - Documentazione completa delle funzionalità AI
+- **[docs/AI_FEATURES.md](docs/AI_FEATURES.md)** - Panoramica delle funzionalità AI
+- **[docs/SUBSCRIPTION_IMPLEMENTATION.md](docs/SUBSCRIPTION_IMPLEMENTATION.md)** - Dettagli sull'implementazione del sistema di abbonamenti
+- **[docs/CRON_JOB_SETUP.md](docs/CRON_JOB_SETUP.md)** - Guida alla configurazione del cron job per le sottoscrizioni
 
 ## 📄 Licenza
 
