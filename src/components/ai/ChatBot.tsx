@@ -184,7 +184,15 @@ export default function ChatBot({
   }, [tripId, tripName, tripData, messages.length]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  // Inizializza isMinimized a true per impostazione predefinita, o carica dal localStorage se disponibile
+  const [isMinimized, setIsMinimized] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem(`chat_minimized_${tripId}`);
+      // Se non c'è uno stato salvato, o se lo stato salvato è "true", minimizza la chat
+      return savedState === null ? true : savedState === 'true';
+    }
+    return true; // Minimizzato per impostazione predefinita
+  });
   const [isExpanded, setIsExpanded] = useState(false);
   const [suggestedQuestions, setSuggestedQuestions] = useState<SuggestedQuestion[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -313,8 +321,14 @@ export default function ChatBot({
   };
 
   const toggleMinimize = () => {
-    setIsMinimized(!isMinimized);
+    const newState = !isMinimized;
+    setIsMinimized(newState);
     if (isExpanded) setIsExpanded(false);
+
+    // Salva lo stato nel localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`chat_minimized_${tripId}`, newState.toString());
+    }
   };
 
   const toggleExpand = () => {
