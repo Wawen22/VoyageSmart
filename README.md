@@ -281,8 +281,9 @@ trip_media
 - **Monetizzazione e piani premium** ✅
   - ✅ Sistema abbonamenti con Supabase e Stripe
   - ✅ Paywall per funzionalità premium (Accommodations, Transportation)
+  - ✅ Paywall per funzionalità AI (Assistente AI, Wizard Itinerario)
   - ✅ Limite di 3 viaggi per utenti free
-  - ✅ Pagina Pricing con piani Free, Premium e AI (coming soon)
+  - ✅ Pagina Pricing con piani Free, Premium e AI
   - ✅ Sistema di tracciamento cronologia sottoscrizioni
   - 🔄 Dashboard amministrativa ricavi
 
@@ -307,21 +308,28 @@ trip_media
 
 ### Piano Premium (€4.99/mese o €49.99/anno)
 - Viaggi illimitati
-- Tutte le funzionalità avanzate
+- Funzionalità avanzate (Accommodations, Transportation)
 - Partecipanti illimitati
 - 10GB storage
 - Nessun annuncio
 - Accesso prioritario alle novità
 - Supporto premium
 
-### Piano Famiglia/Gruppo (€9.99/mese o €99.99/anno)
-- Vantaggi del Piano Premium
+### Piano AI Assistant (€9.99/mese o €99.99/anno)
+- Tutti i vantaggi del Piano Premium
+- Assistente AI integrato in tutte le pagine
+- Wizard AI per generazione attività
+- Suggerimenti personalizzati basati sull'AI
+- 20GB storage
+- Supporto prioritario
+
+### Piano Famiglia/Gruppo (€14.99/mese o €149.99/anno)
+- Vantaggi del Piano AI Assistant
 - Condivisione con 6 membri
-- 30GB storage condiviso
+- 50GB storage condiviso
 - Dashboard famiglia centralizzata
 
 ### In-App Purchases
-- Pacchetti funzionalità IA (€2.99 per viaggio)
 - Guide destinazioni premium (€1.99-4.99)
 - Template viaggio tematici (€0.99-2.99)
 - Storage aggiuntivo (€1.99 per 5GB)

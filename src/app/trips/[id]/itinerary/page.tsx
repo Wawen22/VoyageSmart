@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import { format, parseISO, isValid, addDays } from 'date-fns';
 import { CalendarIcon, BookOpenIcon, ImageIcon, ClockIcon, BookIcon, PlusIcon, ListIcon, Sparkles } from 'lucide-react';
@@ -14,6 +15,7 @@ import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import ItineraryWizard from '@/components/ai/ItineraryWizard';
+import AIUpgradePrompt from '@/components/subscription/AIUpgradePrompt';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
 import { fetchJournalEntries, fetchJournalMedia, JournalEntry } from '@/lib/features/journalSlice';
@@ -71,8 +73,12 @@ export default function TripItinerary() {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { canAccessFeature } = useSubscription();
   const dispatch = useDispatch<AppDispatch>();
   const { entries, media, loading: journalLoading } = useSelector((state: RootState) => state.journal);
+
+  // Verifica se l'utente ha accesso alle funzionalità AI
+  const hasAIAccess = canAccessFeature('ai_assistant');
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>([]);
@@ -866,15 +872,26 @@ export default function TripItinerary() {
                   </button>
                 </div>
 
-                {/* AI Wizard button */}
-                <button
-                  onClick={() => setShowWizard(true)}
-                  className="bg-gradient-to-r from-purple-500 to-indigo-600 py-1.5 px-4 rounded-md shadow-sm text-sm font-medium text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 flex items-center gap-1"
-                  aria-label="Generate activities with AI"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span>AI Wizard</span>
-                </button>
+                {/* AI Wizard button - visible only for AI subscribers */}
+                {hasAIAccess ? (
+                  <button
+                    onClick={() => setShowWizard(true)}
+                    className="bg-gradient-to-r from-purple-500 to-indigo-600 py-1.5 px-4 rounded-md shadow-sm text-sm font-medium text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 flex items-center gap-1"
+                    aria-label="Generate activities with AI"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span>AI Wizard</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => router.push('/pricing')}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 py-1.5 px-4 rounded-md shadow-sm text-sm font-medium text-white hover:from-gray-600 hover:to-gray-700 transition-all duration-200 flex items-center gap-1"
+                    aria-label="Upgrade to AI plan"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span>AI Plan</span>
+                  </button>
+                )}
 
                 {/* Add day button */}
                 <button
@@ -1217,44 +1234,63 @@ export default function TripItinerary() {
         )}
       </Suspense>
 
-      {/* AI Wizard */}
+      {/* AI Wizard or Upgrade Prompt */}
       {showWizard && (
-        <ItineraryWizard
-          tripId={id as string}
-          tripData={trip}
-          itineraryDays={itineraryDays}
-          onClose={() => setShowWizard(false)}
-          onActivitiesGenerated={(activities) => {
-            // Aggiorna lo stato con le nuove attività
-            setItineraryDays(prevDays => {
-              // Crea una copia profonda dell'array dei giorni
-              const updatedDays = [...prevDays];
+        hasAIAccess ? (
+          <ItineraryWizard
+            tripId={id as string}
+            tripData={trip}
+            itineraryDays={itineraryDays}
+            onClose={() => setShowWizard(false)}
+            onActivitiesGenerated={(activities) => {
+              // Aggiorna lo stato con le nuove attività
+              setItineraryDays(prevDays => {
+                // Crea una copia profonda dell'array dei giorni
+                const updatedDays = [...prevDays];
 
-              // Per ogni attività generata, aggiungila al giorno corrispondente
-              activities.forEach(activity => {
-                const dayIndex = updatedDays.findIndex(day => day.id === activity.day_id);
-                if (dayIndex !== -1) {
-                  // Se il giorno esiste, aggiungi l'attività
-                  updatedDays[dayIndex] = {
-                    ...updatedDays[dayIndex],
-                    activities: [
-                      ...(updatedDays[dayIndex].activities || []),
-                      activity
-                    ].sort((a, b) =>
-                      (a.start_time && b.start_time) ?
-                        new Date(a.start_time).getTime() - new Date(b.start_time).getTime() : 0
-                    )
-                  };
-                }
+                // Per ogni attività generata, aggiungila al giorno corrispondente
+                activities.forEach(activity => {
+                  const dayIndex = updatedDays.findIndex(day => day.id === activity.day_id);
+                  if (dayIndex !== -1) {
+                    // Se il giorno esiste, aggiungi l'attività
+                    updatedDays[dayIndex] = {
+                      ...updatedDays[dayIndex],
+                      activities: [
+                        ...(updatedDays[dayIndex].activities || []),
+                        activity
+                      ].sort((a, b) =>
+                        (a.start_time && b.start_time) ?
+                          new Date(a.start_time).getTime() - new Date(b.start_time).getTime() : 0
+                      )
+                    };
+                  }
+                });
+
+                return updatedDays;
               });
 
-              return updatedDays;
-            });
-
-            // Chiudi il wizard
-            setShowWizard(false);
-          }}
-        />
+              // Chiudi il wizard
+              setShowWizard(false);
+            }}
+          />
+        ) : (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-card rounded-lg shadow-lg max-w-md w-full">
+              <div className="p-6">
+                <button
+                  onClick={() => setShowWizard(false)}
+                  className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+                <AIUpgradePrompt
+                  feature="Itinerary Wizard"
+                  description="The AI Itinerary Wizard helps you generate personalized activities for your trip based on your preferences and travel style."
+                />
+              </div>
+            </div>
+          </div>
+        )
       )}
     </div>
   );

@@ -19,17 +19,16 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
 - **Prezzo**: €4.99/mese
 - **Vantaggi**:
   - Viaggi illimitati
-  - Accesso completo a tutte le funzionalità
   - Gestione alloggi (Accommodations)
   - Gestione trasporti (Transportation)
   - Supporto prioritario
 
-### Piano AI (Coming Soon)
+### Piano AI Assistant (Attivo)
 - **Prezzo**: €9.99/mese
 - **Vantaggi**:
   - Tutte le funzionalità Premium
   - Assistente AI per la pianificazione
-  - Ottimizzazione percorsi
+  - Wizard AI per generazione attività
   - Suggerimenti personalizzati
   - Accesso anticipato a nuove funzionalità
 
@@ -57,7 +56,8 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
 - `SubscriptionProvider`: Context provider per gestire lo stato dell'abbonamento
 - `SubscriptionContext`: Context per accedere alle informazioni sull'abbonamento
 - `useSubscription`: Hook per accedere alle funzionalità dell'abbonamento
-- `UpgradePrompt`: Componente per mostrare un prompt di upgrade
+- `UpgradePrompt`: Componente per mostrare un prompt di upgrade per funzionalità Premium
+- `AIUpgradePrompt`: Componente per mostrare un prompt di upgrade per funzionalità AI
 - `TripLimitPrompt`: Componente per mostrare un prompt quando si raggiunge il limite di viaggi
 - `PricingPage`: Pagina per visualizzare e selezionare i piani di abbonamento
 
@@ -65,11 +65,15 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
 - `isSubscribed(tier)`: Verifica se l'utente è abbonato a un determinato piano
 - `canCreateTrip()`: Verifica se l'utente può creare un nuovo viaggio
 - `canAccessFeature(feature)`: Verifica se l'utente può accedere a una funzionalità premium
+  - Supporta i tipi di feature: 'accommodations', 'transportation', 'ai_assistant'
 
 ### Integrazione nelle Pagine
-- Controllo di accesso nella pagina Accommodations
-- Controllo di accesso nella pagina Transportation
-- Controllo del limite di viaggi nella pagina New Trip
+- Controllo di accesso nella pagina Accommodations (richiede piano Premium o AI)
+- Controllo di accesso nella pagina Transportation (richiede piano Premium o AI)
+- Controllo di accesso alle funzionalità AI (richiede piano AI)
+  - Assistente AI in tutte le pagine del viaggio
+  - Wizard AI per generazione attività nell'itinerario
+- Controllo del limite di viaggi nella pagina New Trip (limite di 3 per utenti Free)
 
 ## Prossimi Passi
 
@@ -89,6 +93,10 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
    - Migliorare la pagina di pricing con più dettagli e testimonianze
 
 4. **Funzionalità AI**
-   - Sviluppare le funzionalità AI per il piano AI
-   - Implementare l'integrazione con OpenAI o Google Gemini
-   - Creare un'interfaccia utente per l'assistente AI
+   - ✅ Sviluppare le funzionalità AI per il piano AI
+   - ✅ Implementare l'integrazione con Google Gemini
+   - ✅ Creare un'interfaccia utente per l'assistente AI
+   - ✅ Implementare il Wizard AI per generazione attività
+   - ✅ Limitare l'accesso alle funzionalità AI solo agli utenti con piano AI
+   - 🔄 Implementare suggerimenti proattivi basati sull'AI
+   - 🔄 Aggiungere funzionalità di ottimizzazione percorsi

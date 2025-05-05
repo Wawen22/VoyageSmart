@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import ChatBot from '@/components/ai/ChatBot';
 
@@ -13,6 +14,7 @@ export default function TripLayout({
 }) {
   const { id } = useParams();
   const { user } = useAuth();
+  const { canAccessFeature } = useSubscription();
   const [trip, setTrip] = useState<any>(null);
   const [participants, setParticipants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,12 +135,15 @@ export default function TripLayout({
     fetchTripDetails();
   }, [id, user]);
 
+  // Verifica se l'utente ha accesso alle funzionalità AI
+  const hasAIAccess = canAccessFeature('ai_assistant');
+
   return (
     <>
       {children}
 
-      {/* AI Assistant - Visible on all trip pages */}
-      {!loading && trip && (
+      {/* AI Assistant - Visible on all trip pages only for AI subscribers */}
+      {!loading && trip && hasAIAccess && (
         <ChatBot
           tripId={id as string}
           tripName={trip?.name || 'Viaggio'}

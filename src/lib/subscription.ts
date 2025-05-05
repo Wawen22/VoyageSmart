@@ -23,7 +23,7 @@ export type SubscriptionState = {
   error: Error | null;
   isSubscribed: (tier: SubscriptionTier) => boolean;
   canCreateTrip: () => Promise<boolean>;
-  canAccessFeature: (feature: 'accommodations' | 'transportation') => boolean;
+  canAccessFeature: (feature: 'accommodations' | 'transportation' | 'ai_assistant') => boolean;
   upgradeSubscription: (tier: SubscriptionTier) => Promise<void>;
   cancelSubscription: () => Promise<void>;
   getSubscriptionHistory: () => Promise<any[]>;

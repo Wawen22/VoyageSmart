@@ -434,13 +434,13 @@ export default function SubscriptionPage() {
                 </Card>
 
                 {/* AI Plan */}
-                <Card className="border-2 border-border hover:shadow-lg transition-shadow opacity-75">
+                <Card className={`border-2 ${subscription?.tier === 'ai' ? 'border-primary' : 'border-border'} hover:shadow-lg transition-shadow`}>
                   <CardHeader className="text-center">
                     <div className="flex justify-center mb-2">
                       <SparklesIcon className="h-10 w-10 text-primary" />
                     </div>
                     <CardTitle>AI Assistant</CardTitle>
-                    <CardDescription>Coming Soon</CardDescription>
+                    <CardDescription>For smart travelers</CardDescription>
                     <div className="mt-4">
                       <span className="text-3xl font-bold">€9.99</span>
                       <span className="text-muted-foreground">/month</span>
@@ -456,7 +456,16 @@ export default function SubscriptionPage() {
                     <PricingFeature included={true}>Early access to new features</PricingFeature>
                   </CardContent>
                   <CardFooter className="flex justify-center pt-4">
-                    <Badge variant="outline" className="px-4 py-2">Coming Soon</Badge>
+                    {subscription?.tier === 'ai' ? (
+                      <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
+                    ) : (
+                      <Button
+                        className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
+                        onClick={() => handleUpgrade('ai')}
+                      >
+                        Upgrade
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               </div>

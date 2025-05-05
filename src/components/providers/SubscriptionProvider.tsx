@@ -137,15 +137,34 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     return tripCount < 3;
   };
 
-  const canAccessFeature = (feature: 'accommodations' | 'transportation'): boolean => {
+  const canAccessFeature = (feature: 'accommodations' | 'transportation' | 'ai_assistant'): boolean => {
+    // Se non c'è sottoscrizione, nessun accesso alle funzionalità premium
+    if (!subscription) return false;
+
+    // Per le funzionalità AI, solo gli utenti con piano AI hanno accesso
+    if (feature === 'ai_assistant') {
+      // Se l'utente ha il piano AI, ha accesso
+      if (subscription.tier === 'ai') {
+        return true;
+      }
+
+      // Se la sottoscrizione AI è stata cancellata ma è ancora nel periodo pagato
+      if (subscription.cancelAtPeriodEnd && subscription.tier === 'ai') {
+        return true;
+      }
+
+      // Altrimenti, nessun accesso alle funzionalità AI
+      return false;
+    }
+
+    // Per accommodations e transportation, gli utenti premium e AI hanno accesso
     // Premium users can access accommodations and transportation
-    // Anche gli utenti con sottoscrizione cancellata ma ancora valida possono accedere
-    if (isSubscribed('premium')) {
+    if (isSubscribed('premium') || isSubscribed('ai')) {
       return true;
     }
 
     // Se la sottoscrizione è stata cancellata ma è ancora nel periodo pagato
-    if (subscription?.cancelAtPeriodEnd && subscription.tier === 'premium') {
+    if (subscription.cancelAtPeriodEnd && (subscription.tier === 'premium' || subscription.tier === 'ai')) {
       return true;
     }
 

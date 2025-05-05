@@ -750,20 +750,20 @@ export default function Home() {
 
             {/* AI Plan */}
             <Card className={`border-2 border-border/50 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 h-full group hover:border-primary/20 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden relative`}>
-              {/* Coming Soon Badge */}
+              {/* New Badge */}
               <div className="absolute -top-1 -right-1 transform rotate-0 z-20">
-                <Badge className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-3 py-1.5 rounded-br-xl rounded-tl-xl font-medium shadow-md">
-                  Coming Soon
+                <Badge className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1.5 rounded-br-xl rounded-tl-xl font-medium shadow-md">
+                  New
                 </Badge>
               </div>
 
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-background/80 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-background/80 pointer-events-none"></div>
 
               <CardHeader className="text-center pt-8 pb-6 relative z-10">
                 <div className="flex justify-center mb-4">
-                  <div className="p-4 rounded-xl bg-primary/10 transition-colors duration-300 shadow-md relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent animate-pulse-slow"></div>
-                    <SparklesIcon className="h-10 w-10 text-primary relative z-10" />
+                  <div className="p-4 rounded-xl bg-purple-500/10 transition-colors duration-300 shadow-md relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-transparent animate-pulse-slow"></div>
+                    <SparklesIcon className="h-10 w-10 text-purple-500 relative z-10" />
                   </div>
                 </div>
                 <CardTitle className="text-2xl font-bold mb-2">AI Assistant</CardTitle>
@@ -824,8 +824,8 @@ export default function Home() {
                 <p className="text-muted-foreground">Your data is always preserved. However, if you downgrade to Free and have more than 3 trips, you won't be able to create new trips until you're below the limit. You'll also lose access to Accommodations and Transportation features.</p>
               </div>
               <div>
-                <h4 className="font-medium">When will the AI Assistant plan be available?</h4>
-                <p className="text-muted-foreground">We're working hard to bring AI features to VoyageSmart. Sign up for our newsletter to be the first to know when it launches.</p>
+                <h4 className="font-medium">What AI features are included in the AI Assistant plan?</h4>
+                <p className="text-muted-foreground">The AI Assistant plan includes a 24/7 AI travel assistant, smart itinerary generation with our AI Wizard, personalized recommendations, and more advanced AI features to enhance your travel planning experience.</p>
               </div>
             </div>
           </div>

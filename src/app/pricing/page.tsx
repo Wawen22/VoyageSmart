@@ -84,14 +84,14 @@ export default function PricingPage() {
                 <PricingFeature included={false}>Priority support</PricingFeature>
               </CardContent>
               <CardFooter className="flex justify-center pt-4">
-                {isSubscribed('free') && !isSubscribed('premium') ? (
+                {subscription?.tier === 'free' ? (
                   <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
                 ) : (
                   <Button
                     variant={selectedPlan === 'free' ? 'default' : 'outline'}
                     className="w-full"
                     onClick={() => setSelectedPlan('free')}
-                    disabled={isSubscribed('free') && !isSubscribed('premium')}
+                    disabled={subscription?.tier === 'free'}
                   >
                     {isSubscribed('premium') ? 'Downgrade' : 'Select'}
                   </Button>
@@ -125,7 +125,7 @@ export default function PricingPage() {
                 <PricingFeature included={true}>Priority support</PricingFeature>
               </CardContent>
               <CardFooter className="flex justify-center pt-4">
-                {isSubscribed('premium') ? (
+                {subscription?.tier === 'premium' ? (
                   <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
                 ) : (
                   <Button
@@ -140,13 +140,13 @@ export default function PricingPage() {
             </Card>
 
             {/* AI Plan */}
-            <Card className="border-2 border-border hover:shadow-lg transition-shadow opacity-75">
+            <Card className={`border-2 ${selectedPlan === 'ai' ? 'border-primary' : 'border-border'} hover:shadow-lg transition-shadow`}>
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-2">
                   <SparklesIcon className="h-10 w-10 text-primary" />
                 </div>
                 <CardTitle>AI Assistant</CardTitle>
-                <CardDescription>Coming Soon</CardDescription>
+                <CardDescription>For smart travelers</CardDescription>
                 <div className="mt-4">
                   <span className="text-3xl font-bold">€9.99</span>
                   <span className="text-muted-foreground">/month</span>
@@ -162,7 +162,17 @@ export default function PricingPage() {
                 <PricingFeature included={true}>Early access to new features</PricingFeature>
               </CardContent>
               <CardFooter className="flex justify-center pt-4">
-                <Badge variant="outline" className="px-4 py-2">Coming Soon</Badge>
+                {subscription?.tier === 'ai' ? (
+                  <Badge variant="outline" className="px-4 py-2">Current Plan</Badge>
+                ) : (
+                  <Button
+                    variant={selectedPlan === 'ai' ? 'default' : 'outline'}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white"
+                    onClick={() => setSelectedPlan('ai')}
+                  >
+                    Select
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           </div>
@@ -195,8 +205,8 @@ export default function PricingPage() {
                 <p className="text-muted-foreground">Your data is always preserved. However, if you downgrade to Free and have more than 3 trips, you won't be able to create new trips until you're below the limit. You'll also lose access to Accommodations and Transportation features.</p>
               </div>
               <div>
-                <h4 className="font-medium">When will the AI Assistant plan be available?</h4>
-                <p className="text-muted-foreground">We're working hard to bring AI features to VoyageSmart. Sign up for our newsletter to be the first to know when it launches.</p>
+                <h4 className="font-medium">What AI features are included in the AI Assistant plan?</h4>
+                <p className="text-muted-foreground">The AI Assistant plan includes a 24/7 AI travel assistant, smart itinerary generation, personalized recommendations, and more advanced AI features to enhance your travel planning experience.</p>
               </div>
             </div>
           </div>
