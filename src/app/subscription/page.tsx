@@ -228,8 +228,15 @@ export default function SubscriptionPage() {
                   <div className="flex justify-between items-center">
                     <CardTitle>Current Subscription</CardTitle>
                     {subscription && (
-                      <Badge variant={subscription.tier === 'premium' ? 'default' : 'outline'} className="text-sm">
-                        {subscription.tier === 'premium' ? 'Premium' : 'Free'}
+                      <Badge
+                        variant={subscription.tier !== 'free' ? 'default' : 'outline'}
+                        className={`text-sm ${subscription.tier === 'ai' ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white' : ''}`}
+                      >
+                        {subscription.tier === 'premium'
+                          ? 'Premium'
+                          : subscription.tier === 'ai'
+                            ? 'AI Assistant'
+                            : 'Free'}
                       </Badge>
                     )}
                   </div>
@@ -279,6 +286,29 @@ export default function SubscriptionPage() {
                           <PricingFeature included={subscription.tier !== 'free'}>Unlimited trips</PricingFeature>
                           <PricingFeature included={subscription.tier !== 'free' || subscription.cancelAtPeriodEnd}>Accommodations management</PricingFeature>
                           <PricingFeature included={subscription.tier !== 'free' || subscription.cancelAtPeriodEnd}>Transportation tracking</PricingFeature>
+
+                          {subscription.tier === 'ai' && (
+                            <>
+                              <PricingFeature included={true}>
+                                <span className="flex items-center">
+                                  <SparklesIcon className="h-3 w-3 mr-1 text-purple-500" />
+                                  AI Travel Assistant
+                                </span>
+                              </PricingFeature>
+                              <PricingFeature included={true}>
+                                <span className="flex items-center">
+                                  <SparklesIcon className="h-3 w-3 mr-1 text-purple-500" />
+                                  Itinerary Wizard
+                                </span>
+                              </PricingFeature>
+                              <PricingFeature included={true}>
+                                <span className="flex items-center">
+                                  <SparklesIcon className="h-3 w-3 mr-1 text-purple-500" />
+                                  Smart Trip Recommendations
+                                </span>
+                              </PricingFeature>
+                            </>
+                          )}
                         </div>
                       </div>
                     </>
@@ -334,7 +364,9 @@ export default function SubscriptionPage() {
                   </div>
 
                   <div className="pt-4">
-                    <h3 className="text-sm font-medium mb-3">Premium Features</h3>
+                    <h3 className="text-sm font-medium mb-3">
+                      {subscription?.tier === 'ai' ? 'Premium Features (Included)' : 'Premium Features'}
+                    </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <p className="text-sm">Accommodations</p>
@@ -350,6 +382,35 @@ export default function SubscriptionPage() {
                       </div>
                     </div>
                   </div>
+
+                  {subscription?.tier === 'ai' && (
+                    <div className="pt-4">
+                      <h3 className="text-sm font-medium mb-3 text-purple-500 flex items-center">
+                        <SparklesIcon className="h-4 w-4 mr-1" />
+                        AI Assistant Features
+                      </h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <p className="text-sm">AI Travel Assistant</p>
+                          <Badge variant="default" className="text-xs bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+                            Available
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <p className="text-sm">Itinerary Wizard</p>
+                          <Badge variant="default" className="text-xs bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+                            Available
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <p className="text-sm">Smart Trip Recommendations</p>
+                          <Badge variant="default" className="text-xs bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+                            Available
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

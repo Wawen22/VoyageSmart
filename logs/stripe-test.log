@@ -401,3 +401,73 @@
   "current_period_end": "2025-06-04T08:33:10.334+00:00"
 }
 [2025-05-05T08:33:10.563Z] Test webhook - Successfully updated user fa116dab-3276-4033-9ca2-4a9be5f0dfe0 to tier ai
+[2025-05-06T08:31:51.378Z] Test webhook received
+[2025-05-06T08:31:51.381Z] Test webhook - Action: update for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: {
+  "userId": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+  "tier": "premium",
+  "action": "update"
+}
+[2025-05-06T08:31:51.755Z] Updated subscription for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: [
+  {
+    "id": "f1441426-24f5-47bc-b27f-9cfd0874a96a",
+    "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+    "tier": "premium",
+    "status": "active",
+    "valid_until": "2026-04-22T15:52:57.656621+00:00",
+    "created_at": "2025-04-22T15:52:57.656621+00:00",
+    "updated_at": "2025-04-22T15:52:57.656621+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-06-05T08:31:51.68+00:00"
+  }
+]
+[2025-05-06T08:31:51.804Z] Current subscription state after update: {
+  "id": "f1441426-24f5-47bc-b27f-9cfd0874a96a",
+  "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+  "tier": "premium",
+  "status": "active",
+  "valid_until": "2026-04-22T15:52:57.656621+00:00",
+  "created_at": "2025-04-22T15:52:57.656621+00:00",
+  "updated_at": "2025-04-22T15:52:57.656621+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-06-05T08:31:51.68+00:00"
+}
+[2025-05-06T08:31:51.852Z] Test webhook - Successfully updated user fa116dab-3276-4033-9ca2-4a9be5f0dfe0 to tier premium
+[2025-05-06T08:32:05.083Z] Test webhook received
+[2025-05-06T08:32:05.086Z] Test webhook - Action: update for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: {
+  "userId": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+  "tier": "ai",
+  "action": "update"
+}
+[2025-05-06T08:32:05.252Z] Updated subscription for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: [
+  {
+    "id": "f1441426-24f5-47bc-b27f-9cfd0874a96a",
+    "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+    "tier": "ai",
+    "status": "active",
+    "valid_until": "2026-04-22T15:52:57.656621+00:00",
+    "created_at": "2025-04-22T15:52:57.656621+00:00",
+    "updated_at": "2025-04-22T15:52:57.656621+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-06-05T08:32:05.199+00:00"
+  }
+]
+[2025-05-06T08:32:05.332Z] Current subscription state after update: {
+  "id": "f1441426-24f5-47bc-b27f-9cfd0874a96a",
+  "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+  "tier": "ai",
+  "status": "active",
+  "valid_until": "2026-04-22T15:52:57.656621+00:00",
+  "created_at": "2025-04-22T15:52:57.656621+00:00",
+  "updated_at": "2025-04-22T15:52:57.656621+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-06-05T08:32:05.199+00:00"
+}
+[2025-05-06T08:32:05.417Z] Test webhook - Successfully updated user fa116dab-3276-4033-9ca2-4a9be5f0dfe0 to tier ai

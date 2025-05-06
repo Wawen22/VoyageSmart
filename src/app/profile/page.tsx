@@ -8,7 +8,7 @@ import { useSubscription } from '@/lib/subscription';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
-import { RocketIcon, TagIcon, LockIcon } from 'lucide-react';
+import { RocketIcon, TagIcon, LockIcon, SparklesIcon } from 'lucide-react';
 
 export default function Profile() {
   const { user, updateProfile, signOut } = useAuth();
@@ -186,8 +186,15 @@ export default function Profile() {
                 Subscription Plan
               </h3>
               {subscription && (
-                <Badge variant={subscription.tier === 'premium' ? 'default' : 'outline'} className="text-sm">
-                  {subscription.tier === 'premium' ? 'Premium' : 'Free'}
+                <Badge
+                  variant={subscription.tier !== 'free' ? 'default' : 'outline'}
+                  className={`text-sm ${subscription.tier === 'ai' ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white' : ''}`}
+                >
+                  {subscription.tier === 'premium'
+                    ? 'Premium'
+                    : subscription.tier === 'ai'
+                      ? 'AI Assistant'
+                      : 'Free'}
                 </Badge>
               )}
             </div>
@@ -213,6 +220,8 @@ export default function Profile() {
                       <p className="text-sm text-muted-foreground">
                         {subscription.tier === 'premium' ? (
                           'Unlimited trips, Accommodations, Transportation'
+                        ) : subscription.tier === 'ai' ? (
+                          'All Premium features + AI Assistant, Itinerary Wizard'
                         ) : (
                           'Up to 3 trips'
                         )}
@@ -227,6 +236,11 @@ export default function Profile() {
                           <RocketIcon className="h-4 w-4 mr-2" />
                           <span>You're enjoying all premium features!</span>
                         </div>
+                      ) : subscription.tier === 'ai' ? (
+                        <div className="flex items-center text-sm text-purple-500">
+                          <SparklesIcon className="h-4 w-4 mr-2" />
+                          <span>You're enjoying all premium and AI features!</span>
+                        </div>
                       ) : (
                         <div className="flex items-center text-sm text-muted-foreground">
                           <LockIcon className="h-4 w-4 mr-2" />
@@ -235,13 +249,22 @@ export default function Profile() {
                       )}
 
                       <div className="flex gap-2">
-                        {subscription.tier !== 'premium' && (
+                        {subscription.tier === 'free' && (
                           <button
                             type="button"
-                            onClick={upgradeSubscription}
+                            onClick={() => upgradeSubscription('premium')}
                             className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
                           >
                             Upgrade to Premium
+                          </button>
+                        )}
+                        {subscription.tier !== 'ai' && (
+                          <button
+                            type="button"
+                            onClick={() => upgradeSubscription('ai')}
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                          >
+                            {subscription.tier === 'free' ? 'Get AI Assistant' : 'Upgrade to AI Assistant'}
                           </button>
                         )}
                         <Link

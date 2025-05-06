@@ -129,11 +129,14 @@ export default function Navbar() {
                       role="menuitem"
                       onClick={() => setIsProfileMenuOpen(false)}
                     >
-                      Subscription {subscription?.tier === 'premium'
-                        ? '(Premium)'
-                        : subscription?.tier === 'ai'
-                          ? '(AI Assistant)'
-                          : '(Free)'}
+                      Subscription {' '}
+                      {subscription?.tier === 'premium' ? (
+                        <span className="text-primary font-medium">(Premium)</span>
+                      ) : subscription?.tier === 'ai' ? (
+                        <span className="text-purple-500 font-medium">(AI Assistant)</span>
+                      ) : (
+                        <span className="text-muted-foreground">(Free)</span>
+                      )}
                     </Link>
                     <button
                       className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
