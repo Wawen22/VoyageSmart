@@ -471,3 +471,68 @@
   "current_period_end": "2025-06-05T08:32:05.199+00:00"
 }
 [2025-05-06T08:32:05.417Z] Test webhook - Successfully updated user fa116dab-3276-4033-9ca2-4a9be5f0dfe0 to tier ai
+[2025-05-06T08:38:26.776Z] Test webhook received
+[2025-05-06T08:38:26.778Z] Test webhook - Action: check for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: {
+  "userId": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+  "action": "check"
+}
+[2025-05-06T08:38:27.176Z] Current subscription state for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: {
+  "id": "f1441426-24f5-47bc-b27f-9cfd0874a96a",
+  "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+  "tier": "ai",
+  "status": "active",
+  "valid_until": "2026-04-22T15:52:57.656621+00:00",
+  "created_at": "2025-04-22T15:52:57.656621+00:00",
+  "updated_at": "2025-04-22T15:52:57.656621+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-06-05T08:32:05.199+00:00"
+}
+[2025-05-06T08:38:27.177Z] Subscription history for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: [
+  {
+    "id": "43225aa6-3445-40c6-8bb3-b26f0a04fd79",
+    "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+    "event_type": "subscription_created",
+    "tier": "ai",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-05-06T08:32:05.299033+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-05-06T08:32:05.299033+00:00"
+  },
+  {
+    "id": "9f96668d-52bb-4969-af16-4511d12c635c",
+    "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+    "event_type": "subscription_created",
+    "tier": "premium",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-05-06T08:31:51.738723+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-05-06T08:31:51.738723+00:00"
+  },
+  {
+    "id": "b76e72e0-8a80-4e7c-8e97-b29a83a530ef",
+    "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+    "event_type": "subscription_created",
+    "tier": "ai",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-05-05T08:33:10.531789+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-05-05T08:33:10.531789+00:00"
+  }
+]
