@@ -536,3 +536,143 @@
     "created_at": "2025-05-05T08:33:10.531789+00:00"
   }
 ]
+[2025-05-07T14:37:49.790Z] Test webhook received
+[2025-05-07T14:37:49.802Z] Test webhook - Action: update for user 81a9debf-49a2-4a1c-b349-436ad58dcf1d: {
+  "userId": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+  "tier": "free",
+  "action": "update"
+}
+[2025-05-07T14:37:49.964Z] Updated subscription for user 81a9debf-49a2-4a1c-b349-436ad58dcf1d: [
+  {
+    "id": "a4a3445d-e482-409c-996d-97ff152bdc14",
+    "user_id": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+    "tier": "free",
+    "status": "active",
+    "valid_until": "2025-08-07T14:37:23.58+00:00",
+    "created_at": "2025-04-22T15:52:57.656621+00:00",
+    "updated_at": "2025-05-07T14:37:23.58+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-06-06T14:37:49.915+00:00"
+  }
+]
+[2025-05-07T14:37:50.012Z] Current subscription state after update: {
+  "id": "a4a3445d-e482-409c-996d-97ff152bdc14",
+  "user_id": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2025-08-07T14:37:23.58+00:00",
+  "created_at": "2025-04-22T15:52:57.656621+00:00",
+  "updated_at": "2025-05-07T14:37:23.58+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-06-06T14:37:49.915+00:00"
+}
+[2025-05-07T14:37:50.061Z] Test webhook - Successfully updated user 81a9debf-49a2-4a1c-b349-436ad58dcf1d to tier free
+[2025-05-07T15:26:29.947Z] Test webhook received
+[2025-05-07T15:26:29.949Z] Test webhook - Action: update for user 81a9debf-49a2-4a1c-b349-436ad58dcf1d: {
+  "userId": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+  "tier": "free",
+  "action": "update"
+}
+[2025-05-07T15:26:30.090Z] Updated subscription for user 81a9debf-49a2-4a1c-b349-436ad58dcf1d: [
+  {
+    "id": "a4a3445d-e482-409c-996d-97ff152bdc14",
+    "user_id": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+    "tier": "free",
+    "status": "active",
+    "valid_until": "2025-08-07T15:21:28.888+00:00",
+    "created_at": "2025-04-22T15:52:57.656621+00:00",
+    "updated_at": "2025-05-07T15:21:28.889+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-06-06T15:26:30.043+00:00"
+  }
+]
+[2025-05-07T15:26:30.143Z] Current subscription state after update: {
+  "id": "a4a3445d-e482-409c-996d-97ff152bdc14",
+  "user_id": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2025-08-07T15:21:28.888+00:00",
+  "created_at": "2025-04-22T15:52:57.656621+00:00",
+  "updated_at": "2025-05-07T15:21:28.889+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-06-06T15:26:30.043+00:00"
+}
+[2025-05-07T15:26:30.219Z] Test webhook - Successfully updated user 81a9debf-49a2-4a1c-b349-436ad58dcf1d to tier free
+[2025-05-07T15:51:10.675Z] Test webhook received
+[2025-05-07T15:51:10.677Z] Test webhook - Action: update for user 81a9debf-49a2-4a1c-b349-436ad58dcf1d: {
+  "userId": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+  "tier": "free",
+  "action": "update"
+}
+[2025-05-07T15:51:10.811Z] Updated subscription for user 81a9debf-49a2-4a1c-b349-436ad58dcf1d: [
+  {
+    "id": "a4a3445d-e482-409c-996d-97ff152bdc14",
+    "user_id": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+    "tier": "free",
+    "status": "active",
+    "valid_until": "2025-08-07T15:41:57.459+00:00",
+    "created_at": "2025-04-22T15:52:57.656621+00:00",
+    "updated_at": "2025-05-07T15:41:57.459+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-06-06T15:51:10.733+00:00"
+  }
+]
+[2025-05-07T15:51:10.858Z] Current subscription state after update: {
+  "id": "a4a3445d-e482-409c-996d-97ff152bdc14",
+  "user_id": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2025-08-07T15:41:57.459+00:00",
+  "created_at": "2025-04-22T15:52:57.656621+00:00",
+  "updated_at": "2025-05-07T15:41:57.459+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-06-06T15:51:10.733+00:00"
+}
+[2025-05-07T15:51:10.908Z] Test webhook - Successfully updated user 81a9debf-49a2-4a1c-b349-436ad58dcf1d to tier free
+[2025-05-08T08:05:03.077Z] Test webhook received
+[2025-05-08T08:05:03.079Z] Test webhook - Action: update for user 81a9debf-49a2-4a1c-b349-436ad58dcf1d: {
+  "userId": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+  "tier": "free",
+  "action": "update"
+}
+[2025-05-08T08:05:03.234Z] Updated subscription for user 81a9debf-49a2-4a1c-b349-436ad58dcf1d: [
+  {
+    "id": "a4a3445d-e482-409c-996d-97ff152bdc14",
+    "user_id": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+    "tier": "free",
+    "status": "active",
+    "valid_until": "2026-07-22T00:00:00+00:00",
+    "created_at": "2025-04-22T15:52:57.656621+00:00",
+    "updated_at": "2025-05-08T08:03:52.899+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-06-07T08:05:03.178+00:00"
+  }
+]
+[2025-05-08T08:05:03.413Z] Current subscription state after update: {
+  "id": "a4a3445d-e482-409c-996d-97ff152bdc14",
+  "user_id": "81a9debf-49a2-4a1c-b349-436ad58dcf1d",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2026-07-22T00:00:00+00:00",
+  "created_at": "2025-04-22T15:52:57.656621+00:00",
+  "updated_at": "2025-05-08T08:03:52.899+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-06-07T08:05:03.178+00:00"
+}
+[2025-05-08T08:05:03.465Z] Test webhook - Successfully updated user 81a9debf-49a2-4a1c-b349-436ad58dcf1d to tier free

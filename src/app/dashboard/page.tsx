@@ -169,16 +169,19 @@ export default function Dashboard() {
                   <PremiumIndicator feature="unlimited_trips" variant="text" />
                 </div>
               )}
-              <RippleButton
-                asChild
-                feedbackType="ripple"
-                className="px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent rounded-full shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center transition-all duration-300 hover:scale-105"
-              >
-                <Link href="/trips/new">
-                  <PlusIcon className="h-4 w-4 mr-1" />
-                  Create New Trip
-                </Link>
-              </RippleButton>
+              <div className="flex gap-2">
+                {/* Create New Trip Button */}
+                <RippleButton
+                  asChild
+                  feedbackType="ripple"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent rounded-full shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center transition-all duration-300 hover:scale-105"
+                >
+                  <Link href="/trips/new">
+                    <PlusIcon className="h-4 w-4 mr-1" />
+                    Create New Trip
+                  </Link>
+                </RippleButton>
+              </div>
             </div>
           </div>
 

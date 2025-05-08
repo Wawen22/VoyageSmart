@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
 import TestWebhook from './test-webhook';
+import PromoCodeRedemption from '@/components/subscription/PromoCodeRedemption';
 import {
   CheckIcon,
   XIcon,
@@ -23,7 +24,8 @@ import {
   HistoryIcon,
   SettingsIcon,
   ArrowLeftIcon,
-  TagIcon
+  TagIcon,
+  InfoIcon
 } from 'lucide-react';
 
 export default function SubscriptionPage() {
@@ -34,6 +36,21 @@ export default function SubscriptionPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Log per debug
+  useEffect(() => {
+    if (subscription) {
+      console.log('Subscription data:', {
+        tier: subscription.tier,
+        status: subscription.status,
+        validUntil: subscription.validUntil,
+        stripeCustomerId: subscription.stripeCustomerId,
+        stripeSubscriptionId: subscription.stripeSubscriptionId,
+        cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+        currentPeriodEnd: subscription.currentPeriodEnd,
+      });
+    }
+  }, [subscription]);
 
   // Controlla se c'è un parametro di successo o cancellazione nella URL
   useEffect(() => {
@@ -261,20 +278,36 @@ export default function SubscriptionPage() {
                                 (Cancels on {formatDate(subscription.currentPeriodEnd?.toISOString() || subscription.validUntil.toISOString())})
                               </span>
                             )}
+                            {subscription.status === 'active' && !subscription.stripeSubscriptionId && (
+                              <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">
+                                Via Promo Code
+                              </Badge>
+                            )}
                           </p>
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-muted-foreground mb-2">Valid Until</h3>
                           <p className="text-lg font-medium">{formatDate(subscription.validUntil.toISOString())}</p>
                         </div>
-                        <div>
-                          <h3 className="text-sm font-medium text-muted-foreground mb-2">Next Payment</h3>
-                          <p className="text-lg font-medium">
-                            {subscription.tier === 'free' ? 'No payment required' :
-                             subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd.toISOString()) :
-                             formatDate(subscription.validUntil.toISOString())}
-                          </p>
-                        </div>
+                        {/* Mostra Next Payment solo se è una sottoscrizione Stripe */}
+                        {typeof subscription.stripeSubscriptionId === 'string' && subscription.stripeSubscriptionId.length > 0 ? (
+                          <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Next Payment</h3>
+                            <p className="text-lg font-medium">
+                              {subscription.currentPeriodEnd
+                                ? formatDate(subscription.currentPeriodEnd.toISOString())
+                                : formatDate(subscription.validUntil.toISOString())}
+                            </p>
+                          </div>
+                        ) : (
+                          <div>
+                            <h3 className="text-sm font-medium text-muted-foreground mb-2">Promo Code</h3>
+                            <p className="text-lg font-medium flex items-center">
+                              <SparklesIcon className="h-4 w-4 mr-2 text-purple-500" />
+                              Active
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       <div className="pt-4 border-t border-border">
@@ -326,6 +359,18 @@ export default function SubscriptionPage() {
                   ) : subscription?.cancelAtPeriodEnd ? (
                     <Button variant="outline" onClick={() => handleUpgrade('premium')} className="w-full sm:w-auto">
                       Resubscribe
+                    </Button>
+                  ) : subscription?.status === 'active' &&
+                      (typeof subscription?.stripeSubscriptionId !== 'string' ||
+                       subscription?.stripeSubscriptionId.length === 0) ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => setActiveTab('overview')}
+                      className="w-full sm:w-auto"
+                      disabled
+                    >
+                      <InfoIcon className="h-4 w-4 mr-2" />
+                      Promo Code Subscription
                     </Button>
                   ) : (
                     <Button variant="outline" onClick={handleCancel} className="w-full sm:w-auto">
@@ -413,6 +458,9 @@ export default function SubscriptionPage() {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Promo Code Redemption */}
+              <PromoCodeRedemption />
             </TabsContent>
 
             {/* Plans Tab */}

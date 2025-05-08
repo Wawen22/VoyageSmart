@@ -52,6 +52,25 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
   - `status`: Stato dell'abbonamento ('active', 'inactive', 'canceled')
   - `valid_until`: Data di scadenza
 
+- Tabella `promo_codes`: Gestisce i codici promozionali
+  - `id`: UUID
+  - `code`: Codice promozionale (testo)
+  - `description`: Descrizione del codice (opzionale)
+  - `tier`: Piano da attivare ('free', 'premium', 'ai')
+  - `is_active`: Stato di attivazione del codice
+  - `max_uses`: Numero massimo di utilizzi (null per illimitati)
+  - `used_count`: Contatore degli utilizzi
+  - `expires_at`: Data di scadenza (opzionale)
+  - `created_by`: ID dell'amministratore che ha creato il codice
+  - `created_at`: Data di creazione
+  - `updated_at`: Data di ultimo aggiornamento
+
+- Tabella `promo_code_redemptions`: Registra l'utilizzo dei codici promozionali
+  - `id`: UUID
+  - `promo_code_id`: ID del codice promozionale
+  - `user_id`: ID dell'utente che ha utilizzato il codice
+  - `redeemed_at`: Data di utilizzo
+
 ### Componenti Frontend
 - `SubscriptionProvider`: Context provider per gestire lo stato dell'abbonamento
 - `SubscriptionContext`: Context per accedere alle informazioni sull'abbonamento
@@ -59,6 +78,7 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
 - `UpgradePrompt`: Componente per mostrare un prompt di upgrade per funzionalità Premium
 - `AIUpgradePrompt`: Componente per mostrare un prompt di upgrade per funzionalità AI
 - `TripLimitPrompt`: Componente per mostrare un prompt quando si raggiunge il limite di viaggi
+- `PromoCodeRedemption`: Componente per riscattare codici promozionali
 - `PricingPage`: Pagina per visualizzare e selezionare i piani di abbonamento
 
 ### Funzioni di Controllo Accesso
@@ -92,24 +112,34 @@ Questo documento descrive l'implementazione del sistema di abbonamenti in Voyage
 - ✅ Implementata visualizzazione ricca delle attività generate
 - ✅ Aggiunta visualizzazione su mappa interattiva con Mapbox
 
+### Strategia di Lancio ✅
+- ✅ Implementato sistema di codici promozionali
+- ✅ Creata interfaccia per riscattare codici promo
+- ✅ Implementata gestione amministrativa dei codici promo
+
 ## Prossimi Passi
 
-1. **Automazione Sottoscrizioni**
+1. **Programma di Referral**
+   - Implementare sistema di referral (1 mese gratis di Premium per 3 referral)
+   - Implementare tier superiore di referral (1 mese gratis di AI Assistant per 5 referral)
+   - Creare interfaccia per tracciare e gestire i referral
+
+2. **Automazione Sottoscrizioni**
    - Configurare un cron job per verificare periodicamente le sottoscrizioni scadute
    - Aggiungere notifiche email per cambiamenti di stato delle sottoscrizioni
    - Implementare sistema di promemoria per abbonamenti in scadenza
 
-2. **Dashboard Amministrativa**
+3. **Dashboard Amministrativa**
    - Creare una dashboard per monitorare gli abbonamenti
    - Visualizzare metriche di conversione
    - Gestire gli abbonamenti degli utenti
 
-3. **Miglioramenti UX**
+4. **Miglioramenti UX**
    - Implementare un processo di onboarding per nuovi utenti premium
    - Migliorare la pagina di pricing con più dettagli e testimonianze
    - Aggiungere periodo di prova gratuito per il piano AI
 
-4. **Funzionalità AI Avanzate**
+5. **Funzionalità AI Avanzate**
    - Implementare suggerimenti proattivi basati sull'AI
    - Aggiungere funzionalità di ottimizzazione percorsi
    - Implementare analisi predittiva per costi e affluenza
