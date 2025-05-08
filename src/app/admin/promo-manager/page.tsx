@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeftIcon, RefreshCcw, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeftIcon, RefreshCcw, PlusCircle, Trash2, ShieldIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { AdminProtected } from '@/components/auth/AdminProtected';
 
 // Simplified PromoCode type
 type PromoCode = {
@@ -194,30 +195,59 @@ export default function SimplePromoManager() {
 
   if (!isAuthenticated) {
     return (
-      <div className="container py-10">
+      <div className="container py-16 px-4 md:px-6">
         <div className="max-w-md mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle>Accesso Admin</CardTitle>
-              <CardDescription>Inserisci il token di amministrazione per accedere</CardDescription>
+          <Button
+            variant="ghost"
+            onClick={() => router.push('/dashboard')}
+            className="mb-8 hover:bg-muted/50"
+          >
+            <ArrowLeftIcon className="h-4 w-4 mr-2" />
+            Torna alla Dashboard
+          </Button>
+
+          <h1 className="text-2xl font-bold text-center mb-6">Gestione Codici Promo</h1>
+
+          <Card className="shadow-md border-border">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-xl text-center">Accesso Admin</CardTitle>
+              <CardDescription className="text-center">
+                Inserisci il token di amministrazione per accedere alla gestione dei codici promozionali
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="token">Token Admin</Label>
+                  <Label htmlFor="token" className="font-medium">Token Admin</Label>
                   <Input
                     id="token"
                     type="password"
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
                     placeholder="Inserisci il token di amministrazione"
+                    className="focus-visible:ring-primary"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        authenticate();
+                      }
+                    }}
                   />
                 </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
+                {error && (
+                  <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm">
+                    {error}
+                  </div>
+                )}
               </div>
             </CardContent>
-            <CardFooter>
-              <Button onClick={authenticate} className="w-full">Accedi</Button>
+            <CardFooter className="pt-2 border-t bg-muted/20">
+              <Button
+                onClick={authenticate}
+                className="w-full bg-primary hover:bg-primary/90"
+                disabled={loading}
+              >
+                {loading ? 'Autenticazione...' : 'Accedi'}
+              </Button>
             </CardFooter>
           </Card>
         </div>
@@ -226,43 +256,52 @@ export default function SimplePromoManager() {
   }
 
   return (
-    <div className="container py-10">
-      <div className="mb-6">
-        <Button
-          variant="outline"
-          onClick={() => router.push('/dashboard')}
-          className="mb-4"
-        >
-          <ArrowLeftIcon className="h-4 w-4 mr-2" />
-          Torna alla Dashboard
-        </Button>
-        <h1 className="text-3xl font-bold">Gestione Codici Promo</h1>
-        <p className="text-muted-foreground">
+    <AdminProtected>
+      <div className="container py-10 px-4 md:px-6 mx-auto">
+        <div className="flex items-center mb-8">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/dashboard')}
+            className="mr-4"
+          >
+            <ArrowLeftIcon className="h-4 w-4 mr-2" />
+            Torna alla Dashboard
+          </Button>
+
+          <div className="flex items-center text-purple-500 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+            <ShieldIcon className="h-4 w-4 mr-2" />
+            <span className="text-sm font-medium">Area Amministratore</span>
+          </div>
+        </div>
+
+        <h1 className="text-3xl font-bold mt-4">Gestione Codici Promo</h1>
+        <p className="text-muted-foreground mt-2">
           Crea e gestisci codici promozionali per gli utenti
         </p>
       </div>
 
       {/* Create Promo Code Form */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Crea Nuovo Codice Promo</CardTitle>
+      <Card className="mb-8 shadow-md border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-xl">Crea Nuovo Codice Promo</CardTitle>
           <CardDescription>Compila il form per creare un nuovo codice promozionale</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="pt-4">
+          <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="code">Codice Promo</Label>
+              <Label htmlFor="code" className="font-medium">Codice Promo</Label>
               <Input
                 id="code"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="es. SUMMER2023"
+                className="focus-visible:ring-primary"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tier">Piano</Label>
+              <Label htmlFor="tier" className="font-medium">Piano</Label>
               <Select value={tier} onValueChange={(value: any) => setTier(value)}>
-                <SelectTrigger id="tier">
+                <SelectTrigger id="tier" className="focus-visible:ring-primary">
                   <SelectValue placeholder="Seleziona piano" />
                 </SelectTrigger>
                 <SelectContent>
@@ -273,28 +312,30 @@ export default function SimplePromoManager() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maxUses">Utilizzi Massimi (opzionale)</Label>
+              <Label htmlFor="maxUses" className="font-medium">Utilizzi Massimi <span className="text-muted-foreground font-normal">(opzionale)</span></Label>
               <Input
                 id="maxUses"
                 type="number"
                 value={maxUses === null ? '' : maxUses}
                 onChange={(e) => setMaxUses(e.target.value ? parseInt(e.target.value) : null)}
                 placeholder="Lascia vuoto per illimitati"
+                className="focus-visible:ring-primary"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="expiresAt">Data di Scadenza (opzionale)</Label>
+              <Label htmlFor="expiresAt" className="font-medium">Data di Scadenza <span className="text-muted-foreground font-normal">(opzionale)</span></Label>
               <Input
                 id="expiresAt"
                 type="date"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
+                className="focus-visible:ring-primary"
               />
             </div>
           </div>
         </CardContent>
-        <CardFooter>
-          <Button onClick={createPromoCode} disabled={loading}>
+        <CardFooter className="pt-2 border-t bg-muted/20">
+          <Button onClick={createPromoCode} disabled={loading} className="bg-primary hover:bg-primary/90">
             <PlusCircle className="h-4 w-4 mr-2" />
             Crea Codice Promo
           </Button>
@@ -302,56 +343,71 @@ export default function SimplePromoManager() {
       </Card>
 
       {/* Promo Codes List */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="shadow-md border-border">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
           <div>
-            <CardTitle>Codici Promo Attivi</CardTitle>
+            <CardTitle className="text-xl">Codici Promo Attivi</CardTitle>
             <CardDescription>Gestisci i tuoi codici promozionali</CardDescription>
           </div>
-          <Button variant="outline" size="icon" onClick={fetchPromoCodes} disabled={loading}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={fetchPromoCodes}
+            disabled={loading}
+            className="h-9 w-9 rounded-md hover:bg-muted"
+          >
             <RefreshCcw className="h-4 w-4" />
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           {loading ? (
-            <p className="text-center py-4">Caricamento in corso...</p>
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="mt-4 text-muted-foreground">Caricamento in corso...</p>
+            </div>
           ) : promoCodes.length === 0 ? (
-            <p className="text-center py-4">Nessun codice promo trovato</p>
+            <div className="text-center py-8 border rounded-lg bg-muted/20">
+              <p className="text-muted-foreground">Nessun codice promo trovato</p>
+              <p className="text-sm text-muted-foreground mt-2">Crea il tuo primo codice promozionale utilizzando il form sopra</p>
+            </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-md border">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-2">Codice</th>
-                    <th className="text-left py-3 px-2">Piano</th>
-                    <th className="text-left py-3 px-2">Utilizzi</th>
-                    <th className="text-left py-3 px-2">Scadenza</th>
-                    <th className="text-left py-3 px-2">Azioni</th>
+                  <tr className="border-b bg-muted/30">
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Codice</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Piano</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Utilizzi</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Scadenza</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Azioni</th>
                   </tr>
                 </thead>
                 <tbody>
                   {promoCodes.map((promo) => (
-                    <tr key={promo.id} className="border-b">
-                      <td className="py-3 px-2 font-medium">{promo.code}</td>
-                      <td className="py-3 px-2">
-                        <span className={`inline-block px-2 py-1 rounded text-xs ${
-                          promo.tier === 'premium' ? 'bg-amber-100 text-amber-800' :
-                          promo.tier === 'ai' ? 'bg-purple-100 text-purple-800' :
-                          'bg-gray-100 text-gray-800'
+                    <tr key={promo.id} className="border-b hover:bg-muted/10 transition-colors">
+                      <td className="py-3 px-4 font-medium">{promo.code}</td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${
+                          promo.tier === 'premium' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                          promo.tier === 'ai' ? 'bg-purple-100 text-purple-800 border border-purple-200' :
+                          'bg-gray-100 text-gray-800 border border-gray-200'
                         }`}>
                           {promo.tier === 'premium' ? 'Premium' :
                            promo.tier === 'ai' ? 'AI Assistant' : 'Free'}
                         </span>
                       </td>
-                      <td className="py-3 px-2">
-                        {promo.used_count} / {promo.max_uses === null ? '∞' : promo.max_uses}
+                      <td className="py-3 px-4">
+                        <span className="font-mono bg-muted/30 px-2 py-1 rounded text-xs">
+                          {promo.used_count} / {promo.max_uses === null ? '∞' : promo.max_uses}
+                        </span>
                       </td>
-                      <td className="py-3 px-2">{formatDate(promo.expires_at)}</td>
-                      <td className="py-3 px-2">
+                      <td className="py-3 px-4">{formatDate(promo.expires_at)}</td>
+                      <td className="py-3 px-4">
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => deletePromoCode(promo.id)}
+                          className="h-8 w-8 rounded-md hover:bg-red-50 hover:text-red-600"
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
@@ -364,6 +420,6 @@ export default function SimplePromoManager() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </AdminProtected>
   );
 }

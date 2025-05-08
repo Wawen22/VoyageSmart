@@ -6,12 +6,14 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
-import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon } from 'lucide-react';
+import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon, ShieldIcon } from 'lucide-react';
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
   const { subscription } = useSubscription();
+  const { isAdmin, loading: isAdminLoading } = useIsAdmin();
   const pathname = usePathname();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
@@ -138,17 +140,19 @@ export default function Navbar() {
                         <span className="text-muted-foreground">(Free)</span>
                       )}
                     </Link>
-                    <Link
-                      href="/admin/promo-manager"
-                      className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                      role="menuitem"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <span className="flex items-center">
-                        <span className="mr-2">🎟️</span>
-                        Promo Codes
-                      </span>
-                    </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/admin/promo-manager"
+                        className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                        role="menuitem"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                      >
+                        <span className="flex items-center">
+                          <ShieldIcon className="h-4 w-4 mr-2 text-purple-500" />
+                          Promo Codes
+                        </span>
+                      </Link>
+                    )}
                     <button
                       className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                       role="menuitem"
