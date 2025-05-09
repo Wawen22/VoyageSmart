@@ -70,9 +70,8 @@ export async function POST(request: NextRequest) {
     const prompt = generatePrompt(tripData, preferences, days);
 
     // Chiama l'API Gemini
-    // Utilizziamo una chiave API hardcoded per il debug se quella nelle variabili d'ambiente non è disponibile
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyCdjn1Ox8BqVZUMTWMo9ZMMUYiKpkAym2E';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    // Utilizziamo la chiave API già definita in precedenza
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
 
     const requestBody = {
       contents: [
@@ -132,8 +131,12 @@ export async function POST(request: NextRequest) {
       const rawResponse = data.candidates[0].content.parts[0].text;
       console.log('Risposta grezza ricevuta:', rawResponse.substring(0, 200) + '...');
 
+      // Estrai i vincoli temporali dalle preferenze dell'utente
+      const additionalPreferences = preferences?.additionalPreferences || '';
+      const { timeConstraints } = analyzeAdditionalPreferences(additionalPreferences, tripData?.destination || '', tripData?.destinations || []);
+
       // Analizza la risposta per estrarre le attività
-      const activities = parseActivitiesFromResponse(rawResponse, days);
+      const activities = parseActivitiesFromResponse(rawResponse, days, timeConstraints);
 
       return NextResponse.json({
         success: true,
@@ -196,7 +199,7 @@ function generatePrompt(tripData: any, preferences: any, days: any[]) {
   let timeConstraintsSection = '';
   if (timeConstraints.length > 0) {
     timeConstraintsSection = `
-VINCOLI TEMPORALI (MOLTO IMPORTANTE):
+VINCOLI TEMPORALI (ESTREMAMENTE IMPORTANTE - RISPETTARE RIGOROSAMENTE):
 ${timeConstraints.map(constraint => `- ${constraint}`).join('\n')}
 `;
   }
@@ -251,7 +254,7 @@ ${specificRequests.map(req => `- ${req}`).join('\n')}
       'afternoon': 'pomeriggio',
       'evening': 'sera'
     };
-    const formattedTimes = preferredTimes.map(time => timeMap[time] || time).join(', ');
+    const formattedTimes = preferredTimes.map((time: string) => timeMap[time] || time).join(', ');
     timesDescription = `con preferenza per attività durante: ${formattedTimes}`;
   }
 
@@ -285,7 +288,9 @@ Per ogni giorno, crea 3-5 attività che includano:
 6. Breve nota o consiglio (includi informazioni utili come suggerimenti, cosa aspettarsi, o dettagli storici)
 
 LINEE GUIDA IMPORTANTI:
-- RISPETTA RIGOROSAMENTE i vincoli temporali specificati dall'utente (es. "finire entro le 16:00")
+- RISPETTA RIGOROSAMENTE i vincoli temporali specificati dall'utente (es. "iniziare alle 8:00", "aperitivo alle 18:00")
+- Se l'utente richiede di iniziare le attività a un orario specifico, la prima attività DEVE iniziare a quell'ora esatta
+- Se l'utente richiede un'attività specifica (es. aperitivo) a un orario preciso, DEVI includerla esattamente a quell'ora
 - RISPETTA RIGOROSAMENTE la destinazione specifica richiesta dall'utente (es. "Matera" invece di "Bari")
 - Assicurati che le attività siano realistiche e fattibili nel tempo indicato
 - Considera i tempi di spostamento tra le attività (includi pause adeguate)
@@ -395,7 +400,7 @@ function analyzeAdditionalPreferences(
 
   // Cerca pattern specifici
   destinationPatterns.forEach(pattern => {
-    const matches = normalizedText.matchAll(pattern);
+    const matches = Array.from(normalizedText.matchAll(pattern));
     for (const match of matches) {
       if (match[1]) {
         const city = match[1].trim();
@@ -437,11 +442,19 @@ function analyzeAdditionalPreferences(
     /prima\s+(?:delle\s+)?(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g,
     /fino\s+(?:alle\s+)?(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g,
     /non\s+(?:dopo|oltre)\s+(?:le\s+)?(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g,
-    /(?:alle|ore)\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g
+    /(?:alle|ore)\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g,
+    /inizia(?:re|no)?\s+(?:alle|a)\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g,
+    /inizio\s+(?:alle|a)\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g,
+    /dalle\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g,
+    /a\s+partire\s+dalle\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio|sera))?/g,
+    /aperitivo\s+(?:verso|alle|intorno\s+alle)\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:pomeriggio|sera))?/g,
+    /colazione\s+(?:verso|alle|intorno\s+alle)\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina))?/g,
+    /pranzo\s+(?:verso|alle|intorno\s+alle)\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:mattina|pomeriggio))?/g,
+    /cena\s+(?:verso|alle|intorno\s+alle)\s+(\d{1,2})[:\.]?(\d{2})?\s*(?:del(?:la)?\s+(?:sera))?/g
   ];
 
   timePatterns.forEach(pattern => {
-    const matches = normalizedText.matchAll(pattern);
+    const matches = Array.from(normalizedText.matchAll(pattern));
     for (const match of matches) {
       if (match[1]) {
         let hour = parseInt(match[1]);
@@ -463,6 +476,16 @@ function analyzeAdditionalPreferences(
           constraint = `Le attività possono svolgersi fino alle ${formattedTime}`;
         } else if (match[0].includes('non dopo') || match[0].includes('non oltre')) {
           constraint = `Nessuna attività deve iniziare o svolgersi dopo le ${formattedTime}`;
+        } else if (match[0].includes('inizia') || match[0].includes('inizio') || match[0].includes('dalle') || match[0].includes('partire')) {
+          constraint = `La prima attività della giornata deve iniziare alle ${formattedTime}`;
+        } else if (match[0].includes('aperitivo')) {
+          constraint = `Includere un aperitivo alle ${formattedTime}`;
+        } else if (match[0].includes('colazione')) {
+          constraint = `Includere la colazione alle ${formattedTime}`;
+        } else if (match[0].includes('pranzo')) {
+          constraint = `Includere il pranzo alle ${formattedTime}`;
+        } else if (match[0].includes('cena')) {
+          constraint = `Includere la cena alle ${formattedTime}`;
         } else {
           constraint = `Importante orario menzionato: ${formattedTime}`;
         }
@@ -483,7 +506,7 @@ function analyzeAdditionalPreferences(
   ];
 
   requestPatterns.forEach(pattern => {
-    const matches = normalizedText.matchAll(pattern);
+    const matches = Array.from(normalizedText.matchAll(pattern));
     for (const match of matches) {
       if (match[1]) {
         const request = match[1].trim();
@@ -502,7 +525,7 @@ function analyzeAdditionalPreferences(
 }
 
 // Analizza la risposta per estrarre le attività
-function parseActivitiesFromResponse(response: string, days: any[]) {
+function parseActivitiesFromResponse(response: string, days: any[], timeConstraints: string[]) {
   try {
     console.log('Analisi risposta per estrarre attività...');
     console.log('Risposta grezza (primi 200 caratteri):', response.substring(0, 200));
@@ -522,7 +545,7 @@ function parseActivitiesFromResponse(response: string, days: any[]) {
           const parsedData = JSON.parse(anyJsonMatch[0]);
           if (parsedData.activities && Array.isArray(parsedData.activities)) {
             console.log('Estratto JSON valido dalla risposta non formattata');
-            return processActivities(parsedData.activities, days);
+            return processActivities(parsedData.activities, days, timeConstraints);
           }
         } catch (jsonError) {
           console.error('Errore nel parsing del JSON estratto:', jsonError);
@@ -546,20 +569,28 @@ function parseActivitiesFromResponse(response: string, days: any[]) {
       console.log('Numero di attività trovate:', parsedData.activities.length);
 
       // Valida e formatta le attività
-      return processActivities(parsedData.activities, days);
+      return processActivities(parsedData.activities, days, timeConstraints);
     } catch (jsonError) {
       console.error('Errore nel parsing del JSON:', jsonError);
       throw jsonError;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error parsing activities:', error);
-    throw new Error('Impossibile analizzare le attività dalla risposta: ' + error.message);
+    const errorMessage = error.message || 'Errore sconosciuto';
+    throw new Error('Impossibile analizzare le attività dalla risposta: ' + errorMessage);
   }
 }
 
 // Funzione helper per processare le attività
-function processActivities(activities: any[], days: any[]) {
+function processActivities(activities: any[], days: any[], timeConstraints: string[]) {
   console.log('Processando attività...');
+
+  // Ordina le attività per orario di inizio prima di processarle
+  activities.sort((a, b) => {
+    const aTime = a.start_time ? new Date(a.start_time).getTime() : 0;
+    const bTime = b.start_time ? new Date(b.start_time).getTime() : 0;
+    return aTime - bTime;
+  });
 
   // Valida e formatta le attività
   const processedActivities = activities.map((activity: any, index: number) => {
@@ -587,8 +618,13 @@ function processActivities(activities: any[], days: any[]) {
         const dayDate = activity.day_date || days.find(day => day.id === activity.day_id)?.day_date;
         const baseDate = dayDate ? new Date(dayDate) : new Date();
 
-        // Orario di inizio: 9:00 + (indice * 2 ore)
-        const startHour = 9 + (index % 4) * 2;
+        // Se è la prima attività del giorno, inizia alle 9:00 (o all'orario specificato nelle preferenze)
+        // altrimenti, inizia 2 ore dopo l'attività precedente
+        let startHour = 9;
+        if (index > 0) {
+          startHour = 9 + (index % 4) * 2;
+        }
+
         baseDate.setHours(startHour, 0, 0);
         activity.start_time = baseDate.toISOString();
 
@@ -678,6 +714,193 @@ function processActivities(activities: any[], days: any[]) {
   processedActivities.sort((a, b) => {
     return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
   });
+
+  // Raggruppa le attività per giorno
+  const activitiesByDay: Record<string, any[]> = {};
+  processedActivities.forEach(activity => {
+    const dayDate = activity.day_date;
+    if (!activitiesByDay[dayDate]) {
+      activitiesByDay[dayDate] = [];
+    }
+    activitiesByDay[dayDate].push(activity);
+  });
+
+  // Per ogni giorno, assicurati che la prima attività inizi all'orario specificato (se presente)
+  Object.keys(activitiesByDay).forEach(dayDate => {
+    const dayActivities = activitiesByDay[dayDate];
+    if (dayActivities.length > 0) {
+      // Ordina le attività del giorno per orario di inizio
+      dayActivities.sort((a, b) => {
+        return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+      });
+
+      // Trova l'orario di inizio specificato nelle preferenze (se presente)
+      const startTimeConstraint = findStartTimeConstraint();
+      if (startTimeConstraint) {
+        const [hours, minutes] = startTimeConstraint.split(':').map(Number);
+
+        // Applica l'orario di inizio alla prima attività del giorno
+        const firstActivity = dayActivities[0];
+        const firstActivityDate = new Date(firstActivity.start_time);
+        firstActivityDate.setHours(hours, minutes, 0, 0);
+
+        // Calcola la durata dell'attività
+        const endTime = new Date(firstActivity.end_time);
+        const duration = endTime.getTime() - new Date(firstActivity.start_time).getTime();
+
+        // Aggiorna l'orario di inizio
+        firstActivity.start_time = firstActivityDate.toISOString();
+
+        // Aggiorna l'orario di fine mantenendo la stessa durata
+        const newEndTime = new Date(firstActivityDate.getTime() + duration);
+        firstActivity.end_time = newEndTime.toISOString();
+
+        // Aggiusta gli orari delle attività successive per evitare sovrapposizioni
+        for (let i = 1; i < dayActivities.length; i++) {
+          const prevActivity = dayActivities[i-1];
+          const currentActivity = dayActivities[i];
+
+          const prevEndTime = new Date(prevActivity.end_time);
+          const currentStartTime = new Date(currentActivity.start_time);
+
+          // Se c'è sovrapposizione, sposta l'attività corrente dopo la precedente
+          if (currentStartTime <= prevEndTime) {
+            // Aggiungi 30 minuti di pausa tra le attività
+            const newStartTime = new Date(prevEndTime.getTime() + 30 * 60 * 1000);
+            currentActivity.start_time = newStartTime.toISOString();
+
+            // Calcola la durata dell'attività
+            const duration = new Date(currentActivity.end_time).getTime() - currentStartTime.getTime();
+
+            // Aggiorna l'orario di fine mantenendo la stessa durata
+            const newEndTime = new Date(newStartTime.getTime() + duration);
+            currentActivity.end_time = newEndTime.toISOString();
+          }
+        }
+      }
+    }
+  });
+
+  // Funzione per trovare l'orario di inizio specificato nelle preferenze
+  function findStartTimeConstraint(): string | null {
+    // Cerca nei vincoli temporali
+    for (const constraint of timeConstraints) {
+      if (constraint.includes('La prima attività della giornata deve iniziare alle')) {
+        const match = constraint.match(/iniziare alle (\d{2}:\d{2})/);
+        if (match && match[1]) {
+          return match[1];
+        }
+      }
+    }
+    return null;
+  }
+
+  // Gestisci attività specifiche a orari precisi (come aperitivo)
+  Object.keys(activitiesByDay).forEach(dayDate => {
+    const dayActivities = activitiesByDay[dayDate];
+    if (dayActivities.length > 0) {
+      // Cerca vincoli per attività specifiche (aperitivo, pranzo, cena)
+      const specificTimeActivities = findSpecificTimeActivities();
+
+      for (const specificActivity of specificTimeActivities) {
+        const { activityType, time } = specificActivity;
+        const [hours, minutes] = time.split(':').map(Number);
+
+        // Cerca se esiste già un'attività di questo tipo
+        let existingActivity = dayActivities.find(activity =>
+          activity.name.toLowerCase().includes(activityType.toLowerCase()) ||
+          (activity.type === 'food' && activityType === 'pranzo') ||
+          (activity.type === 'food' && activityType === 'cena') ||
+          (activity.type === 'food' && activityType === 'aperitivo')
+        );
+
+        if (existingActivity) {
+          // Aggiorna l'orario dell'attività esistente
+          const activityDate = new Date(existingActivity.start_time);
+          activityDate.setHours(hours, minutes, 0, 0);
+
+          // Calcola la durata dell'attività
+          const endTime = new Date(existingActivity.end_time);
+          const duration = endTime.getTime() - new Date(existingActivity.start_time).getTime();
+
+          // Aggiorna l'orario di inizio
+          existingActivity.start_time = activityDate.toISOString();
+
+          // Aggiorna l'orario di fine mantenendo la stessa durata
+          const newEndTime = new Date(activityDate.getTime() + duration);
+          existingActivity.end_time = newEndTime.toISOString();
+
+          console.log(`Aggiornato orario per ${activityType} alle ${time}`);
+        } else {
+          // Se non esiste, crea una nuova attività di questo tipo
+          console.log(`Non trovata attività di tipo ${activityType}, potrebbe essere necessario crearne una nuova`);
+        }
+      }
+
+      // Riordina le attività per orario dopo le modifiche
+      dayActivities.sort((a, b) => {
+        return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+      });
+
+      // Aggiusta gli orari delle attività per evitare sovrapposizioni
+      for (let i = 1; i < dayActivities.length; i++) {
+        const prevActivity = dayActivities[i-1];
+        const currentActivity = dayActivities[i];
+
+        const prevEndTime = new Date(prevActivity.end_time);
+        const currentStartTime = new Date(currentActivity.start_time);
+
+        // Se c'è sovrapposizione, sposta l'attività corrente dopo la precedente
+        if (currentStartTime <= prevEndTime) {
+          // Aggiungi 30 minuti di pausa tra le attività
+          const newStartTime = new Date(prevEndTime.getTime() + 30 * 60 * 1000);
+          currentActivity.start_time = newStartTime.toISOString();
+
+          // Calcola la durata dell'attività
+          const duration = new Date(currentActivity.end_time).getTime() - currentStartTime.getTime();
+
+          // Aggiorna l'orario di fine mantenendo la stessa durata
+          const newEndTime = new Date(newStartTime.getTime() + duration);
+          currentActivity.end_time = newEndTime.toISOString();
+        }
+      }
+    }
+  });
+
+  // Funzione per trovare attività specifiche a orari precisi
+  function findSpecificTimeActivities(): Array<{activityType: string, time: string}> {
+    const result: Array<{activityType: string, time: string}> = [];
+
+    // Cerca nei vincoli temporali
+    for (const constraint of timeConstraints) {
+      if (constraint.includes('Includere un aperitivo alle')) {
+        const match = constraint.match(/aperitivo alle (\d{2}:\d{2})/);
+        if (match && match[1]) {
+          result.push({ activityType: 'aperitivo', time: match[1] });
+        }
+      }
+      if (constraint.includes('Includere la colazione alle')) {
+        const match = constraint.match(/colazione alle (\d{2}:\d{2})/);
+        if (match && match[1]) {
+          result.push({ activityType: 'colazione', time: match[1] });
+        }
+      }
+      if (constraint.includes('Includere il pranzo alle')) {
+        const match = constraint.match(/pranzo alle (\d{2}:\d{2})/);
+        if (match && match[1]) {
+          result.push({ activityType: 'pranzo', time: match[1] });
+        }
+      }
+      if (constraint.includes('Includere la cena alle')) {
+        const match = constraint.match(/cena alle (\d{2}:\d{2})/);
+        if (match && match[1]) {
+          result.push({ activityType: 'cena', time: match[1] });
+        }
+      }
+    }
+
+    return result;
+  }
 
   console.log('Attività processate con successo:', processedActivities.length);
   return processedActivities;

@@ -50,7 +50,7 @@ type ItineraryDay = {
 
 // Stato del wizard
 type WizardState = {
-  step: 'intro' | 'preferences' | 'days' | 'activities' | 'summary' | 'saving' | 'complete';
+  step: 'intro' | 'preferences' | 'days' | 'activities' | 'summary' | 'editing' | 'saving' | 'complete';
   preferences: {
     tripType?: string;
     interests?: string[];
@@ -250,11 +250,12 @@ export default function ItineraryWizard({
         break;
 
       case 'summary':
-        // Processa la conferma dell'utente
+        // Processa la risposta dell'utente riguardo alla modifica o al salvataggio
         const lowerMessage = message.toLowerCase().trim();
 
-        // Verifica se l'utente ha confermato
-        if (lowerMessage.includes('sì') ||
+        // Verifica se l'utente vuole salvare direttamente
+        if (lowerMessage.includes('salva') ||
+            lowerMessage.includes('sì') ||
             lowerMessage.includes('si') ||
             lowerMessage === 'ok' ||
             lowerMessage.includes('procedi') ||
@@ -277,7 +278,26 @@ export default function ItineraryWizard({
           // Salva le attività
           await saveActivities();
         }
-        // Verifica se l'utente ha rifiutato
+        // Verifica se l'utente vuole continuare a modificare
+        else if (lowerMessage.includes('modifica') ||
+                lowerMessage.includes('edit') ||
+                lowerMessage.includes('cambia') ||
+                lowerMessage.includes('sistema')) {
+
+          // Passa allo step di editing
+          setWizardState(prev => ({
+            ...prev,
+            step: 'editing'
+          }));
+
+          // Mostra messaggio di editing
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `Puoi modificare le attività cliccando su di esse nella timeline. Quando hai finito, rispondi "Fatto" o "Salva" per procedere con il salvataggio.`,
+            timestamp: new Date()
+          }]);
+        }
+        // Verifica se l'utente ha rifiutato completamente
         else if (lowerMessage.includes('no') ||
                 lowerMessage === 'n' ||
                 lowerMessage.includes('annulla') ||
@@ -302,7 +322,63 @@ export default function ItineraryWizard({
           // Chiedi di nuovo con opzioni più chiare
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: `Non ho capito se vuoi procedere con il salvataggio delle attività. Per favore, rispondi con "Sì" per salvare o "No" per annullare.`,
+            content: `Non ho capito cosa vuoi fare. Per favore, rispondi con:\n- "Modifica" per continuare a modificare le attività\n- "Salva" per salvare le attività nel tuo itinerario\n- "No" per annullare e tornare alle preferenze`,
+            timestamp: new Date()
+          }]);
+        }
+        break;
+
+      case 'editing':
+        // Processa la risposta dell'utente dopo la fase di editing
+        const editingResponse = message.toLowerCase().trim();
+
+        // Verifica se l'utente ha finito di modificare
+        if (editingResponse.includes('fatto') ||
+            editingResponse.includes('salva') ||
+            editingResponse.includes('ok') ||
+            editingResponse.includes('procedi') ||
+            editingResponse.includes('conferma')) {
+
+          // Passa allo step di salvataggio
+          setWizardState(prev => ({
+            ...prev,
+            step: 'saving'
+          }));
+
+          // Mostra messaggio di salvataggio
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `Sto salvando le attività modificate nel tuo itinerario...`,
+            timestamp: new Date()
+          }]);
+
+          // Salva le attività
+          await saveActivities();
+        }
+        // Verifica se l'utente vuole annullare
+        else if (editingResponse.includes('annulla') ||
+                editingResponse.includes('no') ||
+                editingResponse.includes('non salvare')) {
+
+          // Torna allo step delle preferenze
+          setWizardState(prev => ({
+            ...prev,
+            step: 'preferences'
+          }));
+
+          // Mostra messaggio di annullamento
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `Ho annullato il salvataggio delle attività. Vuoi generare nuove attività con preferenze diverse?`,
+            timestamp: new Date()
+          }]);
+        }
+        // L'utente ha dato una risposta non chiara o sta ancora modificando
+        else {
+          // Ricorda all'utente come procedere
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `Continua pure a modificare le attività. Quando hai finito, rispondi "Fatto" o "Salva" per procedere con il salvataggio.`,
             timestamp: new Date()
           }]);
         }
@@ -441,11 +517,11 @@ export default function ItineraryWizard({
           timestamp: new Date()
         }]);
 
-        // Infine aggiungiamo la domanda di conferma
+        // Aggiungiamo un messaggio che offre la possibilità di modificare le attività
         setTimeout(() => {
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: '**Vuoi salvare queste attività nel tuo itinerario?** (Sì/No)',
+            content: '**Vuoi modificare queste attività prima di salvarle?**\n\n- Puoi modificare un\'attività cliccando su di essa\n- Puoi rimuovere un\'attività cliccando sull\'icona del cestino\n- Puoi aggiungere nuove attività generando un nuovo set\n\nRispondi "Modifica" per continuare a modificare, o "Salva" quando sei pronto per salvare le attività nel tuo itinerario.',
             timestamp: new Date()
           }]);
         }, 300);
