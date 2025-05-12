@@ -471,7 +471,24 @@ Scorri fino in fondo alla pagina per trovare il componente di test che ti permet
 
 ## 📚 Documentazione
 
-La documentazione completa del progetto è disponibile nella cartella `docs/`:
+La documentazione completa del progetto è disponibile in due sezioni:
+
+### Documentazione Moderna e Organizzata
+
+La nuova documentazione organizzata per argomenti è disponibile nella cartella `Documentation/`:
+
+- **[Documentation/README.md](Documentation/README.md)** - Panoramica e navigazione
+- **[Documentation/getting-started/](Documentation/getting-started/)** - Guida introduttiva
+- **[Documentation/architecture/](Documentation/architecture/)** - Architettura del sistema
+- **[Documentation/features/](Documentation/features/)** - Funzionalità dell'applicazione
+- **[Documentation/development/](Documentation/development/)** - Guida per sviluppatori
+- **[Documentation/integrations/](Documentation/integrations/)** - Integrazioni con servizi esterni
+- **[Documentation/api/](Documentation/api/)** - Documentazione API
+- **[Documentation/tutorials/](Documentation/tutorials/)** - Tutorial passo-passo
+
+### Documentazione Legacy
+
+La documentazione precedente è ancora disponibile nella cartella `docs/`:
 
 - **[docs/SETUP.md](docs/SETUP.md)** - Guida all'installazione e configurazione
 - **[docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md)** - Documentazione tecnica dettagliata
