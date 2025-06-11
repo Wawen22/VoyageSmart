@@ -2,14 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeftIcon, RefreshCcw, PlusCircle, Trash2, ShieldIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeftIcon, RefreshCcw, PlusCircle, Trash2, ShieldIcon, HomeIcon, TagIcon } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { AdminProtected } from '@/components/auth/AdminProtected';
+import PageLayout from '@/components/layout/PageLayout';
 
 // Simplified PromoCode type
 type PromoCode = {
@@ -257,108 +260,160 @@ export default function SimplePromoManager() {
 
   return (
     <AdminProtected>
-      <div className="container py-10 px-4 md:px-6 mx-auto">
-        <div className="flex items-center mb-8">
-          <Button
-            variant="outline"
-            onClick={() => router.push('/dashboard')}
-            className="mr-4"
-          >
-            <ArrowLeftIcon className="h-4 w-4 mr-2" />
-            Torna alla Dashboard
-          </Button>
-
-          <div className="flex items-center text-purple-500 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
-            <ShieldIcon className="h-4 w-4 mr-2" />
-            <span className="text-sm font-medium">Area Amministratore</span>
-          </div>
-        </div>
-
-        <h1 className="text-3xl font-bold mt-4">Gestione Codici Promo</h1>
-        <p className="text-muted-foreground mt-2">
-          Crea e gestisci codici promozionali per gli utenti
-        </p>
-      </div>
-
-      {/* Create Promo Code Form */}
-      <Card className="mb-8 shadow-md border-border">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-xl">Crea Nuovo Codice Promo</CardTitle>
-          <CardDescription>Compila il form per creare un nuovo codice promozionale</CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="code" className="font-medium">Codice Promo</Label>
-              <Input
-                id="code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="es. SUMMER2023"
-                className="focus-visible:ring-primary"
-              />
+      <PageLayout>
+        <div className="min-h-screen bg-background">
+          <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+              <Link href="/admin" className="hover:text-foreground transition-colors">
+                <HomeIcon className="h-4 w-4" />
+              </Link>
+              <span>/</span>
+              <span className="text-foreground font-medium">Promo Manager</span>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="tier" className="font-medium">Piano</Label>
-              <Select value={tier} onValueChange={(value: any) => setTier(value)}>
-                <SelectTrigger id="tier" className="focus-visible:ring-primary">
-                  <SelectValue placeholder="Seleziona piano" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="free">Free</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="ai">AI Assistant</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="maxUses" className="font-medium">Utilizzi Massimi <span className="text-muted-foreground font-normal">(opzionale)</span></Label>
-              <Input
-                id="maxUses"
-                type="number"
-                value={maxUses === null ? '' : maxUses}
-                onChange={(e) => setMaxUses(e.target.value ? parseInt(e.target.value) : null)}
-                placeholder="Lascia vuoto per illimitati"
-                className="focus-visible:ring-primary"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="expiresAt" className="font-medium">Data di Scadenza <span className="text-muted-foreground font-normal">(opzionale)</span></Label>
-              <Input
-                id="expiresAt"
-                type="date"
-                value={expiresAt}
-                onChange={(e) => setExpiresAt(e.target.value)}
-                className="focus-visible:ring-primary"
-              />
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="pt-2 border-t bg-muted/20">
-          <Button onClick={createPromoCode} disabled={loading} className="bg-primary hover:bg-primary/90">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Crea Codice Promo
-          </Button>
-        </CardFooter>
-      </Card>
 
-      {/* Promo Codes List */}
-      <Card className="shadow-md border-border">
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <div>
-            <CardTitle className="text-xl">Codici Promo Attivi</CardTitle>
-            <CardDescription>Gestisci i tuoi codici promozionali</CardDescription>
-          </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={fetchPromoCodes}
-            disabled={loading}
-            className="h-9 w-9 rounded-md hover:bg-muted"
-          >
-            <RefreshCcw className="h-4 w-4" />
-          </Button>
-        </CardHeader>
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/10 rounded-lg">
+                    <TagIcon className="h-6 w-6 text-blue-500" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold text-foreground">Promo Codes Manager</h1>
+                    <p className="text-muted-foreground">Create and manage promotional codes</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="bg-blue-500/5 text-blue-500 border-blue-500/20">
+                    <ShieldIcon className="h-3 w-3 mr-1" />
+                    Admin Access
+                  </Badge>
+                  <Button asChild variant="outline">
+                    <Link href="/admin">
+                      <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                      Back to Admin
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Create Promo Code Form */}
+            <Card className="mb-8 shadow-lg border-border/50 hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4 bg-gradient-to-r from-blue-500/5 to-transparent">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/10 rounded-lg">
+                    <PlusCircle className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">Create New Promo Code</CardTitle>
+                    <CardDescription>Fill out the form to create a new promotional code</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="code" className="font-medium text-foreground">Promo Code</Label>
+                    <Input
+                      id="code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      placeholder="e.g. SUMMER2023"
+                      className="focus-visible:ring-blue-500 border-border/50 hover:border-border transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tier" className="font-medium text-foreground">Plan</Label>
+                    <Select value={tier} onValueChange={(value: any) => setTier(value)}>
+                      <SelectTrigger id="tier" className="focus-visible:ring-blue-500 border-border/50 hover:border-border transition-colors">
+                        <SelectValue placeholder="Select plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="free">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                            Free
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="premium">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                            Premium
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="ai">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                            AI Assistant
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="maxUses" className="font-medium text-foreground">
+                      Max Uses <span className="text-muted-foreground font-normal">(optional)</span>
+                    </Label>
+                    <Input
+                      id="maxUses"
+                      type="number"
+                      value={maxUses === null ? '' : maxUses}
+                      onChange={(e) => setMaxUses(e.target.value ? parseInt(e.target.value) : null)}
+                      placeholder="Leave empty for unlimited"
+                      className="focus-visible:ring-blue-500 border-border/50 hover:border-border transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="expiresAt" className="font-medium text-foreground">
+                      Expiration Date <span className="text-muted-foreground font-normal">(optional)</span>
+                    </Label>
+                    <Input
+                      id="expiresAt"
+                      type="date"
+                      value={expiresAt}
+                      onChange={(e) => setExpiresAt(e.target.value)}
+                      className="focus-visible:ring-blue-500 border-border/50 hover:border-border transition-colors"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="pt-4 border-t bg-muted/10">
+                <Button
+                  onClick={createPromoCode}
+                  disabled={loading}
+                  className="bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  {loading ? 'Creating...' : 'Create Promo Code'}
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {/* Promo Codes List */}
+            <Card className="shadow-lg border-border/50 hover:shadow-xl transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between pb-4 bg-gradient-to-r from-green-500/5 to-transparent">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-500/10 rounded-lg">
+                    <TagIcon className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">Active Promo Codes</CardTitle>
+                    <CardDescription>Manage your promotional codes</CardDescription>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={fetchPromoCodes}
+                  disabled={loading}
+                  className="h-9 w-9 rounded-md hover:bg-muted border-border/50 hover:border-border transition-all duration-300"
+                >
+                  <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
+              </CardHeader>
         <CardContent className="pt-4">
           {loading ? (
             <div className="text-center py-8">
@@ -418,8 +473,11 @@ export default function SimplePromoManager() {
               </table>
             </div>
           )}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
+      </PageLayout>
     </AdminProtected>
   );
 }

@@ -1189,3 +1189,306 @@
     "created_at": "2025-04-23T18:30:27.399485+00:00"
   }
 ]
+[2025-06-03T13:16:37.661Z] Test webhook received
+[2025-06-03T13:16:37.676Z] Test webhook - Action: update for user e536b708-cc6c-4837-a6a6-3530c8e1043e: {
+  "userId": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+  "tier": "free",
+  "action": "update"
+}
+[2025-06-03T13:16:37.981Z] Updated subscription for user e536b708-cc6c-4837-a6a6-3530c8e1043e: [
+  {
+    "id": "18541675-c57b-4b43-bb4e-3bc9302bca81",
+    "user_id": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+    "tier": "free",
+    "status": "active",
+    "valid_until": "2027-07-22T00:00:00+00:00",
+    "created_at": "2025-04-23T18:29:39.037667+00:00",
+    "updated_at": "2025-05-08T08:13:21.639+00:00",
+    "stripe_customer_id": "cus_test",
+    "stripe_subscription_id": "sub_test",
+    "cancel_at_period_end": false,
+    "current_period_end": "2025-07-03T13:16:37.934+00:00"
+  }
+]
+[2025-06-03T13:16:38.037Z] Current subscription state after update: {
+  "id": "18541675-c57b-4b43-bb4e-3bc9302bca81",
+  "user_id": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+  "tier": "free",
+  "status": "active",
+  "valid_until": "2027-07-22T00:00:00+00:00",
+  "created_at": "2025-04-23T18:29:39.037667+00:00",
+  "updated_at": "2025-05-08T08:13:21.639+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-07-03T13:16:37.934+00:00"
+}
+[2025-06-03T13:16:38.102Z] Test webhook - Successfully updated user e536b708-cc6c-4837-a6a6-3530c8e1043e to tier free
+[2025-06-11T08:30:40.960Z] Test webhook received
+[2025-06-11T08:30:40.974Z] Test webhook - Action: check for user e536b708-cc6c-4837-a6a6-3530c8e1043e: {
+  "userId": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+  "action": "check"
+}
+[2025-06-11T08:30:41.271Z] Current subscription state for user e536b708-cc6c-4837-a6a6-3530c8e1043e: {
+  "id": "18541675-c57b-4b43-bb4e-3bc9302bca81",
+  "user_id": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+  "tier": "ai",
+  "status": "active",
+  "valid_until": "2027-07-22T00:00:00+00:00",
+  "created_at": "2025-04-23T18:29:39.037667+00:00",
+  "updated_at": "2025-06-03T13:21:33.983+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-07-03T13:16:37.934+00:00"
+}
+[2025-06-11T08:30:41.273Z] Subscription history for user e536b708-cc6c-4837-a6a6-3530c8e1043e: [
+  {
+    "id": "2b3a0a50-04b5-4289-8eb0-7b73f46c2cc7",
+    "user_id": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+    "event_type": "promo_code_redemption",
+    "tier": "ai",
+    "status": "active",
+    "stripe_subscription_id": null,
+    "stripe_customer_id": null,
+    "event_timestamp": "2025-06-03T13:21:34.036174+00:00",
+    "details": {
+      "promo_code": "RITIENITIFORTUNATOSENEBTIHADATOQUESTOCODICE",
+      "redeemed_at": "2025-06-03T13:21:34.123Z",
+      "valid_until": "2027-07-22T00:00:00.000Z",
+      "promo_code_id": "06548d80-9485-45ec-98c1-9d2c536d27fa"
+    },
+    "created_at": "2025-06-03T13:21:34.036174+00:00"
+  },
+  {
+    "id": "eaa405f5-6cbe-4bbb-a868-70b0155e7b49",
+    "user_id": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+    "event_type": "subscription_created",
+    "tier": "free",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-06-03T13:16:37.953212+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-06-03T13:16:37.953212+00:00"
+  },
+  {
+    "id": "608da662-174e-4fd8-aefe-5a73d6b754ae",
+    "user_id": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+    "event_type": "promo_code_redemption",
+    "tier": "ai",
+    "status": "active",
+    "stripe_subscription_id": null,
+    "stripe_customer_id": null,
+    "event_timestamp": "2025-05-08T08:13:21.750032+00:00",
+    "details": {
+      "promo_code": "RITIENITIFORTUNATOSENEBTIHADATOQUESTOCODICE",
+      "redeemed_at": "2025-05-08T08:13:21.786Z",
+      "valid_until": "2027-07-22T00:00:00.000Z",
+      "promo_code_id": "06548d80-9485-45ec-98c1-9d2c536d27fa"
+    },
+    "created_at": "2025-05-08T08:13:21.750032+00:00"
+  },
+  {
+    "id": "4d815d8b-0d3c-41ea-8c01-95199a07ba51",
+    "user_id": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+    "event_type": "subscription_canceled",
+    "tier": "premium",
+    "status": "active",
+    "stripe_subscription_id": "sub_1RH83vQ4CpdRSiZ7UxOQn4Y9",
+    "stripe_customer_id": "cus_SBV3ankQvv7QC0",
+    "event_timestamp": "2025-04-23T18:31:31.279011+00:00",
+    "details": {
+      "will_downgrade_to": "free",
+      "current_period_end": "2025-05-23T18:30:23.000Z",
+      "cancel_at_period_end": true
+    },
+    "created_at": "2025-04-23T18:31:31.279011+00:00"
+  },
+  {
+    "id": "ae949375-bd5d-4b76-9a01-18a2966a31e8",
+    "user_id": "e536b708-cc6c-4837-a6a6-3530c8e1043e",
+    "event_type": "checkout_completed",
+    "tier": null,
+    "status": null,
+    "stripe_subscription_id": null,
+    "stripe_customer_id": "cus_SBV3ankQvv7QC0",
+    "event_timestamp": "2025-04-23T18:30:27.399485+00:00",
+    "details": {
+      "id": "cs_test_a1XCYjFGHnbbGmlJOISeQxTv5C5MLxhCiSrzuRXvjnCI4g2f7QRZb9QsEE",
+      "url": null,
+      "mode": "subscription",
+      "locale": null,
+      "object": "checkout.session",
+      "status": "complete",
+      "consent": null,
+      "created": 1745433007,
+      "invoice": "in_1RH83vQ4CpdRSiZ7EPIZP8uP",
+      "ui_mode": "hosted",
+      "currency": "eur",
+      "customer": "cus_SBV3ankQvv7QC0",
+      "livemode": false,
+      "metadata": {
+        "userId": "e536b708-cc6c-4837-a6a6-3530c8e1043e"
+      },
+      "discounts": [],
+      "cancel_url": "http://localhost:3000/subscription?canceled=true",
+      "expires_at": 1745519407,
+      "custom_text": {
+        "submit": null,
+        "after_submit": null,
+        "shipping_address": null,
+        "terms_of_service_acceptance": null
+      },
+      "permissions": null,
+      "submit_type": null,
+      "success_url": "http://localhost:3000/subscription?success=true?session_id={CHECKOUT_SESSION_ID}",
+      "amount_total": 499,
+      "payment_link": null,
+      "setup_intent": null,
+      "subscription": "sub_1RH83vQ4CpdRSiZ7UxOQn4Y9",
+      "automatic_tax": {
+        "status": null,
+        "enabled": false,
+        "provider": null,
+        "liability": null
+      },
+      "client_secret": null,
+      "custom_fields": [],
+      "shipping_cost": null,
+      "total_details": {
+        "amount_tax": 0,
+        "amount_discount": 0,
+        "amount_shipping": 0
+      },
+      "customer_email": null,
+      "payment_intent": null,
+      "payment_status": "paid",
+      "recovered_from": null,
+      "wallet_options": null,
+      "amount_subtotal": 499,
+      "adaptive_pricing": null,
+      "after_expiration": null,
+      "customer_details": {
+        "name": "Bayou Neb",
+        "email": "r.nebili22@gmail.com",
+        "phone": null,
+        "address": {
+          "city": null,
+          "line1": null,
+          "line2": null,
+          "state": null,
+          "country": "IT",
+          "postal_code": null
+        },
+        "tax_ids": [],
+        "tax_exempt": "none"
+      },
+      "invoice_creation": null,
+      "shipping_options": [],
+      "customer_creation": null,
+      "consent_collection": null,
+      "client_reference_id": null,
+      "currency_conversion": null,
+      "payment_method_types": [
+        "card",
+        "link"
+      ],
+      "allow_promotion_codes": null,
+      "collected_information": {
+        "shipping_details": null
+      },
+      "payment_method_options": {
+        "card": {
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "phone_number_collection": {
+        "enabled": false
+      },
+      "payment_method_collection": "always",
+      "billing_address_collection": null,
+      "shipping_address_collection": null,
+      "saved_payment_method_options": {
+        "payment_method_save": null,
+        "payment_method_remove": null,
+        "allow_redisplay_filters": [
+          "always"
+        ]
+      },
+      "payment_method_configuration_details": {
+        "id": "pmc_1RGq3OQ4CpdRSiZ7RDgIRCll",
+        "parent": null
+      }
+    },
+    "created_at": "2025-04-23T18:30:27.399485+00:00"
+  }
+]
+[2025-06-11T08:43:07.501Z] Test webhook received
+[2025-06-11T08:43:07.505Z] Test webhook - Action: check for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: {
+  "userId": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+  "action": "check"
+}
+[2025-06-11T08:43:07.740Z] Current subscription state for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: {
+  "id": "f1441426-24f5-47bc-b27f-9cfd0874a96a",
+  "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+  "tier": "ai",
+  "status": "active",
+  "valid_until": "2026-04-22T15:52:57.656621+00:00",
+  "created_at": "2025-04-22T15:52:57.656621+00:00",
+  "updated_at": "2025-04-22T15:52:57.656621+00:00",
+  "stripe_customer_id": "cus_test",
+  "stripe_subscription_id": "sub_test",
+  "cancel_at_period_end": false,
+  "current_period_end": "2025-06-05T08:32:05.199+00:00"
+}
+[2025-06-11T08:43:07.742Z] Subscription history for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0: [
+  {
+    "id": "43225aa6-3445-40c6-8bb3-b26f0a04fd79",
+    "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+    "event_type": "subscription_created",
+    "tier": "ai",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-05-06T08:32:05.299033+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-05-06T08:32:05.299033+00:00"
+  },
+  {
+    "id": "9f96668d-52bb-4969-af16-4511d12c635c",
+    "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+    "event_type": "subscription_created",
+    "tier": "premium",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-05-06T08:31:51.738723+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-05-06T08:31:51.738723+00:00"
+  },
+  {
+    "id": "b76e72e0-8a80-4e7c-8e97-b29a83a530ef",
+    "user_id": "fa116dab-3276-4033-9ca2-4a9be5f0dfe0",
+    "event_type": "subscription_created",
+    "tier": "ai",
+    "status": "active",
+    "stripe_subscription_id": "sub_test",
+    "stripe_customer_id": "cus_test",
+    "event_timestamp": "2025-05-05T08:33:10.531789+00:00",
+    "details": {
+      "test": true,
+      "action": "update"
+    },
+    "created_at": "2025-05-05T08:33:10.531789+00:00"
+  }
+]

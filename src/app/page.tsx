@@ -95,24 +95,31 @@ export default function Home() {
       image: '/images/app-screenshot-1.jpg'
     },
     {
+      title: 'AI-Powered Assistant',
+      description: 'Get intelligent travel recommendations, smart itinerary optimization, and 24/7 AI assistance for your trips.',
+      icon: <SparklesIcon className="h-6 w-6 text-primary" />,
+      delay: 100,
+      image: '/images/app-screenshot-2.jpg'
+    },
+    {
       title: 'Keep a Travel Journal',
       description: 'Document your journey with daily entries, organize photos in a gallery, and create a timeline of memories.',
       icon: <BookOpenIcon className="h-6 w-6 text-primary" />,
-      delay: 100,
+      delay: 200,
       image: '/images/app-screenshot-2.jpg'
     },
     {
       title: 'Track Expenses',
       description: 'Keep track of your travel budget, split expenses with friends, and see who owes what.',
       icon: <DollarSignIcon className="h-6 w-6 text-primary" />,
-      delay: 200,
+      delay: 300,
       image: '/images/app-screenshot-2.jpg'
     },
     {
       title: 'Collaborate',
       description: 'Invite friends and family to join your trip planning, make decisions together, and share memories.',
       icon: <UsersIcon className="h-6 w-6 text-primary" />,
-      delay: 300,
+      delay: 400,
       image: '/images/app-screenshot-3.jpg'
     }
   ];
@@ -145,7 +152,23 @@ export default function Home() {
       title: 'Is VoyageSmart free to use?',
       content: (
         <p>
-          VoyageSmart offers a free tier that allows you to create up to 3 trips. For unlimited trips and access to premium features like accommodation and transportation tracking, you can upgrade to our Premium plan.
+          VoyageSmart offers a free tier that allows you to create up to 3 trips. For unlimited trips and access to premium features like accommodation and transportation tracking, you can upgrade to our Premium plan. For AI-powered features, check out our AI Assistant plan.
+        </p>
+      )
+    },
+    {
+      title: 'What AI features are available?',
+      content: (
+        <p>
+          Our AI Assistant plan includes a 24/7 AI travel assistant that provides personalized recommendations, an AI Itinerary Generation Wizard that creates complete day-by-day plans, smart budget optimization, and intelligent activity suggestions based on your preferences and travel style.
+        </p>
+      )
+    },
+    {
+      title: 'How does the AI Itinerary Generation Wizard work?',
+      content: (
+        <p>
+          The AI Wizard asks you about your travel preferences, budget, interests, and time constraints. Based on this information, it generates a complete itinerary with activities, timing suggestions, and location recommendations. You can then review and edit the suggestions before adding them to your trip.
         </p>
       )
     },
@@ -270,7 +293,7 @@ export default function Home() {
             </div>
 
             <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white max-w-3xl mx-auto mb-8 animate-slide-in-bottom delay-200 font-light leading-relaxed drop-shadow-md">
-              Your <span className="text-primary font-medium">complete travel planning solution</span>. Plan trips, manage expenses, and collaborate with friends all in one place.
+              Your <span className="text-primary font-medium">AI-powered travel planning solution</span>. Plan trips, manage expenses, collaborate with friends, and get intelligent recommendations all in one place.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-slide-in-bottom delay-300">
@@ -318,6 +341,11 @@ export default function Home() {
         <div className="absolute top-2/3 right-1/3 animate-float-more-delay opacity-90">
           <div className="bg-white/15 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/30">
             <DollarSignIcon className="h-8 w-8 text-white" />
+          </div>
+        </div>
+        <div className="absolute top-1/2 left-1/6 animate-float opacity-90">
+          <div className="bg-white/15 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/30">
+            <SparklesIcon className="h-8 w-8 text-white" />
           </div>
         </div>
       </ParallaxSection>
@@ -383,9 +411,10 @@ export default function Home() {
                   <div className="mt-6 border-l-4 border-primary/30 pl-4 py-2 bg-primary/5 rounded-r-lg">
                     <p className="text-sm text-primary/80 italic">
                       {index === 0 && "Create detailed day-by-day plans for your entire trip"}
-                      {index === 1 && "Document your journey with photos and daily entries"}
-                      {index === 2 && "Split expenses fairly and see who owes what"}
-                      {index === 3 && "Plan together with friends and family in real-time"}
+                      {index === 1 && "Get personalized recommendations and smart suggestions powered by AI"}
+                      {index === 2 && "Document your journey with photos and daily entries"}
+                      {index === 3 && "Split expenses fairly and see who owes what"}
+                      {index === 4 && "Plan together with friends and family in real-time"}
                     </p>
                   </div>
                 </div>
@@ -461,6 +490,46 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div className="bg-card border-2 border-purple-500/20 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-purple-500/40 group relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+              <div className="flex items-center mb-6 relative z-10">
+                <div className="p-4 bg-purple-500/10 rounded-xl mr-5 group-hover:bg-purple-500/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
+                  <SparklesIcon className="h-6 w-6 text-purple-500" />
+                </div>
+                <h3 className="text-xl font-bold group-hover:text-purple-600 transition-colors duration-300">AI Assistant</h3>
+              </div>
+              <p className="text-muted-foreground mb-8 leading-relaxed relative z-10">
+                Get intelligent travel recommendations, 24/7 assistance, and personalized suggestions powered by advanced AI technology.
+              </p>
+              <div className="bg-gradient-to-br from-purple-500/5 to-transparent rounded-xl p-5 border border-purple-500/10 group-hover:border-purple-500/20 transition-all duration-300 relative z-10">
+                <div className="flex flex-col space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-purple-500/10 shadow-sm">
+                      <SparklesIcon className="h-4 w-4 text-purple-500" />
+                    </div>
+                    <span className="font-medium">Smart Recommendations</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-purple-500/10 shadow-sm">
+                      <CalendarIcon className="h-4 w-4 text-purple-500" />
+                    </div>
+                    <span className="font-medium">AI Itinerary Wizard</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-purple-500/10 shadow-sm">
+                      <MessageCircleIcon className="h-4 w-4 text-purple-500" />
+                    </div>
+                    <span className="font-medium">24/7 Chat Support</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 text-center relative z-10">
+                <span className="inline-block text-purple-500 text-sm font-medium hover:underline cursor-pointer group-hover:translate-x-1 transition-transform duration-300">
+                  Learn more →
+                </span>
+              </div>
+            </div>
+
             <div className="bg-card border-2 border-border/50 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/20 group">
               <div className="flex items-center mb-6">
                 <div className="p-4 bg-primary/10 rounded-xl mr-5 group-hover:bg-primary/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
@@ -595,6 +664,105 @@ export default function Home() {
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Features Section */}
+      <section className="py-20 md:py-32 bg-gradient-to-b from-muted/10 to-background relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-background to-transparent"></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-500/5 rounded-full filter blur-3xl animate-pulse-slow"></div>
+        <div className="absolute bottom-20 left-10 w-72 h-72 bg-indigo-500/5 rounded-full filter blur-2xl animate-pulse-slow"></div>
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-20">
+            <Badge className="mb-4 px-4 py-1.5 text-sm bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-600 border-purple-500/20 hover:bg-purple-500/20">
+              <SparklesIcon className="h-4 w-4 mr-2 animate-pulse-slow" />
+              AI Powered
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+              Intelligent Travel Planning
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Experience the future of travel planning with our AI-powered assistant that learns your preferences and provides personalized recommendations
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+            <div className="space-y-8">
+              <div className="bg-card border-2 border-purple-500/10 rounded-xl p-6 hover:border-purple-500/20 transition-all duration-300 group">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-purple-500/10 rounded-xl group-hover:bg-purple-500/20 transition-colors duration-300">
+                    <SparklesIcon className="h-6 w-6 text-purple-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-purple-600 transition-colors duration-300">24/7 AI Travel Assistant</h3>
+                    <p className="text-muted-foreground">Get instant answers about your trip, recommendations for activities, and personalized suggestions based on your travel style and preferences.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-card border-2 border-purple-500/10 rounded-xl p-6 hover:border-purple-500/20 transition-all duration-300 group">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-indigo-500/10 rounded-xl group-hover:bg-indigo-500/20 transition-colors duration-300">
+                    <CalendarIcon className="h-6 w-6 text-indigo-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-600 transition-colors duration-300">AI Itinerary Generation Wizard</h3>
+                    <p className="text-muted-foreground">Let our AI create detailed itineraries for you. Just tell us your preferences, budget, and interests, and we'll generate a complete day-by-day plan.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-card border-2 border-purple-500/10 rounded-xl p-6 hover:border-purple-500/20 transition-all duration-300 group">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-purple-500/10 rounded-xl group-hover:bg-purple-500/20 transition-colors duration-300">
+                    <DollarSignIcon className="h-6 w-6 text-purple-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-purple-600 transition-colors duration-300">Smart Budget Optimization</h3>
+                    <p className="text-muted-foreground">Our AI analyzes your spending patterns and suggests ways to optimize your travel budget while maximizing your experience.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-2xl p-8 border border-purple-500/20">
+                <div className="bg-card rounded-xl p-6 shadow-lg">
+                  <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
+                      <SparklesIcon className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium text-purple-600">AI Assistant</span>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="bg-purple-500/5 rounded-lg p-3">
+                      <p className="text-sm text-muted-foreground mb-2">You: "Suggest activities for my trip to Rome"</p>
+                    </div>
+                    <div className="bg-indigo-500/5 rounded-lg p-3">
+                      <p className="text-sm">Based on your trip to Rome (June 15-20) and your interest in history and food, I recommend:</p>
+                      <ul className="text-sm mt-2 space-y-1">
+                        <li>• Colosseum tour (morning, avoid crowds)</li>
+                        <li>• Trastevere food tour (evening)</li>
+                        <li>• Vatican Museums (book skip-the-line)</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-full filter blur-xl animate-pulse-slow"></div>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <Button
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-6 rounded-xl text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              onClick={() => scrollToSection(pricingRef)}
+            >
+              <SparklesIcon className="h-5 w-5 mr-2" />
+              Try AI Assistant <ArrowRightIcon className="h-5 w-5 ml-1 animate-bounce-horizontal" />
+            </Button>
           </div>
         </div>
       </section>
@@ -749,11 +917,15 @@ export default function Home() {
             </Card>
 
             {/* AI Plan */}
-            <Card className={`border-2 border-border/50 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 h-full group hover:border-primary/20 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden relative`}>
-              {/* New Badge */}
+            <Card className={`border-2 ${
+              selectedPlan === 'ai'
+                ? 'border-purple-500 shadow-lg shadow-purple-500/10'
+                : 'border-border/50'
+              } hover:shadow-xl transition-all duration-500 hover:-translate-y-2 h-full group hover:border-purple-500/20 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden relative`}>
+              {/* AI Badge */}
               <div className="absolute -top-1 -right-1 transform rotate-0 z-20">
                 <Badge className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1.5 rounded-br-xl rounded-tl-xl font-medium shadow-md">
-                  New
+                  AI Powered
                 </Badge>
               </div>
 
@@ -776,22 +948,39 @@ export default function Home() {
               <CardContent className="space-y-4 px-8 relative z-10">
                 <div className="h-px w-full bg-border/50 my-4"></div>
                 <PricingFeature included={true}>All Premium features</PricingFeature>
-                <PricingFeature included={true}>AI trip recommendations</PricingFeature>
-                <PricingFeature included={true}>Smart itinerary optimization</PricingFeature>
-                <PricingFeature included={true}>Budget forecasting</PricingFeature>
-                <PricingFeature included={true}>Personalized travel insights</PricingFeature>
-                <PricingFeature included={true}>Weather alerts</PricingFeature>
                 <PricingFeature included={true}>24/7 AI travel assistant</PricingFeature>
+                <PricingFeature included={true}>AI itinerary generation wizard</PricingFeature>
+                <PricingFeature included={true}>Smart trip recommendations</PricingFeature>
+                <PricingFeature included={true}>Intelligent activity suggestions</PricingFeature>
+                <PricingFeature included={true}>Personalized travel insights</PricingFeature>
+                <PricingFeature included={true}>AI-powered budget optimization</PricingFeature>
               </CardContent>
               <CardFooter className="flex justify-center pt-4 pb-8 px-8 relative z-10">
-                <Button
-                  variant="outline"
-                  className="w-full py-6 text-base font-medium rounded-xl border-primary/20 text-primary/80 hover:bg-primary/5 transition-all duration-300 backdrop-blur-sm cursor-not-allowed opacity-90"
-                  disabled
-                >
-                  <SparklesIcon className="h-5 w-5 mr-2 animate-pulse-slow" />
-                  Join Waitlist
-                </Button>
+                {user && isSubscribed && isSubscribed('ai') ? (
+                  <Badge variant="outline" className="px-6 py-3 text-base border-purple-500/30 text-purple-500">Current Plan</Badge>
+                ) : user ? (
+                  <Button
+                    variant={selectedPlan === 'ai' ? 'default' : 'outline'}
+                    className={`w-full py-6 text-base font-medium rounded-xl ${
+                      selectedPlan === 'ai'
+                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white'
+                        : 'hover:bg-purple-500/10 border-purple-500/20 text-purple-500'
+                    } transition-all duration-300`}
+                    onClick={() => setSelectedPlan('ai')}
+                  >
+                    <SparklesIcon className="h-5 w-5 mr-2" />
+                    Select AI Plan
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    className="w-full py-6 text-base font-medium rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white transition-all duration-300"
+                    onClick={() => router.push('/register')}
+                  >
+                    <SparklesIcon className="h-5 w-5 mr-2" />
+                    Get AI Assistant
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           </div>
@@ -890,7 +1079,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-muted-foreground max-w-md mb-6 text-base leading-relaxed">
-                Travel planning made easy. Plan trips, manage expenses, keep a travel journal, and collaborate with friends all in one place.
+                AI-powered travel planning made easy. Plan trips, manage expenses, keep a travel journal, get intelligent recommendations, and collaborate with friends all in one place.
               </p>
               <div className="flex space-x-4">
                 <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 transition-all duration-300 hover:scale-110">

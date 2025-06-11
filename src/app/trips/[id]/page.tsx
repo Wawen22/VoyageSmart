@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
+import { formatCurrency } from '@/lib/utils';
 import UnreadBadge from '@/components/chat/UnreadBadge';
 import PremiumIndicator from '@/components/subscription/PremiumIndicator';
 import TripWeather from '@/components/weather/TripWeather';
@@ -147,12 +148,9 @@ export default function TripDetails() {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const formatCurrency = (amount: number | null) => {
+  const formatTripBudget = (amount: number | null, currency?: string) => {
     if (amount === null) return 'Not set';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
+    return formatCurrency(amount, currency || 'USD');
   };
 
   const handleDelete = async () => {
@@ -371,7 +369,7 @@ export default function TripDetails() {
                     Budget
                   </dt>
                   <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2 group-hover:text-primary/90 transition-colors">
-                    {formatCurrency(trip.budget_total)}
+                    {formatTripBudget(trip.budget_total, trip.preferences?.currency)}
                   </dd>
                 </div>
                 <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors group stagger-content-item">

@@ -141,18 +141,33 @@ export default function Navbar() {
                       )}
                     </Link>
                     {isAdmin && (
-                      <Link
-                        href="/admin/promo-manager"
-                        className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                        role="menuitem"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        <span className="flex items-center">
-                          <ShieldIcon className="h-4 w-4 mr-2 text-purple-500" />
-                          Promo Codes
-                        </span>
-                      </Link>
+                      <>
+                        <div className="border-t border-border my-1"></div>
+                        <Link
+                          href="/admin"
+                          className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                          role="menuitem"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          <span className="flex items-center">
+                            <ShieldIcon className="h-4 w-4 mr-2 text-blue-500" />
+                            Admin Dashboard
+                          </span>
+                        </Link>
+                        <Link
+                          href="/admin/promo-manager"
+                          className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                          role="menuitem"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          <span className="flex items-center">
+                            <TagIcon className="h-4 w-4 mr-2 text-purple-500" />
+                            Promo Codes
+                          </span>
+                        </Link>
+                      </>
                     )}
+                    <div className="border-t border-border my-1"></div>
                     <button
                       className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                       role="menuitem"
@@ -213,6 +228,16 @@ export default function Navbar() {
             >
               <TagIcon className="h-5 w-5" />
             </Link>
+
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className={`p-2 rounded-md ${pathname.startsWith('/admin') ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
+                aria-label="Admin Dashboard"
+              >
+                <ShieldIcon className="h-5 w-5" />
+              </Link>
+            )}
           </div>
         </div>
       </div>

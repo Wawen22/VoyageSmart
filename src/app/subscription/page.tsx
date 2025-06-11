@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import PageLayout from '@/components/layout/PageLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ export default function SubscriptionPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { subscription, isSubscribed, upgradeSubscription, cancelSubscription, getSubscriptionHistory, refreshSubscription } = useSubscription();
   const [activeTab, setActiveTab] = useState('overview');
   const [history, setHistory] = useState<any[]>([]);
@@ -382,8 +384,8 @@ export default function SubscriptionPage() {
                   </Button>
                 </CardFooter>
 
-                {/* Componente di test per il webhook */}
-                {process.env.NODE_ENV === 'development' && <TestWebhook />}
+                {/* Componente di test per il webhook - Solo per Admin */}
+                {isAdmin && <TestWebhook />}
               </Card>
 
               <Card>
