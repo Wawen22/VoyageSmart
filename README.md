@@ -166,6 +166,13 @@ trip_media
 - **Galleria multimediale**: Organizzazione foto/video, album collaborativi
 - **Condivisione social**: Template visuali, riassunti automatici
 
+### 8. Amministrazione (Solo Admin)
+- **User Management**: Gestione completa degli utenti, ruoli e sottoscrizioni
+- **Dashboard Amministrativa**: Statistiche utenti, metriche sottoscrizioni, panoramica sistema
+- **Gestione Codici Promo**: Creazione e monitoraggio codici promozionali
+- **Operazioni Bulk**: Azioni massive su più utenti contemporaneamente
+- **Audit Trail**: Tracciamento di tutte le modifiche amministrative
+
 ## 📅 Roadmap di Sviluppo
 
 ### Fase 0: Preparazione e Setup ✅
@@ -294,6 +301,16 @@ trip_media
   - ✅ Pagina Pricing con piani Free, Premium e AI
   - ✅ Sistema di tracciamento cronologia sottoscrizioni
   - 🔄 Dashboard amministrativa ricavi
+
+- **Amministrazione e gestione utenti** ✅
+  - ✅ Sistema di gestione utenti completo per amministratori
+  - ✅ Dashboard con statistiche utenti e sottoscrizioni
+  - ✅ Filtri avanzati e ricerca utenti
+  - ✅ Modifica ruoli e sottoscrizioni utenti
+  - ✅ Operazioni bulk su più utenti
+  - ✅ Eliminazione sicura utenti con conferma
+  - ✅ Audit trail per azioni amministrative
+  - ✅ Interfaccia responsive per desktop e mobile
 
 - **Funzionalità innovative** 🔄
   - 🔄 Modalità esplorazione con realtà aumentata
@@ -497,6 +514,7 @@ La documentazione precedente è ancora disponibile nella cartella `docs/`:
 - **[docs/AI_FEATURES.md](docs/AI_FEATURES.md)** - Panoramica delle funzionalità AI
 - **[docs/SUBSCRIPTION_IMPLEMENTATION.md](docs/SUBSCRIPTION_IMPLEMENTATION.md)** - Dettagli sull'implementazione del sistema di abbonamenti
 - **[docs/CRON_JOB_SETUP.md](docs/CRON_JOB_SETUP.md)** - Guida alla configurazione del cron job per le sottoscrizioni
+- **[docs/ADMIN_USER_MANAGEMENT.md](docs/ADMIN_USER_MANAGEMENT.md)** - Documentazione completa del sistema di gestione utenti per amministratori
 
 ## 📄 Licenza
 

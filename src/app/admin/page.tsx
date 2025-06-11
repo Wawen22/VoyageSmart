@@ -114,8 +114,7 @@ export default function AdminDashboard() {
       href: '/admin/users',
       color: 'text-green-500',
       bgColor: 'bg-green-500/10',
-      stats: `${stats.totalUsers} users`,
-      comingSoon: true
+      stats: `${stats.totalUsers} users`
     },
     {
       title: 'Subscription Analytics',
@@ -308,6 +307,12 @@ export default function AdminDashboard() {
                     <Link href="/admin/promo-manager">
                       <TagIcon className="h-4 w-4 mr-2" />
                       Create Promo Code
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/admin/users">
+                      <UsersIcon className="h-4 w-4 mr-2" />
+                      Manage Users
                     </Link>
                   </Button>
                   <Button asChild variant="outline">

@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
-import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon, ShieldIcon } from 'lucide-react';
+import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon, ShieldIcon, UsersIcon } from 'lucide-react';
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
@@ -163,6 +163,17 @@ export default function Navbar() {
                           <span className="flex items-center">
                             <TagIcon className="h-4 w-4 mr-2 text-purple-500" />
                             Promo Codes
+                          </span>
+                        </Link>
+                        <Link
+                          href="/admin/users"
+                          className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                          role="menuitem"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                        >
+                          <span className="flex items-center">
+                            <UsersIcon className="h-4 w-4 mr-2 text-green-500" />
+                            User Management
                           </span>
                         </Link>
                       </>
