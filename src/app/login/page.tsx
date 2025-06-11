@@ -21,9 +21,10 @@ export default function Login() {
     // Check if user just registered
     const registered = searchParams.get('registered');
     const returnUrl = searchParams.get('returnUrl');
+    const redirect = searchParams.get('redirect'); // Add support for redirect parameter
 
     if (registered === 'true') {
-      if (returnUrl && returnUrl.includes('/invite/')) {
+      if ((returnUrl && returnUrl.includes('/invite/')) || (redirect && redirect.includes('/invite/'))) {
         setSuccess('Registration successful! Please log in to accept the invitation.');
       } else {
         setSuccess('Registration successful! You can now log in with your credentials.');
@@ -34,17 +35,21 @@ export default function Login() {
     if (returnUrl) {
       console.log('Login page loaded with returnUrl:', returnUrl);
     }
+    if (redirect) {
+      console.log('Login page loaded with redirect:', redirect);
+    }
   }, [searchParams]);
 
   // Add effect to redirect if user is logged in
   useEffect(() => {
     // If a user object exists (from AuthProvider), redirect away from login
     if (user) {
-      console.log('Login Page: User detected via context, redirecting to dashboard...');
+      console.log('Login Page: User detected via context, redirecting...');
 
-      // Get the return URL if it exists
+      // Get the return URL - check both returnUrl and redirect parameters
       const returnUrl = searchParams.get('returnUrl');
-      const redirectTo = returnUrl || '/dashboard';
+      const redirect = searchParams.get('redirect');
+      const redirectTo = returnUrl || redirect || '/dashboard';
 
       console.log('Redirecting to:', redirectTo);
 
@@ -76,9 +81,10 @@ export default function Login() {
       // Show success message
       setSuccess('Login successful! Redirecting...');
 
-      // Get the return URL if it exists
+      // Get the return URL - check both returnUrl and redirect parameters
       const returnUrl = searchParams.get('returnUrl');
-      const redirectTo = returnUrl || '/dashboard';
+      const redirect = searchParams.get('redirect');
+      const redirectTo = returnUrl || redirect || '/dashboard';
 
       console.log('Manual redirect to:', redirectTo);
 
@@ -218,9 +224,14 @@ export default function Login() {
 
           <div className="mt-6">
             <Link
-              href={searchParams.get('returnUrl')
-                ? `/register?returnUrl=${encodeURIComponent(searchParams.get('returnUrl') || '')}`
-                : '/register'}
+              href={(() => {
+                const returnUrl = searchParams.get('returnUrl');
+                const redirect = searchParams.get('redirect');
+                const redirectParam = returnUrl || redirect;
+                return redirectParam
+                  ? `/register?returnUrl=${encodeURIComponent(redirectParam)}`
+                  : '/register';
+              })()}
               className="w-full flex justify-center py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-foreground bg-secondary hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
             >
               Create an account

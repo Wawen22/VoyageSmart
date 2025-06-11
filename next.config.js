@@ -10,8 +10,19 @@ const nextConfig = {
       },
     ],
   },
-  // Server Actions are available by default in Next.js 14
-  swcMinify: false, // Disabilita SWC per la minificazione
+
+  // Webpack configuration per risolvere problemi di moduli
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;

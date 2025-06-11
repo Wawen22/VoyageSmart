@@ -1,13 +1,82 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { validateInput, validateSecurity } from '@/lib/validation';
+import { logger } from '@/lib/logger';
+import { z } from 'zod';
+
+// Schema di validazione per la generazione attività
+const generateActivitiesSchema = z.object({
+  tripId: z.string().uuid('Invalid trip ID format'),
+  destination: z.string().min(1, 'Destination is required').max(200, 'Destination too long'),
+  startDate: z.string().datetime('Invalid start date format'),
+  endDate: z.string().datetime('Invalid end date format'),
+  preferences: z.object({
+    budget: z.enum(['low', 'medium', 'high']).optional(),
+    interests: z.array(z.string()).optional(),
+    travelStyle: z.enum(['relaxed', 'active', 'cultural', 'adventure']).optional(),
+    groupSize: z.number().min(1).max(50).optional(),
+  }).optional(),
+  selectedDays: z.array(z.number().min(1)).optional(),
+  timePreferences: z.object({
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
+    mealTimes: z.object({
+      breakfast: z.string().optional(),
+      lunch: z.string().optional(),
+      dinner: z.string().optional(),
+    }).optional(),
+  }).optional(),
+});
 
 export async function POST(request: NextRequest) {
+  const startTime = performance.now();
+
   try {
     // Verifica se la chiave API di Gemini è configurata
     const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyCdjn1Ox8BqVZUMTWMo9ZMMUYiKpkAym2E';
     console.log('API - Chiave API Gemini configurata:', geminiApiKey ? 'Sì' : 'No');
-    // Continuiamo anche se la chiave non è nelle variabili d'ambiente, usando quella hardcoded
+
+    // Ottieni i dati dalla richiesta
+    const requestData = await request.json();
+
+    // Validazione input
+    const validation = validateInput(generateActivitiesSchema, requestData);
+    if (!validation.success) {
+      logger.warn('Generate activities validation failed', {
+        errors: validation.errors,
+        tripId: requestData.tripId
+      });
+      return NextResponse.json(
+        { error: 'Invalid input', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const validatedData = validation.data;
+
+    // Controllo sicurezza per i campi di testo
+    const textFields = [validatedData.destination];
+    if (validatedData.preferences?.interests) {
+      textFields.push(...validatedData.preferences.interests);
+    }
+
+    for (const field of textFields) {
+      if (field) {
+        const securityCheck = validateSecurity(field);
+        if (!securityCheck.safe) {
+          logger.security('Potential security threat in activity generation', {
+            issues: securityCheck.issues,
+            tripId: validatedData.tripId,
+            field
+          });
+          return NextResponse.json(
+            { error: 'Input contains potentially unsafe content' },
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     // Verifica l'autenticazione
     const supabase = createRouteHandlerClient({ cookies });

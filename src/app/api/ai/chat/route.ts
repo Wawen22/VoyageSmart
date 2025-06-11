@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTripContext } from '@/lib/services/tripContextService';
+import { validateInput, aiChatSchema, validateSecurity } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
+  const startTime = performance.now();
+
   try {
     // Ottieni i dati dalla richiesta
-    const { message, tripId, tripName, tripData, isInitialMessage } = await request.json();
+    const requestData = await request.json();
+    const { message, tripId, tripName, tripData, isInitialMessage } = requestData;
+
+    // Log della richiesta
+    logger.apiRequest('POST', '/api/ai/chat', 200, 0, {
+      hasMessage: !!message,
+      hasTripId: !!tripId,
+      isInitialMessage
+    });
 
     console.log('=== API Chat chiamata ===');
     console.log('Message:', message);
@@ -13,9 +25,33 @@ export async function POST(request: NextRequest) {
     console.log('Trip Data passati direttamente:', tripData);
     console.log('È il messaggio iniziale?', isInitialMessage);
 
-    if (!message) {
+    // Validazione input con schema Zod
+    const validation = validateInput(aiChatSchema, {
+      message,
+      trip_id: tripId
+    });
+
+    if (!validation.success) {
+      logger.warn('AI Chat validation failed', {
+        errors: validation.errors,
+        tripId
+      });
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: 'Invalid input', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    // Controllo sicurezza per il messaggio
+    const securityCheck = validateSecurity(message);
+    if (!securityCheck.safe) {
+      logger.security('Potential security threat in AI chat message', {
+        issues: securityCheck.issues,
+        tripId,
+        messageLength: message.length
+      });
+      return NextResponse.json(
+        { error: 'Message contains potentially unsafe content' },
         { status: 400 }
       );
     }
@@ -594,16 +630,40 @@ Domanda dell'utente: ${message}`;
       responseText = data.candidates[0].content.parts[0].text;
     }
 
+    // Log performance
+    const duration = performance.now() - startTime;
+    logger.performance('AI Chat API', duration, {
+      tripId,
+      messageLength: message.length,
+      responseLength: responseText.length
+    });
+
     return NextResponse.json({
       success: true,
       message: responseText,
     });
   } catch (error: any) {
+    const duration = performance.now() - startTime;
+
+    logger.error('Error in AI chat API', {
+      error: error.message,
+      stack: error.stack,
+      tripId,
+      messageLength: message?.length,
+      duration
+    });
+
+    // Log API request with error status
+    logger.apiRequest('POST', '/api/ai/chat', 500, duration, {
+      error: error.message,
+      tripId
+    });
+
     console.error('Error in chat API:', error);
     return NextResponse.json(
       {
         error: 'Failed to process request',
-        details: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         message: 'Mi dispiace, ho avuto un problema nel rispondere. Riprova più tardi.'
       },
       { status: 500 }

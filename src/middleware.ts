@@ -69,10 +69,16 @@ export async function middleware(req: NextRequest) {
     */
     // --- End of disabled logic ---
 
-    // Redirect authenticated users from auth routes to dashboard
+    // Redirect authenticated users from auth routes to dashboard or redirect URL
     if (isAuthRoute && isAuthenticated) {
-      console.log('[Middleware] Authenticated user on auth route. Redirecting to /dashboard');
-      return NextResponse.redirect(new URL('/dashboard', req.url));
+      console.log('[Middleware] Authenticated user on auth route. Checking for redirect...');
+
+      // Check if there's a redirect parameter
+      const redirectParam = req.nextUrl.searchParams.get('redirect');
+      const redirectTo = redirectParam || '/dashboard';
+
+      console.log('[Middleware] Redirecting authenticated user to:', redirectTo);
+      return NextResponse.redirect(new URL(redirectTo, req.url));
     }
 
     console.log('[Middleware] Allowing request to proceed.');
@@ -93,8 +99,6 @@ export const config = {
     '/dashboard/:path*',
     '/trips/:path*',
     '/profile/:path*',
-    '/admin/:path*',
-    '/subscription/:path*',
     '/pricing',
     '/login',
     '/register',

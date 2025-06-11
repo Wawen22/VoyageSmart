@@ -15,32 +15,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkSession = async () => {
       try {
         setLoading(true);
+        setError(null);
 
-        const { data: { session } } = await supabase.auth.getSession();
+        // First, try to refresh the session to ensure it's valid
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          console.error('Session error in checkSession:', sessionError);
+          setUser(null);
+          setError(sessionError);
+          return;
+        }
 
         if (session?.user) {
-          // Get user profile from the users table
+          // Get user profile from the users table with retry logic
           console.log('Fetching user profile for ID:', session.user.id);
-          const { data: profile, error: profileError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
 
-          if (profileError) {
-            console.error('Error fetching user profile in checkSession:', profileError);
+          let profile = null;
+          let profileError = null;
+
+          // Retry profile fetch up to 3 times
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            const { data, error } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+
+            if (!error) {
+              profile = data;
+              break;
+            }
+
+            profileError = error;
+            console.warn(`Profile fetch attempt ${attempt} failed:`, error);
+
+            if (attempt < 3) {
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
           }
 
-          const finalUser = profile || { id: session.user.id, email: session.user.email };
+          if (profileError) {
+            console.error('Error fetching user profile after retries:', profileError);
+          }
+
+          const finalUser = profile || {
+            id: session.user.id,
+            email: session.user.email,
+            full_name: session.user.user_metadata?.full_name || session.user.email
+          };
+
           setUser(finalUser);
-          console.log('AuthProvider checkSession - User state SET:', finalUser); // Added log
+          console.log('AuthProvider checkSession - User state SET:', finalUser);
         } else {
           setUser(null);
-          console.log('AuthProvider checkSession - User state SET to null'); // Added log
+          console.log('AuthProvider checkSession - User state SET to null');
         }
       } catch (error) {
         console.error('Error checking session:', error);
         setError(error as Error);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -49,28 +84,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        // Get user profile from the users table
-        console.log('Auth state change - Fetching user profile for ID:', session.user.id);
-        const { data: profile, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change event:', event, 'Session:', !!session);
 
-        if (profileError) {
-          console.error('Error fetching user profile on auth change:', profileError);
+      try {
+        if (session?.user) {
+          // Get user profile from the users table with retry logic
+          console.log('Auth state change - Fetching user profile for ID:', session.user.id);
+
+          let profile = null;
+          let profileError = null;
+
+          // Retry profile fetch up to 2 times for auth state changes
+          for (let attempt = 1; attempt <= 2; attempt++) {
+            const { data, error } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+
+            if (!error) {
+              profile = data;
+              break;
+            }
+
+            profileError = error;
+            console.warn(`Auth change profile fetch attempt ${attempt} failed:`, error);
+
+            if (attempt < 2) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          }
+
+          if (profileError) {
+            console.error('Error fetching user profile on auth change:', profileError);
+          }
+
+          const finalUser = profile || {
+            id: session.user.id,
+            email: session.user.email,
+            full_name: session.user.user_metadata?.full_name || session.user.email
+          };
+
+          setUser(finalUser);
+          console.log('AuthProvider onAuthStateChange - User state SET:', finalUser);
+        } else {
+          setUser(null);
+          console.log('AuthProvider onAuthStateChange - User state SET to null');
         }
-
-        const finalUser = profile || { id: session.user.id, email: session.user.email };
-        setUser(finalUser);
-        console.log('AuthProvider onAuthStateChange - User state SET:', finalUser); // Added log
-      } else {
-        setUser(null);
-        console.log('AuthProvider onAuthStateChange - User state SET to null'); // Added log
+      } catch (error) {
+        console.error('Error in auth state change handler:', error);
+        setError(error as Error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
@@ -170,13 +237,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
         }
 
-        // Explicitly redirect to dashboard after successful login
-        console.log('Redirecting to dashboard after successful login');
-
-        // Use setTimeout to ensure the state update has completed before redirecting
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 100);
+        // Let the middleware handle the redirect based on the URL parameters
+        console.log('Login successful, letting middleware handle redirect');
       }
 
       // No return needed here, the function updates state internally
