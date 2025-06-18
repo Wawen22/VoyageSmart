@@ -18,7 +18,8 @@ import {
   Clock,
   Zap,
   Tag,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 
 // Define travel themes
@@ -29,7 +30,7 @@ const travelThemes = [
     icon: <Palmtree className="h-5 w-5" />,
     color: 'bg-blue-500',
     bgImage: 'url("/images/themes/beach.jpg")',
-    description: 'Relax sulla spiaggia, nuoto e attività all\'aria aperta',
+    description: 'Relax sulla spiaggia, nuoto e attività all&apos;aria aperta',
     preferences: {
       tripType: 'beach',
       interests: ['relax', 'nature', 'food'],

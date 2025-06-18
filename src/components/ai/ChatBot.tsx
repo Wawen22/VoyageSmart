@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import FormattedAIResponse from './FormattedAIResponse';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -514,13 +513,12 @@ export default function ChatBot({
                 )}
               </div>
 
-              {/* Markdown rendering for assistant messages */}
+              {/* Formatted rendering for assistant messages */}
               {message.role === 'assistant' ? (
-                <div className="text-sm prose prose-sm dark:prose-invert max-w-full">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {message.content}
-                  </ReactMarkdown>
-                </div>
+                <FormattedAIResponse
+                  content={message.content}
+                  className="text-sm"
+                />
               ) : (
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               )}

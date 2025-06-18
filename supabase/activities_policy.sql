@@ -13,11 +13,18 @@ CREATE POLICY "Users can view activities of their trips"
     )
   );
 
--- Policy: Gli utenti possono inserire activities solo nei viaggi a cui partecipano
+-- Policy: Gli utenti possono inserire activities solo nei viaggi a cui partecipano o di cui sono proprietari
 DROP POLICY IF EXISTS "Trip participants can insert activities" ON public.activities;
 CREATE POLICY "Trip participants can insert activities"
   ON public.activities FOR INSERT
   WITH CHECK (
+    -- L'utente è il proprietario del viaggio
+    EXISTS (
+      SELECT 1 FROM public.trips t
+      WHERE t.id = public.activities.trip_id
+        AND t.owner_id = auth.uid()
+    ) OR
+    -- L'utente è un partecipante accettato del viaggio
     EXISTS (
       SELECT 1 FROM public.trip_participants tp
       WHERE tp.trip_id = public.activities.trip_id
@@ -26,11 +33,18 @@ CREATE POLICY "Trip participants can insert activities"
     )
   );
 
--- Policy: Gli utenti possono aggiornare activities solo dei viaggi a cui partecipano con ruolo editor o admin
+-- Policy: Gli utenti possono aggiornare activities solo dei viaggi a cui partecipano con ruolo editor o admin, o di cui sono proprietari
 DROP POLICY IF EXISTS "Trip participants can update activities" ON public.activities;
 CREATE POLICY "Trip participants can update activities"
   ON public.activities FOR UPDATE
   USING (
+    -- L'utente è il proprietario del viaggio
+    EXISTS (
+      SELECT 1 FROM public.trips t
+      WHERE t.id = public.activities.trip_id
+        AND t.owner_id = auth.uid()
+    ) OR
+    -- L'utente è un partecipante con ruolo editor o admin
     EXISTS (
       SELECT 1 FROM public.trip_participants tp
       WHERE tp.trip_id = public.activities.trip_id

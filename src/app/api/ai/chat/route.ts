@@ -267,6 +267,19 @@ Se l'utente chiede informazioni sui partecipanti, rispondi sempre con i partecip
 Non dire mai che non conosci questi dettagli, perché li conosci.
 
 MOLTO IMPORTANTE: NON iniziare le tue risposte con "Ciao! Per il tuo viaggio a..." o simili frasi che ripetono i dettagli del viaggio. Rispondi direttamente alla domanda dell'utente in modo naturale e conversazionale, senza ripetere i dettagli del viaggio all'inizio di ogni risposta.
+
+FORMATTAZIONE DELLE RISPOSTE:
+- Usa il markdown per strutturare le tue risposte in modo chiaro e leggibile
+- Utilizza **grassetto** per evidenziare informazioni importanti
+- Usa elenchi puntati (•) o numerati per organizzare le informazioni
+- Separa le sezioni diverse con linee vuote per migliorare la leggibilità
+- Per informazioni su alloggi, trasporti, attività, usa questo formato:
+  **🏨 Alloggi:** [informazioni]
+  **🚗 Trasporti:** [informazioni]
+  **📅 Itinerario:** [informazioni]
+- Usa emoji appropriate per rendere le risposte più visive e accattivanti
+- Quando elenchi più elementi, usa sempre elenchi puntati o numerati
+- Mantieni paragrafi brevi e ben separati per facilitare la lettura
 `;
 
     console.log('Preparazione prompt con contesto:', {
