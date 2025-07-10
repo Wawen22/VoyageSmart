@@ -5,11 +5,17 @@ import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   const startTime = performance.now();
+  let tripId: string | undefined;
+  let message: string | undefined;
 
   try {
     // Ottieni i dati dalla richiesta
     const requestData = await request.json();
-    const { message, tripId, tripName, tripData, isInitialMessage } = requestData;
+    const { message: requestMessage, tripId: requestTripId, tripName, tripData, isInitialMessage } = requestData;
+
+    // Assign to outer scope variables
+    tripId = requestTripId;
+    message = requestMessage;
 
     // Log della richiesta
     logger.apiRequest('POST', '/api/ai/chat', 200, 0, {
