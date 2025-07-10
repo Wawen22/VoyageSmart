@@ -119,7 +119,7 @@ The wizard uses specialized prompts that include:
 ## 🔧 Technical Implementation
 
 ### API Integration
-- **Google Gemini AI**: Using 'gemini-1.5-flash-latest' model
+- **Google Gemini AI**: Using 'gemini-2.0-flash-exp' model
 - **API Key**: Configured via environment variables
 - **Rate Limiting**: Implemented to prevent abuse
 - **Error Handling**: Comprehensive error handling for API failures
@@ -158,7 +158,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 - Users without subscription see upgrade prompts
 
 ### Model Configuration
-- **Model**: gemini-1.5-flash-latest
+- **Model**: gemini-2.0-flash-exp
 - **Temperature**: 0.7 (balanced creativity and consistency)
 - **Max Tokens**: Configured based on use case
 - **Safety Settings**: Configured to block harmful content

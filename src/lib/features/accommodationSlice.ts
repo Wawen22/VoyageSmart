@@ -51,11 +51,8 @@ export const fetchAccommodations = createAsyncThunk(
       const now = Date.now();
 
       if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRATION)) {
-        console.log('[Accommodations] Using cached data');
         return cachedData.data;
       }
-
-      console.log('[Accommodations] Fetching fresh data');
 
       const { data, error } = await supabase
         .from('accommodations')
@@ -64,7 +61,6 @@ export const fetchAccommodations = createAsyncThunk(
         .order('check_in_date', { ascending: true });
 
       if (error) {
-        console.error('Error fetching accommodations:', error);
         throw error;
       }
 

@@ -56,12 +56,19 @@ class Logger {
   }
 
   private logToConsole(entry: LogEntry): void {
+    // In production, only log errors and warnings to console
+    if (this.isProduction && entry.level !== 'error' && entry.level !== 'warn') {
+      return;
+    }
+
     const { level, message, timestamp, context } = entry;
     const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
-    
+
     switch (level) {
       case 'debug':
-        console.debug(prefix, message, context);
+        if (this.isDevelopment) {
+          console.debug(prefix, message, context);
+        }
         break;
       case 'info':
         console.info(prefix, message, context);
@@ -80,23 +87,24 @@ class Logger {
     if (!this.isProduction) return;
 
     try {
-      // TODO: Implement external logging service integration
-      // Example: Send to Sentry, LogRocket, or custom logging endpoint
-      
-      // For now, we'll just store critical errors locally
-      if (entry.level === 'error') {
+      // Store critical errors locally for now
+      // In future, integrate with Sentry or other monitoring service
+      if (entry.level === 'error' || entry.level === 'warn') {
         const errors = this.getStoredErrors();
         errors.push(entry);
-        
-        // Keep only last 50 errors
-        if (errors.length > 50) {
-          errors.splice(0, errors.length - 50);
+
+        // Keep only last 25 errors to reduce storage usage
+        if (errors.length > 25) {
+          errors.splice(0, errors.length - 25);
         }
-        
+
         localStorage.setItem('app-errors', JSON.stringify(errors));
       }
     } catch (error) {
-      console.error('Failed to log to external service:', error);
+      // Silently fail in production to avoid console noise
+      if (this.isDevelopment) {
+        console.error('Failed to log to external service:', error);
+      }
     }
   }
 
@@ -140,38 +148,69 @@ class Logger {
       ...context,
       security: true,
     });
-    
+
     this.logToConsole(securityEntry);
     this.logToExternalService(securityEntry);
-    
-    // In production, immediately alert security team
+
+    // In production, security alerts should go to monitoring service
+    // For now, we ensure they're stored locally
     if (this.isProduction) {
-      // TODO: Implement security alerting
-      console.error('SECURITY ALERT:', securityEntry);
+      try {
+        const securityErrors = JSON.parse(localStorage.getItem('security-alerts') || '[]');
+        securityErrors.push(securityEntry);
+
+        // Keep only last 10 security alerts
+        if (securityErrors.length > 10) {
+          securityErrors.splice(0, securityErrors.length - 10);
+        }
+
+        localStorage.setItem('security-alerts', JSON.stringify(securityErrors));
+      } catch (error) {
+        // Silently fail to avoid console noise
+      }
     }
   }
 
   // Performance logging
   performance(operation: string, duration: number, context?: Record<string, any>): void {
-    const perfEntry = this.formatMessage('info', `[PERFORMANCE] ${operation} took ${duration}ms`, {
-      ...context,
-      performance: true,
-      duration,
-      operation,
-    });
-    
-    // Only log slow operations in production
-    if (this.isProduction && duration > 1000) {
+    // In production, only log very slow operations (>2s) to reduce noise
+    const threshold = this.isProduction ? 2000 : 500;
+
+    if (duration > threshold) {
+      const perfEntry = this.formatMessage('warn', `[PERFORMANCE] ${operation} took ${duration}ms`, {
+        ...context,
+        performance: true,
+        duration,
+        operation,
+      });
+
       this.logToConsole(perfEntry);
-      this.logToExternalService(perfEntry);
-    } else if (this.isDevelopment) {
+
+      if (this.isProduction) {
+        this.logToExternalService(perfEntry);
+      }
+    } else if (this.isDevelopment && duration > 100) {
+      // In development, log operations > 100ms for debugging
+      const perfEntry = this.formatMessage('debug', `[PERFORMANCE] ${operation} took ${duration}ms`, {
+        ...context,
+        performance: true,
+        duration,
+        operation,
+      });
+
       this.logToConsole(perfEntry);
     }
   }
 
   // API request logging
   apiRequest(method: string, url: string, status: number, duration: number, context?: Record<string, any>): void {
-    const level: LogLevel = status >= 400 ? 'error' : status >= 300 ? 'warn' : 'info';
+    const level: LogLevel = status >= 400 ? 'error' : status >= 300 ? 'warn' : 'debug';
+
+    // In production, only log errors and very slow requests
+    if (this.isProduction && level === 'debug' && duration < 3000) {
+      return;
+    }
+
     const entry = this.formatMessage(level, `[API] ${method} ${url} - ${status} (${duration}ms)`, {
       ...context,
       api: true,
@@ -180,11 +219,11 @@ class Logger {
       status,
       duration,
     });
-    
+
     this.logToConsole(entry);
-    
-    // Log errors and slow requests to external service
-    if (level === 'error' || duration > 2000) {
+
+    // Log errors and very slow requests to external service
+    if (level === 'error' || duration > 3000) {
       this.logToExternalService(entry);
     }
   }

@@ -61,7 +61,6 @@ export const fetchTripItinerary = createAsyncThunk(
       const now = Date.now();
 
       if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRATION)) {
-        console.log('[Itinerary] Using cached data');
         return cachedData.data;
       }
 

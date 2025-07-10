@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Verifica se la chiave API di Gemini è configurata
-    const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyCdjn1Ox8BqVZUMTWMo9ZMMUYiKpkAym2E';
+    const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyAipZkwXFf2avc1rHh5ViKbWZ60uIzjLKk';
     console.log('API - Chiave API Gemini configurata:', geminiApiKey ? 'Sì' : 'No');
 
     // Ottieni i dati dalla richiesta
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     // Chiama l'API Gemini
     // Utilizziamo la chiave API già definita in precedenza
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`;
 
     const requestBody = {
       contents: [

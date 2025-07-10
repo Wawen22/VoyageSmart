@@ -84,11 +84,8 @@ export async function uploadFile(
  */
 export async function deleteFile(url: string, bucket: string): Promise<void> {
   try {
-    console.log('Attempting to delete file with URL:', url);
-
-    // For mock URLs, we just log and return
+    // For mock URLs, we just return
     if (url.startsWith('https://example.com/')) {
-      console.log('Skipping deletion of mock file URL');
       return;
     }
 

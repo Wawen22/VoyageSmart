@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit;
 
-    console.log('Fetching users with filters:', { page, limit, search, tier, status, role });
+
 
     const supabase = initSupabaseAdmin();
 
@@ -69,7 +69,6 @@ export async function GET(request: NextRequest) {
     const { data: allUsers, error: countError } = await query;
 
     if (countError) {
-      console.error('Error counting users:', countError);
       return NextResponse.json(
         { error: 'Error counting users', details: countError.message },
         { status: 500 }

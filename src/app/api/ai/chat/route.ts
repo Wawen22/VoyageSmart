@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // Verifica che l'ID del viaggio sia valido
     if (!tripId) {
-      console.error('Trip ID non valido:', tripId);
+      logger.warn('Invalid trip ID provided', { tripId });
       return NextResponse.json(
         { error: 'Trip ID is required', message: 'Mi dispiace, non riesco a trovare informazioni su questo viaggio.' },
         { status: 400 }
@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Recupera il contesto del viaggio
+    logger.debug('Starting trip context retrieval', { tripId });
     let tripContext;
 
     // Se abbiamo i dati del viaggio passati direttamente, li utilizziamo
@@ -605,7 +606,12 @@ Domanda dell'utente: ${message}`;
 
     // Prepara la richiesta per l'API Gemini (basata sul test curl funzionante)
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+
+    if (!apiKey) {
+      throw new Error('Gemini API key non configurata. Contatta l\'amministratore.');
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
 
     const requestBody = {
       contents: [
@@ -620,7 +626,9 @@ Domanda dell'utente: ${message}`;
     };
 
     // Effettua la chiamata API
-    console.log('Calling Gemini API with URL:', url);
+    console.log('Calling Gemini API with URL:', url.substring(0, 100) + '...');
+    console.log('Request body size:', JSON.stringify(requestBody).length, 'characters');
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -632,13 +640,27 @@ Domanda dell'utente: ${message}`;
     // Verifica la risposta
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Gemini API error response:', errorData);
+      logger.error('Gemini API error response', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData,
+        tripId
+      });
+
+      // Handle specific Gemini API errors
+      if (response.status === 503 && errorData.error?.message?.includes('overloaded')) {
+        throw new Error('Il servizio AI è temporaneamente sovraccarico. Riprova tra qualche minuto.');
+      }
+
       throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
     }
 
     // Elabora la risposta
     const data = await response.json();
-    console.log('Gemini API response:', data);
+    logger.debug('Gemini API response received', {
+      tripId,
+      candidatesCount: data.candidates?.length || 0
+    });
 
     // Estrai il testo dalla risposta
     let responseText = 'Mi dispiace, non sono riuscito a generare una risposta.';
@@ -678,12 +700,17 @@ Domanda dell'utente: ${message}`;
       tripId
     });
 
-    console.error('Error in chat API:', error);
+    // Provide more specific error messages
+    let userMessage = 'Mi dispiace, ho avuto un problema nel rispondere. Riprova più tardi.';
+    if (error.message?.includes('sovraccarico') || error.message?.includes('overloaded')) {
+      userMessage = 'Il servizio AI è temporaneamente sovraccarico. Riprova tra qualche minuto.';
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to process request',
         details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
-        message: 'Mi dispiace, ho avuto un problema nel rispondere. Riprova più tardi.'
+        message: userMessage
       },
       { status: 500 }
     );

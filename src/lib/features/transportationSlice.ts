@@ -69,11 +69,8 @@ export const fetchTransportations = createAsyncThunk(
       const now = Date.now();
 
       if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRATION)) {
-        console.log('[Transportation] Using cached data');
         return cachedData.data;
       }
-
-      console.log('[Transportation] Fetching fresh data');
 
       // Fetch transportations
       const { data: transportations, error: transportationsError } = await supabase

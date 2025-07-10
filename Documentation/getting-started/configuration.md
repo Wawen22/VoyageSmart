@@ -51,7 +51,7 @@ These variables enable additional features:
 
 ```env
 # Google Gemini AI API key
-NEXT_PUBLIC_GEMINI_API_KEY=AIzaSyCdjn1Ox8BqVZUMTWMo9ZMMUYiKpkAym2E
+NEXT_PUBLIC_GEMINI_API_KEY=********************************
 ```
 
 **How to get this value:**

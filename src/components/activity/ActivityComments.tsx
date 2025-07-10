@@ -142,7 +142,6 @@ export default function ActivityComments({ activityId, tripId, isEditable = true
         description: 'Your comment has been added successfully.',
       });
     } catch (error) {
-      console.error('Error adding comment:', error);
       toast({
         title: 'Error',
         description: 'Failed to add comment. Please try again.',
@@ -247,7 +246,6 @@ export default function ActivityComments({ activityId, tripId, isEditable = true
         description: 'The comment has been deleted successfully.',
       });
     } catch (error) {
-      console.error('Error deleting comment:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete comment. Please try again.',

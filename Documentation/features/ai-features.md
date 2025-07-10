@@ -190,7 +190,7 @@ Throughout the app, AI provides intelligent suggestions based on your current co
 ```typescript
 // AI service configuration
 const aiService = {
-  model: 'gemini-1.5-flash-latest',
+  model: 'gemini-2.0-flash-exp',
   apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
   baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
   

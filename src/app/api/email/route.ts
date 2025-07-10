@@ -3,36 +3,25 @@ import { sendInvitationEmail, sendTripUpdatedEmail, sendNewActivityEmail } from 
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-// Set to true to disable authentication for testing
-const DISABLE_AUTH_FOR_TESTING = true;
-
 export async function POST(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
 
-    // Check authentication (unless disabled for testing)
-    if (!DISABLE_AUTH_FOR_TESTING) {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // Check authentication
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        return NextResponse.json(
-          { error: 'Authentication error', details: sessionError.message },
-          { status: 401 }
-        );
-      }
+    if (sessionError) {
+      return NextResponse.json(
+        { error: 'Authentication error', details: sessionError.message },
+        { status: 401 }
+      );
+    }
 
-      if (!session) {
-        console.error('No session found');
-        return NextResponse.json(
-          { error: 'Unauthorized - No active session found' },
-          { status: 401 }
-        );
-      }
-
-      console.log('Authenticated user:', session.user.email);
-    } else {
-      console.log('Authentication disabled for testing');
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized - No active session found' },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
@@ -76,7 +65,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.success) {
-      console.error('Email sending failed:', result.error);
+      logger.error('Email sending failed', {
+        error: result.error,
+        emailType: type,
+        recipient: to
+      });
 
       // Check if we're in development mode
       const isDevelopment = process.env.NODE_ENV === 'development';

@@ -83,12 +83,12 @@ export default function AdminDashboard() {
           totalUsers: usersCount || 0,
           totalTrips: tripsCount || 0,
           activeSubscriptions: subscriptionsCount || 0,
-          totalRevenue: 0, // TODO: Calculate from subscription history
+          totalRevenue: 0, // Revenue calculation will be implemented with payment analytics
           promoCodes: promoCodesCount || 0,
           recentActivity: recentActivityCount || 0
         });
       } catch (error) {
-        console.error('Error fetching admin stats:', error);
+        // Error handling is managed by the UI
       } finally {
         setLoading(false);
       }

@@ -7,10 +7,8 @@ import { supabase } from './supabase';
  */
 export async function checkExpiredSubscriptions() {
   try {
-    console.log('Checking for expired subscriptions...');
-    
     const now = new Date().toISOString();
-    
+
     // Trova tutte le sottoscrizioni che sono state cancellate e il cui periodo è scaduto
     const { data: expiredSubscriptions, error: findError } = await supabase
       .from('user_subscriptions')
@@ -18,23 +16,17 @@ export async function checkExpiredSubscriptions() {
       .eq('cancel_at_period_end', true)
       .lt('current_period_end', now)
       .neq('tier', 'free');
-    
+
     if (findError) {
-      console.error('Error finding expired subscriptions:', findError);
-      return;
+      throw new Error(`Error finding expired subscriptions: ${findError.message}`);
     }
-    
+
     if (!expiredSubscriptions || expiredSubscriptions.length === 0) {
-      console.log('No expired subscriptions found');
       return;
     }
-    
-    console.log(`Found ${expiredSubscriptions.length} expired subscriptions`);
     
     // Aggiorna ogni sottoscrizione scaduta
     for (const subscription of expiredSubscriptions) {
-      console.log(`Updating expired subscription for user ${subscription.user_id}`);
-      
       // Aggiorna la sottoscrizione a 'free'
       const { error: updateError } = await supabase
         .from('user_subscriptions')
@@ -45,10 +37,9 @@ export async function checkExpiredSubscriptions() {
           updated_at: now,
         })
         .eq('id', subscription.id);
-      
+
       if (updateError) {
-        console.error(`Error updating subscription for user ${subscription.user_id}:`, updateError);
-        continue;
+        throw new Error(`Error updating subscription for user ${subscription.user_id}: ${updateError.message}`);
       }
       
       console.log(`Updated subscription for user ${subscription.user_id} to free`);
@@ -118,11 +109,8 @@ export async function checkUserSubscription(userId: string) {
                       subscription.tier !== 'free';
     
     if (!isExpired) {
-      console.log(`Subscription for user ${userId} is not expired`);
       return false;
     }
-    
-    console.log(`Subscription for user ${userId} is expired, updating to free`);
     
     // Aggiorna la sottoscrizione a 'free'
     const { error: updateError } = await supabase
@@ -136,8 +124,7 @@ export async function checkUserSubscription(userId: string) {
       .eq('id', subscription.id);
     
     if (updateError) {
-      console.error(`Error updating subscription for user ${userId}:`, updateError);
-      return false;
+      throw new Error(`Error updating subscription for user ${userId}: ${updateError.message}`);
     }
     
     console.log(`Updated subscription for user ${userId} to free`);

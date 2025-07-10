@@ -78,7 +78,6 @@ export default function ActivityMapView({
 
     // Attendi che la mappa sia caricata prima di permettere operazioni
     map.current.on('load', () => {
-      console.log('Activity map loaded successfully');
       setMapLoaded(true);
     });
 

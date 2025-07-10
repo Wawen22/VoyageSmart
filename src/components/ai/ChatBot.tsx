@@ -128,6 +128,12 @@ export default function ChatBot({
             setContextLoaded(true);
           } else {
             console.error('Errore nel caricamento del contesto:', response.status);
+            try {
+              const errorData = await response.json();
+              console.error('Dettagli errore:', errorData);
+            } catch (e) {
+              console.error('Impossibile leggere i dettagli dell\'errore');
+            }
             // Aggiorna il messaggio iniziale senza contesto
             setMessages([{
               role: 'assistant',
@@ -158,7 +164,13 @@ export default function ChatBot({
             }]);
             setContextLoaded(true);
           } else {
-            console.error('Errore nel caricamento del contesto:', response.status);
+            console.error('Errore nel caricamento del contesto (fallback):', response.status);
+            try {
+              const errorData = await response.json();
+              console.error('Dettagli errore (fallback):', errorData);
+            } catch (e) {
+              console.error('Impossibile leggere i dettagli dell\'errore (fallback)');
+            }
             // Aggiorna il messaggio iniziale senza contesto
             setMessages([{
               role: 'assistant',

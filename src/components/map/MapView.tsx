@@ -46,7 +46,7 @@ export default function MapView({
 
     // Wait for map to load before allowing operations
     map.current.on('load', () => {
-      console.log('Map loaded successfully');
+      // Map loaded successfully
     });
 
     // Clean up on unmount

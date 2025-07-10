@@ -41,7 +41,6 @@ export default function AccommodationsMapView({
 
     // Wait for map to load before allowing operations
     map.current.on('load', () => {
-      console.log('Accommodations map loaded successfully');
       setMapLoaded(true);
     });
 

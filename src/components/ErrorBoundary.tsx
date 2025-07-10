@@ -28,25 +28,18 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error, errorInfo);
-    }
+    // Import logger dynamically to avoid circular dependencies
+    import('@/lib/logger').then(({ logger }) => {
+      logger.error('ErrorBoundary caught an error', {
+        error: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+      });
+    });
 
     // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
-    }
-
-    // Log error to external service (e.g., Sentry) in production
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Integrate with Sentry or other error tracking service
-      console.error('Production error:', {
-        error: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
-        timestamp: new Date().toISOString(),
-      });
     }
 
     this.setState({ errorInfo });
@@ -126,13 +119,14 @@ export class ErrorBoundary extends Component<Props, State> {
 // Hook for functional components to handle errors
 export function useErrorHandler() {
   return (error: Error, errorInfo?: ErrorInfo) => {
-    // Log error
-    console.error('Error caught by useErrorHandler:', error, errorInfo);
-    
-    // In production, send to error tracking service
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to Sentry or other service
-    }
+    // Import logger dynamically to avoid circular dependencies
+    import('@/lib/logger').then(({ logger }) => {
+      logger.error('Error caught by useErrorHandler', {
+        error: error.message,
+        stack: error.stack,
+        errorInfo: errorInfo?.componentStack,
+      });
+    });
   };
 }
 
@@ -165,8 +159,13 @@ export function APIErrorBoundary({ children }: { children: ReactNode }) {
         </div>
       }
       onError={(error, errorInfo) => {
-        console.error('API Error:', error, errorInfo);
-        // TODO: Send to monitoring service
+        import('@/lib/logger').then(({ logger }) => {
+          logger.error('API Error', {
+            error: error.message,
+            stack: error.stack,
+            componentStack: errorInfo.componentStack,
+          });
+        });
       }}
     >
       {children}

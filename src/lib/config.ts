@@ -70,7 +70,7 @@ export const config = {
   // AI configuration
   ai: {
     geminiApiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-    model: 'gemini-1.5-flash-latest',
+    model: 'gemini-2.0-flash-exp',
     maxTokens: 2048,
     temperature: 0.7,
   },

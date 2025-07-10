@@ -11,8 +11,8 @@ export async function generateChatResponse(
   tripContext?: any
 ) {
   try {
-    // Usa il modello Gemini 1.5 Flash per il chat
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    // Usa il modello Gemini 2.0 Flash Experimental per il chat
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
     // Crea un contesto iniziale per il chatbot
     let systemPrompt = `Sei un assistente di viaggio intelligente per l'app VoyageSmart.

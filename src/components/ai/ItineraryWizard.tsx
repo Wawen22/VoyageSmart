@@ -80,7 +80,7 @@ export default function ItineraryWizard({
 }: ItineraryWizardProps) {
   // Verifica se la chiave API di Gemini è configurata
   useEffect(() => {
-    const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyCdjn1Ox8BqVZUMTWMo9ZMMUYiKpkAym2E';
+    const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyAipZkwXFf2avc1rHh5ViKbWZ60uIzjLKk';
     console.log('Chiave API Gemini configurata:', geminiApiKey ? 'Sì' : 'No');
     // Continuiamo anche se la chiave non è nelle variabili d'ambiente, usando quella hardcoded
   }, []);

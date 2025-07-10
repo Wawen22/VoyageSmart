@@ -42,7 +42,6 @@ export default function TransportationMap({
 
     // Wait for map to load before allowing operations
     map.current.on('load', () => {
-      console.log('Transportation map loaded successfully');
       setMapLoaded(true);
     });
 
