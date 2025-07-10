@@ -115,3 +115,7 @@ Questo documento riassume le migliorie apportate all'interfaccia utente e all'es
 - Implementare temi personalizzati oltre al tema chiaro/scuro
 - Aggiungere opzioni per la personalizzazione delle notifiche
 - Permettere la personalizzazione delle viste predefinite per ogni sezione
+
+---
+
+© 2025 Voyage Smart (Wawen22). Tutti i diritti riservati.

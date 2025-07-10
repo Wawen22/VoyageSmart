@@ -217,3 +217,7 @@ await expect(page.locator('input[name="password"]:not([name="confirmPassword"])'
 - 📈 Coverage da incrementare con più test
 
 **Prossimo Step**: Fix E2E test failures e implementazione test per funzioni critiche.
+
+---
+
+© 2025 Voyage Smart (Wawen22). Tutti i diritti riservati.

@@ -1,107 +1,251 @@
 # Installing VoyageSmart
 
-This guide will walk you through the process of installing VoyageSmart on your local machine for development purposes.
+This comprehensive guide will walk you through the process of installing VoyageSmart on your local machine for development purposes.
 
-## Prerequisites
+## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed:
+Before you begin, ensure you have the following installed on your system:
 
-- **Node.js** (v16.0.0 or higher)
-- **npm** (v7.0.0 or higher)
-- **Git**
+### Required Software
 
-You'll also need accounts for the following services:
+- **Node.js** (v16.0.0 or higher) - [Download here](https://nodejs.org/)
+- **npm** (v7.0.0 or higher) - Comes with Node.js
+- **Git** - [Download here](https://git-scm.com/)
 
-- [Supabase](https://supabase.com/) - For database, authentication, and storage
-- [Mapbox](https://www.mapbox.com/) - For maps and location services
-- [Stripe](https://stripe.com/) - For payment processing (optional for local development)
-- [Google Cloud Platform](https://cloud.google.com/) - For Gemini AI API (optional for local development)
+### Verify Installation
 
-## Step 1: Clone the Repository
+Check that everything is installed correctly:
 
 ```bash
+# Check Node.js version
+node --version
+# Should output v16.0.0 or higher
+
+# Check npm version
+npm --version
+# Should output v7.0.0 or higher
+
+# Check Git version
+git --version
+# Should output git version 2.x.x or higher
+```
+
+### Required Service Accounts
+
+You'll need accounts for the following services:
+
+- **[Supabase](https://supabase.com/)** - For database, authentication, and storage (Required)
+- **[Mapbox](https://www.mapbox.com/)** - For maps and location services (Required)
+- **[Stripe](https://stripe.com/)** - For payment processing (Optional for local development)
+- **[Google Cloud Platform](https://cloud.google.com/)** - For Gemini AI API (Optional for local development)
+
+## 🚀 Step 1: Clone the Repository
+
+First, clone the VoyageSmart repository to your local machine:
+
+```bash
+# Clone the repository
 git clone https://github.com/Wawen22/VoyageSmart.git
+
+# Navigate to the project directory
 cd VoyageSmart
+
+# Verify the project structure
+ls -la
 ```
 
-## Step 2: Install Dependencies
+You should see the following project structure:
+```
+VoyageSmart/
+├── Documentation/       # Project documentation
+├── public/             # Static assets
+├── src/                # Source code
+├── supabase/           # Database schema and migrations
+├── .env.local.example  # Environment variables template
+├── package.json        # Project dependencies
+├── README.md           # Project overview
+└── ...
+```
+
+## 📦 Step 2: Install Dependencies
+
+Install all the necessary dependencies for VoyageSmart:
 
 ```bash
+# Install dependencies
 npm install
+
+# This will install:
+# - Next.js 15 (React framework)
+# - Supabase client libraries
+# - Tailwind CSS (styling)
+# - Redux Toolkit (state management)
+# - And many other dependencies...
 ```
 
-This will install all the necessary dependencies for VoyageSmart.
+**Note**: The installation may take a few minutes depending on your internet connection.
 
-## Step 3: Set Up Supabase
+## 🗄️ Step 3: Set Up Supabase Database
 
-1. Create a new Supabase project at [app.supabase.com](https://app.supabase.com/)
-2. Note your Supabase URL and anon key from the project settings
-3. Run the database setup script:
+VoyageSmart uses Supabase as its backend database. Follow these steps:
+
+### 3.1 Create Supabase Project
+
+1. Go to [app.supabase.com](https://app.supabase.com/)
+2. Click "New Project"
+3. Choose your organization
+4. Enter project details:
+   - **Name**: `voyage-smart` (or your preferred name)
+   - **Database Password**: Choose a strong password
+   - **Region**: Select the closest region to your users
+5. Click "Create new project"
+
+### 3.2 Get Project Credentials
+
+Once your project is created:
+
+1. Go to **Settings** → **API**
+2. Copy the following values:
+   - **Project URL** (e.g., `https://xxxxx.supabase.co`)
+   - **Project API Key** (anon/public key)
+
+### 3.3 Set Up Database Schema
+
+Run the database setup to create all necessary tables:
 
 ```bash
 # Navigate to the supabase directory
 cd supabase
 
-# Run the setup script
-npm run setup
+# Install Supabase CLI if not already installed
+npm install -g supabase
+
+# Initialize Supabase (if not already done)
+supabase init
+
+# Link to your project (replace with your project reference)
+supabase link --project-ref your-project-ref
+
+# Push the schema to your Supabase project
+supabase db push
 ```
 
-For detailed instructions on setting up Supabase, refer to the [Supabase Integration Guide](../integrations/supabase.md).
+For detailed Supabase setup instructions, see the [Supabase Integration Guide](../integrations/supabase.md).
 
-## Step 4: Configure Environment Variables
+## ⚙️ Step 4: Configure Environment Variables
 
-Create a `.env.local` file in the root directory with the following variables:
-
-```
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-
-# Mapbox
-NEXT_PUBLIC_MAPBOX_TOKEN=your-mapbox-token
-
-# Gemini AI (optional for local development)
-NEXT_PUBLIC_GEMINI_API_KEY=your-gemini-api-key
-
-# Stripe (optional for local development)
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
-STRIPE_SECRET_KEY=your-stripe-secret-key
-STRIPE_WEBHOOK_SECRET=your-stripe-webhook-secret
-
-# Subscription Price IDs (optional for local development)
-NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID=price_your_premium_price_id
-NEXT_PUBLIC_STRIPE_AI_PRICE_ID=price_your_ai_price_id
-```
-
-## Step 5: Start the Development Server
+Create your environment configuration file:
 
 ```bash
-npm run dev
+# Copy the example environment file
+cp .env.local.example .env.local
+
+# Open the file in your preferred editor
+nano .env.local  # or code .env.local for VS Code
 ```
 
-This will start the development server at `http://localhost:3000`.
+Configure the following variables in `.env.local`:
 
-## Step 6: Set Up Stripe Webhook (Optional)
+### Required Variables
+
+```env
+# Supabase Configuration (Required)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Mapbox Configuration (Required for maps)
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.your-mapbox-token
+```
+
+### Optional Variables (for full functionality)
+
+```env
+# Gemini AI Configuration (for AI features)
+NEXT_PUBLIC_GEMINI_API_KEY=your-gemini-api-key
+
+# Stripe Configuration (for payments)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your-stripe-publishable-key
+STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
+STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
+
+# Stripe Price IDs (for subscription plans)
+NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID=price_your_premium_price_id
+NEXT_PUBLIC_STRIPE_AI_PRICE_ID=price_your_ai_price_id
+
+# Email Configuration (for notifications)
+RESEND_API_KEY=re_your-resend-api-key
+
+# Cron Job Security (for subscription management)
+CRON_API_KEY=your-secure-cron-api-key
+```
+
+### How to Get API Keys
+
+- **Supabase**: From your project settings → API
+- **Mapbox**: From [mapbox.com](https://account.mapbox.com/access-tokens/)
+- **Gemini AI**: From [Google AI Studio](https://aistudio.google.com/app/apikey)
+- **Stripe**: From [Stripe Dashboard](https://dashboard.stripe.com/apikeys)
+- **Resend**: From [Resend Dashboard](https://resend.com/api-keys)
+
+## 🚀 Step 5: Start the Development Server
+
+Now you're ready to start the development server:
+
+```bash
+# Start the development server
+npm run dev
+
+# The server will start on http://localhost:3000
+# You should see output similar to:
+# ▲ Next.js 15.x.x
+# - Local:        http://localhost:3000
+# - Network:      http://192.168.x.x:3000
+```
+
+Your application will be available at `http://localhost:3000`.
+
+## 💳 Step 6: Set Up Stripe Webhook (Optional)
 
 If you want to test the subscription functionality locally, you'll need to set up Stripe webhook forwarding:
 
-1. Install the Stripe CLI from [stripe.com/docs/stripe-cli](https://stripe.com/docs/stripe-cli)
-2. Log in to your Stripe account:
+### 6.1 Install Stripe CLI
 
 ```bash
+# macOS (using Homebrew)
+brew install stripe/stripe-cli/stripe
+
+# Windows (using Scoop)
+scoop bucket add stripe https://github.com/stripe/scoop-stripe-cli.git
+scoop install stripe
+
+# Or download from: https://stripe.com/docs/stripe-cli
+```
+
+### 6.2 Configure Stripe CLI
+
+```bash
+# Log in to your Stripe account
 stripe login
+
+# This will open a browser window to authenticate
 ```
 
-3. Start the webhook forwarding:
+### 6.3 Start Webhook Forwarding
 
 ```bash
+# Start the webhook forwarding
 stripe listen --forward-to http://localhost:3000/api/stripe/webhook
+
+# You'll see output like:
+# > Ready! Your webhook signing secret is whsec_1234567890abcdef...
 ```
 
-4. Note the webhook signing secret and add it to your `.env.local` file:
+### 6.4 Update Environment Variables
 
-```
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+Add the webhook signing secret to your `.env.local` file:
+
+```env
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_from_cli_output
 ```
 
 ## Troubleshooting

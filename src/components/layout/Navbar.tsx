@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
-import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon, ShieldIcon, UsersIcon } from 'lucide-react';
+import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon, ShieldIcon, UsersIcon, BookOpenIcon } from 'lucide-react';
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
@@ -86,6 +86,16 @@ export default function Navbar() {
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 {user ? "Subscription" : "Pricing"}
+              </Link>
+              <Link
+                href="/documentation"
+                className={`nav-indicator ${
+                  pathname.startsWith('/documentation')
+                    ? 'border-primary text-foreground active'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Documentation
               </Link>
             </div>
           </div>
@@ -238,6 +248,14 @@ export default function Navbar() {
               aria-label={user ? "Subscription" : "Pricing"}
             >
               <TagIcon className="h-5 w-5" />
+            </Link>
+
+            <Link
+              href="/documentation"
+              className={`p-2 rounded-md ${pathname.startsWith('/documentation') ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
+              aria-label="Documentation"
+            >
+              <BookOpenIcon className="h-5 w-5" />
             </Link>
 
             {isAdmin && (

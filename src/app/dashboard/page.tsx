@@ -214,7 +214,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="flex space-x-2 sm:space-x-3 overflow-x-auto pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
+            <div className="flex space-x-2 sm:space-x-3 pb-1 -mx-3 px-3 sm:mx-0 sm:px-0">
               <RippleButton
                 variant="ghost"
                 onClick={() => setFilter('all')}

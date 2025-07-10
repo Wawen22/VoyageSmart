@@ -849,6 +849,7 @@ export default function ItineraryWizard({
       <button
         onClick={toggleMinimize}
         className="fixed sm:bottom-4 sm:right-[180px] bottom-[100px] right-4 bg-[#8B5CF6] text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-[#7C3AED] transition-all duration-300 animate-float"
+        style={{ marginRight: '4%' }}
         aria-label="Apri wizard itinerario"
       >
         <Calendar size={20} className="animate-pulse" />
@@ -861,8 +862,8 @@ export default function ItineraryWizard({
     <>
       <div
         className={`
-          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 sm:right-[180px] bottom-[100px] right-4 w-[400px] sm:h-[550px] h-[500px]'}
-          bg-background border border-border rounded-lg shadow-xl z-50
+          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 sm:right-[180px] bottom-[70px] right-4 w-[400px] sm:h-[550px] h-[500px]'}
+          bg-background border border-border rounded-lg shadow-xl z-[99]
           flex flex-col transition-all duration-300 ease-in-out
           glass-effect animate-fade-in
         `}

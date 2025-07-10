@@ -11,48 +11,91 @@ This section provides a comprehensive overview of VoyageSmart's architecture, in
 
 ## 🏗️ Architecture Overview
 
-VoyageSmart follows a modern architecture pattern with a clear separation of concerns:
+VoyageSmart follows a modern, scalable architecture pattern with clear separation of concerns:
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│                 │     │                 │     │                 │
-│  React Frontend │────▶│  Next.js API    │────▶│  Supabase       │
-│  (Next.js)      │◀────│  Routes         │◀────│  (PostgreSQL)   │
-│                 │     │                 │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-        │                                               │
-        │                                               │
-        ▼                                               ▼
-┌─────────────────┐                           ┌─────────────────┐
-│                 │                           │                 │
-│  External APIs  │                           │  Supabase       │
-│  (Mapbox,       │                           │  Storage        │
-│   Gemini AI)    │                           │                 │
-│                 │                           │                 │
-└─────────────────┘                           └─────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        VoyageSmart Architecture                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│                 │    │                 │    │                 │
+│   Frontend      │    │   API Layer     │    │   Backend       │
+│   (Next.js)     │◄──►│   (Next.js)     │◄──►│   (Supabase)    │
+│                 │    │                 │    │                 │
+│  - React 18     │    │  - API Routes   │    │  - PostgreSQL   │
+│  - TypeScript   │    │  - Middleware   │    │  - Auth         │
+│  - Tailwind CSS │    │  - Validation   │    │  - Storage      │
+│  - Redux Toolkit│    │  - Error Handle │    │  - Realtime     │
+│  - RTK Query    │    │  - Rate Limiting│    │  - RLS Policies │
+│                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│                 │    │                 │    │                 │
+│  External APIs  │    │  State Mgmt     │    │  File Storage   │
+│                 │    │                 │    │                 │
+│  - Mapbox GL    │    │  - Redux Store  │    │  - Supabase     │
+│  - Gemini AI    │    │  - Local State  │    │    Storage      │
+│  - Stripe       │    │  - Session      │    │  - CDN          │
+│  - Resend       │    │  - Cache        │    │  - Buckets      │
+│                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### Key Components
+### 🔧 Key Components
 
-#### Frontend
+#### Frontend Layer
 
-- **React with Next.js**: The frontend is built using React with Next.js for server-side rendering and routing
-- **Redux Toolkit**: For state management
-- **RTK Query**: For data fetching and caching
-- **Styled Components**: For styling
-- **Mapbox**: For map visualizations
+**Technology Stack:**
+- **React 18**: Modern React with concurrent features
+- **Next.js 15**: Full-stack React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first CSS framework
+- **Redux Toolkit**: Predictable state management
+- **RTK Query**: Data fetching and caching
+- **Framer Motion**: Smooth animations and transitions
 
-#### Backend
+**Key Features:**
+- Server-side rendering (SSR) and static generation (SSG)
+- Client-side routing with Next.js App Router
+- Responsive design with mobile-first approach
+- Dark/light theme support
+- Progressive Web App (PWA) capabilities
 
-- **Next.js API Routes**: Serverless functions for API endpoints
-- **Supabase**: For database, authentication, storage, and realtime functionality
-- **Stripe**: For payment processing and subscription management
+#### API Layer
 
-#### Database
+**Next.js API Routes:**
+- RESTful API endpoints
+- Middleware for authentication and validation
+- Error handling and logging
+- Rate limiting and security
+- Integration with external services
 
-- **PostgreSQL**: The primary database, hosted on Supabase
-- **Row-Level Security (RLS)**: For fine-grained access control
-- **Realtime**: For real-time updates and collaboration
+**Key Endpoints:**
+- `/api/auth/*` - Authentication flows
+- `/api/trips/*` - Trip management
+- `/api/activities/*` - Itinerary management
+- `/api/expenses/*` - Expense tracking
+- `/api/ai/*` - AI-powered features
+
+#### Backend Layer
+
+**Supabase Services:**
+- **PostgreSQL Database**: Primary data storage
+- **Authentication**: User management and security
+- **Storage**: File and media management
+- **Realtime**: Live updates and collaboration
+- **Edge Functions**: Serverless compute (when needed)
+
+**Database Features:**
+- Row-Level Security (RLS) policies
+- Real-time subscriptions
+- Full-text search capabilities
+- JSON/JSONB support for flexible data
+- Automated backups and point-in-time recovery
 
 ## 🔄 Data Flow
 

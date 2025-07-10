@@ -1,250 +1,355 @@
-# AI Features in VoyageSmart
+# AI Features
 
-VoyageSmart integrates powerful AI capabilities to enhance the travel planning experience. This document provides a detailed overview of the AI features available in VoyageSmart.
+VoyageSmart leverages Google's Gemini AI to provide intelligent, personalized travel planning assistance. Our AI features are designed to make trip planning easier, more efficient, and more enjoyable.
 
-## Overview
+## 🤖 Overview
 
-VoyageSmart's AI features are designed to make travel planning easier and more personalized. These features are available exclusively to users with an "AI Assistant" subscription plan.
+VoyageSmart's AI features include:
+- **AI Travel Assistant**: Conversational AI for travel advice and recommendations
+- **Itinerary Generation Wizard**: Automated activity planning based on preferences
+- **Smart Suggestions**: Context-aware recommendations throughout the app
+- **Intelligent Analysis**: AI-powered insights about your trips and destinations
 
-## AI Travel Assistant
+## ✨ AI Travel Assistant
 
-The AI Travel Assistant is an intelligent chatbot that provides personalized information and suggestions based on your trip details.
+### Conversational Interface
 
-### Key Features
+The AI Travel Assistant provides a chat-based interface for getting personalized travel advice and information.
 
-- **Contextual Awareness**: The assistant has access to your complete trip context, including dates, destinations, participants, accommodations, transportation, and itinerary.
-- **Personalized Responses**: Responses are tailored to your specific trip details.
-- **Minimizable Interface**: The assistant can be minimized while you navigate through different pages of your trip.
-- **Suggested Questions**: The interface provides suggested questions to help you get started.
-- **Persistent State**: The assistant remembers your conversation even as you navigate between different pages.
+#### Key Capabilities
+- **Trip-Specific Advice**: Contextual recommendations based on your current trip
+- **Destination Information**: Local insights, weather, culture, and customs
+- **Activity Suggestions**: Personalized recommendations based on your interests
+- **Practical Advice**: Packing lists, transportation options, and travel tips
+- **Real-Time Support**: Instant answers to travel-related questions
 
-### Technical Implementation
-
-The AI Travel Assistant is implemented using:
-
-- Google's Gemini API (model: gemini-1.5-flash-latest)
-- React component: `ChatBot.tsx`
-- API endpoint: `/api/ai/chat`
-
-### Example Code
-
-Here's a simplified example of how the AI Travel Assistant is implemented:
-
-```tsx
-// ChatBot.tsx
-import React, { useState, useEffect } from 'react';
-import { useTripContext } from '@/contexts/TripContext';
-
-const ChatBot = () => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [isMinimized, setIsMinimized] = useState(false);
-  const { tripData } = useTripContext();
-
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    
-    // Add user message to chat
-    setMessages(prev => [...prev, { role: 'user', content: input }]);
-    setInput('');
-    
-    try {
-      // Send request to AI API
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: input,
-          tripContext: tripData, // Include trip context
-        }),
-      });
-      
-      const data = await response.json();
-      
-      // Add AI response to chat
-      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please try again.' 
-      }]);
-    }
-  };
-
-  // Load chat history from localStorage
-  useEffect(() => {
-    const savedMessages = localStorage.getItem(`chat_${tripData.id}`);
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    }
-  }, [tripData.id]);
-
-  // Save chat history to localStorage
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem(`chat_${tripData.id}`, JSON.stringify(messages));
-    }
-  }, [messages, tripData.id]);
-
-  return (
-    <div className={`chatbot-container ${isMinimized ? 'minimized' : ''}`}>
-      <div className="chatbot-header">
-        <h3>AI Travel Assistant</h3>
-        <button onClick={() => setIsMinimized(!isMinimized)}>
-          {isMinimized ? 'Expand' : 'Minimize'}
-        </button>
-      </div>
-      
-      {!isMinimized && (
-        <>
-          <div className="messages-container">
-            {messages.map((msg, index) => (
-              <div key={index} className={`message ${msg.role}`}>
-                {msg.content}
-              </div>
-            ))}
-          </div>
-          
-          <div className="input-container">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything about your trip..."
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-            />
-            <button onClick={sendMessage}>Send</button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-};
-
-export default ChatBot;
-```
-
-## Itinerary Generation Wizard
-
-The Itinerary Generation Wizard is a step-by-step tool that uses AI to automatically generate personalized activities for your trip.
-
-### Key Features
-
-- **Guided Interface**: Step-by-step wizard interface
-- **Predefined Themes**: Selection of travel themes (Adventure, Cultural, Relaxation, etc.)
-- **Interactive Day Selection**: Visual selection of days to plan
-- **Personalized Activity Generation**: AI-generated activities based on preferences
-- **Rich Visualization**: Timeline and map views of generated activities
-- **Pre-save Editing**: Ability to modify or remove activities before saving
-- **Mapbox Integration**: Interactive map with color-coded markers
-
-### Technical Implementation
-
-The Itinerary Generation Wizard is implemented using:
-
-- Google's Gemini API
-- React component: `ItineraryWizard.tsx`
-- Supporting components: `ActivityTimeline.tsx`, `ActivityMapView.tsx`
-- Mapbox for map visualization
-
-### Example Code
-
-Here's a simplified example of the activity generation function:
+#### Example Interactions
 
 ```typescript
-// api/ai/generate-activities.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// User queries the AI Assistant can handle:
+const exampleQueries = [
+  "What should I pack for Paris in December?",
+  "Recommend restaurants near the Eiffel Tower",
+  "What's the best way to get from the airport to downtown?",
+  "What are some hidden gems in Rome?",
+  "How much should I budget for food in Tokyo?",
+  "What's the weather like in my destination next week?",
+  "Are there any cultural customs I should know about?",
+  "What are the must-see attractions in Barcelona?"
+];
+```
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+### Trip Context Integration
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+The AI Assistant has access to your complete trip context:
 
-  try {
-    const { tripData, selectedDays, preferences, theme } = req.body;
-
-    // Create prompt for Gemini AI
-    const prompt = `
-      Generate a detailed itinerary for a trip to ${tripData.destination} 
-      for the following days: ${selectedDays.join(', ')}.
-      
-      Trip details:
-      - Destination: ${tripData.destination}
-      - Trip dates: ${tripData.start_date} to ${tripData.end_date}
-      - Theme: ${theme}
-      - Preferences: ${preferences}
-      
-      For each day, generate 3-5 activities with the following information:
-      - Name
-      - Type (sightseeing, food, adventure, etc.)
-      - Start time (in 24-hour format)
-      - End time (in 24-hour format)
-      - Location (specific address or place name)
-      - Brief description
-      
-      Format the response as a JSON array of activities.
-    `;
-
-    // Call Gemini API
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    
-    // Parse the JSON response
-    const activitiesJson = extractJsonFromText(text);
-    const activities = JSON.parse(activitiesJson);
-    
-    // Process activities (add coordinates, etc.)
-    const processedActivities = await processActivities(activities);
-    
-    return res.status(200).json({ activities: processedActivities });
-  } catch (error) {
-    console.error('Error generating activities:', error);
-    return res.status(500).json({ error: 'Failed to generate activities' });
-  }
-}
-
-// Helper function to extract JSON from text
-function extractJsonFromText(text) {
-  const jsonRegex = /\[\s*\{.*\}\s*\]/s;
-  const match = text.match(jsonRegex);
-  return match ? match[0] : '[]';
-}
-
-// Process activities to add coordinates
-async function processActivities(activities) {
-  // Add geocoding logic here
-  return activities;
+```typescript
+interface TripContext {
+  trip: {
+    name: string;
+    destinations: Destination[];
+    startDate: string;
+    endDate: string;
+    participants: number;
+    budget: number;
+    preferences: TripPreferences;
+  };
+  itinerary: {
+    activities: Activity[];
+    accommodations: Accommodation[];
+    transportation: Transportation[];
+  };
+  expenses: {
+    totalSpent: number;
+    budgetRemaining: number;
+    categories: ExpenseCategory[];
+  };
 }
 ```
 
-## Future AI Features
+### Smart Response Generation
 
-VoyageSmart is continuously developing new AI features to enhance the travel planning experience:
+The AI Assistant provides contextually relevant responses:
 
-### Proactive Suggestions
+```typescript
+// Example API call to AI Assistant
+const getChatResponse = async (message: string, tripContext: TripContext) => {
+  const response = await fetch('/api/ai/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message,
+      tripContext,
+      history: previousMessages
+    })
+  });
 
-- Automatic suggestions based on trip context
-- Intelligent notifications for upcoming activities
-- Personalized recommendations based on user preferences
+  return response.json();
+};
+```
 
-### Route Optimization
+## 🧙‍♂️ Itinerary Generation Wizard
 
-- Analysis and optimization of travel routes
-- Suggestions to reduce travel time and costs
-- Optimized visualization of routes on maps
+### Automated Activity Planning
 
-### Predictive Analytics
+The Itinerary Wizard uses AI to generate comprehensive daily itineraries based on your preferences and trip details.
 
-- Prediction of costs and crowds
-- Suggestions to avoid peak seasons
-- Budget analysis and saving suggestions
+#### Wizard Flow
+
+1. **Trip Theme Selection**: Choose your travel style and interests
+2. **Preference Collection**: Specify budget, pace, and activity types
+3. **Day Selection**: Choose which days to generate activities for
+4. **AI Generation**: AI creates personalized activities for each day
+5. **Review and Edit**: Modify generated activities before saving
+6. **Integration**: Activities are added to your trip itinerary
+
+#### Preference System
+
+```typescript
+interface WizardPreferences {
+  tripType: 'leisure' | 'adventure' | 'cultural' | 'business' | 'romantic';
+  interests: string[];           // e.g., ['museums', 'food', 'nightlife']
+  budget: 'budget' | 'mid-range' | 'luxury';
+  pace: 'relaxed' | 'moderate' | 'packed';
+  preferredTimes: string[];      // e.g., ['morning', 'afternoon', 'evening']
+  additionalPreferences: string; // Free-form text for specific requests
+}
+```
+
+#### Activity Generation
+
+The AI generates activities with detailed information:
+
+```typescript
+interface GeneratedActivity {
+  name: string;                  // Activity name
+  type: string;                  // Category (sightseeing, dining, etc.)
+  description: string;           // Detailed description
+  location: string;              // Specific location/address
+  estimatedDuration: number;     // Duration in minutes
+  estimatedCost: number;         // Estimated cost per person
+  timeSlot: 'morning' | 'afternoon' | 'evening';
+  priority: number;              // Importance level (1-5)
+  tips: string[];               // AI-generated tips and advice
+  alternatives: string[];        // Alternative options
+}
+```
+
+### Advanced Generation Features
+
+#### Time Constraint Analysis
+```typescript
+// AI analyzes user requests for specific timing
+const analyzeTimeConstraints = (preferences: string) => {
+  const timePatterns = [
+    /(\d{1,2}):?(\d{2})?\s*(am|pm|AM|PM)/g,  // "9 AM", "2:30 PM"
+    /alle\s+(\d{1,2})/g,                     // "alle 9" (Italian)
+    /prima\s+delle?\s+(\d{1,2})/g,          // "prima delle 16"
+    /dopo\s+le\s+(\d{1,2})/g,               // "dopo le 18"
+  ];
+  
+  // Extract and return time constraints
+  return extractTimeConstraints(preferences, timePatterns);
+};
+```
+
+#### Location-Specific Recommendations
+- **Local Insights**: AI considers local customs and opening hours
+- **Seasonal Adjustments**: Recommendations adapt to weather and season
+- **Distance Optimization**: Activities are geographically optimized
+- **Transportation Integration**: Considers travel time between activities
+
+## 🎯 Smart Suggestions
+
+### Context-Aware Recommendations
+
+Throughout the app, AI provides intelligent suggestions based on your current context:
+
+#### Activity Suggestions
+- **Similar Activities**: Based on activities you've already planned
+- **Complementary Experiences**: Activities that pair well together
+- **Local Favorites**: Popular activities among locals and travelers
+- **Seasonal Recommendations**: Activities suited to your travel dates
+
+#### Expense Insights
+- **Budget Optimization**: Suggestions to stay within budget
+- **Cost Comparisons**: Alternative options at different price points
+- **Hidden Costs**: Warnings about potential additional expenses
+- **Savings Opportunities**: Tips for reducing costs
+
+#### Accommodation Recommendations
+- **Location Analysis**: Best areas to stay based on your itinerary
+- **Amenity Matching**: Accommodations that match your preferences
+- **Value Assessment**: Best value options for your budget
+- **Booking Timing**: Optimal times to book for best prices
+
+## 🔧 AI Implementation Details
+
+### Gemini AI Integration
+
+```typescript
+// AI service configuration
+const aiService = {
+  model: 'gemini-1.5-flash-latest',
+  apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+  baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+  
+  // Generate content with context
+  generateContent: async (prompt: string, context: any) => {
+    const response = await fetch(`${baseUrl}/models/${model}:generateContent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: buildPrompt(prompt, context) }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048
+        }
+      })
+    });
+    
+    return response.json();
+  }
+};
+```
+
+### Prompt Engineering
+
+#### System Prompts
+```typescript
+const systemPrompts = {
+  travelAssistant: `
+    You are a knowledgeable travel assistant for VoyageSmart, a travel planning app.
+    You have access to the user's trip information and should provide personalized,
+    helpful advice. Be concise but informative, and always consider the user's
+    specific trip context, budget, and preferences.
+  `,
+  
+  itineraryGenerator: `
+    You are an expert travel itinerary planner. Generate detailed, realistic
+    activities for the specified days, considering local customs, opening hours,
+    travel distances, and the user's preferences. Provide practical information
+    including estimated costs, duration, and helpful tips.
+  `,
+  
+  smartSuggestions: `
+    Provide brief, relevant suggestions based on the user's current context.
+    Focus on actionable recommendations that enhance their travel experience.
+  `
+};
+```
+
+#### Context Building
+```typescript
+const buildTripContext = (trip: Trip, itinerary: Activity[], expenses: Expense[]) => {
+  return `
+    Trip: ${trip.name}
+    Destination(s): ${trip.destinations.map(d => d.name).join(', ')}
+    Dates: ${trip.start_date} to ${trip.end_date}
+    Participants: ${trip.participants.length}
+    Budget: ${trip.budget_total} ${trip.preferences.currency}
+    
+    Current Itinerary:
+    ${itinerary.map(activity => 
+      `- ${activity.name} (${activity.location})`
+    ).join('\n')}
+    
+    Expenses So Far:
+    Total Spent: ${expenses.reduce((sum, e) => sum + e.amount, 0)}
+    Remaining Budget: ${trip.budget_total - expenses.reduce((sum, e) => sum + e.amount, 0)}
+  `;
+};
+```
+
+## 🔒 Privacy and Data Handling
+
+### Data Protection
+- **No Personal Data Storage**: AI service doesn't store personal information
+- **Anonymized Queries**: Trip data is anonymized before sending to AI
+- **Secure Transmission**: All AI communications are encrypted
+- **User Control**: Users can disable AI features at any time
+
+### Subscription Requirements
+AI features are available with the AI Assistant subscription plan:
+- **Free Plan**: No AI features
+- **Premium Plan**: No AI features
+- **AI Assistant Plan**: Full access to all AI features
+
+## 📊 AI Performance Metrics
+
+### Response Quality
+- **Relevance Score**: How well responses match user queries
+- **Accuracy Rate**: Factual accuracy of AI recommendations
+- **User Satisfaction**: Feedback scores from users
+- **Response Time**: Average time to generate responses
+
+### Usage Analytics
+- **Feature Adoption**: How many users engage with AI features
+- **Query Types**: Most common types of AI interactions
+- **Success Rate**: Percentage of successful AI interactions
+- **User Retention**: Impact of AI features on user engagement
+
+## 🚀 Future AI Enhancements
+
+### Planned Features
+- **Voice Integration**: Voice commands and responses
+- **Image Recognition**: AI analysis of travel photos
+- **Predictive Planning**: Proactive trip suggestions
+- **Multi-Language Support**: AI assistance in multiple languages
+- **Advanced Personalization**: Learning from user behavior patterns
+
+### Experimental Features
+- **Real-Time Translation**: Live translation of local content
+- **Augmented Reality**: AR-powered location information
+- **Social Integration**: AI-powered travel companion matching
+- **Dynamic Pricing**: AI-powered cost optimization
+
+## 🛠️ Troubleshooting AI Features
+
+### Common Issues
+
+#### AI Assistant Not Responding
+1. Check internet connection
+2. Verify AI Assistant subscription is active
+3. Try refreshing the page
+4. Contact support if issues persist
+
+#### Inaccurate Recommendations
+1. Provide more specific context in your queries
+2. Update your trip preferences and details
+3. Use the feedback system to improve AI responses
+4. Try rephrasing your questions
+
+#### Slow Response Times
+1. Check network connection speed
+2. Try during off-peak hours
+3. Simplify complex queries
+4. Clear browser cache if needed
+
+### Best Practices
+
+#### Getting Better AI Responses
+- **Be Specific**: Include details about your preferences and constraints
+- **Provide Context**: Mention your trip dates, budget, and group size
+- **Ask Follow-Up Questions**: Refine recommendations with additional queries
+- **Use Natural Language**: Write as you would speak to a travel expert
+
+#### Maximizing AI Value
+- **Regular Interaction**: Use AI features throughout your planning process
+- **Feedback**: Rate AI responses to improve future recommendations
+- **Experimentation**: Try different types of queries and requests
+- **Integration**: Combine AI suggestions with your own research
 
 ---
 
-Next: [Trip Management](./trip-management.md)
+**Related Features:**
+- [Trip Management](./trip-management.md) - Create and manage trips
+- [Itinerary Planning](./itinerary-planning.md) - Plan your activities
+- [Collaboration](./collaboration.md) - Share AI insights with travel companions

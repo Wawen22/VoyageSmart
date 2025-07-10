@@ -32,9 +32,12 @@ Detailed documentation of VoyageSmart's features:
 ### 💻 [Development](./development/)
 Resources for developers:
 - [Code Standards](./development/code-standards.md)
+- [Testing Framework](./development/testing-framework.md)
+- [Security Implementations](./development/security-implementations.md)
 - [Testing](./development/testing.md)
 - [Deployment](./development/deployment.md)
 - [Contributing](./development/contributing.md)
+- [UI/UX Improvements](./development/ui-ux-improvements.md)
 
 ### 🔌 [Integrations](./integrations/)
 Learn about the external services VoyageSmart integrates with:
@@ -57,6 +60,15 @@ Step-by-step guides for common tasks:
 - [Planning an Itinerary](./tutorials/planning-an-itinerary.md)
 - [Managing Expenses](./tutorials/managing-expenses.md)
 - [Using AI Features](./tutorials/using-ai-features.md)
+
+### 📋 [Technical Documentation](./technical/)
+Technical implementation details:
+- [Development Roadmap](./technical/DEVELOPMENT_ROADMAP.md)
+- [Subscription Implementation](./technical/SUBSCRIPTION_IMPLEMENTATION.md)
+- [Admin User Management](./technical/ADMIN_USER_MANAGEMENT.md)
+- [AI Documentation](./technical/AI_DOCUMENTATION.md)
+- [Cron Job Setup](./technical/CRON_JOB_SETUP.md)
+- [Technical Documentation](./technical/TECHNICAL_DOCUMENTATION.md)
 
 ## 🔍 Quick Links
 

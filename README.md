@@ -488,33 +488,34 @@ Scorri fino in fondo alla pagina per trovare il componente di test che ti permet
 
 ## 📚 Documentazione
 
-La documentazione completa del progetto è disponibile in due sezioni:
+La documentazione completa del progetto è disponibile in due formati:
 
-### Documentazione Moderna e Organizzata
+### 🌐 Documentazione Online Interattiva
 
-La nuova documentazione organizzata per argomenti è disponibile nella cartella `Documentation/`:
+Accedi alla documentazione interattiva con ricerca e navigazione:
+- **[http://localhost:3001/documentation](http://localhost:3001/documentation)** - Documentazione web moderna
+
+Caratteristiche:
+- 🔍 Ricerca full-text con highlighting
+- 📱 Design responsive e dark mode
+- 🧭 Menu laterale con navigazione intuitiva
+- ⚡ Animazioni fluide e UX moderna
+- 🔗 Link diretti alle sezioni
+- 📋 Syntax highlighting per il codice
+
+### 📁 Documentazione Markdown
+
+La documentazione è organizzata nella cartella `Documentation/`:
 
 - **[Documentation/README.md](Documentation/README.md)** - Panoramica e navigazione
-- **[Documentation/getting-started/](Documentation/getting-started/)** - Guida introduttiva
+- **[Documentation/getting-started/](Documentation/getting-started/)** - Guida introduttiva e installazione
 - **[Documentation/architecture/](Documentation/architecture/)** - Architettura del sistema
 - **[Documentation/features/](Documentation/features/)** - Funzionalità dell'applicazione
-- **[Documentation/development/](Documentation/development/)** - Guida per sviluppatori
+- **[Documentation/development/](Documentation/development/)** - Guida per sviluppatori, testing e sicurezza
 - **[Documentation/integrations/](Documentation/integrations/)** - Integrazioni con servizi esterni
 - **[Documentation/api/](Documentation/api/)** - Documentazione API
 - **[Documentation/tutorials/](Documentation/tutorials/)** - Tutorial passo-passo
-
-### Documentazione Legacy
-
-La documentazione precedente è ancora disponibile nella cartella `docs/`:
-
-- **[docs/SETUP.md](docs/SETUP.md)** - Guida all'installazione e configurazione
-- **[docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md)** - Documentazione tecnica dettagliata
-- **[docs/DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP.md)** - Roadmap di sviluppo e prossimi passi
-- **[docs/AI_DOCUMENTATION.md](docs/AI_DOCUMENTATION.md)** - Documentazione completa delle funzionalità AI
-- **[docs/AI_FEATURES.md](docs/AI_FEATURES.md)** - Panoramica delle funzionalità AI
-- **[docs/SUBSCRIPTION_IMPLEMENTATION.md](docs/SUBSCRIPTION_IMPLEMENTATION.md)** - Dettagli sull'implementazione del sistema di abbonamenti
-- **[docs/CRON_JOB_SETUP.md](docs/CRON_JOB_SETUP.md)** - Guida alla configurazione del cron job per le sottoscrizioni
-- **[docs/ADMIN_USER_MANAGEMENT.md](docs/ADMIN_USER_MANAGEMENT.md)** - Documentazione completa del sistema di gestione utenti per amministratori
+- **[Documentation/technical/](Documentation/technical/)** - Documentazione tecnica specializzata
 
 ## 📄 Licenza
 
