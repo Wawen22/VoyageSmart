@@ -9,8 +9,17 @@ export async function POST(request: NextRequest) {
 
   try {
     // Verifica se la chiave API di Gemini è configurata
-    const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyAipZkwXFf2avc1rHh5ViKbWZ60uIzjLKk';
-    console.log('API - Chiave API Gemini configurata:', geminiApiKey ? 'Sì' : 'No');
+    const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+    if (!geminiApiKey) {
+      console.error('API - Chiave API Gemini non configurata');
+      return NextResponse.json(
+        { error: 'Servizio AI non disponibile. Contatta l\'amministratore.' },
+        { status: 500 }
+      );
+    }
+
+    console.log('API - Chiave API Gemini configurata: Sì');
 
     // Ottieni i dati dalla richiesta
     const { tripId, tripData, preferences, days } = await request.json();

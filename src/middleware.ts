@@ -17,9 +17,10 @@ function shouldRefreshSession(session: Session): boolean {
   const currentTime = Date.now();
   const timeUntilExpiry = expiryTime - currentTime;
 
-  // Refresh if less than 30 minutes until expiry
-  const thirtyMinutesInMs = 30 * 60 * 1000;
-  return timeUntilExpiry < thirtyMinutesInMs;
+  // Refresh if less than 5 minutes until expiry (reduced from 30 minutes)
+  // This reduces unnecessary refresh calls that might trigger rate limits
+  const fiveMinutesInMs = 5 * 60 * 1000;
+  return timeUntilExpiry < fiveMinutesInMs;
 }
 
 export async function middleware(req: NextRequest) {
@@ -27,6 +28,15 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
 
   try {
+    const pathname = req.nextUrl.pathname;
+
+    // Skip middleware for static assets and certain API routes to reduce auth calls
+    if (pathname.startsWith('/_next/') ||
+        pathname.startsWith('/api/webhooks/') ||
+        pathname.includes('.')) {
+      return res;
+    }
+
     // Create a Supabase client
     const supabase = createMiddlewareClient({ req, res });
 
@@ -37,7 +47,6 @@ export async function middleware(req: NextRequest) {
 
     // Check if we need to refresh the session
     // Only refresh for auth-related routes or if session exists but might be stale
-    const pathname = req.nextUrl.pathname;
     const isAuthRoute = pathname.startsWith('/login') ||
                        pathname.startsWith('/register') ||
                        pathname.startsWith('/forgot-password');

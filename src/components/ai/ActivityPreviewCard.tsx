@@ -62,7 +62,11 @@ export default function ActivityPreviewCard({
   const formatTime = (timeString: string) => {
     try {
       const date = new Date(timeString);
-      return date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString('it-IT', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Europe/Rome' // Ensure Italian timezone
+      });
     } catch (e) {
       return timeString;
     }

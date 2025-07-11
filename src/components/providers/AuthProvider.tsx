@@ -34,8 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           let profile = null;
           let profileError = null;
 
-          // Retry profile fetch up to 3 times
-          for (let attempt = 1; attempt <= 3; attempt++) {
+          // Retry profile fetch up to 2 times (reduced from 3 to minimize rate limiting)
+          for (let attempt = 1; attempt <= 2; attempt++) {
             const { data, error } = await supabase
               .from('users')
               .select('*')
@@ -50,9 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             profileError = error;
             console.warn(`Profile fetch attempt ${attempt} failed:`, error);
 
-            if (attempt < 3) {
-              // Wait before retry
-              await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            if (attempt < 2) {
+              // Wait before retry (increased delay to reduce rate limiting)
+              await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
             }
           }
 

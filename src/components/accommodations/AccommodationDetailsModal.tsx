@@ -38,7 +38,7 @@ import {
   TrashIcon,
   ExternalLinkIcon
 } from 'lucide-react';
-import MapView from '@/components/map/MapView';
+import { LazyMapView } from '@/components/LazyComponents';
 
 interface AccommodationDetailsModalProps {
   accommodation: Accommodation | null;
@@ -166,7 +166,7 @@ export default function AccommodationDetailsModal({
                 </div>
                 
                 {accommodation.coordinates && (
-                  <MapView
+                  <LazyMapView
                     coordinates={accommodation.coordinates}
                     interactive={false}
                     height="200px"

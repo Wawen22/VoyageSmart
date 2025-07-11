@@ -9,7 +9,7 @@ import FormattedAIResponse from './FormattedAIResponse';
 import { supabase } from '@/lib/supabase';
 import ActivityPreviewCard from './ActivityPreviewCard';
 import ActivityTimeline from './ActivityTimeline';
-import ActivityMapView from './ActivityMapView';
+import { LazyActivityMapView } from '@/components/LazyComponents';
 import TravelThemeButtons from './TravelThemeButtons';
 import DaySelectionButtons from './DaySelectionButtons';
 import ActivityEditModal from './ActivityEditModal';
@@ -80,9 +80,12 @@ export default function ItineraryWizard({
 }: ItineraryWizardProps) {
   // Verifica se la chiave API di Gemini è configurata
   useEffect(() => {
-    const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyAipZkwXFf2avc1rHh5ViKbWZ60uIzjLKk';
+    const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     console.log('Chiave API Gemini configurata:', geminiApiKey ? 'Sì' : 'No');
-    // Continuiamo anche se la chiave non è nelle variabili d'ambiente, usando quella hardcoded
+
+    if (!geminiApiKey) {
+      console.warn('Chiave API Gemini non configurata - alcune funzionalità potrebbero non funzionare');
+    }
   }, []);
 
   // Stato del wizard
@@ -1074,7 +1077,7 @@ export default function ItineraryWizard({
                             />
                           </TabsContent>
                           <TabsContent value="map" className="mt-0">
-                            <ActivityMapView
+                            <LazyActivityMapView
                               activities={wizardState.generatedActivities}
                               onMarkerClick={handleEditActivity}
                               onCoordinatesUpdate={handleUpdateCoordinates}

@@ -2,13 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { PlusIcon, XIcon, MapPinIcon } from 'lucide-react';
 import { Destination, TripDestinations } from '@/lib/types/destination';
-
-// Set Mapbox token
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+import MapboxWrapper from '../map/MapboxWrapper';
 
 interface DestinationSelectorProps {
   value: TripDestinations;
@@ -21,9 +17,33 @@ export default function DestinationSelector({
   onChange,
   error,
 }: DestinationSelectorProps) {
+  return (
+    <MapboxWrapper>
+      {(mapboxgl) => (
+        <DestinationSelectorContent
+          mapboxgl={mapboxgl}
+          value={value}
+          onChange={onChange}
+          error={error}
+        />
+      )}
+    </MapboxWrapper>
+  );
+}
+
+interface DestinationSelectorContentProps extends DestinationSelectorProps {
+  mapboxgl: any;
+}
+
+function DestinationSelectorContent({
+  mapboxgl,
+  value,
+  onChange,
+  error,
+}: DestinationSelectorContentProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
+  const map = useRef<any>(null);
+  const markers = useRef<{ [key: string]: any }>({});
   const [mapLoaded, setMapLoaded] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);

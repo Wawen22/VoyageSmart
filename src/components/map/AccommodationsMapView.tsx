@@ -1,12 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { Accommodation } from '@/lib/features/accommodationSlice';
-
-// Set your Mapbox token here
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+import MapboxWrapper from './MapboxWrapper';
 
 interface AccommodationsMapViewProps {
   accommodations: Accommodation[];
@@ -19,9 +15,33 @@ export default function AccommodationsMapView({
   height = '500px',
   onMarkerClick,
 }: AccommodationsMapViewProps) {
+  return (
+    <MapboxWrapper>
+      {(mapboxgl) => (
+        <AccommodationsMapContent
+          mapboxgl={mapboxgl}
+          accommodations={accommodations}
+          height={height}
+          onMarkerClick={onMarkerClick}
+        />
+      )}
+    </MapboxWrapper>
+  );
+}
+
+interface AccommodationsMapContentProps extends AccommodationsMapViewProps {
+  mapboxgl: any;
+}
+
+function AccommodationsMapContent({
+  mapboxgl,
+  accommodations,
+  height = '500px',
+  onMarkerClick,
+}: AccommodationsMapContentProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const map = useRef<any>(null);
+  const markers = useRef<any[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   // Initialize map when component mounts

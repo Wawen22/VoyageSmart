@@ -49,7 +49,9 @@ export default function ActivityItem({
   const formatTime = (timeString: string | null) => {
     if (!timeString) return null;
     try {
-      return format(parseISO(timeString), 'HH:mm');
+      return format(parseISO(timeString), 'HH:mm', {
+        timeZone: 'Europe/Rome' // Ensure Italian timezone
+      });
     } catch (e) {
       return timeString;
     }

@@ -3,16 +3,16 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { 
-  MapPin, 
-  Calendar, 
-  Hotel, 
-  Car, 
-  Plane, 
-  Train, 
-  Info, 
-  Star, 
-  Clock, 
+import {
+  MapPin,
+  Calendar,
+  Hotel,
+  Car,
+  Plane,
+  Train,
+  Info,
+  Star,
+  Clock,
   DollarSign,
   Users,
   Camera,
@@ -25,10 +25,12 @@ import {
   Sun,
   Moon
 } from 'lucide-react';
+import AIDataContainer from './cards/AIDataContainer';
 
 interface FormattedAIResponseProps {
   content: string;
   className?: string;
+  tripData?: any; // Trip context data for rendering structured components
 }
 
 // Mappa delle emoji agli icon components di Lucide
@@ -188,15 +190,102 @@ const processContentWithIcons = (content: any): React.ReactNode => {
   return content;
 };
 
-export default function FormattedAIResponse({ content, className = '' }: FormattedAIResponseProps) {
-  return (
-    <div className={`formatted-ai-response prose prose-sm dark:prose-invert max-w-full ${className}`}>
+export default function FormattedAIResponse({ content, className = '', tripData }: FormattedAIResponseProps) {
+  // Function to parse and render structured data components
+  const parseStructuredContent = (text: string) => {
+    const parts = [];
+    let currentIndex = 0;
+
+    // Look for structured data markers
+    const structuredDataRegex = /\[AI_DATA:(transportation|itinerary|accommodations|expenses)(?::(\d+))?\]/g;
+    let match;
+
+    while ((match = structuredDataRegex.exec(text)) !== null) {
+      // Add text before the marker
+      if (match.index > currentIndex) {
+        const beforeText = text.slice(currentIndex, match.index);
+        if (beforeText.trim()) {
+          parts.push(
+            <div key={`text-${currentIndex}`} className="mb-4">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={components}
+              >
+                {beforeText}
+              </ReactMarkdown>
+            </div>
+          );
+        }
+      }
+
+      // Add the structured component
+      const dataType = match[1] as 'transportation' | 'itinerary' | 'accommodations' | 'expenses';
+      const maxItems = match[2] ? parseInt(match[2]) : undefined;
+
+      if (tripData) {
+        let data = [];
+        switch (dataType) {
+          case 'transportation':
+            data = tripData.transportation || [];
+            break;
+          case 'itinerary':
+            data = tripData.itinerary || [];
+            break;
+          case 'accommodations':
+            data = tripData.accommodations || [];
+            break;
+          case 'expenses':
+            data = tripData.expenses || [];
+            break;
+        }
+
+        parts.push(
+          <div key={`data-${match.index}`} className="my-4">
+            <AIDataContainer
+              type={dataType}
+              data={data}
+              compact={true}
+              maxItems={maxItems}
+              showHeader={true}
+            />
+          </div>
+        );
+      }
+
+      currentIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (currentIndex < text.length) {
+      const remainingText = text.slice(currentIndex);
+      if (remainingText.trim()) {
+        parts.push(
+          <div key={`text-${currentIndex}`} className="mb-4">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={components}
+            >
+              {remainingText}
+            </ReactMarkdown>
+          </div>
+        );
+      }
+    }
+
+    return parts.length > 0 ? parts : [
       <ReactMarkdown
+        key="default"
         remarkPlugins={[remarkGfm]}
         components={components}
       >
-        {content}
+        {text}
       </ReactMarkdown>
+    ];
+  };
+
+  return (
+    <div className={`formatted-ai-response prose prose-sm dark:prose-invert max-w-full ${className}`}>
+      {parseStructuredContent(content)}
     </div>
   );
 }

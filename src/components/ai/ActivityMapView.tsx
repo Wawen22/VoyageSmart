@@ -1,14 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MapPin, Navigation, Route, Maximize, Minimize } from 'lucide-react';
-
-// Set your Mapbox token here
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+import MapboxWrapper from '../map/MapboxWrapper';
 
 // Tipo per le attività generate
 type GeneratedActivity = {
@@ -41,9 +37,35 @@ export default function ActivityMapView({
   onMarkerClick,
   onCoordinatesUpdate
 }: ActivityMapViewProps) {
+  return (
+    <MapboxWrapper>
+      {(mapboxgl) => (
+        <ActivityMapContent
+          mapboxgl={mapboxgl}
+          activities={activities}
+          height={height}
+          onMarkerClick={onMarkerClick}
+          onCoordinatesUpdate={onCoordinatesUpdate}
+        />
+      )}
+    </MapboxWrapper>
+  );
+}
+
+interface ActivityMapContentProps extends ActivityMapViewProps {
+  mapboxgl: any;
+}
+
+function ActivityMapContent({
+  mapboxgl,
+  activities,
+  height = '450px',
+  onMarkerClick,
+  onCoordinatesUpdate
+}: ActivityMapContentProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const map = useRef<any>(null);
+  const markers = useRef<any[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isOptimizingRoute, setIsOptimizingRoute] = useState(false);

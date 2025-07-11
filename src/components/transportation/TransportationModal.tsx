@@ -35,7 +35,7 @@ import {
   XIcon
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import MapView from '@/components/map/MapView';
+import { LazyMapView } from '@/components/LazyComponents';
 import { uploadFile } from '@/lib/fileUpload';
 // TransportationStopForm import removed temporarily
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -433,7 +433,7 @@ export default function TransportationModal({
                         (Click on the map to set location)
                       </span>
                     </Label>
-                    <MapView
+                    <LazyMapView
                       address={formData.departure_location}
                       coordinates={departureCoordinates}
                       interactive={true}
@@ -479,7 +479,7 @@ export default function TransportationModal({
                         (Click on the map to set location)
                       </span>
                     </Label>
-                    <MapView
+                    <LazyMapView
                       address={formData.arrival_location}
                       coordinates={arrivalCoordinates}
                       interactive={true}

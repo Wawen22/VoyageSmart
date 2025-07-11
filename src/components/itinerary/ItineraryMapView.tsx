@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ActivityMapView from '@/components/ai/ActivityMapView';
+import { LazyActivityMapView } from '@/components/LazyComponents';
 import { Activity } from '@/lib/features/itinerarySlice';
 import { format, parseISO } from 'date-fns';
 
@@ -131,7 +131,7 @@ export default function ItineraryMapView({
             </p>
           </div>
         ) : (
-          <ActivityMapView
+          <LazyActivityMapView
             activities={allActivities}
             height="500px"
             onMarkerClick={handleMarkerClick}

@@ -31,7 +31,7 @@ import {
 import { formatCurrency } from '@/lib/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/use-toast';
-import TransportationMap from './TransportationMap';
+import { LazyTransportationMap } from '@/components/LazyComponents';
 
 interface TransportationDetailsModalProps {
   transportation: Transportation | null;
@@ -283,7 +283,7 @@ export default function TransportationDetailsModal({
                   <h3 className="font-semibold text-lg">Map</h3>
                   
                   <div className="h-[300px] w-full">
-                    <TransportationMap
+                    <LazyTransportationMap
                       transportations={[transportation]}
                       height="300px"
                     />

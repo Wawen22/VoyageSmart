@@ -1,13 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { Transportation } from '@/lib/features/transportationSlice';
 import { format, parseISO } from 'date-fns';
-
-// Set your Mapbox token here
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+import MapboxWrapper from '../map/MapboxWrapper';
 
 interface TransportationMapProps {
   transportations: Transportation[];
@@ -20,9 +16,33 @@ export default function TransportationMap({
   height = '500px',
   onMarkerClick,
 }: TransportationMapProps) {
+  return (
+    <MapboxWrapper>
+      {(mapboxgl) => (
+        <TransportationMapContent
+          mapboxgl={mapboxgl}
+          transportations={transportations}
+          height={height}
+          onMarkerClick={onMarkerClick}
+        />
+      )}
+    </MapboxWrapper>
+  );
+}
+
+interface TransportationMapContentProps extends TransportationMapProps {
+  mapboxgl: any;
+}
+
+function TransportationMapContent({
+  mapboxgl,
+  transportations,
+  height = '500px',
+  onMarkerClick,
+}: TransportationMapContentProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const map = useRef<any>(null);
+  const markers = useRef<any[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   // Initialize map when component mounts

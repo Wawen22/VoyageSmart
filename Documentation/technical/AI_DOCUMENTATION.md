@@ -46,16 +46,81 @@ The AI assistant uses a comprehensive system prompt that includes:
 // Trip context is dynamically built and includes:
 - Trip basic information (name, dates, participants)
 - Accommodations with locations and dates
-- Transportation with routes and times
-- Itinerary activities organized by day
+- Transportation with routes and times (formatted with correct timezone)
+- Itinerary activities organized by day (with local time formatting)
 - Expense information (if relevant)
 ```
+
+#### Timezone Handling
+All timestamps from the database (TIMESTAMP WITH TIME ZONE) are properly converted to Italian local time (Europe/Rome timezone) before being displayed to users or passed to the AI. This ensures:
+- Transportation times show correct local departure/arrival times
+- Activity times respect Italian timezone (UTC+1 in winter, UTC+2 in summer)
+- Consistent time display across all components
 
 #### Response Formatting
 - Clear separation between different types of information
 - Use of asterisks (**) for emphasis
 - Proper line breaks and lists for readability
 - Concise initial responses with essential information
+- **NEW**: Visual components for structured data display
+
+#### Visual Components Integration
+The AI Assistant now supports rich visual components that match the UI/UX of the original sections:
+
+**Available Components:**
+- `AITransportationCard` - Displays transportation with icons, routes, and times
+- `AIItineraryView` - Shows itinerary organized by days with activities
+- `AIAccommodationCard` - Displays accommodations with details and ratings
+- `AIExpenseCard` - Shows expenses with category colors and split information
+- `AIDataContainer` - Unified container for all data types
+
+**Special Markers:**
+The AI uses special markers to trigger visual components:
+- `[AI_DATA:transportation]` or `[AI_DATA:transportation:3]` - Transportation data
+- `[AI_DATA:itinerary]` or `[AI_DATA:itinerary:5]` - Itinerary data
+- `[AI_DATA:accommodations]` or `[AI_DATA:accommodations:2]` - Accommodation data
+- `[AI_DATA:expenses]` or `[AI_DATA:expenses:10]` - Expense data
+
+**Intelligent Context Recognition:**
+The AI automatically detects when users are discussing specific aspects of their trip and includes appropriate visual components without requiring explicit commands. The system is designed to be precise and avoid showing irrelevant components.
+
+**Selective Recognition System:**
+- Uses specific keyword matching to avoid false positives
+- Implements anti-overlap logic to prevent multiple components from appearing together
+- Prioritizes the most relevant component when multiple matches are detected
+- Only activates when the user's intent is clearly focused on a specific data type
+
+**Transportation Examples:**
+- "A che ora parte il volo?" → Shows only transportation components
+- "Come arriviamo a destinazione?" → Displays only transportation options
+- "Orario di partenza del treno?" → Shows only relevant transport details
+
+**Itinerary Examples:**
+- "Cosa facciamo domani?" → Shows only next day's activities (limited to 1 day)
+- "Programma del giorno?" → Displays only daily itinerary
+- "Attività pianificate?" → Shows only planned activities
+
+**Accommodation Examples:**
+- "Dove dormiamo?" → Shows only accommodation details
+- "Dettagli dell'hotel?" → Displays only hotel information
+- "Check-in dell'alloggio?" → Shows only accommodation data
+
+**Expense Examples:**
+- "Quanto abbiamo speso?" → Shows only expense breakdown
+- "Spese del viaggio?" → Displays only expense details
+- "Budget utilizzato?" → Shows only expense summary
+
+**Anti-Overlap Logic:**
+- If multiple components would be triggered, shows only the most relevant one
+- Prioritizes based on specific keywords in the user's question
+- Prevents visual clutter and confusion
+- Maintains focus on the user's actual request
+
+**Smart Limiting:**
+- Automatically limits large datasets (>10 items show first 10)
+- Recognizes specific requests ("domani" shows 1 day, "ultime spese" shows last 10)
+- Respects "tutto/tutti" keywords to show complete data
+- Applies context-aware filtering based on user intent
 
 ### Usage
 1. Users click the "Assistente AI" button in any trip section

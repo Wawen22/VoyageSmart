@@ -19,11 +19,11 @@ const DEFAULT_CONFIGS: Record<string, RateLimitConfig> = {
   '/api/auth/login': { windowMs: 15 * 60 * 1000, maxRequests: 5 }, // 5 attempts per 15 minutes
   '/api/auth/register': { windowMs: 60 * 60 * 1000, maxRequests: 3 }, // 3 attempts per hour
   '/api/auth/reset-password': { windowMs: 60 * 60 * 1000, maxRequests: 3 }, // 3 attempts per hour
-  
-  // AI endpoints - moderate limits
-  '/api/ai/chat': { windowMs: 60 * 1000, maxRequests: 20 }, // 20 requests per minute
-  '/api/ai/generate-activities': { windowMs: 60 * 1000, maxRequests: 10 }, // 10 requests per minute
-  
+
+  // AI endpoints - optimized limits to prevent 429 errors
+  '/api/ai/chat': { windowMs: 60 * 1000, maxRequests: 15 }, // 15 requests per minute (reduced from 20)
+  '/api/ai/generate-activities': { windowMs: 60 * 1000, maxRequests: 8 }, // 8 requests per minute (reduced from 10)
+
   // General API endpoints
   'default': { windowMs: 60 * 1000, maxRequests: 100 }, // 100 requests per minute
 };

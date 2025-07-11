@@ -3,10 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
-import mapboxgl from 'mapbox-gl';
-
-// Usa il token di Mapbox
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+import MapboxWrapper from './MapboxWrapper';
 
 interface LocationAutocompleteProps {
   value: string;
@@ -23,6 +20,42 @@ export default function LocationAutocomplete({
   error,
   className = '',
 }: LocationAutocompleteProps) {
+  return (
+    <MapboxWrapper fallback={
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={className}
+        disabled
+      />
+    }>
+      {(mapboxgl) => (
+        <LocationAutocompleteContent
+          mapboxgl={mapboxgl}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          error={error}
+          className={className}
+        />
+      )}
+    </MapboxWrapper>
+  );
+}
+
+interface LocationAutocompleteContentProps extends LocationAutocompleteProps {
+  mapboxgl: any;
+}
+
+function LocationAutocompleteContent({
+  mapboxgl,
+  value,
+  onChange,
+  placeholder = 'Inserisci un indirizzo',
+  error,
+  className = '',
+}: LocationAutocompleteContentProps) {
   const [searchInput, setSearchInput] = useState(value);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);

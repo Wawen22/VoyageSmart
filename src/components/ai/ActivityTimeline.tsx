@@ -74,7 +74,8 @@ export default function ActivityTimeline({
         weekday: 'long',
         day: 'numeric',
         month: 'long',
-        year: 'numeric'
+        year: 'numeric',
+        timeZone: 'Europe/Rome' // Ensure Italian timezone
       });
     } catch (e) {
       return dateString;
@@ -85,7 +86,10 @@ export default function ActivityTimeline({
   const formatShortDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return format(date, 'EEE d MMM', { locale: it });
+      return format(date, 'EEE d MMM', {
+        locale: it,
+        timeZone: 'Europe/Rome' // Ensure Italian timezone
+      });
     } catch (e) {
       return dateString;
     }

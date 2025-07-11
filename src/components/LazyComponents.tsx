@@ -27,20 +27,65 @@ const WizardSkeleton = () => (
 );
 
 // Lazy loaded components
-export const LazyTripMap = dynamic(() => import('./TripMap'), {
-  loading: () => <MapSkeleton />,
-  ssr: false,
-});
 
-export const LazyAIWizard = dynamic(() => import('./ai/AIWizard'), {
-  loading: () => <WizardSkeleton />,
-  ssr: false,
-});
+// Mapbox components - must be loaded client-side only
+export const LazyMapView = dynamic(
+  () => import('./map/MapView').catch(() => ({ default: () => <MapSkeleton /> })),
+  {
+    loading: () => <MapSkeleton />,
+    ssr: false,
+  }
+);
 
-export const LazyAIAssistant = dynamic(() => import('./ai/AIAssistant'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false,
-});
+export const LazyAccommodationsMapView = dynamic(
+  () => import('./map/AccommodationsMapView').catch(() => ({ default: () => <MapSkeleton /> })),
+  {
+    loading: () => <MapSkeleton />,
+    ssr: false,
+  }
+);
+
+export const LazyTransportationMap = dynamic(
+  () => import('./transportation/TransportationMap').catch(() => ({ default: () => <MapSkeleton /> })),
+  {
+    loading: () => <MapSkeleton />,
+    ssr: false,
+  }
+);
+
+export const LazyActivityMapView = dynamic(
+  () => import('./ai/ActivityMapView').catch(() => ({ default: () => <MapSkeleton /> })),
+  {
+    loading: () => <MapSkeleton />,
+    ssr: false,
+  }
+);
+
+export const LazyItineraryMapView = dynamic(
+  () => import('./itinerary/ItineraryMapView').catch(() => ({ default: () => <MapSkeleton /> })),
+  {
+    loading: () => <MapSkeleton />,
+    ssr: false,
+  }
+);
+
+export const LazyLocationAutocomplete = dynamic(
+  () => import('./map/LocationAutocomplete').catch(() => ({ default: () => <LoadingSpinner /> })),
+  {
+    loading: () => <LoadingSpinner />,
+    ssr: false,
+  }
+);
+
+export const LazyDestinationSelector = dynamic(
+  () => import('./destination/DestinationSelector').catch(() => ({ default: () => <MapSkeleton /> })),
+  {
+    loading: () => <MapSkeleton />,
+    ssr: false,
+  }
+);
+
+
 
 // Calendar component (react-big-calendar is heavy)
 export const LazyCalendar = dynamic(() => import('react-big-calendar').then(mod => ({ default: mod.Calendar })), {
@@ -48,46 +93,9 @@ export const LazyCalendar = dynamic(() => import('react-big-calendar').then(mod 
   ssr: false,
 });
 
-// Chart components (if using recharts or similar)
-export const LazyChart = dynamic(() => import('./charts/Chart'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false,
-});
 
-// Heavy form components
-export const LazyRichTextEditor = dynamic(() => import('./forms/RichTextEditor'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false,
-});
 
-// File upload components
-export const LazyFileUpload = dynamic(() => import('./upload/FileUpload'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false,
-});
 
-// Admin components (only loaded for admin users)
-export const LazyAdminDashboard = dynamic(() => import('./admin/AdminDashboard'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false,
-});
-
-export const LazyUserManagement = dynamic(() => import('./admin/UserManagement'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false,
-});
-
-// Subscription components
-export const LazySubscriptionModal = dynamic(() => import('./subscription/SubscriptionModal'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false,
-});
-
-// Documentation components
-export const LazyDocumentation = dynamic(() => import('./documentation/Documentation'), {
-  loading: () => <LoadingSpinner />,
-  ssr: false,
-});
 
 // Export types for TypeScript
 export type LazyComponentType<T = {}> = ComponentType<T>;
@@ -108,13 +116,10 @@ export function createLazyComponent<T = {}>(
 export const withLazyLoading = {
   map: (Component: () => Promise<{ default: ComponentType<any> }>) =>
     dynamic(Component, { loading: () => <MapSkeleton />, ssr: false }),
-  
+
   calendar: (Component: () => Promise<{ default: ComponentType<any> }>) =>
     dynamic(Component, { loading: () => <CalendarSkeleton />, ssr: false }),
-  
+
   wizard: (Component: () => Promise<{ default: ComponentType<any> }>) =>
     dynamic(Component, { loading: () => <WizardSkeleton />, ssr: false }),
-  
-  admin: (Component: () => Promise<{ default: ComponentType<any> }>) =>
-    dynamic(Component, { loading: () => <LoadingSpinner />, ssr: false }),
 };

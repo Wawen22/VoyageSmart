@@ -6,6 +6,32 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Debounce utility for authentication requests
+let authTimeout: NodeJS.Timeout | null = null;
+const AUTH_DEBOUNCE_MS = 1000; // 1 second debounce
+
+function debounceAuth<T extends any[], R>(
+  fn: (...args: T) => Promise<R>,
+  delay: number = AUTH_DEBOUNCE_MS
+): (...args: T) => Promise<R> {
+  return (...args: T): Promise<R> => {
+    return new Promise((resolve, reject) => {
+      if (authTimeout) {
+        clearTimeout(authTimeout);
+      }
+
+      authTimeout = setTimeout(async () => {
+        try {
+          const result = await fn(...args);
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      }, delay);
+    });
+  };
+}
+
 export type User = {
   id: string;
   email?: string;
@@ -66,20 +92,40 @@ export async function signUp(email: string, password: string, fullName: string) 
   }
 }
 
-export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+// Internal sign in function (not debounced)
+async function _signIn(email: string, password: string) {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error) {
-    console.error('Sign in error:', error);
+    if (error) {
+      console.error('Sign in error:', error);
+
+      // Handle rate limit errors specifically
+      if (error.message?.includes('rate limit') || error.message?.includes('too many requests')) {
+        throw new Error('Too many login attempts. Please wait a few minutes before trying again.');
+      }
+
+      // Handle other authentication errors
+      if (error.message?.includes('Invalid login credentials')) {
+        throw new Error('Invalid email or password. Please check your credentials and try again.');
+      }
+
+      throw error;
+    }
+
+    console.log('Sign in successful:', data);
+    return data;
+  } catch (error: any) {
+    console.error('Sign in process error:', error);
     throw error;
   }
-
-  console.log('Sign in successful:', data);
-  return data;
 }
+
+// Debounced sign in function to prevent rapid authentication attempts
+export const signIn = debounceAuth(_signIn);
 
 export async function signOut() {
   try {

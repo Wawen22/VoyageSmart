@@ -310,18 +310,42 @@ export default function ChatBot({
     } catch (error: any) {
       console.error('Error sending message:', error);
 
-      // Messaggio di errore personalizzato
-      let errorMessage = 'Mi dispiace, si è verificato un errore. Riprova più tardi.';
+      // Parse error response if available
+      let errorData: any = {};
+      try {
+        if (error.response) {
+          errorData = await error.response.json();
+        }
+      } catch (parseError) {
+        // Ignore parse errors
+      }
 
+      // Messaggio di errore personalizzato basato sulla risposta del server
+      let errorMessage = errorData.message || 'Mi dispiace, si è verificato un errore. Riprova più tardi.';
+      let suggestions = errorData.suggestions || [];
+
+      // Fallback per errori specifici
       if (error.message && error.message.includes('Autenticazione richiesta')) {
         errorMessage = 'Sembra che la tua sessione sia scaduta. Prova ad aggiornare la pagina e accedere nuovamente.';
       } else if (error.message && error.message.includes('Errore')) {
         errorMessage = error.message;
+      } else if (error.message?.includes('429') || error.message?.includes('Too Many Requests')) {
+        errorMessage = 'Troppe richieste. Attendi qualche secondo e riprova.';
+        suggestions = ['Attendi 30-60 secondi prima di inviare un altro messaggio'];
+      } else if (error.message?.includes('503') || error.message?.includes('overloaded')) {
+        errorMessage = 'Il servizio AI è temporaneamente sovraccarico. Riprova tra qualche minuto.';
+        suggestions = ['Il servizio dovrebbe tornare disponibile a breve'];
+      }
+
+      // Costruisci il messaggio di errore con suggerimenti
+      let fullErrorMessage = errorMessage;
+      if (suggestions.length > 0) {
+        fullErrorMessage += '\n\n💡 Suggerimenti:\n' + suggestions.map((s: string) => `• ${s}`).join('\n');
       }
 
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: errorMessage,
+        content: fullErrorMessage,
         timestamp: new Date()
       }]);
 
@@ -531,6 +555,7 @@ export default function ChatBot({
                 <FormattedAIResponse
                   content={message.content}
                   className="text-sm"
+                  tripData={tripData}
                 />
               ) : (
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>

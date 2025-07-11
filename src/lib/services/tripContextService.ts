@@ -1,20 +1,63 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/lib/logger';
 
 // Crea una nuova istanza di Supabase per assicurarci che funzioni correttamente
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Cache per il contesto dei viaggi
+const tripContextCache = new Map<string, { data: any; expiry: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minuti
+
+/**
+ * Get cached trip context if available and not expired
+ */
+function getCachedTripContext(tripId: string): any | null {
+  const cached = tripContextCache.get(tripId);
+  if (cached && cached.expiry > Date.now()) {
+    logger.debug('Returning cached trip context', { tripId });
+    return cached.data;
+  }
+
+  // Remove expired cache entry
+  if (cached) {
+    tripContextCache.delete(tripId);
+  }
+
+  return null;
+}
+
+/**
+ * Cache trip context
+ */
+function setCachedTripContext(tripId: string, data: any): void {
+  tripContextCache.set(tripId, {
+    data,
+    expiry: Date.now() + CACHE_TTL
+  });
+
+  // Cleanup old entries periodically
+  if (Math.random() < 0.05) { // 5% chance
+    const now = Date.now();
+    for (const [key, value] of tripContextCache.entries()) {
+      if (value.expiry <= now) {
+        tripContextCache.delete(key);
+      }
+    }
+  }
+}
+
 /**
  * Raccoglie tutti i dati relativi a un viaggio per fornire contesto all'AI
- *
- * Utilizza una nuova istanza di Supabase per evitare problemi di contesto
+ * Ottimizzato con caching e query parallele
  */
 export async function getTripContext(tripId: string) {
-  console.log('=== getTripContext chiamato con ID:', tripId, '===');
+  const startTime = performance.now();
+  logger.debug('Getting trip context', { tripId });
 
   if (!tripId) {
-    console.error('ERRORE: tripId non valido:', tripId);
+    logger.error('Invalid trip ID provided', { tripId });
     return {
       trip: {
         id: 'unknown',
@@ -25,28 +68,75 @@ export async function getTripContext(tripId: string) {
     };
   }
 
+  // Check cache first
+  const cached = getCachedTripContext(tripId);
+  if (cached) {
+    return cached;
+  }
+
   try {
-    console.log('Verifico connessione a Supabase...');
-    console.log('URL:', supabaseUrl);
-    console.log('Key:', supabaseAnonKey ? 'Presente' : 'Mancante');
+    logger.debug('Fetching trip context from database', { tripId });
 
-    // Ottieni i dettagli base del viaggio con un approccio più semplice
-    const { data: tripData, error: tripError } = await supabase
-      .from('trips')
-      .select('*')
-      .eq('id', tripId)
-      .single();
+    // Esegui tutte le query in parallelo per migliorare le performance
+    const [
+      tripResult,
+      participantsResult,
+      accommodationsResult,
+      transportationResult,
+      itineraryDaysResult,
+      activitiesResult
+    ] = await Promise.allSettled([
+      // Query principale del viaggio
+      supabase
+        .from('trips')
+        .select('id, name, description, destination, start_date, end_date, owner_id, is_private, budget_total, created_at')
+        .eq('id', tripId)
+        .single(),
 
-    if (tripError) {
-      console.error('Errore nel recupero dei dettagli del viaggio:', tripError);
-      throw tripError;
+      // Query partecipanti
+      supabase
+        .from('trip_participants')
+        .select('invited_email, role, invitation_status')
+        .eq('trip_id', tripId),
+
+      // Query alloggi
+      supabase
+        .from('accommodations')
+        .select('name, type, check_in_date, check_out_date, address')
+        .eq('trip_id', tripId),
+
+      // Query trasporti
+      supabase
+        .from('transportation')
+        .select('type, provider, departure_time, departure_location, arrival_time, arrival_location')
+        .eq('trip_id', tripId),
+
+      // Query giorni itinerario
+      supabase
+        .from('itinerary_days')
+        .select('id, day_date, notes')
+        .eq('trip_id', tripId)
+        .order('day_date', { ascending: true }),
+
+      // Query attività
+      supabase
+        .from('activities')
+        .select('id, name, type, start_time, end_time, location, notes, day_id')
+        .eq('trip_id', tripId)
+        .order('start_time', { ascending: true })
+    ]);
+
+    // Verifica che la query principale del viaggio sia riuscita
+    if (tripResult.status === 'rejected' || tripResult.value.error) {
+      const error = tripResult.status === 'rejected' ? tripResult.reason : tripResult.value.error;
+      logger.error('Failed to fetch trip data', { tripId, error });
+      throw error;
     }
 
-    console.log('Dettagli viaggio recuperati:', JSON.stringify(tripData).substring(0, 200) + '...');
+    const tripData = tripResult.value.data;
+    logger.debug('Trip data fetched successfully', { tripId, tripName: tripData.name });
 
-    // Per ora, restituisci solo i dettagli base del viaggio
-    // Questo ci permetterà di verificare se il problema è nella connessione a Supabase
-    // o nelle query più complesse
+    // Costruisci il contesto del viaggio
     const tripContext = {
       trip: {
         id: tripData.id,
@@ -71,168 +161,122 @@ export async function getTripContext(tripId: string) {
       }
     };
 
-    console.log('Contesto base del viaggio recuperato con successo');
-
-    // Ora proviamo a recuperare i partecipanti
-    try {
-      const { data: participants, error: participantsError } = await supabase
-        .from('trip_participants')
-        .select('*')
-        .eq('trip_id', tripId);
-
-      if (!participantsError && participants) {
-        console.log('Partecipanti recuperati:', participants.length);
-        tripContext.participants = participants.map(p => ({
-          name: p.invited_email || 'Partecipante',
-          email: p.invited_email || 'Email sconosciuta',
-          role: p.role,
-          status: p.invitation_status
-        }));
-      } else {
-        console.error('Errore nel recupero dei partecipanti:', participantsError);
-      }
-    } catch (participantsError) {
-      console.error('Eccezione nel recupero dei partecipanti:', participantsError);
+    // Processa i risultati delle query parallele
+    // Partecipanti
+    if (participantsResult.status === 'fulfilled' && !participantsResult.value.error) {
+      tripContext.participants = participantsResult.value.data?.map(p => ({
+        name: p.invited_email || 'Partecipante',
+        email: p.invited_email || 'Email sconosciuta',
+        role: p.role,
+        status: p.invitation_status
+      })) || [];
+      logger.debug('Participants processed', { count: tripContext.participants.length });
+    } else {
+      logger.warn('Failed to fetch participants', { tripId });
     }
 
-    // Proviamo a recuperare gli alloggi
-    try {
-      const { data: accommodations, error: accommodationsError } = await supabase
-        .from('accommodations')
-        .select('*')
-        .eq('trip_id', tripId);
-
-      if (!accommodationsError && accommodations) {
-        console.log('Alloggi recuperati:', accommodations.length);
-        tripContext.accommodations = accommodations.map(a => ({
-          name: a.name,
-          type: a.type,
-          checkIn: a.check_in_date,
-          checkOut: a.check_out_date,
-          address: a.address
-        }));
-      } else {
-        console.error('Errore nel recupero degli alloggi:', accommodationsError);
-      }
-    } catch (accommodationsError) {
-      console.error('Eccezione nel recupero degli alloggi:', accommodationsError);
+    // Alloggi
+    if (accommodationsResult.status === 'fulfilled' && !accommodationsResult.value.error) {
+      tripContext.accommodations = accommodationsResult.value.data?.map(a => ({
+        name: a.name,
+        type: a.type,
+        checkIn: a.check_in_date,
+        checkOut: a.check_out_date,
+        address: a.address
+      })) || [];
+      logger.debug('Accommodations processed', { count: tripContext.accommodations.length });
+    } else {
+      logger.warn('Failed to fetch accommodations', { tripId });
     }
 
-    // Proviamo a recuperare i trasporti
-    try {
-      const { data: transportation, error: transportationError } = await supabase
-        .from('transportation')
-        .select('*')
-        .eq('trip_id', tripId);
-
-      if (!transportationError && transportation) {
-        console.log('Trasporti recuperati:', transportation.length);
-        tripContext.transportation = transportation.map(t => ({
-          type: t.type,
-          provider: t.provider,
-          departureTime: t.departure_time,
-          departureLocation: t.departure_location,
-          arrivalTime: t.arrival_time,
-          arrivalLocation: t.arrival_location
-        }));
-      } else {
-        console.error('Errore nel recupero dei trasporti:', transportationError);
-      }
-    } catch (transportationError) {
-      console.error('Eccezione nel recupero dei trasporti:', transportationError);
+    // Trasporti
+    if (transportationResult.status === 'fulfilled' && !transportationResult.value.error) {
+      tripContext.transportation = transportationResult.value.data?.map(t => ({
+        type: t.type,
+        provider: t.provider,
+        departureTime: t.departure_time,
+        departureLocation: t.departure_location,
+        arrivalTime: t.arrival_time,
+        arrivalLocation: t.arrival_location
+      })) || [];
+      logger.debug('Transportation processed', { count: tripContext.transportation.length });
+    } else {
+      logger.warn('Failed to fetch transportation', { tripId });
     }
 
-    // Proviamo a recuperare l'itinerario (giorni e attività)
-    try {
-      // Recupera i giorni dell'itinerario
-      const { data: itineraryDays, error: itineraryDaysError } = await supabase
-        .from('itinerary_days')
-        .select('*')
-        .eq('trip_id', tripId)
-        .order('day_date', { ascending: true });
+    // Itinerario (giorni e attività)
+    if (itineraryDaysResult.status === 'fulfilled' && !itineraryDaysResult.value.error &&
+        activitiesResult.status === 'fulfilled' && !activitiesResult.value.error) {
 
-      if (itineraryDaysError) {
-        console.error('Errore nel recupero dei giorni dell\'itinerario:', itineraryDaysError);
-      } else if (itineraryDays && itineraryDays.length > 0) {
-        console.log('Giorni dell\'itinerario recuperati:', itineraryDays.length);
+      const itineraryDays = itineraryDaysResult.value.data || [];
+      const activities = activitiesResult.value.data || [];
 
-        // Recupera le attività
-        const { data: activities, error: activitiesError } = await supabase
-          .from('activities')
-          .select('*')
-          .eq('trip_id', tripId)
-          .order('start_time', { ascending: true });
-
-        if (activitiesError) {
-          console.error('Errore nel recupero delle attività:', activitiesError);
-        } else {
-          console.log('Attività recuperate:', activities ? activities.length : 0);
-
-          // Log dei dati per debug
-          if (activities && activities.length > 0) {
-            console.log('Esempio di attività:', JSON.stringify(activities[0]));
-          }
-
-          // Raggruppa le attività per giorno
-          const activitiesByDay = {};
-          if (activities) {
-            activities.forEach(activity => {
-              if (!activitiesByDay[activity.day_id]) {
-                activitiesByDay[activity.day_id] = [];
-              }
-              activitiesByDay[activity.day_id].push(activity);
-            });
-          }
-
-          // Combina i giorni con le loro attività
-          tripContext.itinerary = itineraryDays.map(day => {
-            const dayActivities = activitiesByDay[day.id] || [];
-            return {
-              id: day.id,
-              day_date: day.day_date,
-              date: day.day_date,
-              notes: day.notes,
-              activities: dayActivities.map(activity => ({
-                id: activity.id,
-                name: activity.name,
-                type: activity.type,
-                start_time: activity.start_time,
-                startTime: activity.start_time,
-                end_time: activity.end_time,
-                endTime: activity.end_time,
-                location: activity.location,
-                notes: activity.notes,
-                day_id: activity.day_id
-              }))
-            };
-          });
-
-          // Log dell'itinerario per debug
-          console.log('Itinerario completo:', {
-            daysCount: tripContext.itinerary.length,
-            totalActivities: activities ? activities.length : 0,
-            sampleDay: tripContext.itinerary.length > 0 ?
-              JSON.stringify({
-                date: tripContext.itinerary[0].date,
-                activitiesCount: tripContext.itinerary[0].activities.length
-              }) : null
-          });
+      // Raggruppa le attività per giorno per efficienza
+      const activitiesByDay: Record<string, any[]> = {};
+      activities.forEach(activity => {
+        if (!activitiesByDay[activity.day_id]) {
+          activitiesByDay[activity.day_id] = [];
         }
-      } else {
-        // Se non ci sono giorni dell'itinerario, imposta un array vuoto
-        tripContext.itinerary = [];
-        console.log('Nessun giorno dell\'itinerario trovato per questo viaggio');
-      }
-    } catch (itineraryError) {
-      console.error('Eccezione nel recupero dell\'itinerario:', itineraryError);
-      // In caso di errore, imposta un array vuoto
+        activitiesByDay[activity.day_id].push(activity);
+      });
+
+      // Combina i giorni con le loro attività
+      tripContext.itinerary = itineraryDays.map(day => {
+        const dayActivities = activitiesByDay[day.id] || [];
+        return {
+          id: day.id,
+          day_date: day.day_date,
+          date: day.day_date,
+          notes: day.notes,
+          activities: dayActivities.map(activity => ({
+            id: activity.id,
+            name: activity.name,
+            type: activity.type,
+            start_time: activity.start_time,
+            startTime: activity.start_time,
+            end_time: activity.end_time,
+            endTime: activity.end_time,
+            location: activity.location,
+            notes: activity.notes,
+            day_id: activity.day_id
+          }))
+        };
+      });
+
+      logger.debug('Itinerary processed', {
+        daysCount: tripContext.itinerary.length,
+        totalActivities: activities.length
+      });
+    } else {
+      logger.warn('Failed to fetch itinerary data', { tripId });
       tripContext.itinerary = [];
     }
 
-    console.log('Contesto del viaggio recuperato con successo (versione completa)');
+    // Cache del risultato per future richieste
+    setCachedTripContext(tripId, tripContext);
+
+    // Log performance
+    const duration = performance.now() - startTime;
+    logger.performance('Trip context retrieval', duration, {
+      tripId,
+      participantsCount: tripContext.participants.length,
+      accommodationsCount: tripContext.accommodations.length,
+      transportationCount: tripContext.transportation.length,
+      itineraryDaysCount: tripContext.itinerary.length,
+      totalActivities: tripContext.itinerary.reduce((sum, day) => sum + day.activities.length, 0)
+    });
+
+    logger.debug('Trip context retrieved successfully', { tripId, duration });
     return tripContext;
-  } catch (error) {
-    console.error('Errore nel recupero del contesto del viaggio:', error);
+
+  } catch (error: any) {
+    const duration = performance.now() - startTime;
+    logger.error('Failed to retrieve trip context', {
+      tripId,
+      error: error.message,
+      duration
+    });
+
     // In caso di errore, restituisci un contesto minimo
     return {
       trip: {
@@ -242,5 +286,16 @@ export async function getTripContext(tripId: string) {
       },
       error: 'Non è stato possibile recuperare tutti i dettagli del viaggio'
     };
+  }
+}
+
+/**
+ * Clear trip context cache (useful for testing or when trip data changes)
+ */
+export function clearTripContextCache(tripId?: string): void {
+  if (tripId) {
+    tripContextCache.delete(tripId);
+  } else {
+    tripContextCache.clear();
   }
 }

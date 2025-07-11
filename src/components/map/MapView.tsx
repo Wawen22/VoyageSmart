@@ -1,11 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-// Set your Mapbox token here
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+import MapboxWrapper from './MapboxWrapper';
 
 interface MapViewProps {
   address?: string;
@@ -22,9 +18,37 @@ export default function MapView({
   height = '300px',
   onLocationSelect,
 }: MapViewProps) {
+  return (
+    <MapboxWrapper>
+      {(mapboxgl) => (
+        <MapViewContent
+          mapboxgl={mapboxgl}
+          address={address}
+          coordinates={coordinates}
+          interactive={interactive}
+          height={height}
+          onLocationSelect={onLocationSelect}
+        />
+      )}
+    </MapboxWrapper>
+  );
+}
+
+interface MapViewContentProps extends MapViewProps {
+  mapboxgl: any;
+}
+
+function MapViewContent({
+  mapboxgl,
+  address,
+  coordinates,
+  interactive = true,
+  height = '300px',
+  onLocationSelect,
+}: MapViewContentProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const marker = useRef<mapboxgl.Marker | null>(null);
+  const map = useRef<any>(null);
+  const marker = useRef<any>(null);
   const [geocodingError, setGeocodingError] = useState<string | null>(null);
 
   // Initialize map when component mounts
@@ -219,7 +243,7 @@ export default function MapView({
   useEffect(() => {
     if (!map.current || !interactive || !onLocationSelect) return;
 
-    const handleMapClick = (e: mapboxgl.MapMouseEvent) => {
+    const handleMapClick = (e: any) => {
       const { lng, lat } = e.lngLat;
 
       // Update the marker

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth'; // Import useAuth
 import { supabase } from '@/lib/supabase'; // Keep for resetPassword
+import RateLimitInfo from '@/components/ui/RateLimitInfo';
 
 export default function Login() {
   const router = useRouter();
@@ -15,6 +16,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [cooldownTime, setCooldownTime] = useState<number>(0);
+  const [lastAttemptTime, setLastAttemptTime] = useState<number>(0);
+  const [showRateLimitInfo, setShowRateLimitInfo] = useState<boolean>(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -61,14 +65,45 @@ export default function Login() {
     // We only care if the user object becomes available
   }, [user, router, searchParams]);
 
+  // Cooldown timer effect
+  useEffect(() => {
+    if (cooldownTime > 0) {
+      const timer = setInterval(() => {
+        setCooldownTime(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [cooldownTime]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Login form submitted');
+
+    // Check if we're in cooldown period
+    if (cooldownTime > 0) {
+      setError(`Please wait ${cooldownTime} seconds before trying again.`);
+      return;
+    }
+
+    // Check if too many attempts in short time
+    const now = Date.now();
+    if (now - lastAttemptTime < 3000) { // 3 seconds between attempts
+      setError('Please wait a moment before trying again.');
+      return;
+    }
 
     try {
       setLoading(true);
       setError(null);
       setSuccess(null);
+      setLastAttemptTime(now);
 
       console.log('Attempting to sign in with:', { email });
 
@@ -96,7 +131,18 @@ export default function Login() {
       console.log('Login successful, waiting for redirection');
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.message || 'Invalid email or password. Please try again.');
+
+      // Handle rate limit errors with cooldown
+      if (err.message?.includes('Too many login attempts') ||
+          err.message?.includes('rate limit') ||
+          err.message?.includes('too many requests')) {
+        setCooldownTime(60); // 60 second cooldown
+        setError('Too many login attempts. Please wait 60 seconds before trying again.');
+        setShowRateLimitInfo(true); // Show info modal
+      } else {
+        setError(err.message || 'Invalid email or password. Please try again.');
+      }
+
       setLoading(false);
     }
   };
@@ -153,6 +199,14 @@ export default function Login() {
         {error && (
           <div className="bg-destructive/10 border-l-4 border-destructive p-4 text-destructive mb-4">
             <p>{error}</p>
+            {(error.includes('Too many login attempts') || error.includes('rate limit')) && (
+              <button
+                onClick={() => setShowRateLimitInfo(true)}
+                className="mt-2 text-sm underline hover:no-underline"
+              >
+                Learn more about rate limiting
+              </button>
+            )}
           </div>
         )}
 
@@ -204,10 +258,12 @@ export default function Login() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || cooldownTime > 0}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-colors"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Signing in...' :
+               cooldownTime > 0 ? `Wait ${cooldownTime}s` :
+               'Sign in'}
             </button>
           </div>
         </form>
@@ -239,6 +295,11 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      <RateLimitInfo
+        isVisible={showRateLimitInfo}
+        onClose={() => setShowRateLimitInfo(false)}
+      />
     </div>
   );
 }

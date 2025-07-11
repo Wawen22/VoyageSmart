@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPinIcon } from 'lucide-react';
-import MapView from '@/components/map/MapView';
+import { LazyMapView } from '@/components/LazyComponents';
 import { v4 as uuidv4 } from 'uuid';
 
 interface TransportationStopFormProps {
@@ -126,7 +126,7 @@ export default function TransportationStopForm({
             (Click on the map to set location)
           </span>
         </Label>
-        <MapView
+        <LazyMapView
           address={formData.location}
           coordinates={coordinates}
           interactive={true}

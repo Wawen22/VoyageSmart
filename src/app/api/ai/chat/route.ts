@@ -1,7 +1,179 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTripContext } from '@/lib/services/tripContextService';
+import { queueAIRequest, getQueueStats } from '@/lib/services/aiQueueService';
+import { aiAnalytics } from '@/lib/services/aiAnalyticsService';
 import { validateInput, aiChatSchema, validateSecurity } from '@/lib/validation';
 import { logger } from '@/lib/logger';
+import { formatTimeLocal, formatDateLocal } from '@/lib/utils';
+import { applyRateLimit } from '@/lib/rate-limit';
+
+// Funzione per analizzare automaticamente il contenuto e aggiungere marcatori appropriati
+function enhanceResponseWithVisualComponents(response: string, userMessage: string, tripContext: any): string {
+  if (!tripContext) return response;
+
+  let enhancedResponse = response;
+  const lowerUserMessage = userMessage.toLowerCase();
+  const lowerResponse = response.toLowerCase();
+
+  // Parole chiave SPECIFICHE per identificare il contesto (più restrittive)
+  const transportKeywords = [
+    'volo', 'voli', 'aereo', 'aeroporto', 'partenza', 'arrivo', 'treno', 'treni', 'stazione',
+    'autobus', 'bus', 'auto a noleggio', 'noleggio auto', 'trasporto', 'trasporti',
+    'come arriviamo', 'come andiamo', 'mezzi di trasporto', 'biglietto', 'biglietti',
+    'ferry', 'nave', 'traghetto', 'metro', 'metropolitana', 'taxi', 'uber', 'transfer',
+    'terminal', 'gate', 'binario', 'piattaforma', 'scalo', 'coincidenza', 'ritardo',
+    'orario partenza', 'orario arrivo', 'che ora parte', 'che ora arriva'
+  ];
+
+  const itineraryKeywords = [
+    'itinerario', 'programma giornaliero', 'attività pianificate', 'cosa facciamo', 'dove andiamo',
+    'programma del giorno', 'programma di domani', 'programma di oggi',
+    'attività di domani', 'attività di oggi', 'cosa è previsto',
+    'schedule', 'agenda del viaggio', 'pianificazione', 'cosa visitiamo',
+    'tour programmati', 'escursioni pianificate', 'visite programmate'
+  ];
+
+  const accommodationKeywords = [
+    'hotel', 'albergo', 'alloggio', 'alloggi', 'appartamento', 'dove dormiamo',
+    'dove alloggiamo', 'dove soggiorniamo', 'check-in', 'check-out', 'prenotazione hotel',
+    'booking alloggio', 'resort', 'b&b', 'bed and breakfast', 'ostello', 'airbnb',
+    'struttura ricettiva', 'sistemazione', 'pernottamento'
+  ];
+
+  const expenseKeywords = [
+    'spese del viaggio', 'costi del viaggio', 'budget del viaggio', 'quanto abbiamo speso',
+    'quanto è costato', 'chi ha pagato', 'divisione spese', 'split delle spese',
+    'conto totale', 'spese sostenute', 'esborso', 'pagamenti effettuati',
+    'riepilogo spese', 'bilancio del viaggio'
+  ];
+
+  // Funzione helper per verificare se ci sono parole chiave (più restrittiva)
+  const hasKeywords = (keywords: string[], text: string) => {
+    return keywords.some(keyword => {
+      // Verifica che la keyword sia presente come parola completa o frase
+      const regex = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+      return regex.test(text) || text.includes(keyword.toLowerCase());
+    });
+  };
+
+  // Funzione per determinare se la domanda è SPECIFICAMENTE su un argomento
+  const isSpecificallyAbout = (keywords: string[], userMessage: string, response: string) => {
+    const userHasKeywords = hasKeywords(keywords, userMessage);
+    const responseHasKeywords = hasKeywords(keywords, response);
+
+    // Deve essere presente nella domanda dell'utente O nella risposta dell'AI
+    // ma non in entrambe contemporaneamente per evitare falsi positivi
+    return userHasKeywords || responseHasKeywords;
+  };
+
+  // Verifica se la risposta già contiene marcatori per evitare duplicati
+  const hasTransportMarker = enhancedResponse.includes('[AI_DATA:transportation]');
+  const hasItineraryMarker = enhancedResponse.includes('[AI_DATA:itinerary]');
+  const hasAccommodationMarker = enhancedResponse.includes('[AI_DATA:accommodations]');
+  const hasExpenseMarker = enhancedResponse.includes('[AI_DATA:expenses]');
+
+  // Funzione per determinare il limite di elementi da mostrare
+  const getItemLimit = (userMessage: string, totalItems: number) => {
+    // Se l'utente chiede "tutto" o "tutti", non limitare
+    if (userMessage.includes('tutto') || userMessage.includes('tutti') || userMessage.includes('completo')) {
+      return '';
+    }
+
+    // Se ci sono molti elementi, limita automaticamente
+    if (totalItems > 10) return ':10';
+    if (totalItems > 5) return ':5';
+    return '';
+  };
+
+  // Conta quanti tipi di componenti sarebbero attivati per evitare sovrapposizioni
+  let componentsToAdd = 0;
+  const shouldShowTransport = !hasTransportMarker && isSpecificallyAbout(transportKeywords, lowerUserMessage, lowerResponse);
+  const shouldShowItinerary = !hasItineraryMarker && isSpecificallyAbout(itineraryKeywords, lowerUserMessage, lowerResponse);
+  const shouldShowAccommodation = !hasAccommodationMarker && isSpecificallyAbout(accommodationKeywords, lowerUserMessage, lowerResponse);
+  const shouldShowExpenses = !hasExpenseMarker && isSpecificallyAbout(expenseKeywords, lowerUserMessage, lowerResponse);
+
+  if (shouldShowTransport) componentsToAdd++;
+  if (shouldShowItinerary) componentsToAdd++;
+  if (shouldShowAccommodation) componentsToAdd++;
+  if (shouldShowExpenses) componentsToAdd++;
+
+  // Se più di un componente sarebbe attivato, sii più selettivo
+  // Mostra solo il componente più rilevante basato sulla domanda dell'utente
+  if (componentsToAdd > 1) {
+    // Priorità basata su parole chiave specifiche nella domanda dell'utente
+    if (lowerUserMessage.includes('alloggi') || lowerUserMessage.includes('hotel') || lowerUserMessage.includes('dove dormiamo')) {
+      // Solo alloggi
+      if (shouldShowAccommodation && tripContext.accommodations && tripContext.accommodations.length > 0) {
+        const limit = getItemLimit(lowerUserMessage, tripContext.accommodations.length);
+        enhancedResponse += `\n\n[AI_DATA:accommodations${limit}]`;
+      }
+    } else if (lowerUserMessage.includes('trasporti') || lowerUserMessage.includes('volo') || lowerUserMessage.includes('treno')) {
+      // Solo trasporti
+      if (shouldShowTransport && tripContext.transportation && tripContext.transportation.length > 0) {
+        const limit = getItemLimit(lowerUserMessage, tripContext.transportation.length);
+        enhancedResponse += `\n\n[AI_DATA:transportation${limit}]`;
+      }
+    } else if (lowerUserMessage.includes('itinerario') || lowerUserMessage.includes('programma') || lowerUserMessage.includes('attività')) {
+      // Solo itinerario
+      if (shouldShowItinerary && tripContext.itinerary && tripContext.itinerary.length > 0) {
+        let limit = '';
+        if (lowerUserMessage.includes('domani') || lowerUserMessage.includes('oggi') ||
+            lowerUserMessage.includes('ieri') || /\b(primo|secondo|terzo|quarto|quinto)\s+giorno\b/.test(lowerUserMessage)) {
+          limit = ':1';
+        } else {
+          limit = getItemLimit(lowerUserMessage, tripContext.itinerary.length);
+        }
+        enhancedResponse += `\n\n[AI_DATA:itinerary${limit}]`;
+      }
+    } else if (lowerUserMessage.includes('spese') || lowerUserMessage.includes('budget') || lowerUserMessage.includes('quanto')) {
+      // Solo spese
+      if (shouldShowExpenses && tripContext.expenses && tripContext.expenses.length > 0) {
+        let limit = '';
+        if (lowerUserMessage.includes('ultime') || lowerUserMessage.includes('recenti')) {
+          limit = ':10';
+        } else {
+          limit = getItemLimit(lowerUserMessage, tripContext.expenses.length);
+        }
+        enhancedResponse += `\n\n[AI_DATA:expenses${limit}]`;
+      }
+    }
+    // Se nessuna priorità specifica, non aggiungere nulla per evitare confusione
+  } else {
+    // Se solo un componente è rilevante, aggiungilo
+    if (shouldShowTransport && tripContext.transportation && tripContext.transportation.length > 0) {
+      const limit = getItemLimit(lowerUserMessage, tripContext.transportation.length);
+      enhancedResponse += `\n\n[AI_DATA:transportation${limit}]`;
+    }
+
+    if (shouldShowItinerary && tripContext.itinerary && tripContext.itinerary.length > 0) {
+      let limit = '';
+      if (lowerUserMessage.includes('domani') || lowerUserMessage.includes('oggi') ||
+          lowerUserMessage.includes('ieri') || /\b(primo|secondo|terzo|quarto|quinto)\s+giorno\b/.test(lowerUserMessage)) {
+        limit = ':1';
+      } else {
+        limit = getItemLimit(lowerUserMessage, tripContext.itinerary.length);
+      }
+      enhancedResponse += `\n\n[AI_DATA:itinerary${limit}]`;
+    }
+
+    if (shouldShowAccommodation && tripContext.accommodations && tripContext.accommodations.length > 0) {
+      const limit = getItemLimit(lowerUserMessage, tripContext.accommodations.length);
+      enhancedResponse += `\n\n[AI_DATA:accommodations${limit}]`;
+    }
+
+    if (shouldShowExpenses && tripContext.expenses && tripContext.expenses.length > 0) {
+      let limit = '';
+      if (lowerUserMessage.includes('ultime') || lowerUserMessage.includes('recenti')) {
+        limit = ':10';
+      } else {
+        limit = getItemLimit(lowerUserMessage, tripContext.expenses.length);
+      }
+      enhancedResponse += `\n\n[AI_DATA:expenses${limit}]`;
+    }
+  }
+
+  return enhancedResponse;
+}
 
 export async function POST(request: NextRequest) {
   const startTime = performance.now();
@@ -9,6 +181,27 @@ export async function POST(request: NextRequest) {
   let message: string | undefined;
 
   try {
+    // Apply rate limiting first
+    const { rateLimitResult, headers } = applyRateLimit(request);
+
+    if (!rateLimitResult.allowed) {
+      logger.warn('Rate limit exceeded for AI chat', {
+        clientId: request.headers.get('x-forwarded-for') || 'unknown',
+        remaining: rateLimitResult.remaining
+      });
+
+      return NextResponse.json(
+        {
+          error: 'Too many requests',
+          message: 'Hai fatto troppe richieste. Riprova tra qualche minuto.'
+        },
+        {
+          status: 429,
+          headers
+        }
+      );
+    }
+
     // Ottieni i dati dalla richiesta
     const requestData = await request.json();
     const { message: requestMessage, tripId: requestTripId, tripName, tripData, isInitialMessage } = requestData;
@@ -49,6 +242,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Controllo sicurezza per il messaggio
+    if (!message) {
+      return NextResponse.json(
+        { error: 'Message is required' },
+        { status: 400 }
+      );
+    }
+
     const securityCheck = validateSecurity(message);
     if (!securityCheck.safe) {
       logger.security('Potential security threat in AI chat message', {
@@ -325,7 +525,11 @@ ${tripContext.accommodations.map(a => `- ${a.name} (${a.type}): check-in ${a.che
     if (tripContext.transportation && tripContext.transportation.length > 0) {
       promptText += `
 Trasporti prenotati:
-${tripContext.transportation.map(t => `- ${t.type} con ${t.provider}: da ${t.departureLocation} (${t.departureTime}) a ${t.arrivalLocation} (${t.arrivalTime})`).join('\n')}
+${tripContext.transportation.map(t => {
+  const departureTime = formatTimeLocal(t.departureTime);
+  const arrivalTime = formatTimeLocal(t.arrivalTime);
+  return `- ${t.type} con ${t.provider}: da ${t.departureLocation} (${departureTime}) a ${t.arrivalLocation} (${arrivalTime})`;
+}).join('\n')}
 `;
     }
 
@@ -383,33 +587,17 @@ Questo viaggio ha ${tripContext.itinerary.length} giorni pianificati con un tota
                     let startTime = '';
                     let endTime = '';
 
-                    // Gestisci diversi formati di orario
+                    // Gestisci diversi formati di orario usando la formattazione locale corretta
                     if (activity.start_time) {
-                      if (activity.start_time.includes('T')) {
-                        startTime = activity.start_time.split('T')[1].substring(0, 5);
-                      } else {
-                        startTime = activity.start_time;
-                      }
+                      startTime = formatTimeLocal(activity.start_time);
                     } else if (activity.startTime) {
-                      if (activity.startTime.includes('T')) {
-                        startTime = activity.startTime.split('T')[1].substring(0, 5);
-                      } else {
-                        startTime = activity.startTime;
-                      }
+                      startTime = formatTimeLocal(activity.startTime);
                     }
 
                     if (activity.end_time) {
-                      if (activity.end_time.includes('T')) {
-                        endTime = activity.end_time.split('T')[1].substring(0, 5);
-                      } else {
-                        endTime = activity.end_time;
-                      }
+                      endTime = formatTimeLocal(activity.end_time);
                     } else if (activity.endTime) {
-                      if (activity.endTime.includes('T')) {
-                        endTime = activity.endTime.split('T')[1].substring(0, 5);
-                      } else {
-                        endTime = activity.endTime;
-                      }
+                      endTime = formatTimeLocal(activity.endTime);
                     }
 
                     let timeInfo = '';
@@ -499,6 +687,13 @@ Rispondi in modo conciso, amichevole e utile. Fornisci suggerimenti pratici e pe
 Usa un tono conversazionale ma professionale.
 NON ripetere i dettagli del viaggio all'inizio di ogni risposta. Rispondi direttamente alla domanda dell'utente.
 NON iniziare MAI le tue risposte con "Ciao!" o altri saluti generici.
+
+ISTRUZIONI SPECIALI PER LA VISUALIZZAZIONE INTELLIGENTE:
+I marcatori visuali vengono aggiunti automaticamente dal sistema quando rileva che l'utente sta chiedendo specificamente informazioni su trasporti, alloggi, itinerario o spese.
+
+NON includere manualmente i marcatori [AI_DATA:...] nelle tue risposte - il sistema li aggiungerà automaticamente quando appropriato.
+
+Concentrati solo su fornire risposte utili e informative. Il sistema di post-processing si occuperà di aggiungere i componenti visuali quando necessario.
 
 LINEE GUIDA PER LA FORMATTAZIONE DELLE RISPOSTE:
 - Quando devi elencare più elementi (alloggi, trasporti, attività), usa SEMPRE un elenco puntato con ogni elemento su una nuova riga.
@@ -604,94 +799,89 @@ Se l'utente chiede informazioni su un giorno specifico, mostra solo le attività
 Domanda dell'utente: ${message}`;
     }
 
-    // Prepara la richiesta per l'API Gemini (basata sul test curl funzionante)
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    // Genera una cache key per questa richiesta
+    const cacheKey = `ai-chat:${tripId}:${Buffer.from(message).toString('base64').substring(0, 20)}`;
 
-    if (!apiKey) {
-      throw new Error('Gemini API key non configurata. Contatta l\'amministratore.');
-    }
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
-
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            {
-              text: promptText
-            }
-          ]
-        }
-      ]
-    };
-
-    // Effettua la chiamata API
-    console.log('Calling Gemini API with URL:', url.substring(0, 100) + '...');
-    console.log('Request body size:', JSON.stringify(requestBody).length, 'characters');
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    // Verifica la risposta
-    if (!response.ok) {
-      const errorData = await response.json();
-      logger.error('Gemini API error response', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData,
-        tripId
-      });
-
-      // Handle specific Gemini API errors
-      if (response.status === 503 && errorData.error?.message?.includes('overloaded')) {
-        throw new Error('Il servizio AI è temporaneamente sovraccarico. Riprova tra qualche minuto.');
-      }
-
-      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
-    }
-
-    // Elabora la risposta
-    const data = await response.json();
-    logger.debug('Gemini API response received', {
+    // Log queue stats before request
+    const queueStats = getQueueStats();
+    logger.debug('AI request queue status', {
       tripId,
-      candidatesCount: data.candidates?.length || 0
+      promptLength: promptText.length,
+      cacheKey,
+      queueStats
     });
 
-    // Estrai il testo dalla risposta
-    let responseText = 'Mi dispiace, non sono riuscito a generare una risposta.';
+    // Usa il sistema di queue per gestire la richiesta
+    const responseText = await queueAIRequest(promptText, {
+      timeout: 30000, // 30 secondi
+      cacheKey,
+      cacheTtl: 300000, // 5 minuti di cache
+      retryConfig: {
+        maxRetries: 3,
+        baseDelay: 1000,
+        maxDelay: 10000,
+        backoffMultiplier: 2,
+        retryableStatuses: [429, 503, 502, 504, 408]
+      }
+    });
 
-    if (data.candidates && data.candidates.length > 0 &&
-        data.candidates[0].content && data.candidates[0].content.parts &&
-        data.candidates[0].content.parts.length > 0) {
-      responseText = data.candidates[0].content.parts[0].text;
-    }
+    // Applica l'enhancement automatico per aggiungere componenti visuali
+    const enhancedResponse = enhanceResponseWithVisualComponents(responseText, message, tripContext);
 
-    // Log performance
+    // Log performance and analytics
     const duration = performance.now() - startTime;
+
+    // Log to analytics service
+    aiAnalytics.logRequest({
+      tripId,
+      messageLength: message.length,
+      responseLength: enhancedResponse.length,
+      duration,
+      success: true,
+      cacheHit: cacheKey ? true : false // This would be better determined by the AI service
+    });
+
     logger.performance('AI Chat API', duration, {
       tripId,
       messageLength: message.length,
-      responseLength: responseText.length
+      responseLength: enhancedResponse.length,
+      originalResponseLength: responseText.length,
+      visualComponentsAdded: enhancedResponse !== responseText
     });
 
     return NextResponse.json({
       success: true,
-      message: responseText,
+      message: enhancedResponse,
     });
   } catch (error: any) {
     const duration = performance.now() - startTime;
+
+    // Determine error type for analytics
+    let errorType = 'unknown';
+    if (error.message?.includes('429')) errorType = 'rate_limit';
+    else if (error.message?.includes('503')) errorType = 'service_unavailable';
+    else if (error.message?.includes('timeout')) errorType = 'timeout';
+    else if (error.message?.includes('network')) errorType = 'network';
+    else if (error.message?.includes('API key')) errorType = 'auth';
+
+    // Log to analytics service
+    aiAnalytics.logRequest({
+      tripId: tripId || 'unknown',
+      messageLength: message?.length || 0,
+      duration,
+      success: false,
+      error: error.message,
+      errorType,
+      cacheHit: false
+    });
 
     logger.error('Error in AI chat API', {
       error: error.message,
       stack: error.stack,
       tripId,
       messageLength: message?.length,
-      duration
+      duration,
+      errorType
     });
 
     // Log API request with error status
@@ -700,19 +890,46 @@ Domanda dell'utente: ${message}`;
       tripId
     });
 
-    // Provide more specific error messages
+    // Provide more specific and helpful error messages
     let userMessage = 'Mi dispiace, ho avuto un problema nel rispondere. Riprova più tardi.';
-    if (error.message?.includes('sovraccarico') || error.message?.includes('overloaded')) {
+    let statusCode = 500;
+
+    if (error.message?.includes('429') || error.message?.includes('Too Many Requests')) {
+      userMessage = 'Troppe richieste in corso. Attendi qualche secondo e riprova.';
+      statusCode = 429;
+    } else if (error.message?.includes('sovraccarico') || error.message?.includes('overloaded') || error.message?.includes('503')) {
       userMessage = 'Il servizio AI è temporaneamente sovraccarico. Riprova tra qualche minuto.';
+      statusCode = 503;
+    } else if (error.message?.includes('timeout') || error.message?.includes('ETIMEDOUT')) {
+      userMessage = 'La richiesta ha impiegato troppo tempo. Riprova con un messaggio più breve.';
+      statusCode = 408;
+    } else if (error.message?.includes('network') || error.message?.includes('ECONNRESET')) {
+      userMessage = 'Problema di connessione. Verifica la tua connessione internet e riprova.';
+      statusCode = 502;
+    } else if (error.message?.includes('API key')) {
+      userMessage = 'Problema di configurazione del servizio. Contatta l\'assistenza.';
+      statusCode = 503;
+    }
+
+    // Add helpful suggestions based on error type
+    const suggestions = [];
+    if (statusCode === 429) {
+      suggestions.push('Attendi 30-60 secondi prima di inviare un altro messaggio');
+    } else if (statusCode === 408) {
+      suggestions.push('Prova a dividere la tua richiesta in messaggi più brevi');
+    } else if (statusCode === 503) {
+      suggestions.push('Il servizio dovrebbe tornare disponibile a breve');
     }
 
     return NextResponse.json(
       {
         error: 'Failed to process request',
         details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
-        message: userMessage
+        message: userMessage,
+        suggestions,
+        retryAfter: statusCode === 429 ? 60 : statusCode === 503 ? 300 : 30 // seconds
       },
-      { status: 500 }
+      { status: statusCode }
     );
   }
 }

@@ -68,25 +68,31 @@ const nextConfig = {
     }
 
     // Fix for 'self is not defined' error - exclude problematic packages from server bundle
-    config.externals = config.externals || [];
-    config.externals.push('mapbox-gl');
-
-    // Production optimizations
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-            },
-          },
-        },
-      };
+    if (isServer) {
+      config.externals = config.externals || [];
+      // Add all potentially problematic client-side libraries
+      config.externals.push('mapbox-gl');
+      config.externals.push('mapbox-gl/dist/mapbox-gl.css');
+      config.externals.push('react-big-calendar');
+      config.externals.push('framer-motion');
     }
+
+    // Production optimizations - temporarily disabled to fix build issues
+    // if (!dev) {
+    //   config.optimization = {
+    //     ...config.optimization,
+    //     splitChunks: {
+    //       chunks: 'all',
+    //       cacheGroups: {
+    //         vendor: {
+    //           test: /[\\/]node_modules[\\/]/,
+    //           name: 'vendors',
+    //           chunks: 'all',
+    //         },
+    //       },
+    //     },
+    //   };
+    // }
 
     return config;
   },

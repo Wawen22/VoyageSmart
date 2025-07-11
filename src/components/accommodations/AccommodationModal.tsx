@@ -38,7 +38,7 @@ import {
   TagIcon,
   FileTextIcon
 } from 'lucide-react';
-import MapView from '@/components/map/MapView';
+import { LazyMapView } from '@/components/LazyComponents';
 
 interface AccommodationModalProps {
   tripId: string;
@@ -370,7 +370,7 @@ export default function AccommodationModal({
                 (Click on the map to set location)
               </span>
             </Label>
-            <MapView
+            <LazyMapView
               address={formData.address}
               coordinates={coordinates}
               interactive={true}

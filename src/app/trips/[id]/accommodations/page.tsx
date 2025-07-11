@@ -27,8 +27,7 @@ import AccommodationCard from '@/components/accommodations/AccommodationCard';
 import AccommodationSkeleton from '@/components/accommodations/AccommodationSkeleton';
 import AccommodationModal from '@/components/accommodations/AccommodationModal';
 import AccommodationDetailsModal from '@/components/accommodations/AccommodationDetailsModal';
-import MapView from '@/components/map/MapView';
-import AccommodationsMapView from '@/components/map/AccommodationsMapView';
+import { LazyMapView, LazyAccommodationsMapView } from '@/components/LazyComponents';
 import UpgradePrompt from '@/components/subscription/UpgradePrompt';
 
 type Trip = {
@@ -328,7 +327,7 @@ export default function AccommodationsPage() {
               <Card>
                 <CardContent className="p-4">
                   <div className="h-[500px] relative">
-                    <AccommodationsMapView
+                    <LazyAccommodationsMapView
                       accommodations={accommodations}
                       height="500px"
                       onMarkerClick={handleViewAccommodation}

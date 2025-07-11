@@ -8,8 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, parseISO } from 'date-fns';
-import LocationAutocomplete from '@/components/map/LocationAutocomplete';
-import MapView from '@/components/map/MapView';
+import { LazyLocationAutocomplete, LazyMapView } from '@/components/LazyComponents';
 
 // Tipo per le attività generate
 type GeneratedActivity = {
@@ -229,7 +228,7 @@ export default function ActivityEditModal({
           {/* Luogo */}
           <div className="space-y-2">
             <Label htmlFor="location">Luogo</Label>
-            <LocationAutocomplete
+            <LazyLocationAutocomplete
               value={formData.location}
               onChange={handleLocationSelect}
               placeholder="Cerca un luogo..."
@@ -241,7 +240,7 @@ export default function ActivityEditModal({
           {/* Mappa */}
           <div className="space-y-2">
             <Label>Mappa</Label>
-            <MapView
+            <LazyMapView
               address={mapAddress}
               coordinates={formData.coordinates}
               height="180px"

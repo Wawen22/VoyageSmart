@@ -31,7 +31,7 @@ import TransportationCard from '@/components/transportation/TransportationCard';
 import TransportationSkeleton from '@/components/transportation/TransportationSkeleton';
 import TransportationModal from '@/components/transportation/TransportationModal';
 import TransportationDetailsModal from '@/components/transportation/TransportationDetailsModal';
-import TransportationMap from '@/components/transportation/TransportationMap';
+import { LazyTransportationMap } from '@/components/LazyComponents';
 import UpgradePrompt from '@/components/subscription/UpgradePrompt';
 
 type Trip = {
@@ -328,7 +328,7 @@ export default function TransportationPage() {
                   <Card>
                     <CardContent className="p-4">
                       <div className="h-[500px] relative">
-                        <TransportationMap
+                        <LazyTransportationMap
                           transportations={transportations}
                           height="500px"
                           onMarkerClick={handleViewTransportation}

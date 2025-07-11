@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import ItineraryWizard from '@/components/ai/ItineraryWizard';
 import AIUpgradePrompt from '@/components/subscription/AIUpgradePrompt';
+import { LazyItineraryMapView } from '@/components/LazyComponents';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
 import { fetchJournalEntries, fetchJournalMedia, JournalEntry } from '@/lib/features/journalSlice';
@@ -25,7 +26,6 @@ const ActivityModal = lazy(() => import('@/components/itinerary/ActivityModal'))
 const DayModal = lazy(() => import('@/components/itinerary/DayModal'));
 const MoveActivityModal = lazy(() => import('@/components/itinerary/MoveActivityModal'));
 const CalendarView = lazy(() => import('@/components/itinerary/CalendarView'));
-const ItineraryMapView = lazy(() => import('@/components/itinerary/ItineraryMapView'));
 const ActivityDetailsModal = lazy(() => import('@/components/activity/ActivityDetailsModal'));
 const JournalEntryForm = lazy(() => import('@/components/journal/JournalEntryForm'));
 const JournalEntryCard = lazy(() => import('@/components/journal/JournalEntryCard'));
@@ -978,13 +978,12 @@ export default function TripItinerary() {
             />
           </Suspense>
         ) : (
-          <Suspense fallback={<div className="p-8 text-center">Loading map view...</div>}>
-            <ItineraryMapView
-              days={itineraryDays}
-              onViewActivityDetails={handleViewActivityDetails}
-              onDeleteActivity={handleDeleteActivity}
-              onDeleteMultipleActivities={handleDeleteMultipleActivities}
-              onDeleteAllActivities={handleDeleteAllActivities}
+          <LazyItineraryMapView
+            days={itineraryDays}
+            onViewActivityDetails={handleViewActivityDetails}
+            onDeleteActivity={handleDeleteActivity}
+            onDeleteMultipleActivities={handleDeleteMultipleActivities}
+            onDeleteAllActivities={handleDeleteAllActivities}
               onUpdateCoordinates={(activity, coordinates) => {
                 // Aggiorna le coordinate dell'attività nel database
                 const updateActivity = async () => {
@@ -1036,7 +1035,6 @@ export default function TripItinerary() {
                 updateActivity();
               }}
             />
-          </Suspense>
         )}
           </div>
         )}

@@ -1,12 +1,13 @@
 import { Resend } from 'resend';
 
-// Check if we're in development mode
+// Check if we're in development mode or if API key is missing
 const isDevelopment = process.env.NODE_ENV === 'development';
+const hasApiKey = !!process.env.RESEND_API_KEY;
 
-// Initialize Resend with API key or use mock in development
-export const resend = isDevelopment
+// Initialize Resend with API key or use mock in development/build
+export const resend = (isDevelopment || !hasApiKey)
   ? createMockResend()
-  : new Resend(process.env.RESEND_API_KEY || '');
+  : new Resend(process.env.RESEND_API_KEY!);
 
 // Create a mock Resend client for development
 function createMockResend() {
