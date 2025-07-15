@@ -1,13 +1,44 @@
-# Tutorials
+# Step-by-Step Tutorials
 
-This section provides step-by-step tutorials for common tasks in VoyageSmart. These tutorials are designed to help you get the most out of VoyageSmart's features.
+<div align="center">
+  <h3>📝 Learn by Doing</h3>
+  <p>Comprehensive tutorials to help you master VoyageSmart's features.</p>
+</div>
 
-## 📋 Contents
+---
 
-- [Creating a Trip](./creating-a-trip.md) - How to create and configure a new trip
-- [Planning an Itinerary](./planning-an-itinerary.md) - How to plan your itinerary
-- [Managing Expenses](./managing-expenses.md) - How to manage expenses and budgets
-- [Using AI Features](./using-ai-features.md) - How to use VoyageSmart's AI features
+## 🎯 Available Tutorials
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="./creating-a-trip.md">
+          <img src="https://img.shields.io/badge/🗺️-Creating%20a%20Trip-blue?style=for-the-badge" alt="Creating a Trip"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./planning-an-itinerary.md">
+          <img src="https://img.shields.io/badge/📅-Planning%20Itinerary-green?style=for-the-badge" alt="Planning Itinerary"/>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="./managing-expenses.md">
+          <img src="https://img.shields.io/badge/💰-Managing%20Expenses-orange?style=for-the-badge" alt="Managing Expenses"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./using-ai-features.md">
+          <img src="https://img.shields.io/badge/🤖-Using%20AI%20Features-purple?style=for-the-badge" alt="Using AI Features"/>
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
 
 ## 🚀 Getting Started
 

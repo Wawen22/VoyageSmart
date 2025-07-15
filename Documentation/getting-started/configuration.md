@@ -1,10 +1,21 @@
 # Configuration Guide
 
-This guide covers all the configuration options available in VoyageSmart, from basic setup to advanced customization.
+## ⚙️ Environment Setup & Configuration
+
+*Complete guide to configuring VoyageSmart for development and production environments.*
+
+---
 
 ## 📋 Overview
 
-VoyageSmart uses environment variables for configuration, allowing you to customize the application for different environments (development, staging, production) without changing the code.
+VoyageSmart uses environment variables for secure and flexible configuration across different environments. This approach ensures sensitive data remains protected while allowing easy customization for development, staging, and production deployments.
+
+### Configuration Benefits
+
+- 🔒 **Security** - Sensitive data never committed to version control
+- 🔄 **Flexibility** - Easy environment switching
+- 📦 **Deployment** - Seamless CI/CD integration
+- 🛠️ **Development** - Local development customization
 
 ## 🔧 Environment Variables
 

@@ -1,17 +1,29 @@
 # Development Guide
 
-This section provides resources and guidelines for developers working on VoyageSmart. Whether you're a core contributor or looking to contribute to the project, you'll find everything you need to get started here.
+<div align="center">
+  <h3>💻 Developer Resources</h3>
+  <p>Everything developers need to contribute to VoyageSmart effectively.</p>
+</div>
 
-## 📋 Contents
+---
 
-- [Code Standards](./code-standards.md) - Coding standards and best practices
-- [Testing](./testing.md) - Testing guidelines and procedures
-- [Deployment](./deployment.md) - Deployment process and environments
-- [Contributing](./contributing.md) - How to contribute to VoyageSmart
+## 🛠️ Developer Resources
 
-## 🚀 Getting Started with Development
+| Resource | Description | Status |
+|----------|-------------|---------|
+| **[📏 Code Standards](./code-standards.md)** | Coding standards and best practices | ✅ Available |
+| **[🧪 Testing Framework](./testing-framework.md)** | Testing guidelines and procedures | ✅ Available |
+| **[🧪 Testing Guide](./testing.md)** | Comprehensive testing documentation | ✅ Available |
+| **[🔒 Security](./security-implementations.md)** | Security implementations and guidelines | ✅ Available |
+| **[🤝 Contributing](./contributing.md)** | How to contribute to VoyageSmart | ✅ Available |
+| **[🚀 Deployment](./deployment.md)** | Production deployment guide | ✅ Available |
+| **[🎨 UI/UX Improvements](./ui-ux-improvements.md)** | UI/UX development guidelines | ✅ Available |
 
-Before you start developing, make sure you have:
+---
+
+## 🚀 Quick Start for Developers
+
+Ready to contribute? Here's what you need:
 
 1. Set up your development environment as described in the [Installation Guide](../getting-started/installation.md)
 2. Familiarized yourself with the [Architecture](../architecture/README.md)

@@ -1,13 +1,44 @@
-# Integrations
+# Third-Party Integrations
 
-This section provides detailed documentation on the external services and APIs that VoyageSmart integrates with.
+<div align="center">
+  <h3>🔌 Service Integrations</h3>
+  <p>Learn how VoyageSmart integrates with external services to provide enhanced functionality.</p>
+</div>
 
-## 📋 Contents
+---
 
-- [Supabase](./supabase.md) - Database, authentication, and storage
-- [Stripe](./stripe.md) - Payment processing and subscription management
-- [Mapbox](./mapbox.md) - Maps and location services
-- [Gemini AI](./gemini-ai.md) - AI-powered features
+## 🛠️ Available Integrations
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="./supabase.md">
+          <img src="https://img.shields.io/badge/🗄️-Supabase-green?style=for-the-badge" alt="Supabase"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./mapbox.md">
+          <img src="https://img.shields.io/badge/🗺️-Mapbox-blue?style=for-the-badge" alt="Mapbox"/>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="./stripe.md">
+          <img src="https://img.shields.io/badge/💳-Stripe-purple?style=for-the-badge" alt="Stripe"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./gemini-ai.md">
+          <img src="https://img.shields.io/badge/🤖-Gemini%20AI-orange?style=for-the-badge" alt="Gemini AI"/>
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
 
 ## 🔌 Integration Overview
 

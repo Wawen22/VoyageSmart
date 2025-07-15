@@ -1,18 +1,68 @@
 # VoyageSmart Features
 
-This section provides detailed documentation of all the features available in VoyageSmart, from trip management to AI-powered assistance.
+<div align="center">
+  <h3>✨ Comprehensive Feature Guide</h3>
+  <p>Discover all the powerful features that make VoyageSmart the ultimate travel planning platform.</p>
+</div>
 
-## 📋 Contents
+---
 
-- [Trip Management](./trip-management.md) - Creating and managing trips
-- [Itinerary Planning](./itinerary-planning.md) - Planning your itinerary
-- [Accommodations](./accommodations.md) - Managing accommodations
-- [Transportation](./transportation.md) - Managing transportation
-- [Expenses](./expenses.md) - Managing expenses and budgets
-- [Collaboration](./collaboration.md) - Collaborating with other travelers
-- [AI Features](./ai-features.md) - AI-powered features
+## 🎯 Core Features
 
-## ✨ Feature Overview
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="./trip-management.md">
+          <img src="https://img.shields.io/badge/🗺️-Trip%20Management-blue?style=for-the-badge" alt="Trip Management"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./itinerary-planning.md">
+          <img src="https://img.shields.io/badge/📅-Itinerary%20Planning-green?style=for-the-badge" alt="Itinerary Planning"/>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="./accommodations.md">
+          <img src="https://img.shields.io/badge/🏨-Accommodations-cyan?style=for-the-badge" alt="Accommodations"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./transportation.md">
+          <img src="https://img.shields.io/badge/🚗-Transportation-yellow?style=for-the-badge" alt="Transportation"/>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="./expenses.md">
+          <img src="https://img.shields.io/badge/💰-Expense%20Management-orange?style=for-the-badge" alt="Expense Management"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./collaboration.md">
+          <img src="https://img.shields.io/badge/🤝-Collaboration-pink?style=for-the-badge" alt="Collaboration"/>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="./ai-features.md">
+          <img src="https://img.shields.io/badge/🤖-AI%20Features-purple?style=for-the-badge" alt="AI Features"/>
+        </a>
+      </td>
+      <td align="center">
+        <!-- Space for future feature -->
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 🌟 Feature Highlights
 
 VoyageSmart offers a comprehensive set of features designed to make travel planning easier and more efficient:
 

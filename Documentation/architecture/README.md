@@ -1,13 +1,22 @@
 # VoyageSmart Architecture
 
-This section provides a comprehensive overview of VoyageSmart's architecture, including the database schema, frontend and backend architecture, and security considerations.
+<div align="center">
+  <h3>🏗️ System Architecture</h3>
+  <p>Comprehensive overview of VoyageSmart's modern, scalable architecture.</p>
+</div>
 
-## 📋 Contents
+---
 
-- [Database Schema](./database-schema.md) - Detailed information about the database structure
-- [Frontend Architecture](./frontend-architecture.md) - Overview of the frontend architecture
-- [Backend Architecture](./backend-architecture.md) - Overview of the backend architecture
-- [Security](./security.md) - Security considerations and implementations
+## 📐 Architecture Components
+
+| Component | Description | Status |
+|-----------|-------------|---------|
+| **[🗄️ Database Schema](./database-schema.md)** | Complete database structure and relationships | ✅ Available |
+| **[🎨 Frontend Architecture](./frontend-architecture.md)** | Frontend system design and patterns | ✅ Available |
+| **[⚙️ Backend Architecture](./backend-architecture.md)** | Backend services and API architecture | ✅ Available |
+| **[🔒 Security](./security.md)** | Security implementations and best practices | ✅ Available |
+
+---
 
 ## 🏗️ Architecture Overview
 

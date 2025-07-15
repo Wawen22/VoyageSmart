@@ -1,18 +1,65 @@
 # API Documentation
 
-This section provides detailed documentation for VoyageSmart's API endpoints. These endpoints are used by the frontend to communicate with the backend and can also be used by third-party applications.
+<div align="center">
+  <h3>🔄 VoyageSmart API Reference</h3>
+  <p>Complete documentation for VoyageSmart's RESTful API endpoints.</p>
+</div>
 
-## 📋 Contents
+---
 
-- [Authentication](./authentication.md) - Authentication endpoints and flow
-- [Trips](./trips.md) - Trip management endpoints
-- [Itinerary](./itinerary.md) - Itinerary management endpoints
-- [Expenses](./expenses.md) - Expense management endpoints
-- [AI Endpoints](./ai-endpoints.md) - AI-related endpoints
+## 📚 API Endpoints
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="./authentication.md">
+          <img src="https://img.shields.io/badge/🔐-Authentication-blue?style=for-the-badge" alt="Authentication"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./trips.md">
+          <img src="https://img.shields.io/badge/🗺️-Trips-green?style=for-the-badge" alt="Trips"/>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="./activities.md">
+          <img src="https://img.shields.io/badge/📅-Activities-cyan?style=for-the-badge" alt="Activities"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="./expenses.md">
+          <img src="https://img.shields.io/badge/💰-Expenses-orange?style=for-the-badge" alt="Expenses"/>
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <a href="./ai-endpoints.md">
+          <img src="https://img.shields.io/badge/🤖-AI%20Endpoints-purple?style=for-the-badge" alt="AI Endpoints"/>
+        </a>
+      </td>
+      <td align="center">
+        <a href="#coming-soon">
+          <img src="https://img.shields.io/badge/👥-Participants-pink?style=for-the-badge" alt="Participants"/>
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
 
 ## 🔄 API Overview
 
-VoyageSmart's API is built using Next.js API routes and communicates with Supabase for data storage and authentication. The API follows RESTful principles and uses JSON for data exchange.
+VoyageSmart's API is built with:
+- **Framework**: Next.js API Routes
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Architecture**: RESTful principles
+- **Data Format**: JSON
 
 ### Base URL
 
@@ -103,24 +150,25 @@ For more details, see the [Authentication](./authentication.md) documentation.
 
 For more details, see the [Trips](./trips.md) documentation.
 
-### Itinerary
+### Activities & Itinerary
 
-- `GET /api/itinerary/:tripId` - Get the itinerary for a trip
-- `POST /api/itinerary/:tripId/days` - Add a day to the itinerary
-- `PUT /api/itinerary/:tripId/days/:dayId` - Update a day in the itinerary
-- `DELETE /api/itinerary/:tripId/days/:dayId` - Delete a day from the itinerary
-- `POST /api/itinerary/:tripId/activities` - Add an activity to the itinerary
-- `PUT /api/itinerary/:tripId/activities/:activityId` - Update an activity
-- `DELETE /api/itinerary/:tripId/activities/:activityId` - Delete an activity
+- `GET /api/activities/:tripId` - Get all activities for a trip
+- `GET /api/activities/:tripId/itinerary` - Get daily itinerary
+- `POST /api/activities/:tripId` - Add an activity to a trip
+- `POST /api/activities/batch` - Create multiple activities
+- `PUT /api/activities/:tripId/:activityId` - Update an activity
+- `DELETE /api/activities/:tripId/:activityId` - Delete an activity
 
-For more details, see the [Itinerary](./itinerary.md) documentation.
+For more details, see the [Activities](./activities.md) documentation.
 
 ### Expenses
 
 - `GET /api/expenses/:tripId` - Get all expenses for a trip
+- `GET /api/expenses/:tripId/summary` - Get expense summary
 - `POST /api/expenses/:tripId` - Add an expense to a trip
 - `PUT /api/expenses/:tripId/:expenseId` - Update an expense
 - `DELETE /api/expenses/:tripId/:expenseId` - Delete an expense
+- `POST /api/expenses/:tripId/:expenseId/settle` - Settle expense split
 
 For more details, see the [Expenses](./expenses.md) documentation.
 
@@ -129,6 +177,7 @@ For more details, see the [Expenses](./expenses.md) documentation.
 - `POST /api/ai/chat` - Send a message to the AI assistant
 - `POST /api/ai/generate-activities` - Generate activities for a trip
 - `POST /api/ai/optimize-route` - Optimize a route for a day
+- `GET /api/ai/suggestions/:tripId` - Get AI suggestions
 
 For more details, see the [AI Endpoints](./ai-endpoints.md) documentation.
 
@@ -174,7 +223,7 @@ To learn more about specific API endpoints, check out the detailed documentation
 
 - [Authentication](./authentication.md)
 - [Trips](./trips.md)
-- [Itinerary](./itinerary.md)
+- [Activities](./activities.md)
 - [Expenses](./expenses.md)
 - [AI Endpoints](./ai-endpoints.md)
 
