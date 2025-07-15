@@ -256,7 +256,7 @@ export default function AccommodationDetailsModal({
               <>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="destructive"
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={loading}
                   className="sm:mr-auto"

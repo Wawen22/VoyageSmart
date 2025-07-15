@@ -581,20 +581,20 @@ export default function Home() {
               </p>
               <div className="bg-gradient-to-br from-primary/5 to-transparent rounded-xl p-5 border border-primary/10 group-hover:border-primary/20 transition-all duration-300">
                 <div className="flex flex-col space-y-3">
-                  <div className="flex items-center p-2 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
+                  <div className="flex items-center p-1 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
                     <span className="inline-flex items-center font-medium text-primary">
                       <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold mr-2">1</span>
                       Paris, France
                       <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">Primary</span>
                     </span>
                   </div>
-                  <div className="flex items-center p-2 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
+                  <div style={{ paddingLeft: '4px' }} className="flex items-center p-2 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
                     <span className="inline-flex items-center">
                       <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold mr-2">2</span>
                       Lyon, France
                     </span>
                   </div>
-                  <div className="flex items-center p-2 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
+                  <div className="flex items-center p-1 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
                     <span className="inline-flex items-center">
                       <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold mr-2">3</span>
                       Nice, France
@@ -609,7 +609,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-card border-2 border-border/50 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/20 group">
+            {/* <div className="bg-card border-2 border-border/50 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/20 group">
               <div className="flex items-center mb-6">
                 <div className="p-4 bg-primary/10 rounded-xl mr-5 group-hover:bg-primary/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
                   <CloudIcon className="h-6 w-6 text-primary" />
@@ -663,7 +663,7 @@ export default function Home() {
                   Learn more →
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
