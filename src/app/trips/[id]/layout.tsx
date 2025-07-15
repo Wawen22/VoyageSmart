@@ -67,6 +67,18 @@ export default function TripLayout({
 
         if (activitiesError) throw activitiesError;
 
+        // Fetch expenses
+        const { data: expensesData, error: expensesError } = await supabase
+          .from('expenses')
+          .select(`
+            id, category, amount, currency, date, description, paid_by, split_type, status, created_at,
+            users!inner(full_name)
+          `)
+          .eq('trip_id', id)
+          .order('date', { ascending: false });
+
+        if (expensesError) throw expensesError;
+
         // Group activities by day_id
         const activitiesByDay = (activitiesData || []).reduce((acc: any, activity: any) => {
           if (!acc[activity.day_id]) {
@@ -82,12 +94,57 @@ export default function TripLayout({
           activities: activitiesByDay[day.id] || []
         }));
 
-        // Add accommodations, transportation and itinerary to trip data
+        // Process expenses with participants
+        let processedExpenses: any[] = [];
+        if (expensesData && expensesData.length > 0) {
+          // Fetch expense participants for all expenses
+          const expenseIds = expensesData.map(e => e.id);
+          const { data: expenseParticipants } = await supabase
+            .from('expense_participants')
+            .select(`
+              expense_id, user_id, amount, is_paid,
+              users!inner(full_name)
+            `)
+            .in('expense_id', expenseIds);
+
+          // Group participants by expense
+          const participantsByExpense: Record<string, any[]> = {};
+          (expenseParticipants || []).forEach(participant => {
+            if (!participantsByExpense[participant.expense_id]) {
+              participantsByExpense[participant.expense_id] = [];
+            }
+            participantsByExpense[participant.expense_id].push(participant);
+          });
+
+          // Process expenses with their participants
+          processedExpenses = expensesData.map(expense => ({
+            id: expense.id,
+            category: expense.category,
+            amount: expense.amount,
+            currency: expense.currency,
+            date: expense.date,
+            description: expense.description,
+            paid_by: expense.paid_by,
+            paid_by_name: expense.users?.full_name || 'Sconosciuto',
+            split_type: expense.split_type,
+            status: expense.status,
+            created_at: expense.created_at,
+            participants: (participantsByExpense[expense.id] || []).map(p => ({
+              user_id: p.user_id,
+              amount: p.amount,
+              is_paid: p.is_paid,
+              full_name: p.users?.full_name || 'Sconosciuto'
+            }))
+          }));
+        }
+
+        // Add accommodations, transportation, itinerary and expenses to trip data
         const tripWithDetails = {
           ...tripData,
           accommodations: accommodationsData || [],
           transportation: transportationData || [],
-          itinerary: daysWithActivities || []
+          itinerary: daysWithActivities || [],
+          expenses: processedExpenses
         };
 
         // Log itinerary data for debugging
@@ -163,7 +220,9 @@ export default function TripLayout({
             owner: trip.owner_id,
             accommodations: trip.accommodations || [],
             transportation: trip.transportation || [],
-            itinerary: trip.itinerary || []
+            itinerary: trip.itinerary || [],
+            expenses: trip.expenses || [],
+            currentUserId: user?.id
           } : undefined}
         />
       )}

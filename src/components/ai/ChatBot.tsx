@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
 import FormattedAIResponse from './FormattedAIResponse';
 
@@ -34,6 +35,8 @@ interface TripData {
   transportation?: any[]; // Array di trasporti
   activities?: any[]; // Array di attività
   itinerary?: any[]; // Array di giorni dell'itinerario con attività
+  expenses?: any[]; // Array di spese
+  currentUserId?: string; // ID dell'utente corrente
 }
 
 // Funzione per generare un saluto casuale
@@ -58,6 +61,22 @@ export default function ChatBot({
   tripName: string;
   tripData?: TripData
 }) {
+  // Rileva la pagina corrente
+  const pathname = usePathname();
+
+  // Determina la sezione corrente basata sull'URL
+  const getCurrentSection = () => {
+    if (pathname.includes('/expenses')) return 'expenses';
+    if (pathname.includes('/itinerary')) return 'itinerary';
+    if (pathname.includes('/accommodations')) return 'accommodations';
+    if (pathname.includes('/transportation')) return 'transportation';
+    if (pathname.includes('/documents')) return 'documents';
+    if (pathname.includes('/media')) return 'media';
+    return 'overview'; // Default per la pagina principale del viaggio
+  };
+
+  const currentSection = getCurrentSection();
+
   // Stato per tracciare se il contesto è stato caricato
   const [contextLoaded, setContextLoaded] = useState(false);
 
@@ -114,7 +133,8 @@ export default function ChatBot({
               tripId,
               tripName,
               tripData, // Passa i dati del viaggio direttamente
-              isInitialMessage: true // Indica che è il messaggio iniziale
+              isInitialMessage: true, // Indica che è il messaggio iniziale
+              currentSection: currentSection // Indica la sezione corrente
             }),
           });
 
@@ -151,7 +171,8 @@ export default function ChatBot({
               message: 'Carica il contesto del viaggio e presentati',
               tripId,
               tripName,
-              isInitialMessage: true // Indica che è il messaggio iniziale
+              isInitialMessage: true, // Indica che è il messaggio iniziale
+              currentSection: currentSection // Indica la sezione corrente
             }),
           });
 
@@ -261,7 +282,8 @@ export default function ChatBot({
         message: messageToSend,
         tripId,
         tripName,
-        isInitialMessage: false // Indica che non è il messaggio iniziale
+        isInitialMessage: false, // Indica che non è il messaggio iniziale
+        currentSection: currentSection // Indica la sezione corrente
       };
 
       // Includi i dati del viaggio se disponibili
@@ -372,32 +394,258 @@ export default function ChatBot({
   };
 
   // Funzione per cancellare la conversazione
-  // Genera domande suggerite in base al contesto del viaggio
+  // Genera domande suggerite dinamicamente basate sulla sezione corrente
   const generateSuggestedQuestions = () => {
     const questions: SuggestedQuestion[] = [];
+    const crossSectionQuestions: SuggestedQuestion[] = [];
 
-    // Domande base sempre disponibili
-    questions.push({
-      text: "Cosa posso fare a " + (tripData?.destination || "destinazione"),
-      action: () => {
-        const question = "Cosa posso fare a " + (tripData?.destination || "destinazione") + "?";
-        setInput(question);
-        handleSendMessage(question);
-      }
-    });
+    // Suggerimenti specifici per sezione
+    switch (currentSection) {
+      case 'expenses':
+        // Suggerimenti specifici per la sezione spese
+        if (tripData?.expenses && tripData.expenses.length > 0) {
+          // Analizza i dati delle spese per suggerimenti intelligenti
+          const userExpenses = tripData.expenses.filter(expense =>
+            expense.paid_by === tripData.currentUserId
+          );
 
-    questions.push({
-      text: "Mostrami il mio itinerario",
-      action: () => {
-        const question = "Mostrami il mio itinerario completo";
-        setInput(question);
-        handleSendMessage(question);
-      }
-    });
+          const unpaidExpenses = tripData.expenses.filter(expense =>
+            expense.status === 'pending' ||
+            (expense.participants && expense.participants.some((p: any) => !p.is_paid))
+          );
 
-    // Se ci sono alloggi, aggiungi una domanda sugli alloggi
-    if (tripData?.accommodations && tripData.accommodations.length > 0) {
-      questions.push({
+          const hasCategories = tripData.expenses.some(expense => expense.category);
+
+          // Suggerimenti dinamici basati sui dati
+          if (userExpenses.length > 0) {
+            questions.push({
+              text: `Le mie spese (${userExpenses.length})`,
+              action: () => {
+                const question = "Mostrami solo le spese che ho pagato io";
+                setInput(question);
+                handleSendMessage(question);
+              }
+            });
+          }
+
+          if (unpaidExpenses.length > 0) {
+            questions.push({
+              text: `Spese non saldate (${unpaidExpenses.length})`,
+              action: () => {
+                const question = "Quali spese non sono ancora state saldate?";
+                setInput(question);
+                handleSendMessage(question);
+              }
+            });
+          }
+
+          if (hasCategories) {
+            questions.push({
+              text: "Analisi per categoria",
+              action: () => {
+                const question = "Analizza le spese per categoria";
+                setInput(question);
+                handleSendMessage(question);
+              }
+            });
+          }
+
+          // Suggerimento budget sempre presente se ci sono spese
+          questions.push({
+            text: "Situazione budget",
+            action: () => {
+              const question = "Come va il nostro budget?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+
+          // Se ci sono molte spese, suggerisci consigli per risparmiare
+          if (tripData.expenses.length > 5) {
+            questions.push({
+              text: "Consigli per risparmiare",
+              action: () => {
+                const question = "Hai consigli per risparmiare sui prossimi giorni?";
+                setInput(question);
+                handleSendMessage(question);
+              }
+            });
+          }
+        } else {
+          // Nessuna spesa registrata
+          questions.push({
+            text: "Come tracciare le spese",
+            action: () => {
+              const question = "Come posso iniziare a tracciare le spese del viaggio?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+
+          questions.push({
+            text: "Impostare un budget",
+            action: () => {
+              const question = "Come posso impostare un budget per il viaggio?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+        }
+        break;
+
+      case 'itinerary':
+        // Suggerimenti specifici per l'itinerario
+        if (tripData?.itinerary && tripData.itinerary.length > 0) {
+          const totalActivities = tripData.itinerary.reduce((sum, day) =>
+            sum + (day.activities ? day.activities.length : 0), 0
+          );
+
+          questions.push({
+            text: `Itinerario completo (${tripData.itinerary.length} giorni)`,
+            action: () => {
+              const question = "Mostrami il mio itinerario completo";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+
+          questions.push({
+            text: "Attività di oggi",
+            action: () => {
+              const question = "Cosa abbiamo in programma oggi?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+
+          if (totalActivities > 0) {
+            questions.push({
+              text: `Tutte le attività (${totalActivities})`,
+              action: () => {
+                const question = "Mostrami tutte le attività pianificate";
+                setInput(question);
+                handleSendMessage(question);
+              }
+            });
+          }
+
+          questions.push({
+            text: "Suggerimenti attività",
+            action: () => {
+              const question = "Hai suggerimenti per altre attività da fare?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+        } else {
+          // Nessun itinerario pianificato
+          questions.push({
+            text: "Pianificare l'itinerario",
+            action: () => {
+              const question = "Come posso pianificare il mio itinerario?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+
+          questions.push({
+            text: "Cosa fare a " + (tripData?.destination || "destinazione"),
+            action: () => {
+              const question = "Cosa posso fare a " + (tripData?.destination || "destinazione") + "?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+        }
+        break;
+
+      case 'accommodations':
+        // Suggerimenti specifici per alloggi
+        if (tripData?.accommodations && tripData.accommodations.length > 0) {
+          questions.push({
+            text: "Dettagli alloggi",
+            action: () => {
+              const question = "Mostrami i dettagli dei miei alloggi";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+
+          questions.push({
+            text: "Check-in/Check-out",
+            action: () => {
+              const question = "Quando sono i check-in e check-out?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+        }
+        break;
+
+      case 'transportation':
+        // Suggerimenti specifici per trasporti
+        if (tripData?.transportation && tripData.transportation.length > 0) {
+          questions.push({
+            text: "Info trasporti",
+            action: () => {
+              const question = "Mostrami le informazioni sui miei trasporti";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+
+          questions.push({
+            text: "Orari partenza",
+            action: () => {
+              const question = "Quali sono gli orari di partenza dei miei trasporti?";
+              setInput(question);
+              handleSendMessage(question);
+            }
+          });
+        }
+        break;
+
+      default:
+        // Suggerimenti generali per overview o altre sezioni
+        questions.push({
+          text: "Panoramica viaggio",
+          action: () => {
+            const question = "Dammi una panoramica completa del mio viaggio";
+            setInput(question);
+            handleSendMessage(question);
+          }
+        });
+
+        questions.push({
+          text: "Cosa posso fare a " + (tripData?.destination || "destinazione"),
+          action: () => {
+            const question = "Cosa posso fare a " + (tripData?.destination || "destinazione") + "?";
+            setInput(question);
+            handleSendMessage(question);
+          }
+        });
+    }
+
+    // Aggiungi sempre suggerimenti cross-section utili (se non siamo già in quella sezione)
+
+    // Itinerario (se non siamo nella sezione itinerary)
+    if (currentSection !== 'itinerary' && tripData?.itinerary && tripData.itinerary.length > 0) {
+      const totalActivities = tripData.itinerary.reduce((sum, day) =>
+        sum + (day.activities ? day.activities.length : 0), 0
+      );
+      crossSectionQuestions.push({
+        text: "Mostrami l'itinerario",
+        action: () => {
+          const question = "Mostrami il mio itinerario completo";
+          setInput(question);
+          handleSendMessage(question);
+        }
+      });
+    }
+
+    // Alloggi (se non siamo nella sezione accommodations)
+    if (currentSection !== 'accommodations' && tripData?.accommodations && tripData.accommodations.length > 0) {
+      crossSectionQuestions.push({
         text: "Dettagli sui miei alloggi",
         action: () => {
           const question = "Mostrami i dettagli dei miei alloggi";
@@ -407,9 +655,9 @@ export default function ChatBot({
       });
     }
 
-    // Se ci sono trasporti, aggiungi una domanda sui trasporti
-    if (tripData?.transportation && tripData.transportation.length > 0) {
-      questions.push({
+    // Trasporti (se non siamo nella sezione transportation)
+    if (currentSection !== 'transportation' && tripData?.transportation && tripData.transportation.length > 0) {
+      crossSectionQuestions.push({
         text: "Info sui miei trasporti",
         action: () => {
           const question = "Mostrami le informazioni sui miei trasporti";
@@ -419,8 +667,53 @@ export default function ChatBot({
       });
     }
 
-    // Limita a massimo 4 domande
-    setSuggestedQuestions(questions.slice(0, 4));
+    // Budget/Spese (se non siamo nella sezione expenses)
+    if (currentSection !== 'expenses' && tripData?.expenses && tripData.expenses.length > 0) {
+      crossSectionQuestions.push({
+        text: "Situazione budget",
+        action: () => {
+          const question = "Come va il nostro budget?";
+          setInput(question);
+          handleSendMessage(question);
+        }
+      });
+    }
+
+    // Suggerimenti per attività/destinazione sempre utili
+    if (tripData?.destination) {
+      crossSectionQuestions.push({
+        text: "Cosa fare a " + tripData.destination,
+        action: () => {
+          const question = "Cosa posso fare a " + tripData.destination + "?";
+          setInput(question);
+          handleSendMessage(question);
+        }
+      });
+    }
+
+    // Suggerimento generale sempre presente se non ci sono abbastanza suggerimenti specifici
+    if (currentSection === 'overview' || questions.length < 2) {
+      crossSectionQuestions.push({
+        text: "Panoramica viaggio",
+        action: () => {
+          const question = "Dammi una panoramica completa del mio viaggio";
+          setInput(question);
+          handleSendMessage(question);
+        }
+      });
+    }
+
+    // Combina suggerimenti specifici (priorità alta) con cross-section (priorità bassa)
+    // Mantieni sempre almeno 2 suggerimenti specifici se disponibili, poi aggiungi cross-section
+    const maxSpecific = Math.min(questions.length, 4);
+    const maxCrossSection = Math.max(0, 6 - maxSpecific);
+
+    const finalQuestions = [
+      ...questions.slice(0, maxSpecific),
+      ...crossSectionQuestions.slice(0, maxCrossSection)
+    ];
+
+    setSuggestedQuestions(finalQuestions);
   };
 
   const clearConversation = () => {

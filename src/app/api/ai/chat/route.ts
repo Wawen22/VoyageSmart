@@ -7,6 +7,130 @@ import { logger } from '@/lib/logger';
 import { formatTimeLocal, formatDateLocal } from '@/lib/utils';
 import { applyRateLimit } from '@/lib/rate-limit';
 
+// Funzione per ottenere la descrizione della sezione corrente
+function getSectionDescription(section: string | undefined): string {
+  switch (section) {
+    case 'expenses':
+      return `Fornisci suggerimenti specifici per la gestione delle spese, analisi del budget, consigli per risparmiare,
+e aiuto con la divisione delle spese tra i partecipanti. Concentrati su aspetti finanziari del viaggio.`;
+    case 'itinerary':
+      return `Aiuta con la pianificazione delle attività, suggerimenti su cosa fare, ottimizzazione degli orari,
+e consigli su attrazioni e esperienze da non perdere.`;
+    case 'accommodations':
+      return `Fornisci informazioni e consigli sugli alloggi, check-in/check-out, servizi disponibili,
+e suggerimenti per migliorare l'esperienza di soggiorno.`;
+    case 'transportation':
+      return `Aiuta con i trasporti, orari, alternative di viaggio, consigli per ottimizzare gli spostamenti,
+e informazioni su mezzi pubblici o privati.`;
+    case 'documents':
+      return `Assisti con la gestione dei documenti di viaggio, promemoria per documenti necessari,
+e organizzazione della documentazione del viaggio.`;
+    case 'media':
+      return `Aiuta con la gestione di foto e video del viaggio, suggerimenti per catturare i momenti migliori,
+e organizzazione dei ricordi del viaggio.`;
+    default:
+      return `Fornisci assistenza generale per il viaggio, rispondi a domande su qualsiasi aspetto del viaggio,
+e offri suggerimenti utili per migliorare l'esperienza complessiva.`;
+  }
+}
+
+// Funzione per analizzare il tipo di filtraggio richiesto per le spese
+function analyzeExpenseFilterRequest(message: string, currentUserId?: string): {
+  filterType: 'all' | 'my_expenses' | 'unpaid' | 'paid' | 'by_category' | 'by_person';
+  filterValue?: string;
+  instructions: string;
+} {
+  const lowerMessage = message.toLowerCase();
+
+  // Filtraggio per spese dell'utente corrente
+  if (lowerMessage.includes('le mie spese') ||
+      lowerMessage.includes('mie spese') ||
+      lowerMessage.includes('ho pagato') ||
+      lowerMessage.includes('ho speso') ||
+      lowerMessage.includes('spese che ho pagato') ||
+      lowerMessage.includes('solo le mie') ||
+      lowerMessage.includes('solo mie')) {
+    return {
+      filterType: 'my_expenses',
+      filterValue: currentUserId,
+      instructions: `Mostra SOLO le spese pagate dall'utente corrente (ID: ${currentUserId}). Non includere spese pagate da altri partecipanti.`
+    };
+  }
+
+  // Filtraggio per spese non saldate
+  if (lowerMessage.includes('non saldate') ||
+      lowerMessage.includes('non pagate') ||
+      lowerMessage.includes('in sospeso') ||
+      lowerMessage.includes('pending') ||
+      lowerMessage.includes('da pagare')) {
+    return {
+      filterType: 'unpaid',
+      instructions: `Mostra SOLO le spese che hanno status "pending" o partecipanti con is_paid = false. Concentrati sui debiti non saldati.`
+    };
+  }
+
+  // Filtraggio per spese saldate
+  if (lowerMessage.includes('spese saldate') ||
+      lowerMessage.includes('spese pagate') ||
+      lowerMessage.includes('già pagate') ||
+      lowerMessage.includes('già saldate')) {
+    return {
+      filterType: 'paid',
+      instructions: `Mostra SOLO le spese che sono state completamente saldate (status "settled" o tutti i partecipanti hanno is_paid = true).`
+    };
+  }
+
+  // Filtraggio per categoria
+  const categories = ['cibo', 'trasporto', 'alloggio', 'attività', 'shopping', 'varie'];
+  for (const category of categories) {
+    if (lowerMessage.includes(`spese ${category}`) || lowerMessage.includes(`categoria ${category}`)) {
+      return {
+        filterType: 'by_category',
+        filterValue: category,
+        instructions: `Mostra SOLO le spese della categoria "${category}". Filtra per category = "${category}".`
+      };
+    }
+  }
+
+  // Default: mostra tutte le spese
+  return {
+    filterType: 'all',
+    instructions: `Mostra tutte le spese disponibili con analisi completa.`
+  };
+}
+
+// Funzione per determinare lo stato di saldamento di una spesa
+function getExpenseSettlementStatus(expense: any): string {
+  if (expense.status === 'settled') {
+    return '[✅ SALDATO]';
+  }
+
+  if (expense.status === 'pending') {
+    return '[⏳ IN SOSPESO]';
+  }
+
+  if (expense.status === 'cancelled') {
+    return '[❌ ANNULLATO]';
+  }
+
+  // Controlla i partecipanti se disponibili
+  if (expense.participants && expense.participants.length > 0) {
+    const paidCount = expense.participants.filter((p: any) => p.is_paid).length;
+    const totalCount = expense.participants.length;
+
+    if (paidCount === totalCount) {
+      return '[✅ COMPLETAMENTE SALDATO]';
+    } else if (paidCount === 0) {
+      return '[❌ NON SALDATO]';
+    } else {
+      return `[⚠️ PARZIALMENTE SALDATO: ${paidCount}/${totalCount}]`;
+    }
+  }
+
+  // Default se non ci sono informazioni sui partecipanti
+  return '[ℹ️ STATO SCONOSCIUTO]';
+}
+
 // Funzione per analizzare automaticamente il contenuto e aggiungere marcatori appropriati
 function enhanceResponseWithVisualComponents(response: string, userMessage: string, tripContext: any): string {
   if (!tripContext) return response;
@@ -41,10 +165,27 @@ function enhanceResponseWithVisualComponents(response: string, userMessage: stri
   ];
 
   const expenseKeywords = [
-    'spese del viaggio', 'costi del viaggio', 'budget del viaggio', 'quanto abbiamo speso',
-    'quanto è costato', 'chi ha pagato', 'divisione spese', 'split delle spese',
-    'conto totale', 'spese sostenute', 'esborso', 'pagamenti effettuati',
-    'riepilogo spese', 'bilancio del viaggio'
+    'spese', 'spesa', 'costi', 'costo', 'budget', 'soldi', 'denaro', 'euro', 'dollari',
+    'quanto abbiamo speso', 'quanto è costato', 'quanto costa', 'quanto spendo',
+    'chi ha pagato', 'chi paga', 'divisione spese', 'split delle spese', 'dividere le spese',
+    'conto totale', 'spese sostenute', 'esborso', 'pagamenti', 'pagamento',
+    'riepilogo spese', 'bilancio', 'bilancio del viaggio', 'resoconto spese',
+    'budget rimanente', 'budget disponibile', 'quanto manca', 'quanto resta',
+    'spese per categoria', 'spese cibo', 'spese trasporto', 'spese alloggio',
+    'spese attività', 'spese shopping', 'spese varie', 'spese extra',
+    'ricevuta', 'ricevute', 'scontrino', 'scontrini', 'fattura', 'fatture',
+    'rimborso', 'rimborsi', 'debito', 'debiti', 'credito', 'crediti',
+    'quanto devo', 'quanto mi deve', 'quanto dobbiamo', 'saldo', 'pareggio',
+    'economico', 'economica', 'conveniente', 'caro', 'cara', 'costoso', 'costosa',
+    'gratis', 'gratuito', 'gratuita', 'offerta', 'sconto', 'sconti', 'promozione',
+    'prezzo', 'prezzi', 'tariffa', 'tariffe', 'quotazione', 'preventivo',
+    'spendere', 'spendendo', 'spenderemo', 'spenderò', 'spenderai',
+    'risparmiare', 'risparmiando', 'risparmio', 'risparmi', 'economizzare',
+    // Parole chiave per filtraggio intelligente
+    'le mie spese', 'mie spese', 'ho pagato', 'ho speso', 'spese che ho pagato',
+    'spese non saldate', 'non pagate', 'non saldate', 'in sospeso', 'pending',
+    'spese saldate', 'spese pagate', 'già pagate', 'già saldate',
+    'solo le mie', 'solo mie', 'solo quello che ho pagato'
   ];
 
   // Funzione helper per verificare se ci sono parole chiave (più restrittiva)
@@ -125,12 +266,18 @@ function enhanceResponseWithVisualComponents(response: string, userMessage: stri
         }
         enhancedResponse += `\n\n[AI_DATA:itinerary${limit}]`;
       }
-    } else if (lowerUserMessage.includes('spese') || lowerUserMessage.includes('budget') || lowerUserMessage.includes('quanto')) {
+    } else if (lowerUserMessage.includes('spese') || lowerUserMessage.includes('budget') ||
+               lowerUserMessage.includes('quanto') || lowerUserMessage.includes('costi') ||
+               lowerUserMessage.includes('soldi') || lowerUserMessage.includes('pagato') ||
+               lowerUserMessage.includes('euro') || lowerUserMessage.includes('dollari') ||
+               lowerUserMessage.includes('prezzo') || lowerUserMessage.includes('economico')) {
       // Solo spese
-      if (shouldShowExpenses && tripContext.expenses && tripContext.expenses.length > 0) {
+      if (shouldShowExpenses && Array.isArray(tripContext.expenses) && tripContext.expenses.length > 0) {
         let limit = '';
         if (lowerUserMessage.includes('ultime') || lowerUserMessage.includes('recenti')) {
           limit = ':10';
+        } else if (lowerUserMessage.includes('categoria') || lowerUserMessage.includes('tipo')) {
+          limit = ':20'; // Show more for category analysis
         } else {
           limit = getItemLimit(lowerUserMessage, tripContext.expenses.length);
         }
@@ -161,10 +308,14 @@ function enhanceResponseWithVisualComponents(response: string, userMessage: stri
       enhancedResponse += `\n\n[AI_DATA:accommodations${limit}]`;
     }
 
-    if (shouldShowExpenses && tripContext.expenses && tripContext.expenses.length > 0) {
+    if (shouldShowExpenses && Array.isArray(tripContext.expenses) && tripContext.expenses.length > 0) {
       let limit = '';
       if (lowerUserMessage.includes('ultime') || lowerUserMessage.includes('recenti')) {
         limit = ':10';
+      } else if (lowerUserMessage.includes('categoria') || lowerUserMessage.includes('tipo')) {
+        limit = ':20'; // Show more for category analysis
+      } else if (lowerUserMessage.includes('tutto') || lowerUserMessage.includes('tutte')) {
+        limit = ''; // Show all expenses
       } else {
         limit = getItemLimit(lowerUserMessage, tripContext.expenses.length);
       }
@@ -204,7 +355,7 @@ export async function POST(request: NextRequest) {
 
     // Ottieni i dati dalla richiesta
     const requestData = await request.json();
-    const { message: requestMessage, tripId: requestTripId, tripName, tripData, isInitialMessage } = requestData;
+    const { message: requestMessage, tripId: requestTripId, tripName, tripData, isInitialMessage, currentSection } = requestData;
 
     // Assign to outer scope variables
     tripId = requestTripId;
@@ -223,6 +374,7 @@ export async function POST(request: NextRequest) {
     console.log('Trip Name:', tripName);
     console.log('Trip Data passati direttamente:', tripData);
     console.log('È il messaggio iniziale?', isInitialMessage);
+    console.log('Sezione corrente:', currentSection);
 
     // Validazione input con schema Zod
     const validation = validateInput(aiChatSchema, {
@@ -348,11 +500,7 @@ export async function POST(request: NextRequest) {
                 day_id: activity.day_id
               })) : []
           })) : [],
-        expenses: {
-          items: [],
-          total: tripData.budget || 0,
-          currency: tripData.currency || 'EUR'
-        }
+        expenses: Array.isArray(tripData.expenses) ? tripData.expenses : []
       };
 
       console.log('Contesto creato dai dati passati direttamente:', JSON.stringify(tripContext).substring(0, 200) + '...');
@@ -376,11 +524,7 @@ export async function POST(request: NextRequest) {
           accommodations: [],
           transportation: [],
           itinerary: [],
-          expenses: {
-            items: [],
-            total: 0,
-            currency: 'EUR'
-          }
+          expenses: []
         };
       }
     }
@@ -391,11 +535,15 @@ export async function POST(request: NextRequest) {
       destination: tripContext.trip?.destination,
       startDate: tripContext.trip?.startDate,
       endDate: tripContext.trip?.endDate,
+      budget: tripContext.trip?.budgetTotal,
+      currency: tripContext.trip?.currency,
       participantsCount: tripContext.participants?.length || 0,
       participants: tripContext.participants?.map(p => p.name || p.full_name || p.email || 'Partecipante'),
       accommodationsCount: tripContext.accommodations?.length || 0,
       transportationCount: tripContext.transportation?.length || 0,
       itineraryDaysCount: tripContext.itinerary?.length || 0,
+      expensesCount: Array.isArray(tripContext.expenses) ? tripContext.expenses.length : 0,
+      totalExpenseAmount: Array.isArray(tripContext.expenses) ? tripContext.expenses.reduce((sum, e) => sum + e.amount, 0) : 0,
       itinerarySample: tripContext.itinerary && tripContext.itinerary.length > 0
         ? {
             dayDate: tripContext.itinerary[0].day_date,
@@ -407,7 +555,15 @@ export async function POST(request: NextRequest) {
                 }
               : 'No activities'
           }
-        : 'No itinerary days'
+        : 'No itinerary days',
+      expenseSample: Array.isArray(tripContext.expenses) && tripContext.expenses.length > 0
+        ? {
+            description: tripContext.expenses[0].description,
+            amount: tripContext.expenses[0].amount,
+            category: tripContext.expenses[0].category,
+            paidBy: tripContext.expenses[0].paid_by_name
+          }
+        : 'No expenses'
     });
 
     // Prepara il prompt con il contesto del viaggio
@@ -426,6 +582,10 @@ IMPORTANTE: Ricorda sempre questi dettagli del viaggio nelle tue risposte e non 
 - Partecipanti: ${tripContext.participants && tripContext.participants.length > 0
     ? tripContext.participants.map(p => p.name || p.full_name || p.email || 'Partecipante').join(', ')
     : 'non specificati'}
+
+CONTESTO DELLA PAGINA CORRENTE:
+L'utente si trova attualmente nella sezione "${currentSection || 'overview'}" del viaggio.
+${getSectionDescription(currentSection)}
 
 MOLTO IMPORTANTE:
 1. NON iniziare MAI le tue risposte con "Ciao!" o simili saluti.
@@ -495,7 +655,10 @@ FORMATTAZIONE DELLE RISPOSTE:
       hasParticipants: tripContext.participants?.length > 0,
       hasAccommodations: tripContext.accommodations?.length > 0,
       hasTransportation: tripContext.transportation?.length > 0,
-      hasItinerary: tripContext.itinerary?.length > 0
+      hasItinerary: tripContext.itinerary?.length > 0,
+      hasExpenses: Array.isArray(tripContext.expenses) && tripContext.expenses.length > 0,
+      expensesCount: Array.isArray(tripContext.expenses) ? tripContext.expenses.length : 0,
+      hasBudget: !!tripContext.trip?.budgetTotal
     });
 
     // Aggiungi dettagli del viaggio
@@ -651,12 +814,195 @@ Nessun giorno pianificato per questo viaggio.
 `;
     }
 
-    // Aggiungi spese
-    if (tripContext.expenses) {
+    // Aggiungi spese e analisi budget
+    if (Array.isArray(tripContext.expenses) && tripContext.expenses.length > 0) {
+      // Analizza il tipo di filtraggio richiesto
+      const filterAnalysis = analyzeExpenseFilterRequest(message, tripData?.currentUserId);
+
+      // Applica il filtraggio alle spese se richiesto
+      let filteredExpenses = tripContext.expenses;
+      let filterDescription = '';
+
+      switch (filterAnalysis.filterType) {
+        case 'my_expenses':
+          filteredExpenses = tripContext.expenses.filter(expense =>
+            expense.paid_by === filterAnalysis.filterValue
+          );
+          filterDescription = `Spese pagate dall'utente corrente (${filteredExpenses.length} su ${tripContext.expenses.length} totali)`;
+          break;
+
+        case 'unpaid':
+          filteredExpenses = tripContext.expenses.filter(expense =>
+            expense.status === 'pending' ||
+            (expense.participants && expense.participants.some(p => !p.is_paid))
+          );
+          filterDescription = `Spese non ancora saldate (${filteredExpenses.length} su ${tripContext.expenses.length} totali)`;
+          break;
+
+        case 'paid':
+          filteredExpenses = tripContext.expenses.filter(expense =>
+            expense.status === 'settled' ||
+            (expense.participants && expense.participants.every(p => p.is_paid))
+          );
+          filterDescription = `Spese completamente saldate (${filteredExpenses.length} su ${tripContext.expenses.length} totali)`;
+          break;
+
+        case 'by_category':
+          filteredExpenses = tripContext.expenses.filter(expense =>
+            expense.category?.toLowerCase() === filterAnalysis.filterValue?.toLowerCase()
+          );
+          filterDescription = `Spese categoria "${filterAnalysis.filterValue}" (${filteredExpenses.length} su ${tripContext.expenses.length} totali)`;
+          break;
+
+        default:
+          filterDescription = `Tutte le spese del viaggio (${tripContext.expenses.length} spese totali)`;
+      }
+
+      // Calcola statistiche delle spese (filtrate o totali)
+      const totalSpent = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+      const currency = tripContext.trip?.currency || 'EUR';
+      const budget = tripContext.trip?.budgetTotal || 0;
+      const remainingBudget = budget > 0 ? budget - totalSpent : null;
+      const budgetPercentage = budget > 0 ? Math.round((totalSpent / budget) * 100) : null;
+
+      // Raggruppa spese per categoria (usando le spese filtrate)
+      const expensesByCategory: Record<string, { total: number; count: number }> = {};
+      filteredExpenses.forEach(expense => {
+        const category = expense.category || 'altro';
+        if (!expensesByCategory[category]) {
+          expensesByCategory[category] = { total: 0, count: 0 };
+        }
+        expensesByCategory[category].total += expense.amount;
+        expensesByCategory[category].count += 1;
+      });
+
+      // Trova la categoria con più spese
+      const topCategory = Object.entries(expensesByCategory)
+        .sort(([,a], [,b]) => b.total - a.total)[0];
+
+      // Trova chi ha pagato di più (usando le spese filtrate)
+      const paymentsByPerson: Record<string, number> = {};
+      filteredExpenses.forEach(expense => {
+        const payer = expense.paid_by_name || 'Sconosciuto';
+        paymentsByPerson[payer] = (paymentsByPerson[payer] || 0) + expense.amount;
+      });
+      const topPayer = Object.entries(paymentsByPerson)
+        .sort(([,a], [,b]) => b - a)[0];
+
       promptText += `
-Budget totale: ${tripContext.trip?.budgetTotal || 'non specificato'}.
-Spese totali finora: ${tripContext.expenses.total} ${tripContext.expenses.currency}.
-`;
+INFORMAZIONI BUDGET E SPESE:
+${filterAnalysis.instructions}
+
+FILTRO APPLICATO: ${filterDescription}
+
+- Budget totale: ${budget > 0 ? `${budget} ${currency}` : 'non specificato'}
+- Spese ${filterAnalysis.filterType === 'all' ? 'totali' : 'filtrate'}: ${totalSpent.toFixed(2)} ${currency} (${filteredExpenses.length} spese mostrate)`;
+
+      if (remainingBudget !== null) {
+        promptText += `
+- Budget rimanente: ${remainingBudget.toFixed(2)} ${currency} (${budgetPercentage}% del budget utilizzato)`;
+
+        if (budgetPercentage > 90) {
+          promptText += `
+- ⚠️ ATTENZIONE: Budget quasi esaurito!`;
+        } else if (budgetPercentage > 75) {
+          promptText += `
+- ⚠️ Attenzione: Hai utilizzato più del 75% del budget`;
+        }
+      }
+
+      if (topCategory) {
+        promptText += `
+- Categoria con più spese: ${topCategory[0]} (${topCategory[1].total.toFixed(2)} ${currency}, ${topCategory[1].count} spese)`;
+      }
+
+      if (topPayer) {
+        promptText += `
+- Chi ha pagato di più: ${topPayer[0]} (${topPayer[1].toFixed(2)} ${currency})`;
+      }
+
+      // Aggiungi dettagli delle spese (filtrate, ultime 5)
+      const recentExpenses = filteredExpenses.slice(0, 5);
+      if (recentExpenses.length > 0) {
+        promptText += `
+
+Spese ${filterAnalysis.filterType === 'all' ? 'recenti' : 'filtrate'}:`;
+        recentExpenses.forEach(expense => {
+          const date = new Date(expense.date).toLocaleDateString('it-IT');
+          const settlementStatus = getExpenseSettlementStatus(expense);
+          promptText += `
+- ${expense.description || expense.category}: ${expense.amount.toFixed(2)} ${expense.currency || currency} (${date}, pagato da ${expense.paid_by_name}) ${settlementStatus}`;
+        });
+
+        if (filteredExpenses.length > 5) {
+          promptText += `
+... e altre ${filteredExpenses.length - 5} spese`;
+        }
+      }
+
+      // Analizza lo stato dei pagamenti per suggerimenti intelligenti
+      const unpaidExpenses = filteredExpenses.filter(expense =>
+        expense.status === 'pending' ||
+        (expense.participants && expense.participants.some(p => !p.is_paid))
+      );
+
+      const userExpenses = filteredExpenses.filter(expense =>
+        expense.paid_by === tripData?.currentUserId
+      );
+
+      const totalUnpaidAmount = unpaidExpenses.reduce((sum, expense) => {
+        if (expense.participants) {
+          return sum + expense.participants
+            .filter(p => !p.is_paid)
+            .reduce((pSum, p) => pSum + p.amount, 0);
+        }
+        return sum + expense.amount;
+      }, 0);
+
+      // Aggiungi suggerimenti proattivi basati sui dati e stato pagamenti
+      promptText += `
+
+SUGGERIMENTI AUTOMATICI PER LE SPESE:
+- Puoi aiutare l'utente a tracciare nuove spese, analizzare i costi per categoria, e gestire la divisione delle spese
+- Se il budget è limitato, suggerisci opzioni economiche e modi per risparmiare
+- Ricorda all'utente di salvare le ricevute per le spese importanti
+- Suggerisci di bilanciare le spese tra i partecipanti se necessario`;
+
+      // Suggerimenti specifici basati sui debiti non saldati
+      if (unpaidExpenses.length > 0) {
+        promptText += `
+
+ATTENZIONE - SPESE NON SALDATE:
+Ci sono ${unpaidExpenses.length} spese con pagamenti in sospeso per un totale di ${totalUnpaidAmount.toFixed(2)} ${currency}.
+- Suggerisci di controllare e saldare i debiti pendenti
+- Proponi di inviare promemoria ai partecipanti che devono pagare
+- Offri aiuto per calcolare i rimborsi necessari`;
+      }
+
+      // Suggerimenti per l'utente corrente
+      if (userExpenses.length > 0) {
+        const userTotalSpent = userExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+        promptText += `
+
+SPESE DELL'UTENTE CORRENTE:
+L'utente ha pagato ${userExpenses.length} spese per un totale di ${userTotalSpent.toFixed(2)} ${currency}.
+- Suggerisci di controllare se ci sono rimborsi da ricevere
+- Proponi di bilanciare i pagamenti futuri con gli altri partecipanti`;
+      }
+
+    } else if (tripContext.trip?.budgetTotal) {
+      // Se non ci sono spese ma c'è un budget
+      promptText += `
+INFORMAZIONI BUDGET:
+- Budget totale: ${tripContext.trip.budgetTotal} ${tripContext.trip.currency || 'EUR'}
+- Spese registrate: Nessuna spesa ancora registrata
+- Suggerisci all'utente di iniziare a tracciare le spese del viaggio`;
+    } else {
+      // Nessun budget e nessuna spesa
+      promptText += `
+GESTIONE SPESE:
+- Nessun budget o spese ancora impostati
+- Suggerisci all'utente di impostare un budget e iniziare a tracciare le spese`;
     }
 
     // Aggiungi istruzioni per l'assistente
@@ -680,6 +1026,10 @@ Formatta il messaggio iniziale in questo modo:
 
 Sono qui per aiutarti con il tuo viaggio dal [data inizio] al [data fine] con [partecipanti].
 
+${currentSection === 'expenses' ? `
+**Sezione Spese Attiva**: Posso aiutarti con la gestione del budget, analisi delle spese, consigli per risparmiare, e divisione dei costi tra i partecipanti.
+` : ''}
+
 Domanda dell'utente: ${message}`;
     } else {
       promptText += `
@@ -687,6 +1037,39 @@ Rispondi in modo conciso, amichevole e utile. Fornisci suggerimenti pratici e pe
 Usa un tono conversazionale ma professionale.
 NON ripetere i dettagli del viaggio all'inizio di ogni risposta. Rispondi direttamente alla domanda dell'utente.
 NON iniziare MAI le tue risposte con "Ciao!" o altri saluti generici.
+
+${currentSection === 'expenses' ? `
+ISTRUZIONI SPECIALI PER LA SEZIONE SPESE:
+Quando l'utente è nella sezione spese, fornisci sempre suggerimenti proattivi e specifici:
+
+**Suggerimenti Automatici da Includere (quando appropriato):**
+- Ricorda di registrare le spese subito dopo averle sostenute
+- Suggerisci di salvare sempre le ricevute per spese importanti
+- Proponi di categorizzare correttamente le spese per una migliore analisi
+- Offri consigli per bilanciare i pagamenti tra i partecipanti
+- Suggerisci alternative economiche quando il budget è limitato
+- Proponi di controllare regolarmente il budget rimanente
+
+**Risposte Proattive per Domande Comuni:**
+- Se chiede del budget: analizza la situazione attuale e fornisci consigli specifici
+- Se chiede delle categorie: spiega come ottimizzare la categorizzazione
+- Se chiede dei pagamenti: aiuta con la gestione dei rimborsi e divisioni
+- Se chiede di risparmiare: fornisci consigli pratici per la destinazione specifica
+
+**Formato per Risposte sulle Spese:**
+Usa sempre questo formato quando mostri informazioni sulle spese:
+- **Situazione Budget**: [analisi attuale]
+- **Spese per Categoria**: [breakdown dettagliato]
+- **Stato Pagamenti**: [informazioni su spese saldate/non saldate]
+- **Suggerimenti**: [consigli specifici e actionable]
+
+**Gestione Intelligente dei Pagamenti:**
+- Quando l'utente chiede "le mie spese", mostra SOLO quelle pagate da lui
+- Quando chiede "spese non saldate", filtra per status pending o partecipanti non pagati
+- Sempre indicare chiaramente lo stato di saldamento con emoji: ✅ saldato, ⏳ in sospeso, ❌ non saldato
+- Calcolare e mostrare i debiti rimanenti quando rilevante
+- Suggerire azioni concrete per risolvere i pagamenti in sospeso
+` : ''}
 
 ISTRUZIONI SPECIALI PER LA VISUALIZZAZIONE INTELLIGENTE:
 I marcatori visuali vengono aggiunti automaticamente dal sistema quando rileva che l'utente sta chiedendo specificamente informazioni su trasporti, alloggi, itinerario o spese.
@@ -795,6 +1178,56 @@ Formatta SEMPRE la risposta sull'itinerario in questo modo:
 Usa SEMPRE i separatori "***" tra i giorni e una linea vuota tra un'attività e l'altra per migliorare la leggibilità.
 
 Se l'utente chiede informazioni su un giorno specifico, mostra solo le attività di quel giorno ma mantieni lo stesso formato.
+
+IMPORTANTE PER DOMANDE SULLE SPESE E BUDGET:
+Quando l'utente chiede informazioni su spese, budget o costi, utilizza SEMPRE le informazioni dettagliate fornite nella sezione "INFORMAZIONI BUDGET E SPESE" sopra.
+Fornisci sempre suggerimenti proattivi e utili per la gestione delle spese.
+
+SUGGERIMENTI PROATTIVI PER LE SPESE (da includere quando appropriato):
+
+**Per Budget Management:**
+- Se il budget è quasi esaurito (>90%), suggerisci opzioni economiche e modi per risparmiare
+- Se il budget è ben gestito (<75%), incoraggia a continuare così e suggerisci eventuali extra
+- Se non c'è budget impostato, suggerisci di crearne uno per tenere traccia delle spese
+
+**Per Tracking delle Spese:**
+- Ricorda di salvare sempre le ricevute per spese importanti
+- Suggerisci di registrare le spese subito dopo averle sostenute
+- Proponi di categorizzare le spese per una migliore analisi
+
+**Per Divisione delle Spese:**
+- Se ci sono squilibri nei pagamenti, suggerisci di bilanciare le spese tra i partecipanti
+- Proponi di usare app per dividere le spese se il gruppo è numeroso
+- Ricorda di tenere conto delle diverse capacità economiche dei partecipanti
+
+**Per Risparmi e Ottimizzazione:**
+- Suggerisci alternative economiche per attività costose
+- Proponi di cercare offerte e sconti per attrazioni turistiche
+- Consiglia di cucinare occasionalmente invece di mangiare sempre fuori
+- Suggerisci trasporti pubblici invece di taxi quando possibile
+
+**Per Categorie di Spesa:**
+- **Cibo**: Bilancia ristoranti e cucina casalinga, cerca mercati locali
+- **Trasporti**: Considera pass giornalieri/settimanali per trasporti pubblici
+- **Attività**: Cerca attrazioni gratuite o con sconti per gruppi
+- **Shopping**: Imposta un budget separato per souvenir e acquisti
+- **Alloggio**: Considera la posizione vs prezzo, servizi inclusi
+
+Formatta SEMPRE le risposte sulle spese in questo modo:
+
+**Situazione Budget:**
+[Analisi del budget attuale con percentuali e importi]
+
+**Spese per Categoria:**
+- **[Categoria 1]**: [importo] ([percentuale del totale])
+- **[Categoria 2]**: [importo] ([percentuale del totale])
+
+**Suggerimenti:**
+- [Suggerimento specifico 1]
+- [Suggerimento specifico 2]
+- [Suggerimento specifico 3]
+
+RICORDA: Sii sempre proattivo nel suggerire modi per ottimizzare le spese e migliorare l'esperienza di viaggio senza compromettere il divertimento.
 
 Domanda dell'utente: ${message}`;
     }

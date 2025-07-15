@@ -84,12 +84,14 @@ export async function getTripContext(tripId: string) {
       accommodationsResult,
       transportationResult,
       itineraryDaysResult,
-      activitiesResult
+      activitiesResult,
+      expensesResult,
+      expenseParticipantsResult
     ] = await Promise.allSettled([
       // Query principale del viaggio
       supabase
         .from('trips')
-        .select('id, name, description, destination, start_date, end_date, owner_id, is_private, budget_total, created_at')
+        .select('id, name, description, destination, start_date, end_date, owner_id, is_private, budget_total, currency, created_at')
         .eq('id', tripId)
         .single(),
 
@@ -123,7 +125,26 @@ export async function getTripContext(tripId: string) {
         .from('activities')
         .select('id, name, type, start_time, end_time, location, notes, day_id')
         .eq('trip_id', tripId)
-        .order('start_time', { ascending: true })
+        .order('start_time', { ascending: true }),
+
+      // Query spese
+      supabase
+        .from('expenses')
+        .select(`
+          id, category, amount, currency, date, description, paid_by, split_type, status, created_at,
+          users!inner(full_name)
+        `)
+        .eq('trip_id', tripId)
+        .order('date', { ascending: false }),
+
+      // Query partecipanti spese
+      supabase
+        .from('expense_participants')
+        .select(`
+          expense_id, user_id, amount, is_paid,
+          users!inner(full_name)
+        `)
+        .in('expense_id', [])  // Will be updated after expenses are fetched
     ]);
 
     // Verifica che la query principale del viaggio sia riuscita
@@ -148,17 +169,14 @@ export async function getTripContext(tripId: string) {
         owner: tripData.owner_id,
         isPrivate: tripData.is_private,
         budgetTotal: tripData.budget_total,
+        currency: tripData.currency || 'EUR',
         createdAt: tripData.created_at
       },
       participants: [],
       accommodations: [],
       transportation: [],
       itinerary: [],
-      expenses: {
-        items: [],
-        total: 0,
-        currency: 'EUR'
-      }
+      expenses: []
     };
 
     // Processa i risultati delle query parallele
@@ -252,6 +270,65 @@ export async function getTripContext(tripId: string) {
       tripContext.itinerary = [];
     }
 
+    // Spese
+    if (expensesResult.status === 'fulfilled' && !expensesResult.value.error) {
+      const expenses = expensesResult.value.data || [];
+
+      // Fetch expense participants for each expense
+      if (expenses.length > 0) {
+        const expenseIds = expenses.map(e => e.id);
+
+        // Update the expense participants query with actual expense IDs
+        const { data: expenseParticipants } = await supabase
+          .from('expense_participants')
+          .select(`
+            expense_id, user_id, amount, is_paid,
+            users!inner(full_name)
+          `)
+          .in('expense_id', expenseIds);
+
+        // Group participants by expense
+        const participantsByExpense: Record<string, any[]> = {};
+        (expenseParticipants || []).forEach(participant => {
+          if (!participantsByExpense[participant.expense_id]) {
+            participantsByExpense[participant.expense_id] = [];
+          }
+          participantsByExpense[participant.expense_id].push(participant);
+        });
+
+        // Process expenses with their participants
+        tripContext.expenses = expenses.map(expense => ({
+          id: expense.id,
+          category: expense.category,
+          amount: expense.amount,
+          currency: expense.currency,
+          date: expense.date,
+          description: expense.description,
+          paid_by: expense.paid_by,
+          paid_by_name: expense.users?.full_name || 'Sconosciuto',
+          split_type: expense.split_type,
+          status: expense.status,
+          created_at: expense.created_at,
+          participants: (participantsByExpense[expense.id] || []).map(p => ({
+            user_id: p.user_id,
+            amount: p.amount,
+            is_paid: p.is_paid,
+            full_name: p.users?.full_name || 'Sconosciuto'
+          }))
+        }));
+
+        logger.debug('Expenses processed', {
+          count: tripContext.expenses.length,
+          totalAmount: tripContext.expenses.reduce((sum, e) => sum + e.amount, 0)
+        });
+      } else {
+        tripContext.expenses = [];
+      }
+    } else {
+      logger.warn('Failed to fetch expenses', { tripId });
+      tripContext.expenses = [];
+    }
+
     // Cache del risultato per future richieste
     setCachedTripContext(tripId, tripContext);
 
@@ -263,7 +340,9 @@ export async function getTripContext(tripId: string) {
       accommodationsCount: tripContext.accommodations.length,
       transportationCount: tripContext.transportation.length,
       itineraryDaysCount: tripContext.itinerary.length,
-      totalActivities: tripContext.itinerary.reduce((sum, day) => sum + day.activities.length, 0)
+      totalActivities: tripContext.itinerary.reduce((sum, day) => sum + day.activities.length, 0),
+      expensesCount: tripContext.expenses.length,
+      totalExpenseAmount: tripContext.expenses.reduce((sum, expense) => sum + expense.amount, 0)
     });
 
     logger.debug('Trip context retrieved successfully', { tripId, duration });
@@ -284,6 +363,11 @@ export async function getTripContext(tripId: string) {
         name: 'Viaggio',
         destination: 'Destinazione sconosciuta'
       },
+      participants: [],
+      accommodations: [],
+      transportation: [],
+      itinerary: [],
+      expenses: [],
       error: 'Non è stato possibile recuperare tutti i dettagli del viaggio'
     };
   }
