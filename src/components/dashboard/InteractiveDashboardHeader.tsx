@@ -13,6 +13,7 @@ import {
   CalendarIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import WeatherWidget, { CompactWeatherWidget } from './WeatherWidget';
 
 interface InteractiveDashboardHeaderProps {
   searchTerm: string;
@@ -106,51 +107,37 @@ export default function InteractiveDashboardHeader({
       <div className="relative z-10 px-6 py-6 lg:px-8">
         {/* Welcome Section */}
         <div className="mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="relative">
-              <div className={cn(
-                "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
-                greeting.color
-              )}>
-                <GreetingIcon className="h-6 w-6 text-white" />
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
+            {/* Left side - Greeting */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className={cn(
+                  "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
+                  greeting.color
+                )}>
+                  <GreetingIcon className="h-6 w-6 text-white" />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                  {greeting.text}, {userName}!
+                </h1>
+                <p className="text-muted-foreground">
+                  You have <span className="font-semibold text-foreground">{tripCount}</span> {tripCount === 1 ? 'trip' : 'trips'} planned
+                </p>
               </div>
             </div>
 
-            <div className="space-y-1">
-              <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                {greeting.text}, {userName}!
-              </h1>
-              <p className="text-muted-foreground">
-                You have <span className="font-semibold text-foreground">{tripCount}</span> {tripCount === 1 ? 'trip' : 'trips'} planned
-              </p>
+            {/* Right side - Weather Widget */}
+            <div className="lg:max-w-sm w-full lg:w-auto">
+              <div className="hidden lg:block">
+                <WeatherWidget />
+              </div>
+              <div className="lg:hidden">
+                <CompactWeatherWidget />
+              </div>
             </div>
-          </div>
-
-          {/* Professional stats indicators */}
-          <div className="flex gap-3 flex-wrap">
-            {[
-              { label: 'Destinations', value: tripCount.toString(), icon: MapIcon },
-              { label: 'This year', value: new Date().getFullYear().toString(), icon: CalendarIcon },
-              { label: 'Active', value: stats.ongoing.toString(), icon: SparklesIcon }
-            ].map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div
-                  key={stat.label}
-                  className="transition-all duration-200"
-                >
-                  <div className="bg-muted/50 rounded-lg px-3 py-2 border border-border">
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-primary" />
-                      <div>
-                        <div className="text-sm font-semibold text-foreground">{stat.value}</div>
-                        <div className="text-xs text-muted-foreground">{stat.label}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
 
