@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import {
   SearchIcon,
-  FilterIcon,
   GridIcon,
   ListIcon,
   SparklesIcon,
@@ -11,8 +10,6 @@ import {
   SunIcon,
   MoonIcon,
   CloudIcon,
-  StarIcon,
-  ZapIcon,
   CalendarIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -71,30 +68,30 @@ export default function InteractiveDashboardHeader({
     {
       value: 'all',
       label: 'All Trips',
-      icon: MapIcon,
       color: 'from-slate-600 to-slate-700',
-      count: stats.total
+      count: stats.total,
+      emoji: '🌍'
     },
     {
       value: 'upcoming',
       label: 'Upcoming',
-      icon: CalendarIcon,
       color: 'from-emerald-600 to-emerald-700',
-      count: stats.upcoming
+      count: stats.upcoming,
+      emoji: '🚀'
     },
     {
       value: 'ongoing',
       label: 'Ongoing',
-      icon: ZapIcon,
       color: 'from-orange-600 to-red-700',
-      count: stats.ongoing
+      count: stats.ongoing,
+      emoji: '✈️'
     },
     {
       value: 'past',
       label: 'Completed',
-      icon: StarIcon,
       color: 'from-purple-600 to-purple-700',
-      count: stats.completed
+      count: stats.completed,
+      emoji: '✅'
     }
   ];
 
@@ -184,7 +181,6 @@ export default function InteractiveDashboardHeader({
         {/* Filter Tabs with Stats */}
         <div className="flex flex-wrap gap-2 mb-6">
           {filterOptions.map((option, index) => {
-            const Icon = option.icon;
             const isActive = filter === option.value;
 
             return (
@@ -198,7 +194,7 @@ export default function InteractiveDashboardHeader({
                     : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <span className="text-sm">{option.emoji}</span>
                 <span className="text-sm">{option.label}</span>
                 <span className={cn(
                   "text-xs px-2 py-0.5 rounded-full font-semibold",

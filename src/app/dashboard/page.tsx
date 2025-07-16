@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'past'>('upcoming');
+  const [hasInitializedFilter, setHasInitializedFilter] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [tripCount, setTripCount] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string>('created_desc');
@@ -72,6 +73,33 @@ export default function Dashboard() {
   };
 
   const stats = getStatistics();
+
+  // Smart filter selection logic - run once when trips are loaded
+  useEffect(() => {
+    if (!loading && trips.length > 0 && !hasInitializedFilter) {
+      let smartFilter: 'all' | 'upcoming' | 'ongoing' | 'past' = 'all';
+
+      // Priority 1: Ongoing trips (most important - user is traveling now!)
+      if (stats.ongoing > 0) {
+        smartFilter = 'ongoing';
+      }
+      // Priority 2: Upcoming trips (next most important - future excitement)
+      else if (stats.upcoming > 0) {
+        smartFilter = 'upcoming';
+      }
+      // Priority 3: Completed trips (for nostalgia and memories)
+      else if (stats.completed > 0) {
+        smartFilter = 'past';
+      }
+      // Priority 4: All trips (fallback when everything else is empty)
+      else {
+        smartFilter = 'all';
+      }
+
+      setFilter(smartFilter);
+      setHasInitializedFilter(true);
+    }
+  }, [loading, trips.length, stats.ongoing, stats.upcoming, stats.completed, hasInitializedFilter]);
 
   useEffect(() => {
     const fetchTrips = async () => {

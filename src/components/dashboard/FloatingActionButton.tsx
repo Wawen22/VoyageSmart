@@ -22,19 +22,22 @@ export default function FloatingActionButton() {
       icon: RocketIcon,
       label: 'New Trip',
       href: '/trips/new',
-      gradient: 'from-blue-500 to-cyan-500'
+      gradient: 'from-blue-500 to-cyan-500',
+      enabled: true
     },
     {
       icon: CalendarIcon,
       label: 'Quick Itinerary',
-      href: '/trips/new?quick=true',
-      gradient: 'from-emerald-500 to-teal-500'
+      href: '#',
+      gradient: 'from-emerald-500 to-teal-500',
+      enabled: false
     },
     {
       icon: CameraIcon,
       label: 'Travel Journal',
-      href: '/trips/new?type=journal',
-      gradient: 'from-purple-500 to-pink-500'
+      href: '#',
+      gradient: 'from-purple-500 to-pink-500',
+      enabled: false
     }
   ];
 
@@ -45,8 +48,38 @@ export default function FloatingActionButton() {
         "flex flex-col gap-3 mb-4 transition-all duration-300",
         isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
       )}>
-        {actions.map((action, index) => {
+        {actions.map((action) => {
           const Icon = action.icon;
+          const isDisabled = !action.enabled;
+
+          if (isDisabled) {
+            return (
+              <div
+                key={action.label}
+                className={cn(
+                  "flex items-center gap-3 bg-muted/50 rounded-xl shadow-sm border border-border opacity-50 cursor-not-allowed"
+                )}
+              >
+                <div className={cn(
+                  "w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center shadow-md opacity-60",
+                  action.gradient
+                )}>
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <div className="pr-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {action.label}
+                    </span>
+                    <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                      Coming Soon
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <Link
               key={action.label}
