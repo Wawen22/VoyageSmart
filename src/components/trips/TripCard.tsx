@@ -41,6 +41,20 @@ export default function TripCard({ trip }: TripCardProps) {
     }
   };
 
+  const getDuration = (startDate: string | null, endDate: string | null) => {
+    if (!startDate || !endDate) return '';
+    try {
+      const start = parseISO(startDate);
+      const end = parseISO(endDate);
+      if (!isValid(start) || !isValid(end)) return '';
+
+      const diffInDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''}`;
+    } catch (error) {
+      return '';
+    }
+  };
+
   const isUpcoming = () => {
     if (!trip.start_date) return false;
     try {
@@ -144,101 +158,97 @@ export default function TripCard({ trip }: TripCardProps) {
   return (
     <Link href={`/trips/${trip.id}`} className="block h-full group">
       <Card
-        className="overflow-hidden transition-all duration-300 h-full hover:scale-[1.02] hover:shadow-lg relative bg-card/80 backdrop-blur-sm border border-border/50"
+        className="overflow-hidden transition-all duration-500 h-full hover:scale-[1.03] hover:shadow-xl relative bg-gradient-to-br from-card via-card to-card/80 backdrop-blur-sm border border-border/30 hover:border-primary/20"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
         {/* Status indicator */}
         <div
-          className="absolute top-0 left-0 w-full h-1 transition-all duration-300 group-hover:h-1.5"
-          style={{ backgroundColor: statusInfo.color }}
+          className="absolute top-0 left-0 w-full h-1.5 transition-all duration-300 group-hover:h-2"
+          style={{
+            background: `linear-gradient(90deg, ${statusInfo.color}, ${statusInfo.color}80)`
+          }}
         />
 
-        {/* Ripple effect overlay */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-md">
-          <div
-            className={`absolute bg-primary/5 rounded-full transform -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-all duration-700 ease-in-out ${isHovered ? 'scale-[4]' : 'scale-0'}`}
-            style={{
-              top: '50%',
-              left: '50%',
-              width: '100px',
-              height: '100px',
-              opacity: isHovered ? 0.8 : 0
-            }}
-          />
+        {/* Floating action indicator */}
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+          <div className="w-8 h-8 bg-primary/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-primary/20">
+            <ArrowRightIcon className="h-4 w-4 text-primary" />
+          </div>
         </div>
 
-        <CardContent className="p-0">
-          <div className="p-5 space-y-4">
-            {/* Header with title and status */}
-            <div className="flex justify-between items-start gap-2">
-              <div className="flex-1">
-                <h3 className="text-lg font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors duration-300">{trip.name}</h3>
+        <CardContent className="p-0 relative z-10">
+          <div className="p-6 space-y-5">
+            {/* Header with title and destination */}
+            <div className="space-y-3">
+              <div className="flex justify-between items-start gap-3">
+                <div className="flex-1 space-y-2">
+                  <h3 className="text-xl font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors duration-300">
+                    {trip.name}
+                  </h3>
+                  {trip.destination && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <MapPinIcon className="h-4 w-4 text-primary/70" />
+                      <span className="text-sm font-medium">{trip.destination}</span>
+                    </div>
+                  )}
+                </div>
 
-                {/* Status badge - always visible */}
-                <div className="flex items-center mt-1">
-                  <Badge
-                    variant="outline"
-                    className="text-xs px-2 py-0 h-5 flex items-center gap-1 transition-all duration-300"
-                    style={{
-                      backgroundColor: `${statusInfo.color}10`,
-                      color: statusInfo.color,
-                      borderColor: `${statusInfo.color}30`
-                    }}
-                  >
-                    {statusInfo.icon}
-                    <span>{statusInfo.text}</span>
-                  </Badge>
+                {/* Status badge */}
+                <Badge
+                  variant="outline"
+                  className="text-xs px-3 py-1 h-6 flex items-center gap-1.5 transition-all duration-300 hover:scale-105"
+                  style={{
+                    backgroundColor: `${statusInfo.color}15`,
+                    color: statusInfo.color,
+                    borderColor: `${statusInfo.color}40`
+                  }}
+                >
+                  {statusInfo.icon}
+                  <span className="font-medium">{statusInfo.text}</span>
+                </Badge>
+              </div>
 
-                  {/* Premium indicators */}
-                  <div className="flex gap-1 ml-2">
-                    <PremiumIndicator feature="accommodations" variant="icon" size="sm" />
-                    <PremiumIndicator feature="transportation" variant="icon" size="sm" />
+              {/* Description */}
+              {trip.description && (
+                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                  {trip.description}
+                </p>
+              )}
+            </div>
+
+            {/* Dates Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-border/30">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                  <CalendarIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-foreground">
+                    {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {getDuration(trip.start_date, trip.end_date)}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Destination */}
-            {trip.destination && (
-              <div className="flex items-center text-sm">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <MapPinIcon className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-foreground line-clamp-1">{trip.destination}</span>
-              </div>
-            )}
-
-            {/* Dates */}
-            <div className="flex items-center text-sm">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                <CalendarIcon className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-muted-foreground">
-                {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
-              </span>
-            </div>
-
-            {/* Description */}
-            {trip.description && (
-              <div className="bg-muted/30 rounded-md p-3 mt-2">
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {trip.description}
-                </p>
-              </div>
-            )}
-
-            {/* Footer */}
-            <div className="pt-3 mt-auto flex justify-between items-center border-t border-border">
-              <span className="text-xs text-muted-foreground">
-                Created {format(parseISO(trip.created_at), 'MMM d, yyyy')}
-              </span>
-              <div className="flex items-center text-primary text-sm font-medium group/btn">
-                <span className="relative">
-                  <span className="transition-all duration-300 group-hover/btn:pr-1">View details</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover/btn:w-full"></span>
+            {/* Footer with Premium Indicators */}
+            <div className="flex justify-between items-center pt-2 border-t border-border/30">
+              <div className="flex items-center gap-2">
+                <PremiumIndicator feature="accommodations" variant="icon" size="sm" />
+                <PremiumIndicator feature="transportation" variant="icon" size="sm" />
+                <span className="text-xs text-muted-foreground ml-2">
+                  {format(parseISO(trip.created_at), 'MMM d')}
                 </span>
-                <ArrowRightIcon className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+              </div>
+              <div className="flex items-center text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                <span>View trip</span>
+                <ArrowRightIcon className="h-4 w-4 ml-1" />
               </div>
             </div>
           </div>

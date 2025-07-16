@@ -249,6 +249,13 @@ export default function Home() {
               >
                 FAQ
               </button>
+              <Link
+                href="/documentation"
+                target="_blank"
+                className="text-foreground/70 hover:text-primary transition-colors"
+              >
+                Documentation
+              </Link>
             </div>
             <div className="flex space-x-4">
               <Link

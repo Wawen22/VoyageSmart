@@ -17,9 +17,128 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
-  // Return empty div for landing page and auth pages
-  if (pathname === '/' || pathname === '/login' || pathname === '/register' || pathname === '/forgot-password') {
+  // Show simplified navbar for non-authenticated users on auth pages
+  const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/forgot-password';
+  const isLandingPage = pathname === '/';
+
+  // Return empty div only for landing page (it has its own navigation)
+  if (isLandingPage) {
     return <div></div>;
+  }
+
+  // Show simplified navbar for auth pages and documentation for non-authenticated users
+  if (isAuthPage || !user) {
+    return (
+      <nav className="bg-background border-b border-border transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+                <Image
+                  src="/images/logo-voyage_smart.png"
+                  alt="Voyage Smart Logo"
+                  width={200}
+                  height={60}
+                  className="h-12 w-auto"
+                  priority
+                />
+                <span className="sr-only">Voyage Smart</span>
+              </Link>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden sm:flex items-center space-x-6">
+              {/* Documentation link - always visible */}
+              <Link
+                href="/documentation"
+                className={`${
+                  pathname.startsWith('/documentation')
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                } text-sm font-medium transition-colors`}
+              >
+                Documentation
+              </Link>
+
+              {!isAuthPage && (
+                <>
+                  <Link
+                    href="/pricing"
+                    className={`${
+                      pathname === '/pricing'
+                        ? 'text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
+                    } text-sm font-medium transition-colors`}
+                  >
+                    Pricing
+                  </Link>
+
+                  <div className="flex space-x-4">
+                    <Link
+                      href="/login"
+                      className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                      Log in
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                      Sign up
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="flex items-center gap-2 sm:hidden">
+              {/* Documentation link for mobile */}
+              <Link
+                href="/documentation"
+                className={`p-2 rounded-md ${
+                  pathname.startsWith('/documentation')
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-label="Documentation"
+              >
+                <BookOpenIcon className="h-5 w-5" />
+              </Link>
+
+              {!isAuthPage && (
+                <>
+                  <Link
+                    href="/pricing"
+                    className={`p-2 rounded-md ${
+                      pathname === '/pricing'
+                        ? 'text-primary'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                    aria-label="Pricing"
+                  >
+                    <TagIcon className="h-5 w-5" />
+                  </Link>
+
+                  <Link
+                    href="/login"
+                    className="text-muted-foreground hover:text-foreground px-2 py-1 rounded-md text-xs font-medium transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-2 py-1 rounded-md text-xs font-medium transition-colors"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
   }
 
   const toggleProfileMenu = () => {

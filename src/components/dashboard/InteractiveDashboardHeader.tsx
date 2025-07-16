@@ -1,0 +1,246 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import {
+  SearchIcon,
+  FilterIcon,
+  GridIcon,
+  ListIcon,
+  SparklesIcon,
+  MapIcon,
+  SunIcon,
+  MoonIcon,
+  CloudIcon,
+  StarIcon,
+  ZapIcon,
+  CalendarIcon
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface InteractiveDashboardHeaderProps {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  filter: 'all' | 'upcoming' | 'ongoing' | 'past';
+  setFilter: (filter: 'all' | 'upcoming' | 'ongoing' | 'past') => void;
+  viewMode: 'grid' | 'list';
+  setViewMode: (mode: 'grid' | 'list') => void;
+  tripCount: number;
+  userName?: string;
+  stats: {
+    total: number;
+    upcoming: number;
+    ongoing: number;
+    completed: number;
+  };
+}
+
+export default function InteractiveDashboardHeader({
+  searchTerm,
+  setSearchTerm,
+  filter,
+  setFilter,
+  viewMode,
+  setViewMode,
+  tripCount,
+  userName = 'Explorer',
+  stats
+}: InteractiveDashboardHeaderProps) {
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening'>('morning');
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setTimeOfDay('morning');
+    else if (hour < 18) setTimeOfDay('afternoon');
+    else setTimeOfDay('evening');
+  }, []);
+
+  const getGreeting = () => {
+    const greetings = {
+      morning: { text: 'Good morning', icon: SunIcon, color: 'from-yellow-400 to-orange-500' },
+      afternoon: { text: 'Good afternoon', icon: CloudIcon, color: 'from-blue-400 to-cyan-500' },
+      evening: { text: 'Good evening', icon: MoonIcon, color: 'from-purple-400 to-pink-500' }
+    };
+    return greetings[timeOfDay];
+  };
+
+  const greeting = getGreeting();
+  const GreetingIcon = greeting.icon;
+
+  const filterOptions = [
+    {
+      value: 'all',
+      label: 'All Trips',
+      icon: MapIcon,
+      color: 'from-slate-600 to-slate-700',
+      count: stats.total
+    },
+    {
+      value: 'upcoming',
+      label: 'Upcoming',
+      icon: CalendarIcon,
+      color: 'from-emerald-600 to-emerald-700',
+      count: stats.upcoming
+    },
+    {
+      value: 'ongoing',
+      label: 'Ongoing',
+      icon: ZapIcon,
+      color: 'from-orange-600 to-red-700',
+      count: stats.ongoing
+    },
+    {
+      value: 'past',
+      label: 'Completed',
+      icon: StarIcon,
+      color: 'from-purple-600 to-purple-700',
+      count: stats.completed
+    }
+  ];
+
+  return (
+    <div className="relative overflow-hidden bg-card border-b border-border">
+      {/* Background pattern simile al resto dell'app */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent"></div>
+      </div>
+
+
+      <div className="relative z-10 px-6 py-6 lg:px-8">
+        {/* Welcome Section */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="relative">
+              <div className={cn(
+                "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
+                greeting.color
+              )}>
+                <GreetingIcon className="h-6 w-6 text-white" />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                {greeting.text}, {userName}!
+              </h1>
+              <p className="text-muted-foreground">
+                You have <span className="font-semibold text-foreground">{tripCount}</span> {tripCount === 1 ? 'trip' : 'trips'} planned
+              </p>
+            </div>
+          </div>
+
+          {/* Professional stats indicators */}
+          <div className="flex gap-3 flex-wrap">
+            {[
+              { label: 'Destinations', value: tripCount.toString(), icon: MapIcon },
+              { label: 'This year', value: new Date().getFullYear().toString(), icon: CalendarIcon },
+              { label: 'Active', value: stats.ongoing.toString(), icon: SparklesIcon }
+            ].map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <div
+                  key={stat.label}
+                  className="transition-all duration-200"
+                >
+                  <div className="bg-muted/50 rounded-lg px-3 py-2 border border-border">
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-primary" />
+                      <div>
+                        <div className="text-sm font-semibold text-foreground">{stat.value}</div>
+                        <div className="text-xs text-muted-foreground">{stat.label}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search your trips..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Filter Tabs with Stats */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {filterOptions.map((option, index) => {
+            const Icon = option.icon;
+            const isActive = filter === option.value;
+
+            return (
+              <button
+                key={option.value}
+                onClick={() => setFilter(option.value as any)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="text-sm">{option.label}</span>
+                <span className={cn(
+                  "text-xs px-2 py-0.5 rounded-full font-semibold",
+                  isActive
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-background text-foreground"
+                )}>
+                  {option.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* View Mode Toggle */}
+        <div className="flex justify-end">
+          <div className="flex items-center bg-muted rounded-lg p-1 border border-border">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={cn(
+                "p-2 rounded-md transition-all duration-200",
+                viewMode === 'grid'
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              )}
+            >
+              <GridIcon className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={cn(
+                "p-2 rounded-md transition-all duration-200",
+                viewMode === 'list'
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              )}
+            >
+              <ListIcon className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
