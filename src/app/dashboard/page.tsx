@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import InteractiveDashboardHeader from '@/components/dashboard/InteractiveDashboardHeader';
 import InteractiveTripCard from '@/components/dashboard/InteractiveTripCard';
 import InteractiveEmptyState from '@/components/dashboard/InteractiveEmptyState';
+import TripTimeline from '@/components/dashboard/TripTimeline';
 import ModernLoadingSkeleton, {
   ModernStatsLoadingSkeleton,
   ModernHeaderLoadingSkeleton
@@ -37,7 +38,13 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [tripCount, setTripCount] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string>('created_desc');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'timeline'>('grid');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+
+  // Reset year filter when main filter changes
+  useEffect(() => {
+    setSelectedYear('all');
+  }, [filter]);
 
   // Performance optimizations
   const { shouldAnimate, getAnimationClass } = useAnimationOptimization();
@@ -168,7 +175,24 @@ export default function Dashboard() {
     return new Date(dateString).toLocaleDateString();
   };
 
-  // Filter trips based on the selected filter and search term
+  // Get available years for filter
+  const availableYears = trips.reduce((years, trip) => {
+    if (trip.start_date) {
+      const year = new Date(trip.start_date).getFullYear();
+      if (!years.includes(year)) {
+        years.push(year);
+      }
+    } else {
+      // Planning trips count as current year
+      const currentYear = new Date().getFullYear();
+      if (!years.includes(currentYear)) {
+        years.push(currentYear);
+      }
+    }
+    return years;
+  }, [] as number[]).sort((a, b) => a - b);
+
+  // Filter trips based on the selected filter, search term, and year
   const filteredTrips = trips.filter(trip => {
     // Apply date filter
     if (filter === 'upcoming' && trip.start_date) {
@@ -180,6 +204,17 @@ export default function Dashboard() {
       if (now < start || now > end) return false;
     } else if (filter === 'past' && trip.end_date) {
       if (new Date(trip.end_date) >= new Date()) return false;
+    }
+
+    // Apply year filter
+    if (selectedYear !== 'all') {
+      const yearNumber = parseInt(selectedYear);
+      if (trip.start_date) {
+        if (new Date(trip.start_date).getFullYear() !== yearNumber) return false;
+      } else {
+        // Planning trips without dates are considered current year
+        if (yearNumber !== new Date().getFullYear()) return false;
+      }
     }
 
     // Apply search filter
@@ -238,6 +273,9 @@ export default function Dashboard() {
           tripCount={tripCount || 0}
           userName={user?.user_metadata?.full_name?.split(' ')[0] || 'Explorer'}
           stats={stats}
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
+          availableYears={availableYears}
         />
       )}
 
@@ -261,6 +299,12 @@ export default function Dashboard() {
             <InteractiveEmptyState />
           ) : filteredTrips.length === 0 ? (
             <InteractiveEmptyState searchTerm={searchTerm} filter={filter} />
+          ) : viewMode === 'timeline' ? (
+            <TripTimeline
+              trips={filteredTrips}
+              searchTerm={searchTerm}
+              filter={filter}
+            />
           ) : (
             <div className={
               viewMode === 'grid'
@@ -271,7 +315,7 @@ export default function Dashboard() {
                 <InteractiveTripCard
                   key={trip.id}
                   trip={trip}
-                  viewMode={viewMode}
+                  viewMode={viewMode === 'timeline' ? 'list' : viewMode}
                   index={index}
                 />
               ))}

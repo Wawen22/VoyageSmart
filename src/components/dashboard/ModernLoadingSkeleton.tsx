@@ -3,11 +3,15 @@
 import { cn } from '@/lib/utils';
 
 interface ModernLoadingSkeletonProps {
-  viewMode?: 'grid' | 'list';
+  viewMode?: 'grid' | 'list' | 'timeline';
   count?: number;
 }
 
 export default function ModernLoadingSkeleton({ viewMode = 'grid', count = 6 }: ModernLoadingSkeletonProps) {
+  if (viewMode === 'timeline') {
+    return <TimelineLoadingSkeleton count={count} />;
+  }
+
   if (viewMode === 'list') {
     return (
       <div className="space-y-4">
@@ -112,6 +116,98 @@ export function ModernStatsLoadingSkeleton() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// Horizontal Timeline skeleton
+export function TimelineLoadingSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div className="relative">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 rounded-full animate-shimmer" />
+          <div>
+            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer mb-1" style={{ width: '180px' }} />
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" style={{ width: '120px' }} />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" />
+          <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" />
+        </div>
+      </div>
+
+      {/* Timeline Line Skeleton */}
+      <div className="absolute top-20 left-0 right-0 h-1 bg-slate-200 dark:bg-slate-700 rounded-full animate-shimmer"></div>
+
+      {/* Horizontal Cards Skeleton */}
+      <div className="flex gap-6 overflow-hidden pb-4">
+        {Array.from({ length: count }).map((_, index) => (
+          <div key={index} className="relative flex-shrink-0 w-80">
+            {/* Timeline Dot Skeleton */}
+            <div className="flex justify-center mb-4">
+              <div className="w-6 h-6 bg-slate-200 dark:bg-slate-700 rounded-full animate-pulse"
+                   style={{ animationDelay: `${index * 100}ms` }} />
+            </div>
+
+            {/* Card Skeleton */}
+            <div
+              className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden animate-pulse"
+              style={{ animationDelay: `${index * 150}ms` }}
+            >
+              {/* Header Skeleton */}
+              <div className="h-24 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 animate-shimmer relative">
+                <div className="absolute top-4 left-4 w-20 h-6 bg-white/30 rounded-full" />
+                <div className="absolute top-4 right-4 w-8 h-6 bg-white/30 rounded-full" />
+              </div>
+
+              {/* Content Skeleton */}
+              <div className="p-4 space-y-3">
+                {/* Title */}
+                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" style={{ width: '80%' }} />
+
+                {/* Destination */}
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" />
+                  <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" style={{ width: '60%' }} />
+                </div>
+
+                {/* Date Range */}
+                <div className="flex items-center justify-between">
+                  <div className="text-center">
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer mb-1" style={{ width: '40px' }} />
+                    <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer mb-1" style={{ width: '30px' }} />
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" style={{ width: '35px' }} />
+                  </div>
+                  <div className="w-4 h-4 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" />
+                  <div className="text-center">
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer mb-1" style={{ width: '40px' }} />
+                    <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer mb-1" style={{ width: '30px' }} />
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" style={{ width: '35px' }} />
+                  </div>
+                </div>
+
+                {/* Duration */}
+                <div className="flex justify-center">
+                  <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-full animate-shimmer" style={{ width: '80px' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Legend Skeleton */}
+      <div className="flex items-center justify-center gap-6 mt-8 p-4 bg-slate-100 dark:bg-slate-800/50 rounded-xl">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-slate-200 dark:bg-slate-700 rounded-full animate-shimmer" />
+            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" style={{ width: '60px' }} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

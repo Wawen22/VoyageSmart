@@ -10,8 +10,14 @@ import {
   SunIcon,
   MoonIcon,
   CloudIcon,
-  CalendarIcon
+  CalendarIcon,
+  ClockIcon,
+  FilterIcon
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import WeatherWidget, { CompactWeatherWidget } from './WeatherWidget';
 
@@ -20,8 +26,8 @@ interface InteractiveDashboardHeaderProps {
   setSearchTerm: (term: string) => void;
   filter: 'all' | 'upcoming' | 'ongoing' | 'past';
   setFilter: (filter: 'all' | 'upcoming' | 'ongoing' | 'past') => void;
-  viewMode: 'grid' | 'list';
-  setViewMode: (mode: 'grid' | 'list') => void;
+  viewMode: 'grid' | 'list' | 'timeline';
+  setViewMode: (mode: 'grid' | 'list' | 'timeline') => void;
   tripCount: number;
   userName?: string;
   stats: {
@@ -30,6 +36,9 @@ interface InteractiveDashboardHeaderProps {
     ongoing: number;
     completed: number;
   };
+  selectedYear: string;
+  setSelectedYear: (year: string) => void;
+  availableYears: number[];
 }
 
 export default function InteractiveDashboardHeader({
@@ -41,7 +50,10 @@ export default function InteractiveDashboardHeader({
   setViewMode,
   tripCount,
   userName = 'Explorer',
-  stats
+  stats,
+  selectedYear,
+  setSelectedYear,
+  availableYears
 }: InteractiveDashboardHeaderProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening'>('morning');
@@ -196,8 +208,29 @@ export default function InteractiveDashboardHeader({
           })}
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex justify-end">
+        {/* Year Filter and View Mode Toggle */}
+        <div className="flex items-center gap-3 justify-end">
+          {/* Year Filter */}
+          {availableYears.length > 1 && (
+            <div className="flex items-center gap-2">
+              <FilterIcon className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedYear} onValueChange={setSelectedYear}>
+                <SelectTrigger className="w-20 h-8 text-xs">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  {availableYears.map(year => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* View Mode Toggle */}
           <div className="flex items-center bg-muted rounded-lg p-1 border border-border">
             <button
               onClick={() => setViewMode('grid')}
@@ -207,6 +240,7 @@ export default function InteractiveDashboardHeader({
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-background/50"
               )}
+              title="Grid View"
             >
               <GridIcon className="h-4 w-4" />
             </button>
@@ -218,8 +252,21 @@ export default function InteractiveDashboardHeader({
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-background/50"
               )}
+              title="List View"
             >
               <ListIcon className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={cn(
+                "p-2 rounded-md transition-all duration-200",
+                viewMode === 'timeline'
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              )}
+              title="Timeline View"
+            >
+              <ClockIcon className="h-4 w-4" />
             </button>
           </div>
         </div>

@@ -22,7 +22,6 @@ interface InteractiveEmptyStateProps {
 }
 
 export default function InteractiveEmptyState({ searchTerm, filter }: InteractiveEmptyStateProps) {
-  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
   const [isAnimating, setIsAnimating] = useState(false);
   const [currentEmoji, setCurrentEmoji] = useState(0);
 
@@ -31,58 +30,41 @@ export default function InteractiveEmptyState({ searchTerm, filter }: Interactiv
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentEmoji((prev) => (prev + 1) % emojis.length);
-    }, 2000);
+    }, 3000); // Rallentato a 3 secondi
     return () => clearInterval(interval);
   }, [emojis.length]);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMousePosition({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100
-    });
-  };
 
   const isSearching = !!searchTerm;
   const isFiltered = filter && filter !== 'all';
 
   if (isSearching) {
     return (
-      <div 
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-indigo-900"
-        onMouseMove={handleMouseMove}
-      >
-        {/* Interactive background */}
-        <div 
-          className="absolute inset-0 opacity-20 transition-all duration-1000"
-          style={{
-            background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(59, 130, 246, 0.4) 0%, transparent 50%)`
-          }}
-        />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 border border-border/50">
+        {/* Clean background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/60 to-background/80" />
 
         <div className="relative z-10 flex flex-col items-center justify-center py-20 px-6 text-center">
           <div className="relative mb-8">
-            <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center animate-bounce">
-              <CompassIcon className="h-16 w-16 text-white" />
+            <div className="w-32 h-32 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-lg">
+              <CompassIcon className="h-16 w-16 text-primary-foreground" />
             </div>
-            <div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center animate-spin-slow">
+            <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
               <span className="text-2xl">🔍</span>
             </div>
           </div>
-          
-          <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 animate-fade-in-up">
+
+          <h3 className="text-3xl font-bold text-foreground mb-4">
             No trips found
           </h3>
-          <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md text-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            We couldn't find any trips for "<span className="font-bold text-blue-600">{searchTerm}</span>".
+          <p className="text-muted-foreground mb-8 max-w-md text-lg">
+            We couldn't find any trips for "<span className="font-bold text-primary">{searchTerm}</span>".
             Try searching for something else! 🤔
           </p>
 
           <Button
             variant="outline"
             onClick={() => window.location.reload()}
-            className="rounded-2xl px-8 py-3 text-lg hover:scale-110 transition-all duration-300 animate-fade-in-up"
-            style={{ animationDelay: '400ms' }}
+            className="rounded-2xl px-8 py-3 text-lg hover:scale-105 transition-all duration-300"
           >
             Clear search ✨
           </Button>
@@ -93,40 +75,32 @@ export default function InteractiveEmptyState({ searchTerm, filter }: Interactiv
 
   if (isFiltered) {
     return (
-      <div 
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-900 dark:via-emerald-900 dark:to-teal-900"
-        onMouseMove={handleMouseMove}
-      >
-        {/* Interactive background */}
-        <div 
-          className="absolute inset-0 opacity-20 transition-all duration-1000"
-          style={{
-            background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(16, 185, 129, 0.4) 0%, transparent 50%)`
-          }}
-        />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 border border-border/50">
+        {/* Clean background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/60 to-background/80" />
 
         <div className="relative z-10 flex flex-col items-center justify-center py-20 px-6 text-center">
           <div className="relative mb-8">
-            <div className="w-32 h-32 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center animate-pulse">
-              <MapIcon className="h-16 w-16 text-white" />
+            <div className="w-32 h-32 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center shadow-lg">
+              <MapIcon className="h-16 w-16 text-primary-foreground" />
             </div>
-            <div className="absolute -bottom-2 -right-2 text-4xl animate-bounce">
+            <div className="absolute -bottom-2 -right-2 text-4xl">
               {filter === 'upcoming' ? '✨' : filter === 'ongoing' ? '✈️' : filter === 'past' ? '📸' : '🌍'}
             </div>
           </div>
 
-          <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 animate-fade-in-up">
+          <h3 className="text-3xl font-bold text-foreground mb-4">
             No {filter === 'upcoming' ? 'upcoming' : filter === 'ongoing' ? 'ongoing' : filter === 'past' ? 'completed' : ''} trips
           </h3>
-          <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md text-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <p className="text-muted-foreground mb-8 max-w-md text-lg">
             It's the perfect time to plan your next adventure! 🚀
           </p>
 
-          <div className="flex gap-4 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-            <Button variant="outline" onClick={() => window.location.reload()} className="rounded-2xl px-6 py-3 hover:scale-110 transition-all duration-300">
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={() => window.location.reload()} className="rounded-2xl px-6 py-3 hover:scale-105 transition-all duration-300">
               Show all
             </Button>
-            <Button asChild className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-2xl px-6 py-3 hover:scale-110 transition-all duration-300">
+            <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl px-6 py-3 hover:scale-105 transition-all duration-300">
               <Link href="/trips/new">
                 <PlusIcon className="h-5 w-5 mr-2" />
                 Plan Trip
@@ -139,90 +113,66 @@ export default function InteractiveEmptyState({ searchTerm, filter }: Interactiv
   }
 
   return (
-    <div 
-      className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-violet-900 dark:to-purple-900"
-      onMouseMove={handleMouseMove}
-    >
-      {/* Animated background particles */}
-      <div className="absolute inset-0">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-30 animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${3 + Math.random() * 4}s`
-            }}
-          />
-        ))}
-      </div>
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 dark:from-primary/10 dark:via-primary/20 dark:to-primary/10 border border-border/50">
+      {/* Clean background with subtle pattern */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/60 to-background/80" />
 
-      {/* Interactive gradient overlay */}
-      <div 
-        className="absolute inset-0 opacity-30 transition-all duration-1000"
-        style={{
-          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(139, 92, 246, 0.4) 0%, transparent 50%)`
-        }}
-      />
-      
       <div className="relative z-10 flex flex-col items-center justify-center py-24 px-6 text-center">
         {/* Main illustration */}
         <div className="relative mb-12">
-          <div 
+          <div
             className={cn(
-              "w-48 h-48 bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl transition-all duration-1000",
-              isAnimating ? "scale-110 rotate-12" : "animate-float"
+              "w-48 h-48 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-105",
+              isAnimating ? "scale-105" : ""
             )}
             onMouseEnter={() => setIsAnimating(true)}
             onMouseLeave={() => setIsAnimating(false)}
           >
-            <div className="text-6xl animate-bounce">
+            <div className="text-6xl">
               {emojis[currentEmoji]}
             </div>
           </div>
-          
-          {/* Floating elements */}
-          <div className="absolute -top-6 -left-6 w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-bounce" style={{ animationDelay: '0.5s' }}>
-            <StarIcon className="h-6 w-6 text-white" />
+
+          {/* Floating elements with app colors */}
+          <div className="absolute -top-6 -left-6 w-12 h-12 bg-gradient-to-br from-primary/80 to-primary rounded-full flex items-center justify-center shadow-lg">
+            <StarIcon className="h-6 w-6 text-primary-foreground" />
           </div>
-          <div className="absolute -top-4 -right-8 w-8 h-8 bg-gradient-to-br from-pink-400 to-red-500 rounded-full flex items-center justify-center animate-bounce" style={{ animationDelay: '1s' }}>
-            <HeartIcon className="h-4 w-4 text-white" />
+          <div className="absolute -top-4 -right-8 w-8 h-8 bg-gradient-to-br from-primary/60 to-primary/80 rounded-full flex items-center justify-center shadow-lg">
+            <HeartIcon className="h-4 w-4 text-primary-foreground" />
           </div>
-          <div className="absolute -bottom-4 -left-8 w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center animate-bounce" style={{ animationDelay: '1.5s' }}>
-            <CameraIcon className="h-8 w-8 text-white" />
+          <div className="absolute -bottom-4 -left-8 w-16 h-16 bg-gradient-to-br from-primary/70 to-primary/90 rounded-full flex items-center justify-center shadow-lg">
+            <CameraIcon className="h-8 w-8 text-primary-foreground" />
           </div>
-          <div className="absolute -bottom-2 -right-6 w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center animate-bounce" style={{ animationDelay: '2s' }}>
-            <RocketIcon className="h-5 w-5 text-white" />
+          <div className="absolute -bottom-2 -right-6 w-10 h-10 bg-gradient-to-br from-primary/50 to-primary/70 rounded-full flex items-center justify-center shadow-lg">
+            <RocketIcon className="h-5 w-5 text-primary-foreground" />
           </div>
         </div>
         
-        <h3 className="text-5xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6 animate-fade-in-up">
-          La Tua Avventura Ti Aspetta! 
+        <h3 className="text-5xl font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent mb-6">
+          La Tua Avventura Ti Aspetta!
         </h3>
-        <p className="text-xl text-slate-600 dark:text-slate-400 mb-12 max-w-2xl leading-relaxed animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-          Pronto a esplorare il mondo? Crea il tuo primo viaggio e inizia a pianificare avventure indimenticabili. 
+        <p className="text-xl text-muted-foreground mb-12 max-w-2xl leading-relaxed">
+          Pronto a esplorare il mondo? Crea il tuo primo viaggio e inizia a pianificare avventure indimenticabili.
           Dai sogni agli itinerari dettagliati, il tuo viaggio inizia qui! ✨
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-6 mb-12 animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-          <Button 
-            asChild 
-            size="lg" 
-            className="group bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-2xl px-12 py-6 text-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-500 hover:scale-110"
+        <div className="flex flex-col sm:flex-row gap-6 mb-12">
+          <Button
+            asChild
+            size="lg"
+            className="group bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl px-12 py-6 text-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
             <Link href="/trips/new">
-              <RocketIcon className="h-6 w-6 mr-3 group-hover:animate-bounce" />
+              <RocketIcon className="h-6 w-6 mr-3" />
               Inizia la Tua Prima Avventura
-              <SparklesIcon className="h-6 w-6 ml-3 group-hover:animate-spin" />
+              <SparklesIcon className="h-6 w-6 ml-3" />
             </Link>
           </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            asChild 
-            className="rounded-2xl px-12 py-6 text-xl border-2 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:scale-110 transition-all duration-300"
+          <Button
+            variant="outline"
+            size="lg"
+            asChild
+            className="rounded-2xl px-12 py-6 text-xl border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all duration-300 hover:scale-105"
           >
             <Link href="/documentation">
               Scopri di Più 📚
@@ -231,7 +181,7 @@ export default function InteractiveEmptyState({ searchTerm, filter }: Interactiv
         </div>
         
         {/* Feature highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl animate-fade-in-up" style={{ animationDelay: '600ms' }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl">
           {[
             { icon: MapIcon, title: 'Pianifica Itinerari', desc: 'Crea piani dettagliati giorno per giorno', emoji: '🗺️' },
             { icon: CompassIcon, title: 'Traccia Avventure', desc: 'Monitora i tuoi progressi di viaggio', emoji: '🧭' },
@@ -239,16 +189,16 @@ export default function InteractiveEmptyState({ searchTerm, filter }: Interactiv
           ].map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <div 
+              <div
                 key={feature.title}
-                className="group text-center hover:scale-110 transition-all duration-500 cursor-pointer"
+                className="group text-center hover:scale-105 transition-all duration-300 cursor-pointer"
               >
-                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-2xl group-hover:rotate-12 transition-all duration-500">
-                  <Icon className="h-10 w-10 text-white" />
+                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
+                  <Icon className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-lg">{feature.title}</h4>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{feature.desc}</p>
-                <div className="text-2xl mt-2 group-hover:animate-bounce">{feature.emoji}</div>
+                <h4 className="font-bold text-foreground mb-2 text-lg">{feature.title}</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+                <div className="text-2xl mt-2">{feature.emoji}</div>
               </div>
             );
           })}
