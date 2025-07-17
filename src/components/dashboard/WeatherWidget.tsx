@@ -1290,16 +1290,50 @@ export default function WeatherWidget() {
 export function CompactWeatherWidget() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const [manualLocation, setManualLocation] = useState('');
   const [location, setLocation] = useState<LocationState>({
     hasPermission: null,
     isLoading: false,
     error: null,
-    coordinates: null
+    coordinates: null,
+    selectedLocation: null,
+    locationType: 'gps'
   });
 
-  // Get user's current location (simplified for compact version)
+  // Load saved location from localStorage
+  const loadSavedLocation = () => {
+    try {
+      const saved = localStorage.getItem('weather-location');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Save location to localStorage
+  const saveLocation = (locationData: any) => {
+    try {
+      localStorage.setItem('weather-location', JSON.stringify(locationData));
+    } catch (error) {
+      console.error('Failed to save location:', error);
+    }
+  };
+
+  // Get user's current location
   const getCurrentLocation = () => {
-    if (!navigator.geolocation) return;
+    setLocation(prev => ({ ...prev, isLoading: true, error: null }));
+
+    if (!navigator.geolocation) {
+      setLocation(prev => ({
+        ...prev,
+        isLoading: false,
+        hasPermission: false,
+        error: 'Geolocation not supported'
+      }));
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -1307,28 +1341,71 @@ export function CompactWeatherWidget() {
           lat: position.coords.latitude,
           lon: position.coords.longitude
         };
-        setLocation({
+        setLocation(prev => ({
+          ...prev,
           hasPermission: true,
           isLoading: false,
           error: null,
-          coordinates: coords
-        });
-        fetchWeatherByCoordinates(coords.lat, coords.lon);
+          coordinates: coords,
+          selectedLocation: 'Your Location',
+          locationType: 'gps'
+        }));
+
+        // Save location
+        const locationData = {
+          location: 'Your Location',
+          coordinates: coords,
+          type: 'gps'
+        };
+        saveLocation(locationData);
+
+        fetchWeatherByCoordinates(coords.lat, coords.lon, 'Your Location');
       },
-      () => {
-        // Fallback to default location
-        fetchWeatherByLocation('Your Location');
+      (error) => {
+        let errorMessage = 'Unable to get location';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location access denied';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location unavailable';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timeout';
+            break;
+        }
+        setLocation(prev => ({
+          ...prev,
+          hasPermission: false,
+          isLoading: false,
+          error: errorMessage
+        }));
+
+        // Try to load saved location or fallback
+        const saved = loadSavedLocation();
+        if (saved && saved.coordinates) {
+          fetchWeatherByCoordinates(saved.coordinates.lat, saved.coordinates.lon, saved.location);
+        } else {
+          fetchWeatherByLocation('Milan, Italy');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
       }
     );
   };
 
-  const fetchWeatherByCoordinates = async (lat: number, lon: number) => {
+  const fetchWeatherByCoordinates = async (lat: number, lon: number, locationName: string) => {
     try {
       setLoading(true);
+      setError(null);
+
       const apiWeatherData = await getCurrentWeatherByCoords(lat, lon, 'metric');
 
       setWeather({
-        location: 'Your Location',
+        location: locationName || `${apiWeatherData.name}, ${apiWeatherData.sys.country}`,
         temperature: Math.round(apiWeatherData.main.temp),
         condition: apiWeatherData.weather[0].main,
         description: apiWeatherData.weather[0].description,
@@ -1341,11 +1418,14 @@ export function CompactWeatherWidget() {
       });
     } catch (error) {
       console.error('Error fetching weather:', error);
+      setError('Failed to fetch weather');
+
       // Fallback to mock data
       setWeather({
-        location: 'Your Location',
+        location: locationName || 'Your Location',
         temperature: 22,
         condition: 'Partly Cloudy',
+        description: 'partly cloudy',
         humidity: 65,
         windSpeed: 12,
         visibility: 10,
@@ -1361,9 +1441,11 @@ export function CompactWeatherWidget() {
   const fetchWeatherByLocation = async (locationName: string) => {
     try {
       setLoading(true);
+      setError(null);
+
       const apiWeatherData = await getCurrentWeatherByCity(locationName, 'metric');
 
-      setWeather({
+      const weatherData = {
         location: `${apiWeatherData.name}, ${apiWeatherData.sys.country}`,
         temperature: Math.round(apiWeatherData.main.temp),
         condition: apiWeatherData.weather[0].main,
@@ -1374,14 +1456,34 @@ export function CompactWeatherWidget() {
         icon: apiWeatherData.weather[0].icon,
         coordinates: { lat: apiWeatherData.coord.lat, lon: apiWeatherData.coord.lon },
         lastUpdated: Date.now()
-      });
+      };
+
+      setWeather(weatherData);
+
+      // Save location
+      const locationData = {
+        location: weatherData.location,
+        coordinates: weatherData.coordinates,
+        type: 'manual'
+      };
+      setLocation(prev => ({
+        ...prev,
+        selectedLocation: weatherData.location,
+        coordinates: weatherData.coordinates,
+        locationType: 'manual'
+      }));
+      saveLocation(locationData);
+
     } catch (error) {
       console.error('Error fetching weather:', error);
+      setError('Failed to fetch weather');
+
       // Fallback to mock data
       setWeather({
         location: locationName,
         temperature: 22,
         condition: 'Partly Cloudy',
+        description: 'partly cloudy',
         humidity: 65,
         windSpeed: 12,
         visibility: 10,
@@ -1393,8 +1495,42 @@ export function CompactWeatherWidget() {
     }
   };
 
+  // Handle manual location input
+  const handleManualLocation = () => {
+    if (manualLocation.trim()) {
+      fetchWeatherByLocation(manualLocation.trim());
+      setIsLocationDialogOpen(false);
+      setManualLocation('');
+    }
+  };
+
+  // Refresh weather
+  const refreshWeather = () => {
+    if (location.locationType === 'gps' && location.coordinates) {
+      fetchWeatherByCoordinates(location.coordinates.lat, location.coordinates.lon, location.selectedLocation || 'Your Location');
+    } else if (location.selectedLocation) {
+      fetchWeatherByLocation(location.selectedLocation);
+    } else {
+      getCurrentLocation();
+    }
+  };
+
+  // Initial load
   useEffect(() => {
-    getCurrentLocation();
+    const saved = loadSavedLocation();
+    if (saved && saved.coordinates) {
+      // Load from saved location
+      setLocation(prev => ({
+        ...prev,
+        selectedLocation: saved.location,
+        coordinates: saved.coordinates,
+        locationType: saved.type
+      }));
+      fetchWeatherByCoordinates(saved.coordinates.lat, saved.coordinates.lon, saved.location);
+    } else {
+      // Try to get current location
+      getCurrentLocation();
+    }
   }, []);
 
   const getWeatherIconCompact = (condition: string, iconCode?: string) => {
@@ -1432,21 +1568,208 @@ export function CompactWeatherWidget() {
 
   if (loading) {
     return (
-      <div className="bg-muted/50 rounded-lg px-3 py-2 animate-pulse">
-        <div className="h-4 bg-muted rounded"></div>
+      <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-xl p-4 border border-border animate-pulse">
+        <div className="space-y-3">
+          <div className="h-4 bg-muted rounded w-3/4"></div>
+          <div className="h-6 bg-muted rounded w-1/2"></div>
+          <div className="flex gap-2">
+            <div className="h-3 bg-muted rounded w-16"></div>
+            <div className="h-3 bg-muted rounded w-16"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !weather) {
+    return (
+      <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 rounded-xl p-4 border border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+            <AlertCircleIcon className="h-5 w-5" />
+            <div>
+              <div className="text-sm font-medium">Weather unavailable</div>
+              <div className="text-xs">{error}</div>
+            </div>
+          </div>
+          <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <SettingsIcon className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Set Weather Location</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Button
+                  onClick={getCurrentLocation}
+                  disabled={location.isLoading}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <MapPinIcon className="h-4 w-4 mr-2" />
+                  {location.isLoading ? 'Getting location...' : 'Use Current Location'}
+                </Button>
+
+                <div className="relative">
+                  <Input
+                    placeholder="Enter city name..."
+                    value={manualLocation}
+                    onChange={(e) => setManualLocation(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleManualLocation()}
+                    className="pr-16"
+                  />
+                  <Button
+                    onClick={handleManualLocation}
+                    disabled={!manualLocation.trim()}
+                    className="absolute right-1 top-1 h-8"
+                    size="sm"
+                  >
+                    Set
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
     );
   }
 
   if (!weather) return null;
 
+  const getGradientByCondition = (condition: string) => {
+    switch (condition.toLowerCase()) {
+      case 'clear':
+      case 'sunny':
+        return 'from-yellow-400 via-orange-400 to-red-400';
+      case 'clouds':
+      case 'partly cloudy':
+      case 'cloudy':
+        return 'from-gray-400 via-gray-500 to-gray-600';
+      case 'rain':
+      case 'drizzle':
+      case 'rainy':
+        return 'from-blue-400 via-blue-500 to-indigo-600';
+      case 'snow':
+      case 'snowy':
+        return 'from-blue-200 via-blue-300 to-blue-400';
+      default:
+        return 'from-blue-400 via-purple-500 to-indigo-600';
+    }
+  };
+
   return (
-    <div className="bg-muted/50 rounded-lg px-3 py-2 border border-border">
-      <div className="flex items-center gap-2">
-        {getWeatherIconCompact(weather.condition, weather.icon)}
-        <div>
-          <div className="text-sm font-semibold text-foreground">{weather.temperature}°C</div>
-          <div className="text-xs text-muted-foreground">{weather.location}</div>
+    <div className={cn(
+      "relative overflow-hidden bg-gradient-to-br rounded-xl p-4 shadow-lg transition-all duration-300 hover:shadow-xl border border-white/20",
+      getGradientByCondition(weather.condition)
+    )}>
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"></div>
+      </div>
+
+      <div className="relative z-10">
+        {/* Header with location and controls */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1 text-white text-xs opacity-90">
+            <MapPinIcon className="h-3 w-3" />
+            <span className="truncate max-w-[120px]">{weather.location}</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              onClick={refreshWeather}
+              disabled={loading}
+              className="p-1 rounded-md hover:bg-white/20 transition-colors"
+              title="Refresh weather"
+            >
+              <RefreshCwIcon className={cn(
+                "h-3 w-3 text-white",
+                loading && "animate-spin"
+              )} />
+            </button>
+
+            <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
+              <DialogTrigger asChild>
+                <button className="p-1 rounded-md hover:bg-white/20 transition-colors" title="Change location">
+                  <SettingsIcon className="h-3 w-3 text-white" />
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Set Weather Location</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Button
+                    onClick={getCurrentLocation}
+                    disabled={location.isLoading}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <MapPinIcon className="h-4 w-4 mr-2" />
+                    {location.isLoading ? 'Getting location...' : 'Use Current Location'}
+                  </Button>
+
+                  <div className="relative">
+                    <Input
+                      placeholder="Enter city name..."
+                      value={manualLocation}
+                      onChange={(e) => setManualLocation(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleManualLocation()}
+                      className="pr-16"
+                    />
+                    <Button
+                      onClick={handleManualLocation}
+                      disabled={!manualLocation.trim()}
+                      className="absolute right-1 top-1 h-8"
+                      size="sm"
+                    >
+                      Set
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Main weather info */}
+        <div className="flex items-center gap-3 mb-3">
+          {getWeatherIconCompact(weather.condition, weather.icon)}
+          <div className="text-white">
+            <div className="text-xl font-bold">{weather.temperature}°C</div>
+            <div className="text-xs opacity-90 capitalize">{weather.description || weather.condition}</div>
+          </div>
+        </div>
+
+        {/* Additional weather details */}
+        <div className="grid grid-cols-3 gap-2 text-white text-xs">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <ThermometerIcon className="h-3 w-3 opacity-75" />
+            </div>
+            <div className="opacity-75">Humidity</div>
+            <div className="font-semibold">{weather.humidity}%</div>
+          </div>
+
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <WindIcon className="h-3 w-3 opacity-75" />
+            </div>
+            <div className="opacity-75">Wind</div>
+            <div className="font-semibold">{weather.windSpeed} km/h</div>
+          </div>
+
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <EyeIcon className="h-3 w-3 opacity-75" />
+            </div>
+            <div className="opacity-75">Visibility</div>
+            <div className="font-semibold">{weather.visibility} km</div>
+          </div>
         </div>
       </div>
     </div>

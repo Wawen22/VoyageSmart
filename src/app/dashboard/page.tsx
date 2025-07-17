@@ -18,6 +18,7 @@ import { useAnimationOptimization, useOptimizedLoading } from '@/hooks/usePerfor
 import { useDashboardShortcuts } from '@/components/ui/KeyboardShortcutsHelp';
 import TripsMapView from '@/components/dashboard/TripsMapView';
 
+
 type Trip = {
   id: string;
   name: string;
@@ -260,6 +261,19 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background relative">
 
+      {/* Main Content */}
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8 lg:px-8" role="main" id="main-content">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-700 dark:text-red-400 animate-fade-in-up">
+            <p className="font-medium">{error}</p>
+          </div>
+        )}
+
+
+
+      </main>
+
       {/* Interactive Header */}
       {loading ? (
         <ModernHeaderLoadingSkeleton />
@@ -277,25 +291,17 @@ export default function Dashboard() {
           selectedYear={selectedYear}
           setSelectedYear={setSelectedYear}
           availableYears={availableYears}
+          trips={trips}
         />
       )}
 
-      {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8 lg:px-8" role="main" id="main-content">
-        {/* Error Message */}
-        {error && (
-          <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-700 dark:text-red-400 animate-fade-in-up">
-            <p className="font-medium">{error}</p>
-          </div>
-        )}
-
-
-
+      {/* Trips Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pb-8 lg:px-8">
         {/* Content Section */}
         <div className="space-y-8">
 
           {loading ? (
-            <ModernLoadingSkeleton viewMode={viewMode} count={6} />
+            <ModernLoadingSkeleton viewMode={viewMode === 'map' ? 'grid' : viewMode} count={6} />
           ) : trips.length === 0 ? (
             <InteractiveEmptyState />
           ) : filteredTrips.length === 0 ? (
@@ -308,7 +314,7 @@ export default function Dashboard() {
             />
           ) : viewMode === 'map' ? (
             <TripsMapView
-              trips={filteredTrips}
+              trips={filteredTrips as any}
               searchTerm={searchTerm}
               filter={filter}
             />
@@ -325,7 +331,7 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       {/* Floating Action Button */}
       <FloatingActionButton />
