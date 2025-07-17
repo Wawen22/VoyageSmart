@@ -16,6 +16,7 @@ import FloatingActionButton from '@/components/dashboard/FloatingActionButton';
 
 import { useAnimationOptimization, useOptimizedLoading } from '@/hooks/usePerformance';
 import { useDashboardShortcuts } from '@/components/ui/KeyboardShortcutsHelp';
+import TripsMapView from '@/components/dashboard/TripsMapView';
 
 type Trip = {
   id: string;
@@ -38,7 +39,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [tripCount, setTripCount] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string>('created_desc');
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'timeline'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'timeline' | 'map'>('grid');
   const [selectedYear, setSelectedYear] = useState<string>('all');
 
   // Reset year filter when main filter changes
@@ -305,17 +306,19 @@ export default function Dashboard() {
               searchTerm={searchTerm}
               filter={filter}
             />
+          ) : viewMode === 'map' ? (
+            <TripsMapView
+              trips={filteredTrips}
+              searchTerm={searchTerm}
+              filter={filter}
+            />
           ) : (
-            <div className={
-              viewMode === 'grid'
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-                : "space-y-3 sm:space-y-4"
-            }>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredTrips.map((trip, index) => (
                 <InteractiveTripCard
                   key={trip.id}
                   trip={trip}
-                  viewMode={viewMode === 'timeline' ? 'list' : viewMode}
+                  viewMode="grid"
                   index={index}
                 />
               ))}

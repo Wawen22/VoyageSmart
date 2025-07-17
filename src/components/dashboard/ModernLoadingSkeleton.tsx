@@ -3,43 +3,13 @@
 import { cn } from '@/lib/utils';
 
 interface ModernLoadingSkeletonProps {
-  viewMode?: 'grid' | 'list' | 'timeline';
+  viewMode?: 'grid' | 'timeline';
   count?: number;
 }
 
 export default function ModernLoadingSkeleton({ viewMode = 'grid', count = 6 }: ModernLoadingSkeletonProps) {
   if (viewMode === 'timeline') {
     return <TimelineLoadingSkeleton count={count} />;
-  }
-
-  if (viewMode === 'list') {
-    return (
-      <div className="space-y-4">
-        {Array.from({ length: count }).map((_, index) => (
-          <div
-            key={index}
-            className="flex items-center gap-6 p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 animate-pulse"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            {/* Image skeleton */}
-            <div className="w-24 h-24 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 rounded-xl animate-shimmer" />
-            
-            {/* Content skeleton */}
-            <div className="flex-1 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-lg animate-shimmer" style={{ width: '60%' }} />
-                <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-full animate-shimmer" style={{ width: '80px' }} />
-              </div>
-              <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" style={{ width: '40%' }} />
-              <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" style={{ width: '70%' }} />
-            </div>
-            
-            {/* Arrow skeleton */}
-            <div className="w-5 h-5 bg-slate-200 dark:bg-slate-700 rounded animate-shimmer" />
-          </div>
-        ))}
-      </div>
-    );
   }
 
   return (

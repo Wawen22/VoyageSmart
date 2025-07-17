@@ -26,8 +26,8 @@ interface InteractiveDashboardHeaderProps {
   setSearchTerm: (term: string) => void;
   filter: 'all' | 'upcoming' | 'ongoing' | 'past';
   setFilter: (filter: 'all' | 'upcoming' | 'ongoing' | 'past') => void;
-  viewMode: 'grid' | 'list' | 'timeline';
-  setViewMode: (mode: 'grid' | 'list' | 'timeline') => void;
+  viewMode: 'grid' | 'timeline' | 'map';
+  setViewMode: (mode: 'grid' | 'timeline' | 'map') => void;
   tripCount: number;
   userName?: string;
   stats: {
@@ -209,7 +209,7 @@ export default function InteractiveDashboardHeader({
         </div>
 
         {/* Year Filter and View Mode Toggle */}
-        <div className="flex items-center gap-3 justify-end">
+        <div className="flex items-center gap-6 justify-end">
           {/* Year Filter */}
           {availableYears.length > 1 && (
             <div className="flex items-center gap-2">
@@ -230,7 +230,55 @@ export default function InteractiveDashboardHeader({
             </div>
           )}
 
-          {/* View Mode Toggle */}
+          {/* Map View - Prominent Button */}
+          <button
+            onClick={() => setViewMode('map')}
+            className={cn(
+              "relative group px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 transform hover:scale-105 overflow-hidden",
+              viewMode === 'map'
+                ? "bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 text-white shadow-xl shadow-blue-500/30"
+                : "bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50 text-blue-600 dark:text-blue-400 border-2 border-blue-200 dark:border-blue-800 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700"
+            )}
+            title="🗺️ Interactive Map View - Explore your trips visually!"
+          >
+            {/* Animated background for active state */}
+            {viewMode === 'map' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-500 opacity-20 animate-pulse"></div>
+            )}
+
+            <div className="relative flex items-center gap-1.5 sm:gap-2.5">
+              <div className="relative">
+                <MapIcon className={cn(
+                  "h-3.5 w-3.5 sm:h-4 sm:w-4 transition-all duration-300",
+                  viewMode === 'map' && "animate-bounce"
+                )} />
+                {viewMode === 'map' && (
+                  <div className="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
+                )}
+              </div>
+
+              <span className="relative whitespace-nowrap">
+                <span className="hidden sm:inline">🗺️ Map View</span>
+                <span className="sm:hidden">🗺️ Map</span>
+                {viewMode === 'map' && (
+                  <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                )}
+              </span>
+
+              {/* Sparkle effect for hover */}
+              <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <SparklesIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-yellow-300 animate-pulse" />
+              </div>
+            </div>
+
+            {/* Shimmer effect on hover */}
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
+          </button>
+
+          {/* Separator */}
+          <div className="h-8 w-px bg-gradient-to-b from-transparent via-border to-transparent"></div>
+
+          {/* Standard View Mode Toggle */}
           <div className="flex items-center bg-muted rounded-lg p-1 border border-border">
             <button
               onClick={() => setViewMode('grid')}
@@ -243,18 +291,6 @@ export default function InteractiveDashboardHeader({
               title="Grid View"
             >
               <GridIcon className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={cn(
-                "p-2 rounded-md transition-all duration-200",
-                viewMode === 'list'
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-              )}
-              title="List View"
-            >
-              <ListIcon className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode('timeline')}

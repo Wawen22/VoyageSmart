@@ -30,7 +30,7 @@ type Trip = {
 
 interface InteractiveTripCardProps {
   trip: Trip;
-  viewMode?: 'grid' | 'list';
+  viewMode?: 'grid';
   index?: number;
 }
 
@@ -145,7 +145,7 @@ export default function InteractiveTripCard({ trip, viewMode = 'grid', index = 0
     return gradients[hash % gradients.length];
   };
 
-  if (viewMode === 'list') {
+  if (false) { // Removed list view mode
     return (
       <Link href={`/trips/${trip.id}`} className="block group">
         <div
