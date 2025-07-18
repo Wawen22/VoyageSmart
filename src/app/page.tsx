@@ -340,7 +340,7 @@ export default function Home() {
             {/* Left Side - Content */}
             <div className="flex-1 text-center lg:text-left">
               <div className="space-y-8">
-                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold leading-tight">
+                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold leading-tight mt-6 lg:mt-0">
                   <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent">
                     Your Journey,
                   </span>
@@ -1333,7 +1333,7 @@ export default function Home() {
       )}
 
       {/* Section Navigation Dots - Left Side - Hidden on mobile */}
-      <div className="hidden lg:flex fixed left-4 xl:left-6 top-1/2 transform -translate-y-1/2 z-50 flex-col gap-3 bg-background/90 backdrop-blur-xl rounded-xl p-3 border border-border/50 shadow-xl max-w-[60px]">
+      <div className="hidden lg:flex fixed left-4 xl:left-6 top-1/2 transform -translate-y-1/2 z-50 flex-col gap-3 bg-background/90 backdrop-blur-xl rounded-xl p-4 border border-border/50 shadow-xl w-[64px] items-center">
         {[
           { id: 'hero', label: 'Home', icon: HomeIcon },
           { id: 'features', label: 'Features', icon: SparklesIcon },
@@ -1355,7 +1355,7 @@ export default function Home() {
                     ref.current.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className={`relative p-2.5 lg:p-2 xl:p-3 rounded-full transition-all duration-300 backdrop-blur-sm border shadow-md hover:shadow-lg hover:scale-105 ${
+                className={`relative w-12 h-12 lg:w-10 lg:h-10 xl:w-12 xl:h-12 rounded-full transition-all duration-300 backdrop-blur-sm border shadow-md hover:shadow-lg hover:scale-105 flex items-center justify-center ${
                   isActive
                     ? 'bg-primary text-white border-primary/20 shadow-primary/25'
                     : 'bg-background/80 text-muted-foreground border-border/50 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
