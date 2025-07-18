@@ -72,58 +72,7 @@ export default function JournalInfoModal({ isOpen, onClose }: JournalInfoModalPr
             </div>
           </div>
 
-          {/* Feature Description */}
-          <div>
-            <h4 className="font-semibold text-lg mb-3">What you'll get with Premium:</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckIcon className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Unlimited Journal Entries</p>
-                    <p className="text-sm text-muted-foreground">Write detailed daily entries about your adventures</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckIcon className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Photo Gallery</p>
-                    <p className="text-sm text-muted-foreground">Upload and organize unlimited travel photos</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckIcon className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Timeline View</p>
-                    <p className="text-sm text-muted-foreground">See your memories in chronological order</p>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckIcon className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Rich Text Editor</p>
-                    <p className="text-sm text-muted-foreground">Format your entries with styles and links</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckIcon className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Media Attachments</p>
-                    <p className="text-sm text-muted-foreground">Add photos and files to your entries</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckIcon className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium">Export & Backup</p>
-                    <p className="text-sm text-muted-foreground">Download your memories anytime</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+
 
           {/* Free vs Premium Comparison */}
           <div className="bg-muted/30 rounded-lg p-4">
@@ -146,26 +95,13 @@ export default function JournalInfoModal({ isOpen, onClose }: JournalInfoModalPr
                   <li>• Unlimited journal entries</li>
                   <li>• Unlimited photo uploads</li>
                   <li>• Timeline & gallery views</li>
-                  <li>• Rich text formatting</li>
+                  <li>• Advanced organization</li>
                 </ul>
               </div>
             </div>
           </div>
 
-          {/* Social Proof */}
-          <div className="text-center bg-gradient-to-r from-primary/10 to-purple-100/50 dark:from-primary/10 dark:to-purple-900/20 rounded-lg p-4">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <StarIcon className="h-4 w-4 text-yellow-500 fill-current" />
-              <StarIcon className="h-4 w-4 text-yellow-500 fill-current" />
-              <StarIcon className="h-4 w-4 text-yellow-500 fill-current" />
-              <StarIcon className="h-4 w-4 text-yellow-500 fill-current" />
-              <StarIcon className="h-4 w-4 text-yellow-500 fill-current" />
-            </div>
-            <p className="text-sm font-medium">Join thousands of travelers who have upgraded</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              "The journal feature helped me remember every detail of my trip!" - Sarah M.
-            </p>
-          </div>
+
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
@@ -187,7 +123,7 @@ export default function JournalInfoModal({ isOpen, onClose }: JournalInfoModalPr
 
           {/* Pricing Hint */}
           <div className="text-center text-sm text-muted-foreground">
-            <p>Starting from <span className="font-semibold text-primary">€9.99/month</span></p>
+            <p>Starting from <span className="font-semibold text-primary">€4.99/month</span></p>
             <p>Cancel anytime • 30-day money-back guarantee</p>
           </div>
         </div>

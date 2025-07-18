@@ -338,23 +338,10 @@ export default function Navbar() {
             )}
           </div>
           <div className="-mr-2 flex items-center gap-2 sm:hidden">
+            {/* Trip Counter Widget for Mobile */}
+            <TripCounterWidget />
+
             {/* Mobile Quick Links */}
-            <Link
-              href="/dashboard"
-              className={`p-2 rounded-md ${pathname === '/dashboard' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
-              aria-label="Dashboard"
-            >
-              <HomeIcon className="h-5 w-5" />
-            </Link>
-
-            <Link
-              href="/trips/new"
-              className={`p-2 rounded-md ${pathname === '/trips/new' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
-              aria-label="New Trip"
-            >
-              <PlusCircleIcon className="h-5 w-5" />
-            </Link>
-
             <Link
               href="/profile"
               className={`p-2 rounded-md ${pathname === '/profile' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}

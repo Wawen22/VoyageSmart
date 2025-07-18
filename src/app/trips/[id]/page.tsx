@@ -276,12 +276,6 @@ export default function TripDetails() {
         <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center relative z-10">
           <div className="flex items-center gap-3">
             <BackButton href="/dashboard" label="Back to Dashboard" className="hover:scale-105 transition-transform" />
-            {subscription?.tier === 'free' && tripCount !== null && (
-              <div className="flex items-center text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                <InfoIcon className="h-3 w-3 mr-1" />
-                <span>{tripCount}/5 trips</span>
-              </div>
-            )}
           </div>
 
           {isOwner && (
