@@ -26,4 +26,11 @@ create policy "Allow service_role to insert"
   to service_role
   using (true);
 
+-- Policy: permetti agli utenti autenticati di inserire i propri record
+create policy "Allow authenticated users to insert own history"
+  on public.subscription_history
+  for insert
+  to authenticated
+  with check (user_id = auth.uid());
+
 alter table public.subscription_history enable row level security;

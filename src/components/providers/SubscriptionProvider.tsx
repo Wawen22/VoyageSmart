@@ -9,9 +9,15 @@ import {
   SubscriptionTier,
   getUserSubscription,
   getUserTripCount,
+  getUserTotalTripCount,
+  canAddAccommodation,
+  canAddTransportation,
+  canAddJournalEntry,
+  canAddPhoto,
   createDefaultSubscription,
   initiateCheckout,
   cancelStripeSubscription,
+  downgradeToFree,
   getSubscriptionHistory
 } from '@/lib/subscription';
 import { checkUserSubscription } from '@/lib/subscription-utils';
@@ -132,13 +138,13 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       return true;
     }
 
-    // Free users are limited to 3 trips
-    const tripCount = await getUserTripCount(user.id);
-    return tripCount < 3;
+    // Free users are limited to 5 trips (including trips they participate in)
+    const { total } = await getUserTotalTripCount(user.id);
+    return total < 5;
   };
 
-  const canAccessFeature = (feature: 'accommodations' | 'transportation' | 'ai_assistant'): boolean => {
-    // Se non c'è sottoscrizione, nessun accesso alle funzionalità premium
+  const canAccessFeature = (feature: 'accommodations' | 'transportation' | 'journal' | 'photo_gallery' | 'ai_assistant'): boolean => {
+    // Se non c'è sottoscrizione, solo accesso alle funzionalità free
     if (!subscription) return false;
 
     // Per le funzionalità AI, solo gli utenti con piano AI hanno accesso
@@ -157,18 +163,37 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    // Per accommodations e transportation, gli utenti premium e AI hanno accesso
-    // Premium users can access accommodations and transportation
-    if (isSubscribed('premium') || isSubscribed('ai')) {
-      return true;
+    // Accommodations e Transportation sono ora FREE per tutti
+    if (feature === 'accommodations' || feature === 'transportation') {
+      return true; // Sempre accessibili
     }
 
-    // Se la sottoscrizione è stata cancellata ma è ancora nel periodo pagato
-    if (subscription.cancelAtPeriodEnd && (subscription.tier === 'premium' || subscription.tier === 'ai')) {
-      return true;
+    // Journal e Photo Gallery sono ora PREMIUM
+    if (feature === 'journal' || feature === 'photo_gallery') {
+      return subscription.tier === 'premium' || subscription.tier === 'ai';
     }
 
     return false;
+  };
+
+  const canAddAccommodationToTrip = async (tripId: string): Promise<boolean> => {
+    if (!user || !subscription) return false;
+    return await canAddAccommodation(user.id, tripId, subscription.tier);
+  };
+
+  const canAddTransportationToTrip = async (tripId: string): Promise<boolean> => {
+    if (!user || !subscription) return false;
+    return await canAddTransportation(user.id, tripId, subscription.tier);
+  };
+
+  const canAddJournalEntryToTrip = async (tripId: string): Promise<boolean> => {
+    if (!user || !subscription) return false;
+    return await canAddJournalEntry(user.id, tripId, subscription.tier);
+  };
+
+  const canAddPhotoToTrip = async (tripId: string): Promise<boolean> => {
+    if (!user || !subscription) return false;
+    return await canAddPhoto(user.id, tripId, subscription.tier);
   };
 
   const upgradeSubscription = async (tier: SubscriptionTier): Promise<void> => {
@@ -178,7 +203,21 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
 
     if (tier === 'free') {
-      router.push('/dashboard');
+      // Gestisci il downgrade al piano free
+      try {
+        console.log('Provider - Downgrading to free tier');
+        await downgradeToFree();
+
+        console.log('Provider - Downgrade successful, refreshing subscription data');
+        // Aggiorna i dati della sottoscrizione
+        await fetchSubscription();
+
+        console.log('Provider - Downgrade completed successfully');
+      } catch (error) {
+        console.error('Provider - Error downgrading to free:', error);
+        setError(error as Error);
+        throw error;
+      }
       return;
     }
 
@@ -268,8 +307,24 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         isSubscribed,
         canCreateTrip,
         canAccessFeature,
+        canAddAccommodation: canAddAccommodationToTrip,
+        canAddTransportation: canAddTransportationToTrip,
+        canAddJournalEntry: canAddJournalEntryToTrip,
+        canAddPhoto: canAddPhotoToTrip,
         upgradeSubscription,
         cancelSubscription,
+        downgradeToFree: async () => {
+          if (!user) {
+            throw new Error('No user found');
+          }
+          try {
+            await downgradeToFree();
+            await fetchSubscription();
+          } catch (error) {
+            setError(error as Error);
+            throw error;
+          }
+        },
         getSubscriptionHistory: fetchSubscriptionHistory,
         refreshSubscription,
       }}

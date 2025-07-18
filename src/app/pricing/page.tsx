@@ -75,12 +75,13 @@ export default function PricingPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <PricingFeature included={true}>Up to 3 trips</PricingFeature>
+                <PricingFeature included={true}>Up to 5 trips</PricingFeature>
                 <PricingFeature included={true}>Basic itinerary planning</PricingFeature>
                 <PricingFeature included={true}>Expense tracking</PricingFeature>
                 <PricingFeature included={true}>Trip collaboration</PricingFeature>
-                <PricingFeature included={false}>Accommodations management</PricingFeature>
-                <PricingFeature included={false}>Transportation tracking</PricingFeature>
+                <PricingFeature included={true}>Accommodations management</PricingFeature>
+                <PricingFeature included={true}>Transportation tracking</PricingFeature>
+                <PricingFeature included={false}>Journal & Photo Gallery</PricingFeature>
                 <PricingFeature included={false}>Priority support</PricingFeature>
               </CardContent>
               <CardFooter className="flex justify-center pt-4">
@@ -116,13 +117,12 @@ export default function PricingPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                <PricingFeature included={true}>All Free features</PricingFeature>
                 <PricingFeature included={true}>Unlimited trips</PricingFeature>
-                <PricingFeature included={true}>Advanced itinerary planning</PricingFeature>
-                <PricingFeature included={true}>Expense tracking</PricingFeature>
-                <PricingFeature included={true}>Trip collaboration</PricingFeature>
-                <PricingFeature included={true}>Accommodations management</PricingFeature>
-                <PricingFeature included={true}>Transportation tracking</PricingFeature>
+                <PricingFeature included={true}>Journal & Photo Gallery</PricingFeature>
+                <PricingFeature included={true}>Advanced expense analytics</PricingFeature>
                 <PricingFeature included={true}>Priority support</PricingFeature>
+                <PricingFeature included={true}>Export/backup features</PricingFeature>
               </CardContent>
               <CardFooter className="flex justify-center pt-4">
                 {subscription?.tier === 'premium' ? (

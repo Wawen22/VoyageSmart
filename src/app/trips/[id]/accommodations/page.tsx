@@ -21,7 +21,8 @@ import {
   CalendarIcon,
   MapPinIcon,
   ListIcon,
-  MapIcon
+  MapIcon,
+  AlertTriangleIcon
 } from 'lucide-react';
 import AccommodationCard from '@/components/accommodations/AccommodationCard';
 import AccommodationSkeleton from '@/components/accommodations/AccommodationSkeleton';
@@ -42,7 +43,7 @@ export default function AccommodationsPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
-  const { canAccessFeature } = useSubscription();
+  const { canAccessFeature, canAddAccommodation: canAddAccommodationToTrip, subscription } = useSubscription();
   const { accommodations, loading, error, currentAccommodation } = useSelector(
     (state: RootState) => state.accommodations
   );
@@ -55,6 +56,18 @@ export default function AccommodationsPage() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   const { canEdit } = useRolePermissions(id as string);
+  const [canAddMore, setCanAddMore] = useState(true);
+
+  useEffect(() => {
+    const checkAccommodationLimit = async () => {
+      if (user && id) {
+        const canAdd = await canAddAccommodationToTrip(id as string);
+        setCanAddMore(canAdd);
+      }
+    };
+
+    checkAccommodationLimit();
+  }, [user, id, canAddAccommodationToTrip, accommodations]);
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -197,42 +210,7 @@ export default function AccommodationsPage() {
     );
   }
 
-  // Check if user has access to this premium feature
-  const hasAccess = canAccessFeature('accommodations');
-
-  if (!hasAccess) {
-    return (
-      <div className="min-h-screen bg-background">
-        <header className="bg-card border-b border-border mb-6">
-          <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
-            <BackButton href={`/trips/${id}`} label="Back to Trip" />
-          </div>
-
-          <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-            <div className="flex flex-col space-y-2">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
-                <Building2Icon className="h-6 w-6 mr-2" />
-                Accommodations
-              </h1>
-
-              {trip && (
-                <p className="text-sm text-muted-foreground">
-                  {trip.name} {trip.destination && `• ${trip.destination}`}
-                </p>
-              )}
-            </div>
-          </div>
-        </header>
-
-        <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <UpgradePrompt
-            feature="Accommodations"
-            description="Track your hotels, Airbnbs, and other accommodations with our premium Accommodations feature."
-          />
-        </main>
-      </div>
-    );
-  }
+  // Accommodations are now free for all users - no access check needed
 
   return (
     <div className="min-h-screen bg-background">
@@ -258,11 +236,33 @@ export default function AccommodationsPage() {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Free plan limitation warning */}
+        {subscription?.tier === 'free' && accommodations.length >= 4 && (
+          <div className="mb-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangleIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                {accommodations.length >= 5
+                  ? "You've reached the free plan limit of 5 accommodations per trip. Upgrade to Premium for unlimited accommodations."
+                  : `You're approaching the free plan limit (${accommodations.length}/5 accommodations). Upgrade to Premium for unlimited accommodations.`
+                }
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {canEdit && (
-            <Button onClick={handleAddAccommodation}>
+            <Button
+              onClick={handleAddAccommodation}
+              disabled={!canAddMore}
+              className={!canAddMore ? 'opacity-50 cursor-not-allowed' : ''}
+            >
               <PlusIcon className="h-4 w-4 mr-2" />
               Add Accommodation
+              {!canAddMore && subscription?.tier === 'free' && (
+                <span className="ml-2 text-xs">(Limit reached)</span>
+              )}
             </Button>
           )}
         </div>

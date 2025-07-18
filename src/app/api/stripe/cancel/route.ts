@@ -55,18 +55,28 @@ export async function POST(request: NextRequest) {
       console.log('Cancel API - Found subscription:', subscriptionData);
 
       // Cancella la sottoscrizione in Stripe
+      let stripeUpdateSuccessful = false;
       try {
         console.log('Cancel API - Updating subscription in Stripe:', subscriptionId);
         await stripe.subscriptions.update(subscriptionId, {
           cancel_at_period_end: true,
         });
         console.log('Cancel API - Subscription updated in Stripe');
+        stripeUpdateSuccessful = true;
       } catch (stripeError: any) {
         console.error('Cancel API - Error updating subscription in Stripe:', stripeError);
-        return NextResponse.json(
-          { error: 'Error updating subscription in Stripe', details: stripeError.message },
-          { status: 500 }
-        );
+
+        // Se la subscription non esiste in Stripe (es. subscription di test), continua comunque
+        if (stripeError.code === 'resource_missing' || stripeError.type === 'StripeInvalidRequestError') {
+          console.log('Cancel API - Subscription not found in Stripe (possibly test data), continuing with database update');
+          stripeUpdateSuccessful = false; // Continua senza errore
+        } else {
+          // Per altri errori Stripe, restituisci errore
+          return NextResponse.json(
+            { error: 'Error updating subscription in Stripe', details: stripeError.message },
+            { status: 500 }
+          );
+        }
       }
 
       // Aggiorna lo stato della sottoscrizione nel database
@@ -79,17 +89,26 @@ export async function POST(request: NextRequest) {
       //   .eq('user_id', user.id)
       //   .eq('stripe_subscription_id', subscriptionId);
 
-      // Opzione 2: Termina immediatamente l'accesso premium
-      // Prima otteniamo il valore di current_period_end
+      // Determina il current_period_end
       let currentPeriodEnd;
-      try {
-        console.log('Cancel API - Retrieving subscription details from Stripe:', subscriptionId);
-        const subscriptionDetails = await stripe.subscriptions.retrieve(subscriptionId);
-        currentPeriodEnd = new Date(subscriptionDetails.current_period_end * 1000).toISOString();
-        console.log('Cancel API - Current period end:', currentPeriodEnd);
-      } catch (stripeError: any) {
-        console.error('Cancel API - Error retrieving subscription details from Stripe:', stripeError);
-        // Se non riusciamo a ottenere current_period_end da Stripe, usiamo il valore dal database
+
+      // Se l'aggiornamento Stripe è riuscito, prova a recuperare i dettagli aggiornati
+      if (stripeUpdateSuccessful) {
+        try {
+          console.log('Cancel API - Retrieving subscription details from Stripe:', subscriptionId);
+          const subscriptionDetails = await stripe.subscriptions.retrieve(subscriptionId);
+          currentPeriodEnd = new Date(subscriptionDetails.current_period_end * 1000).toISOString();
+          console.log('Cancel API - Current period end from Stripe:', currentPeriodEnd);
+        } catch (stripeError: any) {
+          console.error('Cancel API - Error retrieving subscription details from Stripe:', stripeError);
+          // Fallback al database
+          currentPeriodEnd = subscriptionData.current_period_end
+            ? new Date(subscriptionData.current_period_end).toISOString()
+            : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+          console.log('Cancel API - Using fallback current_period_end:', currentPeriodEnd);
+        }
+      } else {
+        // Se Stripe non è stato aggiornato (subscription di test), usa i dati dal database
         if (subscriptionData.current_period_end) {
           currentPeriodEnd = new Date(subscriptionData.current_period_end).toISOString();
           console.log('Cancel API - Using current_period_end from database:', currentPeriodEnd);
@@ -131,10 +150,12 @@ export async function POST(request: NextRequest) {
         status: 'active', // Rimane attiva fino alla fine del periodo
         stripe_subscription_id: subscriptionId,
         stripe_customer_id: subscriptionData.stripe_customer_id,
+        event_timestamp: new Date().toISOString(),
         details: {
           cancel_at_period_end: true,
           current_period_end: currentPeriodEnd,
-          will_downgrade_to: 'free'
+          will_downgrade_to: 'free',
+          stripe_updated: stripeUpdateSuccessful
         },
       });
 
@@ -146,13 +167,55 @@ export async function POST(request: NextRequest) {
         console.log('Cancel API - Event recorded in subscription history');
       }
 
-      return NextResponse.json({ success: true });
+      // Recupera la sottoscrizione aggiornata per restituirla
+      const { data: updatedSubscription, error: fetchError } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Cancel API - Error fetching updated subscription:', fetchError);
+        // Restituiamo comunque successo anche se non riusciamo a recuperare i dati aggiornati
+      }
+
+      const message = stripeUpdateSuccessful
+        ? 'Subscription canceled successfully. You will continue to have access until the end of your billing period.'
+        : 'Subscription canceled in our system. Note: This appears to be test data, so no changes were made in Stripe.';
+
+      return NextResponse.json({
+        success: true,
+        message,
+        stripeUpdated: stripeUpdateSuccessful,
+        subscription: updatedSubscription || {
+          tier: subscriptionData.tier,
+          status: 'active',
+          cancel_at_period_end: true,
+          valid_until: currentPeriodEnd
+        }
+      });
     } catch (error: any) {
       console.error('Cancel API - Unexpected error:', error);
+
+      // Fornisci messaggi di errore più specifici
+      let errorMessage = 'Error canceling subscription';
+      let errorDetails = error.message;
+
+      if (error.message?.includes('No such subscription')) {
+        errorMessage = 'Subscription not found in Stripe';
+        errorDetails = 'The subscription may have already been canceled or does not exist.';
+      } else if (error.message?.includes('authentication')) {
+        errorMessage = 'Authentication error';
+        errorDetails = 'Please log in again and try again.';
+      } else if (error.message?.includes('network') || error.message?.includes('timeout')) {
+        errorMessage = 'Network error';
+        errorDetails = 'Please check your connection and try again.';
+      }
+
       return NextResponse.json(
         {
-          error: 'Error canceling subscription',
-          details: error.message,
+          error: errorMessage,
+          details: errorDetails,
           stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         },
         { status: 500 }

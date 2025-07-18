@@ -13,6 +13,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import PremiumIndicator from '@/components/subscription/PremiumIndicator';
+import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 
 type Trip = {
   id: string;
@@ -237,12 +238,10 @@ export default function TripCard({ trip }: TripCardProps) {
               </div>
             </div>
 
-            {/* Footer with Premium Indicators */}
+            {/* Footer */}
             <div className="flex justify-between items-center pt-2 border-t border-border/30">
               <div className="flex items-center gap-2">
-                <PremiumIndicator feature="accommodations" variant="icon" size="sm" />
-                <PremiumIndicator feature="transportation" variant="icon" size="sm" />
-                <span className="text-xs text-muted-foreground ml-2">
+                <span className="text-xs text-muted-foreground">
                   {format(parseISO(trip.created_at), 'MMM d')}
                 </span>
               </div>

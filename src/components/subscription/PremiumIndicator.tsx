@@ -3,6 +3,7 @@
 import { useSubscription } from '@/lib/subscription';
 import { Badge } from '@/components/ui/badge';
 import { LockIcon, SparklesIcon } from 'lucide-react';
+import { useOnboardingModal } from './OnboardingModal';
 
 // Dynamically import tooltip components to handle cases where they might not be available
 let TooltipProvider: any;
@@ -21,7 +22,7 @@ try {
 }
 
 interface PremiumIndicatorProps {
-  feature?: 'accommodations' | 'transportation' | 'unlimited_trips';
+  feature?: 'journal' | 'photo_gallery' | 'unlimited_trips';
   showTooltip?: boolean;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'badge' | 'icon' | 'text';
@@ -34,6 +35,15 @@ export default function PremiumIndicator({
   variant = 'badge'
 }: PremiumIndicatorProps) {
   const { subscription, isSubscribed, upgradeSubscription } = useSubscription();
+
+  // Prova a usare il modal context, ma fallback se non disponibile
+  let showModal: (() => void) | null = null;
+  try {
+    const modalContext = useOnboardingModal();
+    showModal = modalContext.showModal;
+  } catch (error) {
+    // Context non disponibile, useremo il fallback
+  }
 
   // If user has premium, don't show the indicator
   if (isSubscribed('premium')) {
@@ -53,12 +63,12 @@ export default function PremiumIndicator({
   };
 
   const getTooltipText = () => {
-    if (feature === 'accommodations') {
-      return 'Accommodations management is a premium feature. Upgrade to access.';
-    } else if (feature === 'transportation') {
-      return 'Transportation tracking is a premium feature. Upgrade to access.';
+    if (feature === 'journal') {
+      return 'Journal entries are a premium feature. Upgrade to access unlimited entries.';
+    } else if (feature === 'photo_gallery') {
+      return 'Photo gallery is a premium feature. Upgrade to access unlimited photo uploads.';
     } else if (feature === 'unlimited_trips') {
-      return 'Free users are limited to 3 trips. Upgrade to create unlimited trips.';
+      return 'Free users are limited to 5 trips. Upgrade to create unlimited trips.';
     } else {
       return 'This is a premium feature. Upgrade to access.';
     }
@@ -87,6 +97,15 @@ export default function PremiumIndicator({
     }
   };
 
+  const handleUpgradeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (showModal) {
+      showModal();
+    } else {
+      upgradeSubscription();
+    }
+  };
+
   if (showTooltip && TooltipProvider && Tooltip && TooltipTrigger && TooltipContent) {
     return (
       <TooltipProvider>
@@ -100,10 +119,7 @@ export default function PremiumIndicator({
             <p>{getTooltipText()}</p>
             <button
               className="text-xs text-primary font-medium mt-1 hover:underline"
-              onClick={(e) => {
-                e.stopPropagation();
-                upgradeSubscription();
-              }}
+              onClick={handleUpgradeClick}
             >
               Upgrade now
             </button>
@@ -113,5 +129,9 @@ export default function PremiumIndicator({
     );
   }
 
-  return content();
+  return (
+    <div onClick={handleUpgradeClick} className="cursor-pointer">
+      {content()}
+    </div>
+  );
 }

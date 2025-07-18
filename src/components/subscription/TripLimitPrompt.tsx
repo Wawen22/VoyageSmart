@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangleIcon, RocketIcon } from 'lucide-react';
+import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 
 export default function TripLimitPrompt() {
   const router = useRouter();
+  const { showUpgradeModal } = usePremiumFeature();
 
   return (
     <div className="flex items-center justify-center min-h-[50vh]">
@@ -17,7 +19,7 @@ export default function TripLimitPrompt() {
           </div>
           <CardTitle className="text-xl">Trip Limit Reached</CardTitle>
           <CardDescription>
-            Free accounts are limited to 3 trips maximum.
+            Free accounts are limited to 5 trips maximum (including trips you participate in).
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
@@ -30,16 +32,22 @@ export default function TripLimitPrompt() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center gap-4">
-          <Button 
+          <Button
             variant="outline"
             onClick={() => router.push('/dashboard')}
           >
             Back to Dashboard
           </Button>
-          <Button 
-            onClick={() => router.push('/pricing')}
+          <Button
+            onClick={() => {
+              if (showUpgradeModal) {
+                showUpgradeModal();
+              } else {
+                router.push('/pricing');
+              }
+            }}
           >
-            View Pricing Plans
+            Upgrade Now
           </Button>
         </CardFooter>
       </Card>

@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/lib/utils';
 import UnreadBadge from '@/components/chat/UnreadBadge';
 import PremiumIndicator from '@/components/subscription/PremiumIndicator';
+import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 import TripWeather from '@/components/weather/TripWeather';
 import { TripDestinations } from '@/lib/types/destination';
 import {
@@ -65,6 +66,7 @@ export default function TripDetails() {
   const router = useRouter();
   const { user } = useAuth();
   const { subscription, isSubscribed } = useSubscription();
+  const { withPremiumAccess } = usePremiumFeature();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +74,8 @@ export default function TripDetails() {
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [tripCount, setTripCount] = useState<number | null>(null);
+  const [accommodationCount, setAccommodationCount] = useState<number>(0);
+  const [transportationCount, setTransportationCount] = useState<number>(0);
 
 
   useEffect(() => {
@@ -142,6 +146,34 @@ export default function TripDetails() {
 
     fetchTripDetails();
   }, [id, user]);
+
+  // Fetch counts for accommodations and transportation
+  useEffect(() => {
+    const fetchCounts = async () => {
+      if (!id) return;
+
+      try {
+        // Fetch accommodation count
+        const { count: accCount } = await supabase
+          .from('accommodations')
+          .select('*', { count: 'exact', head: true })
+          .eq('trip_id', id);
+
+        // Fetch transportation count
+        const { count: transCount } = await supabase
+          .from('transportation')
+          .select('*', { count: 'exact', head: true })
+          .eq('trip_id', id);
+
+        setAccommodationCount(accCount || 0);
+        setTransportationCount(transCount || 0);
+      } catch (error) {
+        console.error('Error fetching counts:', error);
+      }
+    };
+
+    fetchCounts();
+  }, [id]);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Not set';
@@ -247,7 +279,7 @@ export default function TripDetails() {
             {subscription?.tier === 'free' && tripCount !== null && (
               <div className="flex items-center text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                 <InfoIcon className="h-3 w-3 mr-1" />
-                <span>{tripCount}/3 trips</span>
+                <span>{tripCount}/5 trips</span>
               </div>
             )}
           </div>
@@ -523,17 +555,17 @@ export default function TripDetails() {
               </div>
             </Link>
 
-            <Link href={`/trips/${id}/accommodations`} className="group">
+            <Link href={`/trips/${id}/accommodations`} className="group cursor-pointer">
               <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
                 {/* Card background decoration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
 
-                {!isSubscribed('premium') && (
+                {/* Free plan counter */}
+                {subscription?.tier === 'free' && (
                   <div className="absolute top-3 right-3 z-10">
-                    <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 shadow-sm">
-                      <SparklesIcon className="h-3.5 w-3.5 mr-1 animate-pulse" />
-                      Premium
+                    <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm">
+                      {accommodationCount}/5 Free
                     </span>
                   </div>
                 )}
@@ -542,10 +574,7 @@ export default function TripDetails() {
                   <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
                     <Building2Icon className="h-8 w-8 text-primary" />
                   </div>
-                  <div className="flex items-center gap-2 justify-center">
-                    <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Accommodations</h3>
-                    <PremiumIndicator feature="accommodations" variant="icon" size="sm" />
-                  </div>
+                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Accommodations</h3>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground relative text-center">
                   Manage hotels and places to stay
@@ -553,17 +582,17 @@ export default function TripDetails() {
               </div>
             </Link>
 
-            <Link href={`/trips/${id}/transportation`} className="group">
+            <Link href={`/trips/${id}/transportation`} className="group cursor-pointer">
               <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
                 {/* Card background decoration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
 
-                {!isSubscribed('premium') && (
+                {/* Free plan counter */}
+                {subscription?.tier === 'free' && (
                   <div className="absolute top-3 right-3 z-10">
-                    <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 shadow-sm">
-                      <SparklesIcon className="h-3.5 w-3.5 mr-1 animate-pulse" />
-                      Premium
+                    <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm">
+                      {transportationCount}/5 Free
                     </span>
                   </div>
                 )}
@@ -572,10 +601,7 @@ export default function TripDetails() {
                   <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
                     <PlaneTakeoffIcon className="h-8 w-8 text-primary" />
                   </div>
-                  <div className="flex items-center gap-2 justify-center">
-                    <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Transportation</h3>
-                    <PremiumIndicator feature="transportation" variant="icon" size="sm" />
-                  </div>
+                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Transportation</h3>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground relative text-center">
                   Track flights, trains, and other transport

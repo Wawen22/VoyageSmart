@@ -19,8 +19,8 @@ import { formatCurrency } from '@/lib/utils';
 interface TransportationCardProps {
   transportation: Transportation;
   onView: (transportation: Transportation) => void;
-  onEdit: (transportation: Transportation) => void;
-  canEdit: boolean;
+  onEdit?: (transportation: Transportation) => void;
+  canEdit?: boolean;
   getIcon: (type: string) => JSX.Element;
 }
 
@@ -28,7 +28,7 @@ function TransportationCard({
   transportation,
   onView,
   onEdit,
-  canEdit,
+  canEdit = false,
   getIcon
 }: TransportationCardProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -184,7 +184,7 @@ function TransportationCard({
               View
             </Button>
 
-            {canEdit && (
+            {canEdit && onEdit && (
               <Button
                 variant="ghost"
                 size="sm"

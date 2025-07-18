@@ -25,14 +25,14 @@ import {
   CarIcon,
   TrainIcon,
   ShipIcon,
-  BusIcon
+  BusIcon,
+  AlertTriangleIcon
 } from 'lucide-react';
 import TransportationCard from '@/components/transportation/TransportationCard';
 import TransportationSkeleton from '@/components/transportation/TransportationSkeleton';
 import TransportationModal from '@/components/transportation/TransportationModal';
 import TransportationDetailsModal from '@/components/transportation/TransportationDetailsModal';
 import { LazyTransportationMap } from '@/components/LazyComponents';
-import UpgradePrompt from '@/components/subscription/UpgradePrompt';
 
 type Trip = {
   id: string;
@@ -46,7 +46,7 @@ export default function TransportationPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
-  const { canAccessFeature } = useSubscription();
+  const { canAccessFeature, canAddTransportation: canAddTransportationToTrip, subscription } = useSubscription();
   const { transportations, loading, error, currentTransportation } = useSelector(
     (state: RootState) => state.transportation
   );
@@ -59,42 +59,44 @@ export default function TransportationPage() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   const { canEdit } = useRolePermissions(id as string);
+  const [canAddMore, setCanAddMore] = useState(true);
+
+  useEffect(() => {
+    const checkTransportationLimit = async () => {
+      if (user && id) {
+        const canAdd = await canAddTransportationToTrip(id as string);
+        setCanAddMore(canAdd);
+      }
+    };
+    
+    checkTransportationLimit();
+  }, [user, id, canAddTransportationToTrip, transportations]);
 
   useEffect(() => {
     const fetchTripDetails = async () => {
       try {
         if (!user) return;
 
-        // Create a cache key for this trip
         const cacheKey = `trip_details_${id}`;
-
-        // Check if we have cached data
         const cachedData = sessionStorage.getItem(cacheKey);
+        
         if (cachedData) {
           try {
             const parsed = JSON.parse(cachedData);
             const cacheTime = parsed.timestamp;
             const now = Date.now();
 
-            // Use cache if it's less than 5 minutes old
             if (now - cacheTime < 5 * 60 * 1000) {
-              console.log('[Transportation] Using cached trip data');
               setTrip(parsed.trip);
               setIsParticipant(parsed.isParticipant);
-
-              // Fetch transportations (this will use its own cache)
               dispatch(fetchTransportations(id as string));
               return;
             }
           } catch (e) {
             console.error('Error parsing cached trip data:', e);
-            // Continue with normal fetch if cache parsing fails
           }
         }
 
-        console.log('[Transportation] Fetching fresh trip data');
-
-        // Fetch trip details and participant status in parallel
         const [tripResponse, participantResponse] = await Promise.all([
           supabase
             .from('trips')
@@ -118,7 +120,6 @@ export default function TransportationPage() {
         const isUserParticipant = !!participantResponse.data || tripData.owner_id === user.id;
         setIsParticipant(isUserParticipant);
 
-        // Cache the trip data
         try {
           sessionStorage.setItem(cacheKey, JSON.stringify({
             timestamp: Date.now(),
@@ -127,10 +128,8 @@ export default function TransportationPage() {
           }));
         } catch (e) {
           console.error('Error caching trip data:', e);
-          // Continue even if caching fails
         }
 
-        // Fetch transportations
         dispatch(fetchTransportations(id as string));
       } catch (error) {
         console.error('Error fetching trip details:', error);
@@ -219,12 +218,8 @@ export default function TransportationPage() {
     );
   }
 
-  // Check if user has access to this premium feature
-  const hasAccess = canAccessFeature('transportation');
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="bg-card border-b border-border mb-6">
         <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
           <BackButton href={`/trips/${id}`} label="Back to Trip" />
@@ -247,161 +242,135 @@ export default function TransportationPage() {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {!hasAccess ? (
-          <UpgradePrompt
-            feature="Transportation"
-            description="Track your flights, trains, and other transportation with our premium Transportation feature."
-          />
-        ) : (
-          <>
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              {canEdit && (
-                <Button onClick={handleAddTransportation}>
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Add Transportation
-                </Button>
-              )}
+        {subscription?.tier === 'free' && transportations.length >= 4 && (
+          <div className="mb-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangleIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                {transportations.length >= 5
+                  ? "You've reached the free plan limit of 5 transportation items per trip. Upgrade to Premium for unlimited transportation."
+                  : `You're approaching the free plan limit (${transportations.length}/5 transportation items). Upgrade to Premium for unlimited transportation.`
+                }
+              </p>
             </div>
+          </div>
+        )}
 
-            {/* View Mode Tabs */}
-            <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
-              <TabsList className="grid w-full max-w-xs grid-cols-2">
-                <TabsTrigger value="list" className="flex items-center">
-                  <ListIcon className="h-4 w-4 mr-2" />
-                  List View
-                </TabsTrigger>
-                <TabsTrigger value="map" className="flex items-center">
-                  <MapIcon className="h-4 w-4 mr-2" />
-                  Map View
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {canEdit && (
+            <Button 
+              onClick={handleAddTransportation}
+              disabled={!canAddMore}
+              className={!canAddMore ? 'opacity-50 cursor-not-allowed' : ''}
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Transportation
+              {!canAddMore && subscription?.tier === 'free' && (
+                <span className="ml-2 text-xs">(Limit reached)</span>
+              )}
+            </Button>
+          )}
+        </div>
 
-            {/* Content */}
-            {loading ? (
-              <TransportationSkeleton />
+        <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
+          <TabsList className="grid w-full max-w-xs grid-cols-2">
+            <TabsTrigger value="list" className="flex items-center">
+              <ListIcon className="h-4 w-4 mr-2" />
+              List View
+            </TabsTrigger>
+            <TabsTrigger value="map" className="flex items-center">
+              <MapIcon className="h-4 w-4 mr-2" />
+              Map View
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="list" className="mt-0">
+            {loading && transportations.length === 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <TransportationSkeleton key={i} />
+                ))}
+              </div>
             ) : error ? (
-              <div className="text-center py-8">
-                <p className="text-destructive">Error: {error}</p>
-                <Button
-                  variant="outline"
-                  className="mt-4"
-                  onClick={() => dispatch(fetchTransportations(id as string))}
-                >
+              <div className="text-center py-12">
+                <p className="text-destructive mb-4">Error loading transportations: {error}</p>
+                <Button onClick={() => dispatch(fetchTransportations(id as string))}>
                   Try Again
                 </Button>
               </div>
             ) : transportations.length === 0 ? (
               <div className="text-center py-12">
-                <PlaneTakeoffIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No transportation yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Add your first transportation to keep track of your travels during this trip.
+                <PlaneTakeoffIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No transportation yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Add your flights, trains, and other transportation to keep track of your journey.
                 </p>
                 {canEdit && (
-                  <Button onClick={handleAddTransportation}>
+                  <Button onClick={handleAddTransportation} disabled={!canAddMore}>
                     <PlusIcon className="h-4 w-4 mr-2" />
                     Add Transportation
                   </Button>
                 )}
               </div>
             ) : (
-              <>
-                {/* List View */}
-                {viewMode === 'list' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {transportations.map((transportation) => (
-                      <TransportationCard
-                        key={transportation.id}
-                        transportation={transportation}
-                        onView={handleViewTransportation}
-                        onEdit={handleEditTransportation}
-                        canEdit={canEdit}
-                        getIcon={getTransportationIcon}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Map View */}
-                {viewMode === 'map' && (
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="h-[500px] relative">
-                        <LazyTransportationMap
-                          transportations={transportations}
-                          height="500px"
-                          onMarkerClick={handleViewTransportation}
-                        />
-
-                        {/* Transportation list */}
-                        <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-sm p-4 rounded-md shadow max-h-[450px] overflow-y-auto w-72">
-                          <h3 className="font-medium mb-3">Transportation</h3>
-                          <div className="space-y-2">
-                            {transportations.map((transportation) => (
-                              <div
-                                key={transportation.id}
-                                className="p-2 border rounded-md hover:bg-accent cursor-pointer"
-                                onClick={() => handleViewTransportation(transportation)}
-                              >
-                                <div className="flex items-center">
-                                  {getTransportationIcon(transportation.type)}
-                                  <p className="font-medium text-sm ml-2">
-                                    {transportation.provider || transportation.type}
-                                  </p>
-                                </div>
-                                {transportation.departure_time && (
-                                  <div className="flex items-center text-xs text-muted-foreground">
-                                    <CalendarIcon className="h-3 w-3 mr-1" />
-                                    {format(parseISO(transportation.departure_time), 'MMM d, yyyy HH:mm')}
-                                  </div>
-                                )}
-                                {transportation.departure_location && (
-                                  <div className="flex items-center text-xs text-muted-foreground">
-                                    <MapPinIcon className="h-3 w-3 mr-1" />
-                                    <span className="truncate">{transportation.departure_location}</span>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {transportations.map((transportation) => (
+                  <TransportationCard
+                    key={transportation.id}
+                    transportation={transportation}
+                    onEdit={canEdit ? handleEditTransportation : undefined}
+                    onView={handleViewTransportation}
+                    canEdit={canEdit}
+                    getIcon={getTransportationIcon}
+                  />
+                ))}
+              </div>
             )}
-          </>
-        )}
+          </TabsContent>
+
+          <TabsContent value="map" className="mt-0">
+            <Suspense fallback={<div className="h-96 bg-muted rounded-lg animate-pulse" />}>
+              <LazyTransportationMap
+                transportations={transportations}
+                onTransportationClick={handleViewTransportation}
+              />
+            </Suspense>
+          </TabsContent>
+        </Tabs>
       </main>
 
-      {/* Modals - Only render if user has access */}
-      {hasAccess && (
-        <>
+      {/* Modals */}
+      <Suspense fallback={null}>
+        {/* Add Transportation Modal */}
+        {isAddModalOpen && (
           <TransportationModal
-            tripId={id as string}
             isOpen={isAddModalOpen}
             onClose={handleCloseAddModal}
-          />
-
-          <TransportationModal
             tripId={id as string}
-            transportation={currentTransportation}
+          />
+        )}
+
+        {/* Edit Transportation Modal */}
+        {isEditModalOpen && currentTransportation && (
+          <TransportationModal
             isOpen={isEditModalOpen}
             onClose={handleCloseEditModal}
-          />
-
-          <TransportationDetailsModal
+            tripId={id as string}
             transportation={currentTransportation}
+          />
+        )}
+
+        {/* Transportation Details Modal */}
+        {isDetailsModalOpen && currentTransportation && (
+          <TransportationDetailsModal
             isOpen={isDetailsModalOpen}
             onClose={handleCloseDetailsModal}
-            onEdit={handleEditFromDetails}
-            canEdit={canEdit}
+            transportation={currentTransportation}
+            onEdit={canEdit ? handleEditFromDetails : undefined}
             getIcon={getTransportationIcon}
           />
-        </>
-      )}
+        )}
+      </Suspense>
     </div>
   );
 }

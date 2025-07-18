@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
+import TripCounterWidget from '@/components/ui/TripCounterWidget';
 import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon, ShieldIcon, UsersIcon, BookOpenIcon } from 'lucide-react';
 
 export default function Navbar() {
@@ -219,6 +220,7 @@ export default function Navbar() {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center gap-4">
+            <TripCounterWidget />
             <ThemeSwitcher />
             {user ? (
               <div className="ml-3 relative">

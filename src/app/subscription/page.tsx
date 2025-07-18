@@ -319,8 +319,9 @@ export default function SubscriptionPage() {
                           <PricingFeature included={true}>Expense tracking</PricingFeature>
                           <PricingFeature included={true}>Trip collaboration</PricingFeature>
                           <PricingFeature included={subscription.tier !== 'free'}>Unlimited trips</PricingFeature>
-                          <PricingFeature included={subscription.tier !== 'free' || subscription.cancelAtPeriodEnd}>Accommodations management</PricingFeature>
-                          <PricingFeature included={subscription.tier !== 'free' || subscription.cancelAtPeriodEnd}>Transportation tracking</PricingFeature>
+                          <PricingFeature included={true}>Accommodations management</PricingFeature>
+                          <PricingFeature included={true}>Transportation tracking</PricingFeature>
+                          <PricingFeature included={subscription.tier !== 'free' || subscription.cancelAtPeriodEnd}>Journal & Photo Gallery</PricingFeature>
 
                           {subscription.tier === 'ai' && (
                             <>
@@ -417,12 +418,18 @@ export default function SubscriptionPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <p className="text-sm">Accommodations</p>
-                        <Badge variant={subscription?.tier !== 'free' ? 'default' : 'outline'} className="text-xs">
-                          {subscription?.tier !== 'free' ? 'Available' : 'Premium Only'}
+                        <Badge variant="default" className="text-xs">
+                          Available (5 per trip)
                         </Badge>
                       </div>
                       <div className="flex justify-between">
                         <p className="text-sm">Transportation</p>
+                        <Badge variant="default" className="text-xs">
+                          Available (5 per trip)
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <p className="text-sm">Journal & Photo Gallery</p>
                         <Badge variant={subscription?.tier !== 'free' ? 'default' : 'outline'} className="text-xs">
                           {subscription?.tier !== 'free' ? 'Available' : 'Premium Only'}
                         </Badge>
@@ -482,12 +489,13 @@ export default function SubscriptionPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <PricingFeature included={true}>Up to 3 trips</PricingFeature>
+                    <PricingFeature included={true}>Up to 5 trips</PricingFeature>
                     <PricingFeature included={true}>Basic itinerary planning</PricingFeature>
                     <PricingFeature included={true}>Expense tracking</PricingFeature>
                     <PricingFeature included={true}>Trip collaboration</PricingFeature>
-                    <PricingFeature included={false}>Accommodations management</PricingFeature>
-                    <PricingFeature included={false}>Transportation tracking</PricingFeature>
+                    <PricingFeature included={true}>Accommodations management</PricingFeature>
+                    <PricingFeature included={true}>Transportation tracking</PricingFeature>
+                    <PricingFeature included={false}>Journal & Photo Gallery</PricingFeature>
                     <PricingFeature included={false}>Priority support</PricingFeature>
                   </CardContent>
                   <CardFooter className="flex justify-center pt-4">
@@ -522,13 +530,12 @@ export default function SubscriptionPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <PricingFeature included={true}>All Free features</PricingFeature>
                     <PricingFeature included={true}>Unlimited trips</PricingFeature>
-                    <PricingFeature included={true}>Advanced itinerary planning</PricingFeature>
-                    <PricingFeature included={true}>Expense tracking</PricingFeature>
-                    <PricingFeature included={true}>Trip collaboration</PricingFeature>
-                    <PricingFeature included={true}>Accommodations management</PricingFeature>
-                    <PricingFeature included={true}>Transportation tracking</PricingFeature>
+                    <PricingFeature included={true}>Journal & Photo Gallery</PricingFeature>
+                    <PricingFeature included={true}>Advanced expense analytics</PricingFeature>
                     <PricingFeature included={true}>Priority support</PricingFeature>
+                    <PricingFeature included={true}>Export/backup features</PricingFeature>
                   </CardContent>
                   <CardFooter className="flex justify-center pt-4">
                     {subscription?.tier === 'premium' ? (

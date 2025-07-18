@@ -52,6 +52,7 @@ export async function checkExpiredSubscriptions() {
         status: 'inactive',
         stripe_subscription_id: subscription.stripe_subscription_id,
         stripe_customer_id: subscription.stripe_customer_id,
+        event_timestamp: now,
         details: {
           previous_tier: subscription.tier,
           expired_at: now,
@@ -137,6 +138,7 @@ export async function checkUserSubscription(userId: string) {
       status: 'inactive',
       stripe_subscription_id: subscription.stripe_subscription_id,
       stripe_customer_id: subscription.stripe_customer_id,
+      event_timestamp: now,
       details: {
         previous_tier: subscription.tier,
         expired_at: now,

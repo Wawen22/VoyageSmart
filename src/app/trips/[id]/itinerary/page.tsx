@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import { format, parseISO, isValid, addDays } from 'date-fns';
-import { CalendarIcon, BookOpenIcon, ImageIcon, ClockIcon, BookIcon, PlusIcon, ListIcon, Sparkles } from 'lucide-react';
+import { CalendarIcon, BookOpenIcon, ImageIcon, ClockIcon, BookIcon, PlusIcon, ListIcon, Sparkles, LockIcon, InfoIcon } from 'lucide-react';
 import { it } from 'date-fns/locale';
 import DaySchedule from '@/components/itinerary/DaySchedule';
 import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
@@ -32,6 +32,7 @@ const JournalEntryCard = lazy(() => import('@/components/journal/JournalEntryCar
 const SimpleMediaUploader = lazy(() => import('@/components/journal/SimpleMediaUploader'));
 const MediaGallery = lazy(() => import('@/components/journal/MediaGallery'));
 const MemoriesTimeline = lazy(() => import('@/components/journal/MemoriesTimeline'));
+const JournalInfoModal = lazy(() => import('@/components/subscription/JournalInfoModal'));
 
 type Trip = {
   id: string;
@@ -73,12 +74,13 @@ export default function TripItinerary() {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { canAccessFeature } = useSubscription();
+  const { canAccessFeature, subscription } = useSubscription();
   const dispatch = useDispatch<AppDispatch>();
   const { entries, media, loading: journalLoading } = useSelector((state: RootState) => state.journal);
 
-  // Verifica se l'utente ha accesso alle funzionalità AI
+  // Verifica se l'utente ha accesso alle funzionalità AI e Journal
   const hasAIAccess = canAccessFeature('ai_assistant');
+  const hasJournalAccess = canAccessFeature('journal');
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>([]);
@@ -103,6 +105,7 @@ export default function TripItinerary() {
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<JournalEntry | null>(null);
   const [showMediaUploader, setShowMediaUploader] = useState(false);
+  const [showJournalInfoModal, setShowJournalInfoModal] = useState(false);
 
   useEffect(() => {
     // Load journal data
@@ -789,31 +792,68 @@ export default function TripItinerary() {
               )}
             </button>
 
-            <button
-              onClick={() => setActiveTab('journal')}
-              className={`group relative px-5 py-4 sm:px-8 sm:py-5 rounded-xl flex items-center gap-4 transition-all duration-300 border-2 ${
-                activeTab === 'journal'
-                  ? 'bg-primary/10 text-primary border-primary shadow-md transform scale-105'
-                  : 'bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground border-transparent hover:border-muted'
-              }`}
-            >
-              <div className={`p-3 rounded-full ${
-                activeTab === 'journal'
-                  ? 'bg-primary/20'
-                  : 'bg-muted group-hover:bg-muted/80'
-              } transition-colors duration-300`}>
-                <BookOpenIcon className={`h-6 w-6 ${
-                  activeTab === 'journal' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
-                }`} />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-base sm:text-lg">Journal</span>
-                <span className="text-xs sm:text-sm text-muted-foreground">Keep a diary and photos</span>
-              </div>
-              {activeTab === 'journal' && (
-                <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-primary rounded-l-full"></div>
+            <div className="relative">
+              <button
+                onClick={() => {
+                  if (hasJournalAccess) {
+                    setActiveTab('journal');
+                  } else {
+                    setShowJournalInfoModal(true);
+                  }
+                }}
+                className={`group relative w-full px-5 py-4 sm:px-8 sm:py-5 rounded-xl flex items-center gap-4 transition-all duration-300 border-2 ${
+                  !hasJournalAccess
+                    ? 'bg-muted/50 text-muted-foreground border-muted hover:border-amber-300 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 cursor-pointer'
+                    : activeTab === 'journal'
+                    ? 'bg-primary/10 text-primary border-primary shadow-md transform scale-105'
+                    : 'bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground border-transparent hover:border-muted'
+                }`}
+              >
+                <div className={`p-3 rounded-full ${
+                  !hasJournalAccess
+                    ? 'bg-muted group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30'
+                    : activeTab === 'journal'
+                    ? 'bg-primary/20'
+                    : 'bg-muted group-hover:bg-muted/80'
+                } transition-colors duration-300`}>
+                  {!hasJournalAccess ? (
+                    <LockIcon className="h-6 w-6 text-muted-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" />
+                  ) : (
+                    <BookOpenIcon className={`h-6 w-6 ${
+                      activeTab === 'journal' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                    }`} />
+                  )}
+                </div>
+                <div className="flex flex-col flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-base sm:text-lg">Journal</span>
+                    {!hasJournalAccess && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 group-hover:bg-amber-200 dark:group-hover:bg-amber-800/40 transition-colors">
+                        Premium
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs sm:text-sm text-muted-foreground text-left">Keep a diary and photos</span>
+                </div>
+                {activeTab === 'journal' && hasJournalAccess && (
+                  <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-primary rounded-l-full"></div>
+                )}
+              </button>
+
+              {/* Info Icon for Free Users */}
+              {!hasJournalAccess && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowJournalInfoModal(true);
+                  }}
+                  className="absolute top-3 right-3 p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-800/40 transition-all duration-200 hover:scale-110 z-10 group/info"
+                  title="Learn about Journal features"
+                >
+                  <InfoIcon className="h-4 w-4 text-amber-600 dark:text-amber-400 group-hover/info:text-amber-700 dark:group-hover/info:text-amber-300 transition-colors" />
+                </button>
               )}
-            </button>
+            </div>
           </div>
         </div>
 
@@ -1044,7 +1084,7 @@ export default function TripItinerary() {
           </div>
         )}
 
-        {activeTab === 'journal' && (
+        {activeTab === 'journal' && hasJournalAccess && (
           <div className="mt-0 w-full">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
               <div className="flex bg-muted/30 p-1 rounded-lg shadow-sm">
@@ -1295,6 +1335,16 @@ export default function TripItinerary() {
           </div>
         )
       )}
+
+      {/* Journal Info Modal for Free Users */}
+      <Suspense fallback={null}>
+        {showJournalInfoModal && (
+          <JournalInfoModal
+            isOpen={showJournalInfoModal}
+            onClose={() => setShowJournalInfoModal(false)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

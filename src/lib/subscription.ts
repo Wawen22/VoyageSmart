@@ -23,9 +23,14 @@ export type SubscriptionState = {
   error: Error | null;
   isSubscribed: (tier: SubscriptionTier) => boolean;
   canCreateTrip: () => Promise<boolean>;
-  canAccessFeature: (feature: 'accommodations' | 'transportation' | 'ai_assistant') => boolean;
+  canAccessFeature: (feature: 'accommodations' | 'transportation' | 'journal' | 'photo_gallery' | 'ai_assistant') => boolean;
+  canAddAccommodation: (tripId: string) => Promise<boolean>;
+  canAddTransportation: (tripId: string) => Promise<boolean>;
+  canAddJournalEntry: (tripId: string) => Promise<boolean>;
+  canAddPhoto: (tripId: string) => Promise<boolean>;
   upgradeSubscription: (tier: SubscriptionTier) => Promise<void>;
   cancelSubscription: () => Promise<void>;
+  downgradeToFree: () => Promise<void>;
   getSubscriptionHistory: () => Promise<any[]>;
   refreshSubscription: () => Promise<void>;
 };
@@ -114,6 +119,147 @@ export async function getUserTripCount(userId: string): Promise<number> {
   }
 }
 
+// New function to count all trips (owned + participating)
+export async function getUserTotalTripCount(userId: string): Promise<{ owned: number; participating: number; total: number }> {
+  try {
+    // Count trips owned by user
+    const { count: ownedCount, error: ownedError } = await supabase
+      .from('trips')
+      .select('*', { count: 'exact', head: true })
+      .eq('owner_id', userId);
+
+    if (ownedError) {
+      console.error('Error fetching owned trip count:', ownedError);
+      return { owned: 0, participating: 0, total: 0 };
+    }
+
+    // Count trips where user is a participant
+    const { count: participatingCount, error: participatingError } = await supabase
+      .from('trip_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    if (participatingError) {
+      console.error('Error fetching participating trip count:', participatingError);
+      return { owned: ownedCount || 0, participating: 0, total: ownedCount || 0 };
+    }
+
+    const owned = ownedCount || 0;
+    const participating = participatingCount || 0;
+    const total = owned + participating;
+
+    return { owned, participating, total };
+  } catch (error) {
+    console.error('Error in getUserTotalTripCount:', error);
+    return { owned: 0, participating: 0, total: 0 };
+  }
+}
+
+// Check if user can add accommodation to trip (max 5 for free users)
+export async function canAddAccommodation(userId: string, tripId: string, userTier: string): Promise<boolean> {
+  try {
+    // Premium and AI users have no limits
+    if (userTier === 'premium' || userTier === 'ai') {
+      return true;
+    }
+
+    // Free users are limited to 5 accommodations per trip
+    const { count, error } = await supabase
+      .from('accommodations')
+      .select('*', { count: 'exact', head: true })
+      .eq('trip_id', tripId);
+
+    if (error) {
+      console.error('Error fetching accommodation count:', error);
+      return false;
+    }
+
+    return (count || 0) < 5;
+  } catch (error) {
+    console.error('Error in canAddAccommodation:', error);
+    return false;
+  }
+}
+
+// Check if user can add transportation to trip (max 5 for free users)
+export async function canAddTransportation(userId: string, tripId: string, userTier: string): Promise<boolean> {
+  try {
+    // Premium and AI users have no limits
+    if (userTier === 'premium' || userTier === 'ai') {
+      return true;
+    }
+
+    // Free users are limited to 5 transportation items per trip
+    const { count, error } = await supabase
+      .from('transportation')
+      .select('*', { count: 'exact', head: true })
+      .eq('trip_id', tripId);
+
+    if (error) {
+      console.error('Error fetching transportation count:', error);
+      return false;
+    }
+
+    return (count || 0) < 5;
+  } catch (error) {
+    console.error('Error in canAddTransportation:', error);
+    return false;
+  }
+}
+
+// Check if user can add journal entry to trip (max 2 for free users)
+export async function canAddJournalEntry(userId: string, tripId: string, userTier: string): Promise<boolean> {
+  try {
+    // Premium and AI users have no limits
+    if (userTier === 'premium' || userTier === 'ai') {
+      return true;
+    }
+
+    // Free users are limited to 2 journal entries per trip
+    const { count, error } = await supabase
+      .from('journal_entries')
+      .select('*', { count: 'exact', head: true })
+      .eq('trip_id', tripId);
+
+    if (error) {
+      console.error('Error fetching journal entries count:', error);
+      return false;
+    }
+
+    return (count || 0) < 2;
+  } catch (error) {
+    console.error('Error in canAddJournalEntry:', error);
+    return false;
+  }
+}
+
+// Check if user can add photo to trip (max 2 for free users)
+export async function canAddPhoto(userId: string, tripId: string, userTier: string): Promise<boolean> {
+  try {
+    // Premium and AI users have no limits
+    if (userTier === 'premium' || userTier === 'ai') {
+      return true;
+    }
+
+    // Free users are limited to 2 photos per trip
+    const { count, error } = await supabase
+      .from('trip_media')
+      .select('*', { count: 'exact', head: true })
+      .eq('trip_id', tripId)
+      .eq('type', 'photo');
+
+    if (error) {
+      console.error('Error fetching photos count:', error);
+      return false;
+    }
+
+    return (count || 0) < 2;
+  } catch (error) {
+    console.error('Error in canAddPhoto:', error);
+    return false;
+  }
+}
+
 export async function createDefaultSubscription(userId: string): Promise<void> {
   try {
     // Check if user already has a subscription
@@ -166,6 +312,7 @@ export async function createDefaultSubscription(userId: string): Promise<void> {
       event_type: 'subscription_created',
       tier: 'free',
       status: 'active',
+      event_timestamp: new Date().toISOString(),
     });
 
     if (historyError) {
@@ -260,13 +407,78 @@ export async function cancelStripeSubscription(subscriptionId: string): Promise<
 
     if (!response.ok) {
       console.error('Client - Error response from cancellation API:', data);
-      throw new Error(data.error || data.details || 'Error canceling subscription');
+
+      // Fornisci messaggi di errore più specifici
+      let errorMessage = data.error || 'Error canceling subscription';
+      if (data.details) {
+        errorMessage += `: ${data.details}`;
+      }
+
+      throw new Error(errorMessage);
     }
 
     console.log('Client - Subscription canceled successfully');
     return true;
   } catch (error: any) {
     console.error('Client - Error canceling subscription:', error);
+
+    // Se è un errore di rete, fornisci un messaggio più chiaro
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    }
+
+    // Rilanciamo l'errore per permettere al chiamante di gestirlo
+    throw error;
+  }
+}
+
+export async function downgradeToFree(): Promise<boolean> {
+  try {
+    console.log('Client - Downgrading to free tier');
+    // Ottieni la sessione corrente per il token di accesso
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
+
+    if (!accessToken) {
+      console.error('Client - No active session found');
+      throw new Error('No active session found');
+    }
+
+    console.log('Client - Got access token, proceeding with downgrade');
+
+    const response = await fetch('/api/stripe/downgrade', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await response.json();
+    console.log('Client - Downgrade response:', data);
+
+    if (!response.ok) {
+      console.error('Client - Error response from downgrade API:', data);
+
+      // Fornisci messaggi di errore più specifici
+      let errorMessage = data.error || 'Error downgrading subscription';
+      if (data.details) {
+        errorMessage += `: ${data.details}`;
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    console.log('Client - Subscription downgraded successfully');
+    return true;
+  } catch (error: any) {
+    console.error('Client - Error downgrading subscription:', error);
+
+    // Se è un errore di rete, fornisci un messaggio più chiaro
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    }
+
     // Rilanciamo l'errore per permettere al chiamante di gestirlo
     throw error;
   }
