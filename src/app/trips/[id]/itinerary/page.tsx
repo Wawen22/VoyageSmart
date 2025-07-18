@@ -253,11 +253,16 @@ export default function TripItinerary() {
 
   const createDefaultItineraryDays = async (startDate: string, endDate: string) => {
     try {
+      // Validate trip ID
+      if (!id) {
+        throw new Error('Trip ID is required');
+      }
+
       const start = parseISO(startDate);
       const end = parseISO(endDate);
 
       if (!isValid(start) || !isValid(end)) {
-        throw new Error('Invalid date format');
+        throw new Error(`Invalid date format: start=${startDate}, end=${endDate}`);
       }
 
       // First check if there are already days for this trip
