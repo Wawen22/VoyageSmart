@@ -867,6 +867,62 @@
   animation: glow 2s ease-in-out infinite;
 }
 
+/* Landing page specific animations */
+@keyframes bounce-horizontal {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-bounce-horizontal {
+  animation: bounce-horizontal 1s ease-in-out infinite;
+}
+
+@keyframes float-delay {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float-delay {
+  animation: float-delay 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+@keyframes float-more-delay {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float-more-delay {
+  animation: float-more-delay 5s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+/* Grid pattern background */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(rgba(var(--primary) / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--primary) / 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
 @keyframes heartbeat {
   0%, 100% {
     transform: scale(1);

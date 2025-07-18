@@ -37,7 +37,16 @@ import {
   Sun,
   Thermometer,
   BookOpenIcon,
-  ImageIcon
+  ImageIcon,
+  PlayIcon,
+  ZapIcon,
+  TrendingUpIcon,
+  HeartIcon,
+  AwardIcon,
+  ChevronUpIcon,
+  NavigationIcon,
+  CircleIcon,
+  HomeIcon
 } from 'lucide-react';
 
 export default function Home() {
@@ -47,7 +56,13 @@ export default function Home() {
   const [selectedPlan, setSelectedPlan] = useState<'free' | 'premium' | 'ai'>(
     subscription?.tier || 'free'
   );
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
+  const aiRef = useRef<HTMLDivElement>(null);
+  const latestRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
   const faqRef = useRef<HTMLDivElement>(null);
 
@@ -57,11 +72,56 @@ export default function Home() {
     }
   }, [user, router]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+
+      // Calculate scroll progress
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = (scrollTop / docHeight) * 100;
+      setScrollProgress(Math.min(100, Math.max(0, scrollPercent)));
+
+      // Determine active section
+      const sections = [
+        { ref: heroRef, id: 'hero' },
+        { ref: featuresRef, id: 'features' },
+        { ref: aiRef, id: 'ai' },
+        { ref: latestRef, id: 'latest' },
+        { ref: pricingRef, id: 'pricing' },
+        { ref: faqRef, id: 'faq' }
+      ];
+
+      const scrollPosition = window.scrollY + 200;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section.ref.current) {
+          const sectionTop = section.ref.current.offsetTop;
+          if (scrollPosition >= sectionTop) {
+            setActiveSection(section.id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Call once to set initial state
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+
 
   const handleUpgrade = async (plan: 'free' | 'premium' | 'ai') => {
     if (user) {
@@ -116,36 +176,22 @@ export default function Home() {
       image: '/images/app-screenshot-2.jpg'
     },
     {
+      title: 'Travel Analytics',
+      description: 'Discover insights about your travel patterns with detailed analytics on destinations, frequency, duration, and spending habits.',
+      icon: <TrendingUpIcon className="h-6 w-6 text-primary" />,
+      delay: 400,
+      image: '/images/app-screenshot-3.jpg'
+    },
+    {
       title: 'Collaborate',
       description: 'Invite friends and family to join your trip planning, make decisions together, and share memories.',
       icon: <UsersIcon className="h-6 w-6 text-primary" />,
-      delay: 400,
+      delay: 500,
       image: '/images/app-screenshot-3.jpg'
     }
   ];
 
-  const benefits = [
-    {
-      title: 'All-in-One Solution',
-      description: 'Everything you need for trip planning in a single app',
-      icon: <GlobeIcon className="h-5 w-5 text-primary" />
-    },
-    {
-      title: 'Easy Expense Splitting',
-      description: 'No more awkward money conversations with friends',
-      icon: <DollarSignIcon className="h-5 w-5 text-primary" />
-    },
-    {
-      title: 'Seamless Collaboration',
-      description: 'Real-time updates and communication with travel companions',
-      icon: <MessageCircleIcon className="h-5 w-5 text-primary" />
-    },
-    {
-      title: 'Secure & Private',
-      description: 'Your travel data is protected and only shared with those you invite',
-      icon: <ShieldIcon className="h-5 w-5 text-primary" />
-    }
-  ];
+
 
   const faqItems = [
     {
@@ -215,58 +261,70 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <main className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none"></div>
+      <div className="fixed top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-primary/10 via-primary/5 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+      <div className="fixed bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-primary/8 via-primary/4 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+
       {/* Navigation Menu */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border h-16">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/50 h-16 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 h-full">
           <div className="flex justify-between items-center h-full">
             <div className="flex items-center">
-              <Image
-                src="/images/logo-voyage_smart.png"
-                alt="Voyage Smart Logo"
-                width={160}
-                height={40}
-                className="h-8 w-auto"
-                priority
-              />
+              <div className="relative group">
+                <div className="absolute inset-0 bg-primary/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                <Image
+                  src="/images/logo-voyage_smart.png"
+                  alt="Voyage Smart Logo"
+                  width={200}
+                  height={50}
+                  className="h-12 w-auto relative z-10 transition-transform duration-300 group-hover:scale-105"
+                  priority
+                />
+              </div>
             </div>
-            <div className="hidden md:flex space-x-6">
+            <div className="hidden md:flex space-x-8">
               <button
                 onClick={() => scrollToSection(featuresRef)}
-                className="text-foreground/70 hover:text-primary transition-colors"
+                className="text-foreground/70 hover:text-primary transition-all duration-300 font-medium relative group"
               >
                 Features
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </button>
               <button
                 onClick={() => scrollToSection(pricingRef)}
-                className="text-foreground/70 hover:text-primary transition-colors"
+                className="text-foreground/70 hover:text-primary transition-all duration-300 font-medium relative group"
               >
                 Plans & Pricing
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </button>
               <button
                 onClick={() => scrollToSection(faqRef)}
-                className="text-foreground/70 hover:text-primary transition-colors"
+                className="text-foreground/70 hover:text-primary transition-all duration-300 font-medium relative group"
               >
                 FAQ
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </button>
               <Link
                 href="/documentation"
                 target="_blank"
-                className="text-foreground/70 hover:text-primary transition-colors"
+                className="text-foreground/70 hover:text-primary transition-all duration-300 font-medium relative group"
               >
                 Documentation
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               <Link
                 href="/login"
-                className="text-foreground/70 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-foreground/70 hover:text-primary px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-primary/5"
               >
                 Log in
               </Link>
               <Link
                 href="/register"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground hover:from-primary/90 hover:to-primary px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
               >
                 Sign up
               </Link>
@@ -276,215 +334,368 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <ParallaxSection
-        className="min-h-screen w-full flex items-center justify-center overflow-hidden py-20"
-        bgImage="/images/hero-bg.jpg"
-        speed={0.3}
-        overlayOpacity={0.7}
-      >
-        <div className="container mx-auto px-4 sm:px-6 relative z-10 flex flex-col justify-center">
-          <div className="flex flex-col items-center text-center">
-            <div className="animate-fade-in flex flex-col items-center">
-              <div className="relative mb-6">
-                <div className="absolute inset-0 bg-primary/20 rounded-full filter blur-3xl animate-pulse-slow"></div>
-                <Image
-                  src="/images/logo-voyage_smart.png"
-                  alt="Voyage Smart Logo"
-                  width={450}
-                  height={135}
-                  className="h-auto w-auto max-w-[220px] sm:max-w-[250px] md:max-w-[280px] lg:max-w-[350px] xl:max-w-[450px] relative z-10"
-                  priority
-                />
-              </div>
-              <h1 className="sr-only">Voyage Smart</h1>
-            </div>
-
-            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white max-w-3xl mx-auto mb-8 animate-slide-in-bottom delay-200 font-light leading-relaxed drop-shadow-md">
-              Your <span className="text-primary font-medium">AI-powered travel planning solution</span>. Plan trips, manage expenses, collaborate with friends, and get intelligent recommendations all in one place.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-slide-in-bottom delay-300">
-              <RippleButton
-                size="lg"
-                className="font-medium text-base px-10 py-6 shadow-xl hover:shadow-2xl transition-all duration-300 bg-primary hover:bg-primary/90 text-white rounded-xl"
-                feedbackType="ripple"
-              >
-                <Link href="/register" className="flex items-center gap-2">
-                  Get Started <ArrowRightIcon className="h-5 w-5 ml-1 animate-bounce-horizontal" />
-                </Link>
-              </RippleButton>
-
-              <Button
-                variant="outline"
-                size="lg"
-                className="font-medium text-base px-10 py-6 hover:scale-105 bg-background/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 hover:text-white transition-all duration-300 rounded-xl"
-              >
-                <Link href="/login">Log In</Link>
-              </Button>
-            </div>
-
-            <div className="animate-bounce delay-700 mt-8 bg-white/10 backdrop-blur-sm p-3 rounded-full border border-white/20 shadow-lg">
-              <MousePointerIcon className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        {/* Decorative elements - Improved positioning */}
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/30 rounded-full filter blur-3xl animate-pulse-slow opacity-70" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-primary/30 rounded-full filter blur-3xl animate-pulse-slow opacity-70" />
-        <div className="absolute top-2/3 left-1/3 w-64 h-64 bg-primary/20 rounded-full filter blur-2xl animate-float opacity-50" />
-
-        {/* Floating elements - Enhanced visibility */}
-        <div className="absolute top-1/3 right-1/4 animate-float opacity-90">
-          <div className="bg-white/15 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/30">
-            <CalendarIcon className="h-8 w-8 text-white" />
-          </div>
-        </div>
-        <div className="absolute bottom-1/3 left-1/4 animate-float-delay opacity-90">
-          <div className="bg-white/15 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/30">
-            <BookOpenIcon className="h-8 w-8 text-white" />
-          </div>
-        </div>
-        <div className="absolute top-2/3 right-1/3 animate-float-more-delay opacity-90">
-          <div className="bg-white/15 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/30">
-            <DollarSignIcon className="h-8 w-8 text-white" />
-          </div>
-        </div>
-        <div className="absolute top-1/2 left-1/6 animate-float opacity-90">
-          <div className="bg-white/15 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/30">
-            <SparklesIcon className="h-8 w-8 text-white" />
-          </div>
-        </div>
-      </ParallaxSection>
-
-      {/* Features Section */}
-      <section ref={featuresRef} className="py-20 md:py-32 relative overflow-hidden">
-        {/* Improved transition from hero section */}
-        <div className="absolute -top-16 left-0 right-0 h-32 bg-gradient-to-b from-black/30 to-transparent z-10"></div>
-        <div className="absolute top-0 right-0 w-full h-32 bg-gradient-to-b from-muted/30 to-transparent"></div>
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full filter blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-muted/30 to-transparent"></div>
-
+      <section ref={heroRef} className="min-h-screen lg:min-h-[85vh] xl:min-h-screen w-full flex items-center justify-center relative pt-16">
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-20">
-            <Badge className="mb-4 px-4 py-1.5 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">Explore</Badge>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-              Powerful Features
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in delay-100">
-              Everything you need to plan the perfect trip from start to finish
-            </p>
-          </div>
+          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-12 xl:gap-16">
+            {/* Left Side - Content */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="space-y-8">
+                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold leading-tight">
+                  <span className="bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent">
+                    Your Journey,
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-primary via-primary/90 to-primary/80 bg-clip-text text-transparent">
+                    Simplified
+                  </span>
+                </h1>
 
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center mb-32 last:mb-0`}
-            >
-              <div className="w-full md:w-1/2 animate-fade-in" style={{ animationDelay: `${feature.delay}ms` }}>
-                <div className="bg-card border-2 border-border/50 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 group hover:border-primary/20 relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <Image
-                      src={feature.image}
-                      alt={feature.title}
-                      width={800}
-                      height={500}
-                      className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute bottom-0 left-0 w-full p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 opacity-0 group-hover:opacity-100">
-                      <span className="inline-block bg-primary text-white text-sm px-3 py-1 rounded-full">
-                        Learn more
-                      </span>
-                    </div>
-                  </div>
+                <p className="text-xl md:text-2xl lg:text-xl xl:text-2xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                  The <span className="text-primary font-semibold">AI-powered travel companion</span> that transforms how you plan, organize, and experience your adventures.
+                </p>
+
+                <div className="flex flex-wrap justify-center lg:justify-start gap-3">
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20">
+                    <SparklesIcon className="h-4 w-4 mr-2" />
+                    AI-Powered
+                  </Badge>
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20">
+                    <UsersIcon className="h-4 w-4 mr-2" />
+                    Collaborative
+                  </Badge>
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20">
+                    <ZapIcon className="h-4 w-4 mr-2" />
+                    Smart Planning
+                  </Badge>
                 </div>
-              </div>
 
-              <div className="w-full md:w-1/2 animate-fade-in" style={{ animationDelay: `${feature.delay + 100}ms` }}>
-                <div className="p-6">
-                  <div className="flex items-center mb-6 text-primary">
-                    <div className="p-4 bg-primary/10 rounded-xl mr-5 group-hover:bg-primary/20 transition-colors transform hover:scale-110 duration-300 shadow-md">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-                      {feature.title}
-                    </h3>
-                  </div>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
-                  <div className="mt-6 border-l-4 border-primary/30 pl-4 py-2 bg-primary/5 rounded-r-lg">
-                    <p className="text-sm text-primary/80 italic">
-                      {index === 0 && "Create detailed day-by-day plans for your entire trip"}
-                      {index === 1 && "Get personalized recommendations and smart suggestions powered by AI"}
-                      {index === 2 && "Document your journey with photos and daily entries"}
-                      {index === 3 && "Split expenses fairly and see who owes what"}
-                      {index === 4 && "Plan together with friends and family in real-time"}
-                    </p>
-                  </div>
+                {/* CTA Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <RippleButton
+                    size="lg"
+                    className="font-semibold text-lg lg:text-base xl:text-lg px-12 lg:px-8 xl:px-12 py-6 lg:py-4 xl:py-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-2xl shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
+                    feedbackType="ripple"
+                  >
+                    <Link href="/register" className="flex items-center gap-3">
+                      <RocketIcon className="h-6 w-6" />
+                      Start Your Journey
+                      <ArrowRightIcon className="h-5 w-5 animate-bounce-horizontal" />
+                    </Link>
+                  </RippleButton>
+
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="font-semibold text-lg lg:text-base xl:text-lg px-12 lg:px-8 xl:px-12 py-6 lg:py-4 xl:py-6 bg-background/80 backdrop-blur-sm border-2 border-primary/20 text-foreground hover:bg-primary/5 hover:border-primary/40 transition-all duration-300 hover:scale-105 rounded-2xl shadow-lg"
+                  >
+                    <Link href="/login" className="flex items-center gap-2">
+                      <HeartIcon className="h-5 w-5" />
+                      Welcome Back
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
-          ))}
+
+            {/* Right Side - Animated Logo */}
+            <div className="flex-1 flex justify-center lg:justify-end">
+              <div className="relative group">
+                {/* Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/30 to-primary/20 rounded-3xl blur-3xl animate-pulse-slow scale-110"></div>
+
+                {/* Logo Container */}
+                <div className="relative bg-gradient-to-br from-background/90 to-background/70 backdrop-blur-xl rounded-3xl p-8 lg:p-6 xl:p-8 border border-primary/20 shadow-2xl hover:shadow-primary/20 transition-all duration-500 group-hover:scale-105">
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-auto max-w-[400px] md:max-w-[500px] lg:max-w-[400px] xl:max-w-[500px] object-contain"
+                    poster="/images/logo-voyage_smart.png"
+                  >
+                    <source src="/images/animated_logo-voyage_smart.mp4" type="video/mp4" />
+                    <Image
+                      src="/images/animated_logo-voyage_smart.gif"
+                      alt="VoyageSmart - Your AI Travel Companion"
+                      width={500}
+                      height={150}
+                      className="w-full h-auto"
+                      priority
+                    />
+                  </video>
+
+                  {/* Floating Indicators */}
+                  <div className="absolute -top-3 -right-3 w-6 h-6 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-ping"></div>
+                  <div className="absolute -bottom-3 -left-3 w-4 h-4 bg-gradient-to-r from-primary/60 to-primary/40 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Elements - Simplified */}
+        <div className="absolute top-1/4 right-1/12 animate-float opacity-40">
+          <div className="bg-primary/10 backdrop-blur-md p-3 rounded-xl shadow-lg border border-primary/20">
+            <CalendarIcon className="h-6 w-6 text-primary" />
+          </div>
+        </div>
+        <div className="absolute bottom-1/4 left-1/12 animate-float-delay opacity-40">
+          <div className="bg-primary/10 backdrop-blur-md p-3 rounded-xl shadow-lg border border-primary/20">
+            <SparklesIcon className="h-6 w-6 text-primary" />
+          </div>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-muted/20 to-background relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-background to-transparent"></div>
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full filter blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-primary/5 rounded-full filter blur-2xl"></div>
+      {/* Features Section */}
+      <section ref={featuresRef} className="py-24 md:py-32 relative overflow-hidden bg-gradient-to-b from-background to-muted/10">
+        {/* Background Elements */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-primary/8 to-transparent rounded-full blur-3xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-20">
-            <Badge className="mb-4 px-4 py-1.5 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">Benefits</Badge>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-              Why Choose Voyage Smart
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full border border-primary/20 mb-6 animate-fade-in">
+              <AwardIcon className="h-5 w-5" />
+              <span className="font-semibold">Powerful Features</span>
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
+              Everything You Need
+              <span className="block bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                In One Place
+              </span>
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Simplify your travel planning and enjoy more of your journey
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto animate-fade-in delay-100 leading-relaxed">
+              From planning to memories, we've got every aspect of your journey covered
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            {benefits.map((benefit, index) => (
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            {features.map((feature, index) => (
               <Card
                 key={index}
-                className="overflow-hidden hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border-2 border-border/50 hover:border-primary/20 h-full bg-card/50 backdrop-blur-sm group"
+                className="group relative overflow-hidden border-2 border-border/50 hover:border-primary/30 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 rounded-3xl"
+                style={{ animationDelay: `${feature.delay}ms` }}
               >
-                <CardContent className="p-8">
-                  <div className="p-4 bg-primary/10 rounded-xl w-16 h-16 flex items-center justify-center mb-6 mx-auto transform group-hover:scale-110 transition-transform duration-300 shadow-md group-hover:bg-primary/20 group-hover:shadow-lg">
-                    {benefit.icon}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+
+                <CardHeader className="relative z-10 pb-4">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="p-4 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-300 shadow-lg group-hover:scale-110">
+                      {feature.icon}
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300">
+                        {feature.title}
+                      </CardTitle>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-xl mb-4 text-center group-hover:text-primary transition-colors duration-300">{benefit.title}</h3>
-                  <p className="text-muted-foreground text-center">{benefit.description}</p>
+                </CardHeader>
+
+                <CardContent className="relative z-10 pt-0">
+                  <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
+                    {feature.description}
+                  </p>
+
+                  {/* Feature Image */}
+                  <div className="relative overflow-hidden rounded-2xl mb-6 group-hover:scale-[1.02] transition-transform duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
+                    <Image
+                      src={feature.image}
+                      alt={feature.title}
+                      width={600}
+                      height={400}
+                      className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Feature Highlight */}
+                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-4 border border-primary/20 group-hover:border-primary/30 transition-all duration-300">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                      <p className="text-sm font-medium text-primary/90">
+                        {index === 0 && "Create detailed day-by-day plans for your entire trip"}
+                        {index === 1 && "Get personalized recommendations and smart suggestions powered by AI"}
+                        {index === 2 && "Document your journey with photos and daily entries"}
+                        {index === 3 && "Split expenses fairly and see who owes what"}
+                        {index === 4 && "Analyze your travel patterns with detailed insights and statistics"}
+                        {index === 5 && "Plan together with friends and family in real-time"}
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
+
+                {/* Decorative Elements */}
+                <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
               </Card>
             ))}
           </div>
 
-          <div className="mt-16 text-center">
+          {/* Call to Action */}
+          <div className="text-center">
             <Button
-              className="bg-primary/90 hover:bg-primary text-white px-8 py-6 rounded-xl text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              size="lg"
+              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-12 py-6 rounded-2xl text-lg font-semibold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
             >
-              <Link href="/register" className="flex items-center gap-2">
-                Start Planning Your Trip <ArrowRightIcon className="h-5 w-5 ml-1 animate-bounce-horizontal" />
+              <Link href="/register" className="flex items-center gap-3">
+                <TrendingUpIcon className="h-6 w-6" />
+                Explore All Features
+                <ArrowRightIcon className="h-5 w-5 animate-bounce-horizontal" />
               </Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* New Features Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/10 relative overflow-hidden">
+
+
+
+
+
+
+      {/* AI Features Section */}
+      <section ref={aiRef} className="py-20 md:py-24 bg-gradient-to-b from-primary/5 to-background relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-purple-500/8 via-primary/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-indigo-500/6 via-primary/4 to-transparent rounded-full blur-3xl"></div>
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            {/* Left Side - Content */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="space-y-8">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/10 via-primary/10 to-indigo-500/10 text-purple-600 px-4 py-2 rounded-full border border-purple-500/20">
+                  <SparklesIcon className="h-5 w-5" />
+                  <span className="font-semibold">AI Powered</span>
+                </div>
+
+                <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+                  <span className="bg-gradient-to-r from-purple-600 via-primary to-indigo-600 bg-clip-text text-transparent">
+                    Intelligent Travel
+                  </span>
+                  <br />
+                  <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                    Planning
+                  </span>
+                </h2>
+
+                <p className="text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                  Experience the future of travel planning with our AI-powered assistant that learns your preferences and provides personalized recommendations.
+                </p>
+
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl shadow-md">
+                      <SparklesIcon className="h-6 w-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-purple-600">24/7 AI Travel Assistant</h3>
+                      <p className="text-muted-foreground">Get instant answers and personalized suggestions</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 rounded-xl shadow-md">
+                      <CalendarIcon className="h-6 w-6 text-indigo-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-indigo-600">AI Itinerary Wizard</h3>
+                      <p className="text-muted-foreground">Generate complete day-by-day plans</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl shadow-md">
+                      <DollarSignIcon className="h-6 w-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-purple-600">Smart Budget Optimization</h3>
+                      <p className="text-muted-foreground">Maximize your experience within your budget</p>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-500 via-primary to-indigo-600 hover:from-purple-600 hover:via-primary/90 hover:to-indigo-700 text-white px-8 py-6 rounded-xl text-lg font-semibold shadow-xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+                  onClick={() => scrollToSection(pricingRef)}
+                >
+                  <SparklesIcon className="h-5 w-5 mr-2" />
+                  Experience AI Magic
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Side - AI Demo */}
+            <div className="flex-1 mt-12 lg:mt-0">
+              <div className="bg-gradient-to-br from-purple-500/10 via-primary/5 to-indigo-500/10 rounded-2xl p-6 border border-purple-500/20 shadow-xl backdrop-blur-sm">
+                <div className="bg-gradient-to-br from-card/95 to-card/85 rounded-xl p-6 shadow-lg border border-border/50">
+                  {/* Header */}
+                  <div className="flex items-center mb-4">
+                    <div className="relative">
+                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mr-3 shadow-md">
+                        <SparklesIcon className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                    </div>
+                    <div>
+                      <span className="font-bold text-base bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">AI Travel Assistant</span>
+                      <p className="text-xs text-muted-foreground">Online • Ready to help</p>
+                    </div>
+                  </div>
+
+                  {/* Chat Messages */}
+                  <div className="space-y-3">
+                    <div className="bg-gradient-to-r from-purple-500/10 to-purple-500/5 rounded-xl p-3 border border-purple-500/20">
+                      <p className="text-xs text-muted-foreground mb-1">You</p>
+                      <p className="font-medium text-sm">"Suggest activities for my trip to Rome"</p>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-indigo-500/10 to-indigo-500/5 rounded-xl p-3 border border-indigo-500/20">
+                      <p className="text-xs text-muted-foreground mb-2">AI Assistant</p>
+                      <p className="text-sm mb-2">Based on your trip to Rome (June 15-20) and your interest in history and food, I recommend:</p>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
+                          <CalendarIcon className="h-4 w-4 text-indigo-500" />
+                          <span className="text-xs">Colosseum tour (morning, avoid crowds)</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
+                          <DollarSignIcon className="h-4 w-4 text-indigo-500" />
+                          <span className="text-xs">Trastevere food tour (evening)</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
+                          <MapPinIcon className="h-4 w-4 text-indigo-500" />
+                          <span className="text-xs">Vatican Museums (book skip-the-line)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Typing Indicator */}
+                  <div className="mt-3 flex items-center gap-2 text-muted-foreground">
+                    <div className="flex space-x-1">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                    <span className="text-xs">AI is thinking...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Latest Features Section */}
+      <section ref={latestRef} className="py-20 md:py-24 bg-gradient-to-b from-background to-muted/10 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-muted/30 to-transparent"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full filter blur-3xl animate-pulse-slow"></div>
         <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-primary/5 rounded-full filter blur-2xl animate-pulse-slow"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-20">
+          <div className="text-center mb-16">
             <Badge className="mb-4 px-4 py-1.5 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
               <span className="animate-pulse-slow mr-1">●</span> New
             </Badge>
@@ -497,43 +708,37 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-            <div className="bg-card border-2 border-purple-500/20 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-purple-500/40 group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-              <div className="flex items-center mb-6 relative z-10">
-                <div className="p-4 bg-purple-500/10 rounded-xl mr-5 group-hover:bg-purple-500/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
-                  <SparklesIcon className="h-6 w-6 text-purple-500" />
+            <div className="bg-card border-2 border-border/50 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/20 group">
+              <div className="flex items-center mb-6">
+                <div className="p-4 bg-primary/10 rounded-xl mr-5 group-hover:bg-primary/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
+                  <MapPinIcon className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold group-hover:text-purple-600 transition-colors duration-300">AI Assistant</h3>
+                <h3 className="text-xl font-bold group-hover:text-primary transition-colors duration-300">Interactive Maps</h3>
               </div>
-              <p className="text-muted-foreground mb-8 leading-relaxed relative z-10">
-                Get intelligent travel recommendations, 24/7 assistance, and personalized suggestions powered by advanced AI technology.
+              <p className="text-muted-foreground mb-8 leading-relaxed">
+                Visualize your trips with interactive maps featuring List, Calendar, and Map views. See all your destinations in one beautiful interface.
               </p>
-              <div className="bg-gradient-to-br from-purple-500/5 to-transparent rounded-xl p-5 border border-purple-500/10 group-hover:border-purple-500/20 transition-all duration-300 relative z-10">
+              <div className="bg-gradient-to-br from-primary/5 to-transparent rounded-xl p-5 border border-primary/10 group-hover:border-primary/20 transition-all duration-300">
                 <div className="flex flex-col space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-purple-500/10 shadow-sm">
-                      <SparklesIcon className="h-4 w-4 text-purple-500" />
+                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
+                      <MapPinIcon className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="font-medium">Smart Recommendations</span>
+                    <span className="font-medium">Interactive Map View</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-purple-500/10 shadow-sm">
-                      <CalendarIcon className="h-4 w-4 text-purple-500" />
+                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
+                      <CalendarIcon className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="font-medium">AI Itinerary Wizard</span>
+                    <span className="font-medium">Calendar Integration</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-purple-500/10 shadow-sm">
-                      <MessageCircleIcon className="h-4 w-4 text-purple-500" />
+                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
+                      <GlobeIcon className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="font-medium">24/7 Chat Support</span>
+                    <span className="font-medium">Route Visualization</span>
                   </div>
                 </div>
-              </div>
-              <div className="mt-6 text-center relative z-10">
-                <span className="inline-block text-purple-500 text-sm font-medium hover:underline cursor-pointer group-hover:translate-x-1 transition-transform duration-300">
-                  Learn more →
-                </span>
               </div>
             </div>
 
@@ -568,11 +773,6 @@ export default function Home() {
                     <span className="font-medium">Memories Timeline</span>
                   </div>
                 </div>
-              </div>
-              <div className="mt-6 text-center">
-                <span className="inline-block text-primary text-sm font-medium hover:underline cursor-pointer group-hover:translate-x-1 transition-transform duration-300">
-                  Learn more →
-                </span>
               </div>
             </div>
 
@@ -609,167 +809,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 text-center">
-                <span className="inline-block text-primary text-sm font-medium hover:underline cursor-pointer group-hover:translate-x-1 transition-transform duration-300">
-                  Learn more →
-                </span>
-              </div>
             </div>
-
-            {/* <div className="bg-card border-2 border-border/50 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/20 group">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-primary/10 rounded-xl mr-5 group-hover:bg-primary/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
-                  <CloudIcon className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold group-hover:text-primary transition-colors duration-300">Enhanced Weather</h3>
-              </div>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
-                Get accurate weather forecasts for all your destinations in a beautiful, modern interface. Plan your activities with confidence knowing the weather conditions.
-              </p>
-              <div className="bg-gradient-to-br from-primary/5 to-transparent rounded-xl p-5 border border-primary/10 group-hover:border-primary/20 transition-all duration-300">
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="p-1.5 rounded-full bg-primary/10 shadow-sm">
-                        <CloudIcon className="h-4 w-4 text-primary" />
-                      </div>
-                      <span className="font-medium">Weather Forecast</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="flex -space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary border border-background shadow-sm">P</div>
-                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary border border-background shadow-sm">L</div>
-                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary border border-background shadow-sm">N</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-white/50 dark:bg-black/5 rounded-lg p-3 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center">
-                          <Sun className="h-8 w-8 text-yellow-400 animate-pulse-slow" />
-                        </div>
-                        <div>
-                          <div className="flex items-center">
-                            <Thermometer className="h-3 w-3 mr-1 text-primary" />
-                            <span className="text-sm font-medium">24°C</span>
-                          </div>
-                          <div className="text-xs text-muted-foreground">Sunny</div>
-                        </div>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        <div className="font-medium">Paris, France</div>
-                        <div>Today</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 text-center">
-                <span className="inline-block text-primary text-sm font-medium hover:underline cursor-pointer group-hover:translate-x-1 transition-transform duration-300">
-                  Learn more →
-                </span>
-              </div>
-            </div> */}
-          </div>
-        </div>
-      </section>
-
-      {/* AI Features Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-b from-muted/10 to-background relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-background to-transparent"></div>
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-500/5 rounded-full filter blur-3xl animate-pulse-slow"></div>
-        <div className="absolute bottom-20 left-10 w-72 h-72 bg-indigo-500/5 rounded-full filter blur-2xl animate-pulse-slow"></div>
-
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-20">
-            <Badge className="mb-4 px-4 py-1.5 text-sm bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-purple-600 border-purple-500/20 hover:bg-purple-500/20">
-              <SparklesIcon className="h-4 w-4 mr-2 animate-pulse-slow" />
-              AI Powered
-            </Badge>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
-              Intelligent Travel Planning
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Experience the future of travel planning with our AI-powered assistant that learns your preferences and provides personalized recommendations
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-            <div className="space-y-8">
-              <div className="bg-card border-2 border-purple-500/10 rounded-xl p-6 hover:border-purple-500/20 transition-all duration-300 group">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-purple-500/10 rounded-xl group-hover:bg-purple-500/20 transition-colors duration-300">
-                    <SparklesIcon className="h-6 w-6 text-purple-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-purple-600 transition-colors duration-300">24/7 AI Travel Assistant</h3>
-                    <p className="text-muted-foreground">Get instant answers about your trip, recommendations for activities, and personalized suggestions based on your travel style and preferences.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card border-2 border-purple-500/10 rounded-xl p-6 hover:border-purple-500/20 transition-all duration-300 group">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-indigo-500/10 rounded-xl group-hover:bg-indigo-500/20 transition-colors duration-300">
-                    <CalendarIcon className="h-6 w-6 text-indigo-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-indigo-600 transition-colors duration-300">AI Itinerary Generation Wizard</h3>
-                    <p className="text-muted-foreground">Let our AI create detailed itineraries for you. Just tell us your preferences, budget, and interests, and we'll generate a complete day-by-day plan.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card border-2 border-purple-500/10 rounded-xl p-6 hover:border-purple-500/20 transition-all duration-300 group">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-purple-500/10 rounded-xl group-hover:bg-purple-500/20 transition-colors duration-300">
-                    <DollarSignIcon className="h-6 w-6 text-purple-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-purple-600 transition-colors duration-300">Smart Budget Optimization</h3>
-                    <p className="text-muted-foreground">Our AI analyzes your spending patterns and suggests ways to optimize your travel budget while maximizing your experience.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-2xl p-8 border border-purple-500/20">
-                <div className="bg-card rounded-xl p-6 shadow-lg">
-                  <div className="flex items-center mb-4">
-                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3">
-                      <SparklesIcon className="h-4 w-4 text-white" />
-                    </div>
-                    <span className="font-medium text-purple-600">AI Assistant</span>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="bg-purple-500/5 rounded-lg p-3">
-                      <p className="text-sm text-muted-foreground mb-2">You: "Suggest activities for my trip to Rome"</p>
-                    </div>
-                    <div className="bg-indigo-500/5 rounded-lg p-3">
-                      <p className="text-sm">Based on your trip to Rome (June 15-20) and your interest in history and food, I recommend:</p>
-                      <ul className="text-sm mt-2 space-y-1">
-                        <li>• Colosseum tour (morning, avoid crowds)</li>
-                        <li>• Trastevere food tour (evening)</li>
-                        <li>• Vatican Museums (book skip-the-line)</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-full filter blur-xl animate-pulse-slow"></div>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <Button
-              className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-6 rounded-xl text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              onClick={() => scrollToSection(pricingRef)}
-            >
-              <SparklesIcon className="h-5 w-5 mr-2" />
-              Try AI Assistant <ArrowRightIcon className="h-5 w-5 ml-1 animate-bounce-horizontal" />
-            </Button>
           </div>
         </div>
       </section>
@@ -1064,118 +1104,339 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Ready to Start Section */}
+      <section className="py-20 md:py-24 bg-gradient-to-b from-background to-primary/5 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-gradient-to-br from-primary/8 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-gradient-to-tl from-primary/6 to-transparent rounded-full blur-3xl"></div>
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center max-w-4xl mx-auto space-y-12">
+            <div className="space-y-6">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
+                <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  Ready to Start
+                </span>
+                <br />
+                <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  Your Adventure?
+                </span>
+              </h2>
+
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Join thousands of travelers who've discovered the magic of AI-powered trip planning.
+              </p>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <RippleButton
+                size="lg"
+                className="font-bold text-xl px-12 py-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-2xl shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
+                feedbackType="ripple"
+              >
+                <Link href="/register" className="flex items-center gap-3">
+                  <RocketIcon className="h-6 w-6" />
+                  Start Free Today
+                  <ArrowRightIcon className="h-5 w-5 animate-bounce-horizontal" />
+                </Link>
+              </RippleButton>
+
+              <Button
+                variant="outline"
+                size="lg"
+                className="font-bold text-xl px-12 py-6 bg-background/80 backdrop-blur-sm border-2 border-primary/30 text-foreground hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:scale-105 rounded-2xl shadow-lg"
+              >
+                <Link href="/login" className="flex items-center gap-3">
+                  <HeartIcon className="h-6 w-6" />
+                  Welcome Back
+                </Link>
+              </Button>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="flex flex-wrap justify-center items-center gap-8 opacity-70">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <ShieldIcon className="h-5 w-5 text-primary" />
+                <span className="font-medium">Secure & Private</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <StarIcon className="h-5 w-5 text-primary" />
+                <span className="font-medium">10K+ Happy Users</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <ZapIcon className="h-5 w-5 text-primary" />
+                <span className="font-medium">AI-Powered</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="py-16 border-t border-border bg-gradient-to-b from-card/50 to-background/80 backdrop-blur-sm relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-background to-transparent"></div>
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-primary/5 rounded-full filter blur-3xl"></div>
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full filter blur-2xl"></div>
+      <footer className="py-20 border-t border-border/50 bg-gradient-to-b from-background/95 to-primary/5 backdrop-blur-sm relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/10 to-transparent"></div>
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-primary/8 rounded-full filter blur-3xl"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/6 rounded-full filter blur-2xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="md:col-span-2">
-              <div className="flex items-center mb-6">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/10 rounded-full filter blur-xl opacity-50"></div>
-                  <Image
-                    src="/images/logo-voyage_smart.png"
-                    alt="Voyage Smart Logo"
-                    width={180}
-                    height={45}
-                    className="h-12 w-auto relative z-10"
-                  />
+              <div className="flex items-center mb-8">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-2xl filter blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                  <div className="relative bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm rounded-2xl p-6 border border-primary/20 shadow-lg">
+                    <Image
+                      src="/images/logo-voyage_smart.png"
+                      alt="Voyage Smart Logo"
+                      width={240}
+                      height={60}
+                      className="h-16 w-auto relative z-10 group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                 </div>
               </div>
-              <p className="text-muted-foreground max-w-md mb-6 text-base leading-relaxed">
+              <p className="text-muted-foreground max-w-lg mb-8 text-lg leading-relaxed">
                 AI-powered travel planning made easy. Plan trips, manage expenses, keep a travel journal, get intelligent recommendations, and collaborate with friends all in one place.
               </p>
               <div className="flex space-x-4">
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 transition-all duration-300 hover:scale-110">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors duration-300"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 transition-all duration-300 hover:scale-110">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors duration-300"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 transition-all duration-300 hover:scale-110">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors duration-300"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+                </Button>
+                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                 </Button>
               </div>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-6 text-foreground">Quick Links</h3>
-              <ul className="space-y-4">
+              <h3 className="font-bold text-xl mb-8 text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">Quick Links</h3>
+              <ul className="space-y-5">
                 <li>
                   <button
                     onClick={() => scrollToSection(featuresRef)}
-                    className="text-muted-foreground hover:text-primary transition-colors text-left flex items-center group"
+                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-lg"
                   >
-                    <ArrowRightIcon className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" />
-                    <span>Features</span>
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Features</span>
                   </button>
                 </li>
                 <li>
                   <button
                     onClick={() => scrollToSection(pricingRef)}
-                    className="text-muted-foreground hover:text-primary transition-colors text-left flex items-center group"
+                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-lg"
                   >
-                    <ArrowRightIcon className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" />
-                    <span>Plans & Pricing</span>
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Plans & Pricing</span>
                   </button>
                 </li>
                 <li>
                   <button
                     onClick={() => scrollToSection(faqRef)}
-                    className="text-muted-foreground hover:text-primary transition-colors text-left flex items-center group"
+                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-lg"
                   >
-                    <ArrowRightIcon className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" />
-                    <span>FAQ</span>
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">FAQ</span>
                   </button>
                 </li>
                 <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors flex items-center group">
-                    <ArrowRightIcon className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" />
-                    <span>Support</span>
+                  <Link href="/documentation" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Documentation</span>
                   </Link>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-6 text-foreground">Account</h3>
-              <ul className="space-y-4">
+              <h3 className="font-bold text-xl mb-8 text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">Get Started</h3>
+              <ul className="space-y-5">
                 <li>
-                  <Link href="/login" className="text-muted-foreground hover:text-primary transition-colors flex items-center group">
-                    <ArrowRightIcon className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" />
-                    <span>Log In</span>
+                  <Link href="/login" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Log In</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/register" className="text-muted-foreground hover:text-primary transition-colors flex items-center group">
-                    <ArrowRightIcon className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" />
-                    <span>Sign Up</span>
+                  <Link href="/register" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Sign Up Free</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors flex items-center group">
-                    <ArrowRightIcon className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" />
-                    <span>Privacy Policy</span>
+                  <Link href="#" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Privacy Policy</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-colors flex items-center group">
-                    <ArrowRightIcon className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0" />
-                    <span>Terms of Service</span>
+                  <Link href="#" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Terms of Service</span>
                   </Link>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="mt-16 pt-8 border-t border-border/30 text-center">
-            <p className="text-muted-foreground">© {new Date().getFullYear()} VoyageSmart. All rights reserved.</p>
+          {/* Footer Bottom */}
+          <div className="mt-20 pt-8 border-t border-gradient-to-r from-transparent via-border/50 to-transparent">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex items-center gap-4">
+                <p className="text-muted-foreground text-lg">© {new Date().getFullYear()} VoyageSmart. All rights reserved.</p>
+                <div className="hidden md:flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  <span className="text-sm text-primary font-medium">Made with ❤️ for travelers</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Badge variant="secondary" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
+                  <SparklesIcon className="h-4 w-4 mr-2" />
+                  AI-Powered
+                </Badge>
+                <Badge variant="secondary" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
+                  <ShieldIcon className="h-4 w-4 mr-2" />
+                  Secure
+                </Badge>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* Modern Navigation System */}
+      {/* Progress Bar - Top */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-background/20">
+        <div
+          className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300 ease-out shadow-sm"
+          style={{ width: `${scrollProgress}%` }}
+        ></div>
+      </div>
+
+      {/* Back to Top Button - Simple and Clean */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-24 right-6 lg:bottom-6 lg:right-6 z-50 bg-primary/90 hover:bg-primary text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 backdrop-blur-sm border border-primary/20 animate-fade-in group"
+          aria-label="Back to top"
+        >
+          <ChevronUpIcon className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
+        </button>
+      )}
+
+      {/* Section Navigation Dots - Left Side - Hidden on mobile */}
+      <div className="hidden lg:flex fixed left-4 xl:left-6 top-1/2 transform -translate-y-1/2 z-50 flex-col gap-3 bg-background/90 backdrop-blur-xl rounded-xl p-3 border border-border/50 shadow-xl max-w-[60px]">
+        {[
+          { id: 'hero', label: 'Home', icon: HomeIcon },
+          { id: 'features', label: 'Features', icon: SparklesIcon },
+          { id: 'ai', label: 'AI Powered', icon: RocketIcon },
+          { id: 'latest', label: 'Latest', icon: StarIcon },
+          { id: 'pricing', label: 'Pricing', icon: DollarSignIcon },
+          { id: 'faq', label: 'Help', icon: HelpCircleIcon }
+        ].map((section) => {
+          const isActive = activeSection === section.id;
+          const Icon = section.icon;
+
+          return (
+            <div key={section.id} className="relative group">
+              <button
+                onClick={() => {
+                  const refs = { hero: heroRef, features: featuresRef, ai: aiRef, latest: latestRef, pricing: pricingRef, faq: faqRef };
+                  const ref = refs[section.id as keyof typeof refs];
+                  if (ref?.current) {
+                    ref.current.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className={`relative p-2.5 lg:p-2 xl:p-3 rounded-full transition-all duration-300 backdrop-blur-sm border shadow-md hover:shadow-lg hover:scale-105 ${
+                  isActive
+                    ? 'bg-primary text-white border-primary/20 shadow-primary/25'
+                    : 'bg-background/80 text-muted-foreground border-border/50 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
+                }`}
+                aria-label={`Go to ${section.label}`}
+              >
+                <Icon className={`h-4 w-4 lg:h-4 lg:w-4 xl:h-5 xl:w-5 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+
+                {/* Active indicator */}
+                {isActive && (
+                  <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-primary rounded-full animate-fade-in"></div>
+                )}
+              </button>
+
+              {/* Tooltip */}
+              <div className="absolute left-full ml-3 lg:ml-2 xl:ml-4 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-xs lg:text-xs xl:text-sm px-2 lg:px-2 xl:px-3 py-1 lg:py-1 xl:py-2 rounded-md lg:rounded-md xl:rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none shadow-lg z-60">
+                {section.label}
+                <div className="absolute right-full top-1/2 transform -translate-y-1/2 border-2 lg:border-2 xl:border-4 border-transparent border-r-gray-900"></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Mobile Navigation Bar - Bottom (App-style) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 shadow-2xl">
+        <div className="flex justify-around items-center py-2 px-4 max-w-md mx-auto">
+          {[
+            { id: 'hero', label: 'Home', icon: HomeIcon },
+            { id: 'features', label: 'Features', icon: SparklesIcon },
+            { id: 'ai', label: 'AI', icon: RocketIcon },
+            { id: 'latest', label: 'New', icon: StarIcon },
+            { id: 'pricing', label: 'Pricing', icon: DollarSignIcon },
+            { id: 'faq', label: 'Help', icon: HelpCircleIcon }
+          ].map((section) => {
+            const isActive = activeSection === section.id;
+            const Icon = section.icon;
+
+            return (
+              <button
+                key={section.id}
+                onClick={() => {
+                  const refs = { hero: heroRef, features: featuresRef, ai: aiRef, latest: latestRef, pricing: pricingRef, faq: faqRef };
+                  const ref = refs[section.id as keyof typeof refs];
+                  if (ref?.current) {
+                    ref.current.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className={`flex flex-col items-center justify-center py-2 px-1 min-w-0 flex-1 transition-all duration-300 rounded-lg ${
+                  isActive
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-primary'
+                }`}
+                aria-label={`Go to ${section.label}`}
+              >
+                <div className={`relative p-1 transition-all duration-300 ${isActive ? 'scale-110' : 'hover:scale-105'}`}>
+                  <Icon className={`h-5 w-5 transition-all duration-300 ${isActive ? 'drop-shadow-sm' : ''}`} />
+                  {/* Active indicator dot */}
+                  {isActive && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  )}
+                </div>
+                <span className={`text-xs font-medium mt-1 transition-all duration-300 ${
+                  isActive ? 'text-primary' : 'text-muted-foreground'
+                } truncate max-w-full`}>
+                  {section.label}
+                </span>
+                {/* Active underline */}
+                {isActive && (
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full animate-fade-in"></div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Safe area for devices with home indicator */}
+        <div className="h-safe-area-inset-bottom"></div>
+      </div>
+
+
     </main>
   );
 }
