@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -17,6 +17,24 @@ export default function Navbar() {
   const { isAdmin, loading: isAdminLoading } = useIsAdmin();
   const pathname = usePathname();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    if (isProfileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileMenuOpen]);
 
   // Show simplified navbar for non-authenticated users on auth pages
   const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/forgot-password';
@@ -341,39 +359,107 @@ export default function Navbar() {
             {/* Trip Counter Widget for Mobile */}
             <TripCounterWidget />
 
-            {/* Mobile Quick Links */}
-            <Link
-              href="/profile"
-              className={`p-2 rounded-md ${pathname === '/profile' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
-              aria-label="Profile"
+            {/* Mobile Menu Button */}
+            <button
+              type="button"
+              className="p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              onClick={toggleProfileMenu}
+              aria-label="Open menu"
             >
               <UserIcon className="h-5 w-5" />
-            </Link>
+            </button>
 
-            <Link
-              href={user ? "/subscription" : "/pricing"}
-              className={`p-2 rounded-md ${pathname === '/pricing' || pathname === '/subscription' ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
-              aria-label={user ? "Subscription" : "Pricing"}
-            >
-              <TagIcon className="h-5 w-5" />
-            </Link>
+            {/* Mobile Menu Dropdown */}
+            {isProfileMenuOpen && (
+              <>
+                {/* Overlay for mobile */}
+                <div
+                  className="fixed inset-0 bg-black/20 z-40 sm:hidden"
+                  onClick={() => setIsProfileMenuOpen(false)}
+                />
+                <div
+                  ref={menuRef}
+                  className="absolute top-16 right-4 w-56 bg-background border border-border rounded-lg shadow-lg z-50 animate-in slide-in-from-top-2 duration-200"
+                >
+                <div className="py-2">
+                  <Link
+                    href="/dashboard"
+                    className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
+                      pathname === '/dashboard' ? 'text-primary bg-muted' : 'text-foreground'
+                    }`}
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <HomeIcon className="h-4 w-4" />
+                    Dashboard
+                  </Link>
 
-            <Link
-              href="/documentation"
-              className={`p-2 rounded-md ${pathname.startsWith('/documentation') ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
-              aria-label="Documentation"
-            >
-              <BookOpenIcon className="h-5 w-5" />
-            </Link>
+                  <Link
+                    href="/profile"
+                    className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
+                      pathname === '/profile' ? 'text-primary bg-muted' : 'text-foreground'
+                    }`}
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    Profile
+                  </Link>
 
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className={`p-2 rounded-md ${pathname.startsWith('/admin') ? 'text-primary animate-pulse-once' : 'text-muted-foreground'}`}
-                aria-label="Admin Dashboard"
-              >
-                <ShieldIcon className="h-5 w-5" />
-              </Link>
+                  <Link
+                    href={user ? "/subscription" : "/pricing"}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
+                      pathname === '/subscription' || pathname === '/pricing' ? 'text-primary bg-muted' : 'text-foreground'
+                    }`}
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <TagIcon className="h-4 w-4" />
+                    {user ? "Subscription" : "Pricing"}
+                  </Link>
+
+                  <Link
+                    href="/documentation"
+                    className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
+                      pathname.startsWith('/documentation') ? 'text-primary bg-muted' : 'text-foreground'
+                    }`}
+                    onClick={() => setIsProfileMenuOpen(false)}
+                  >
+                    <BookOpenIcon className="h-4 w-4" />
+                    Documentation
+                  </Link>
+
+                  {isAdmin && !isAdminLoading && (
+                    <Link
+                      href="/admin"
+                      className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
+                        pathname.startsWith('/admin') ? 'text-primary bg-muted' : 'text-foreground'
+                      }`}
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      <ShieldIcon className="h-4 w-4" />
+                      Admin
+                    </Link>
+                  )}
+
+                  <div className="border-t border-border my-2"></div>
+
+                  <div className="px-4 py-2">
+                    <ThemeSwitcher />
+                  </div>
+
+                  <div className="border-t border-border my-2"></div>
+
+                  <button
+                    onClick={() => {
+                      setIsProfileMenuOpen(false);
+                      signOut();
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left"
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    Sign out
+                  </button>
+                </div>
+              </div>
+              </>
             )}
           </div>
         </div>
