@@ -33,6 +33,7 @@ import TransportationSkeleton from '@/components/transportation/TransportationSk
 import TransportationModal from '@/components/transportation/TransportationModal';
 import TransportationDetailsModal from '@/components/transportation/TransportationDetailsModal';
 import { LazyTransportationMap } from '@/components/LazyComponents';
+import TransportationCounterWidget from '@/components/ui/TransportationCounterWidget';
 
 type Trip = {
   id: string;
@@ -226,17 +227,31 @@ export default function TransportationPage() {
         </div>
 
         <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col space-y-2">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
-              <PlaneTakeoffIcon className="h-6 w-6 mr-2" />
-              Transportation
-            </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+            <div className="flex flex-col space-y-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
+                <PlaneTakeoffIcon className="h-6 w-6 mr-2" />
+                Transportation
+              </h1>
 
-            {trip && (
-              <p className="text-sm text-muted-foreground">
-                {trip.name} {trip.destination && `• ${trip.destination}`}
-              </p>
-            )}
+              {trip && (
+                <p className="text-sm text-muted-foreground">
+                  {trip.name} {trip.destination && `• ${trip.destination}`}
+                </p>
+              )}
+            </div>
+
+            {/* Counter Widget */}
+            <div className="flex-shrink-0">
+              {/* Desktop version */}
+              <div className="hidden sm:block">
+                <TransportationCounterWidget count={transportations.length} />
+              </div>
+              {/* Mobile version */}
+              <div className="block sm:hidden">
+                <TransportationCounterWidget count={transportations.length} compact />
+              </div>
+            </div>
           </div>
         </div>
       </header>

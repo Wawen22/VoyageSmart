@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
 import FormattedAIResponse from './FormattedAIResponse';
+import '@/styles/ai-assistant.css';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -226,6 +227,22 @@ export default function ChatBot({
     return true; // Minimizzato per impostazione predefinita
   });
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Detect if we're on mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Non blocchiamo più lo scroll del body dato che non occupiamo tutto lo schermo
   const [suggestedQuestions, setSuggestedQuestions] = useState<SuggestedQuestion[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -380,7 +397,13 @@ export default function ChatBot({
   const toggleMinimize = () => {
     const newState = !isMinimized;
     setIsMinimized(newState);
-    if (isExpanded) setIsExpanded(false);
+
+    // Su mobile, quando si apre la chat, va direttamente in fullscreen
+    if (!newState && isMobile) {
+      setIsExpanded(true);
+    } else if (isExpanded && !isMobile) {
+      setIsExpanded(false);
+    }
 
     // Salva lo stato nel localStorage
     if (typeof window !== 'undefined') {
@@ -389,6 +412,9 @@ export default function ChatBot({
   };
 
   const toggleExpand = () => {
+    // Su mobile non permettiamo il toggle expand, è sempre fullscreen quando aperto
+    if (isMobile) return;
+
     setIsExpanded(!isExpanded);
     if (isMinimized) setIsMinimized(false);
   };
@@ -739,12 +765,17 @@ export default function ChatBot({
     return (
       <button
         onClick={toggleMinimize}
-        className="fixed sm:bottom-4 bottom-[180px] right-4 bg-primary text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-all duration-300 animate-float"
+        className="fixed sm:bottom-4 bottom-[90px] right-4 bg-gradient-to-br from-purple-600 to-indigo-600 text-white p-4 rounded-2xl shadow-2xl z-50 flex items-center gap-3 hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 ai-float backdrop-blur-xl border border-purple-500/20 ai-button-hover"
         style={{ marginRight: '4%' }}
         aria-label="Apri assistente AI"
       >
-        <Sparkles size={20} className="animate-pulse" />
-        <span className="sm:inline hidden">{contextLoaded ? 'Assistente AI' : 'Assistente AI (Caricamento...)'}</span>
+        <div className="relative">
+          <Sparkles size={22} className="animate-pulse" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-purple-600 animate-pulse"></div>
+        </div>
+        <span className="sm:inline hidden font-medium">
+          {contextLoaded ? 'AI Assistant' : 'AI Assistant (Loading...)'}
+        </span>
       </button>
     );
   }
@@ -752,59 +783,78 @@ export default function ChatBot({
   return (
     <div
       className={`
-        fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 bottom-[70px] right-4 w-80 sm:h-[450px] h-[400px]'}
-        bg-background border border-border rounded-lg shadow-xl z-50
+        fixed ${
+          isMobile
+            ? 'bottom-[70px] left-0 right-0 h-[75vh] max-h-[650px]' // Su mobile altezza aumentata al 75% con massimo 650px
+            : isExpanded
+              ? 'inset-4'
+              : 'bottom-4 right-4 w-80 h-[450px]'
+        }
+        bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 shadow-2xl z-50
         flex flex-col transition-all duration-300 ease-in-out
-        glass-effect animate-fade-in
+        animate-fade-in ai-chat-container
+        ${isMobile ? 'rounded-t-2xl' : 'rounded-2xl'}
       `}
       aria-label="Assistente AI di viaggio"
     >
       {/* Header */}
-      <div className="p-3 border-b flex items-center justify-between bg-primary/5 rounded-t-lg">
-        <div className="flex items-center gap-2">
-          <div className="bg-primary/10 p-1.5 rounded-full">
-            <Sparkles className="text-primary" size={18} />
+      <div className={`p-4 border-b border-slate-700/50 flex items-center justify-between bg-slate-800/80 ai-header ${isMobile ? 'rounded-t-2xl' : 'rounded-t-2xl'}`}>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="bg-gradient-to-br from-purple-500 to-blue-600 p-2 rounded-xl shadow-lg">
+              <Sparkles className="text-white" size={20} />
+            </div>
+            {/* Online indicator */}
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-slate-800 online-indicator"></div>
           </div>
-          <h3 className="font-medium text-sm">
-            {contextLoaded
-              ? `Assistente Viaggio: ${tripName}`
-              : <span className="flex items-center gap-1">Caricamento contesto <Loader2 size={14} className="animate-spin" /></span>
-            }
-          </h3>
+          <div className="flex flex-col">
+            <h3 className="font-semibold text-white text-sm">
+              AI Travel Assistant
+            </h3>
+            <p className="text-xs text-slate-300 flex items-center gap-1">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              Online • Ready to help
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={clearConversation}
-            className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-destructive transition-colors"
+            className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
             title="Cancella conversazione"
             aria-label="Cancella conversazione"
           >
             <Trash2 size={16} />
           </button>
-          {isExpanded ? (
-            <button
-              onClick={toggleExpand}
-              className="p-1.5 hover:bg-muted rounded transition-colors"
-              title="Riduci"
-              aria-label="Riduci finestra"
-            >
-              <Minimize2 size={16} />
-            </button>
-          ) : (
-            <button
-              onClick={toggleExpand}
-              className="p-1.5 hover:bg-muted rounded transition-colors"
-              title="Espandi"
-              aria-label="Espandi finestra"
-            >
-              <Maximize2 size={16} />
-            </button>
+          {/* Pulsanti di espansione solo su desktop */}
+          {!isMobile && (
+            <>
+              {isExpanded ? (
+                <button
+                  onClick={toggleExpand}
+                  className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400 hover:text-white transition-colors"
+                  title="Riduci"
+                  aria-label="Riduci finestra"
+                >
+                  <Minimize2 size={16} />
+                </button>
+              ) : (
+                <button
+                  onClick={toggleExpand}
+                  className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400 hover:text-white transition-colors"
+                  title="Espandi"
+                  aria-label="Espandi finestra"
+                >
+                  <Maximize2 size={16} />
+                </button>
+              )}
+            </>
           )}
           <button
             onClick={toggleMinimize}
-            className="p-1.5 hover:bg-muted rounded transition-colors"
-            title="Minimizza"
-            aria-label="Minimizza finestra"
+            className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400 hover:text-white transition-colors"
+            title={isMobile ? "Chiudi" : "Minimizza"}
+            aria-label={isMobile ? "Chiudi finestra" : "Minimizza finestra"}
           >
             <X size={16} />
           </button>
@@ -812,64 +862,63 @@ export default function ChatBot({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-slate-900/80 ai-chat-messages">
         {messages.map((message, index) => (
           <div
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div
-              className={`
-                max-w-[80%] p-3 rounded-lg shadow-sm
-                ${message.role === 'user'
-                  ? 'bg-primary text-primary-foreground ml-4 animate-slide-in-left'
-                  : 'bg-muted mr-4 animate-slide-in-right'
-                }
-              `}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                {message.role === 'assistant' ? (
-                  <Bot size={16} className="text-primary" />
-                ) : (
-                  <User size={16} />
-                )}
-                <span className="text-xs font-medium">
-                  {message.role === 'assistant' ? 'Assistente' : 'Tu'}
-                </span>
+            {message.role === 'user' && (
+              <div className="flex flex-col items-end space-y-1">
+                <div className="bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-sm shadow-md max-w-[85%] user-message message-slide-in-left">
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                </div>
+                <div className="flex items-center gap-1 px-2">
+                  <span className="text-xs text-slate-400 font-medium">You</span>
+                  {message.timestamp && (
+                    <span className="text-xs text-slate-500">
+                      {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {message.role === 'assistant' && (
+              <div className="flex flex-col items-start space-y-1">
+                <div className="bg-slate-800 text-white p-3 rounded-2xl rounded-tl-sm shadow-md max-w-[85%] ai-message message-slide-in-right">
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="text-xs font-medium text-indigo-400">AI Assistant</span>
+                  </div>
+                  <FormattedAIResponse
+                    content={message.content}
+                    className="text-sm text-slate-200"
+                    tripData={tripData}
+                  />
+                </div>
                 {message.timestamp && (
-                  <span className="text-xs text-muted-foreground ml-auto">
+                  <span className="text-xs text-slate-500 px-2">
                     {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 )}
               </div>
-
-              {/* Formatted rendering for assistant messages */}
-              {message.role === 'assistant' ? (
-                <FormattedAIResponse
-                  content={message.content}
-                  className="text-sm"
-                  tripData={tripData}
-                />
-              ) : (
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-              )}
-            </div>
+            )}
           </div>
         ))}
 
         {/* Typing indicator */}
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-muted p-3 rounded-lg max-w-[80%] mr-4 animate-pulse">
-              <div className="flex items-center gap-2 mb-1">
-                <Bot size={16} className="text-primary" />
-                <span className="text-xs font-medium">Assistente</span>
+            <div className="bg-slate-800 text-white p-3 rounded-2xl rounded-tl-sm shadow-md max-w-[85%]">
+              <div className="mb-1 flex items-center gap-2">
+                <span className="text-xs font-medium text-indigo-400">AI Assistant</span>
               </div>
               <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-300">AI is thinking</span>
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
               </div>
             </div>
@@ -879,14 +928,13 @@ export default function ChatBot({
         {/* Loading indicator */}
         {isLoading && !isTyping && (
           <div className="flex justify-start">
-            <div className="bg-muted p-3 rounded-lg max-w-[80%] mr-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Bot size={16} className="text-primary" />
-                <span className="text-xs font-medium">Assistente</span>
+            <div className="bg-slate-800 text-white p-3 rounded-2xl rounded-tl-sm shadow-md max-w-[85%]">
+              <div className="mb-1 flex items-center gap-2">
+                <span className="text-xs font-medium text-indigo-400">AI Assistant</span>
               </div>
               <div className="flex items-center gap-2">
-                <Loader2 size={16} className="animate-spin" />
-                <p className="text-sm">Sto elaborando la risposta...</p>
+                <Loader2 size={16} className="animate-spin text-indigo-400" />
+                <p className="text-sm text-slate-300">Processing your request...</p>
               </div>
             </div>
           </div>
@@ -894,14 +942,14 @@ export default function ChatBot({
 
         {/* Suggested questions */}
         {suggestedQuestions.length > 0 && !isLoading && !isTyping && (
-          <div className="flex flex-wrap gap-2 mt-2 mb-1">
+          <div className="flex flex-wrap gap-2 mt-3 mb-1">
             {suggestedQuestions.map((question, index) => (
               <button
                 key={index}
                 onClick={question.action}
-                className="text-xs bg-muted hover:bg-muted/80 text-foreground px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+                className="text-xs bg-slate-700/60 hover:bg-slate-600/60 text-slate-200 px-3 py-2 rounded-xl transition-all duration-200 flex items-center gap-1 border border-slate-600/30 hover:border-indigo-500/50 suggestion-button"
               >
-                <HelpCircle size={12} />
+                <HelpCircle size={12} className="text-indigo-400" />
                 {question.text}
               </button>
             ))}
@@ -912,27 +960,27 @@ export default function ChatBot({
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t bg-muted/20">
+      <div className={`p-4 border-t border-slate-700/50 bg-slate-800/80 ai-footer rounded-b-2xl`}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
           }}
-          className="flex gap-2 items-center"
+          className="flex gap-3 items-center"
         >
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Chiedi qualcosa sul tuo viaggio..."
-            className="text-xs flex-1 px-4 py-2.5 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-background shadow-sm"
+            placeholder="Ask me anything about your trip..."
+            className="text-sm flex-1 px-4 py-3 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-slate-700/50 text-white placeholder-slate-400 shadow-sm ai-input-focus"
             disabled={isLoading}
             aria-label="Messaggio per l'assistente AI"
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="bg-primary text-white p-2.5 rounded-full disabled:opacity-50 hover:bg-primary/90 transition-colors shadow-sm"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-xl disabled:opacity-50 hover:from-indigo-500 hover:to-purple-500 transition-all duration-200 shadow-lg disabled:cursor-not-allowed send-button"
             aria-label="Invia messaggio"
           >
             {isLoading ? (
@@ -942,9 +990,9 @@ export default function ChatBot({
             )}
           </button>
         </form>
-        <div className="text-xs text-center mt-2 text-muted-foreground">
-          <MessageSquare size={12} className="inline mr-1" />
-          Assistente AI di VoyageSmart - Powered by Gemini
+        <div className="text-xs text-center mt-3 text-slate-400 flex items-center justify-center gap-1">
+          <MessageSquare size={12} />
+          VoyageSmart AI Assistant • Powered by Gemini
         </div>
       </div>
     </div>

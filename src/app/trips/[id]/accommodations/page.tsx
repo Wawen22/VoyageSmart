@@ -30,6 +30,7 @@ import AccommodationModal from '@/components/accommodations/AccommodationModal';
 import AccommodationDetailsModal from '@/components/accommodations/AccommodationDetailsModal';
 import { LazyMapView, LazyAccommodationsMapView } from '@/components/LazyComponents';
 import UpgradePrompt from '@/components/subscription/UpgradePrompt';
+import AccommodationCounterWidget from '@/components/ui/AccommodationCounterWidget';
 
 type Trip = {
   id: string;
@@ -220,17 +221,31 @@ export default function AccommodationsPage() {
         </div>
 
         <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col space-y-2">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
-              <Building2Icon className="h-6 w-6 mr-2" />
-              Accommodations
-            </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+            <div className="flex flex-col space-y-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
+                <Building2Icon className="h-6 w-6 mr-2" />
+                Accommodations
+              </h1>
 
-            {trip && (
-              <p className="text-sm text-muted-foreground">
-                {trip.name} {trip.destination && `• ${trip.destination}`}
-              </p>
-            )}
+              {trip && (
+                <p className="text-sm text-muted-foreground">
+                  {trip.name} {trip.destination && `• ${trip.destination}`}
+                </p>
+              )}
+            </div>
+
+            {/* Counter Widget */}
+            <div className="flex-shrink-0">
+              {/* Desktop version */}
+              <div className="hidden sm:block">
+                <AccommodationCounterWidget count={accommodations.length} />
+              </div>
+              {/* Mobile version */}
+              <div className="block sm:hidden">
+                <AccommodationCounterWidget count={accommodations.length} compact />
+              </div>
+            </div>
           </div>
         </div>
       </header>

@@ -81,19 +81,19 @@ const components = {
     // Se il paragrafo contiene emoji specifiche, aggiungi icone
     const content = typeof children === 'string' ? children : '';
     const hasSpecialEmoji = Object.keys(emojiToIcon).some(emoji => content.includes(emoji));
-    
+
     if (hasSpecialEmoji) {
       return (
-        <div className="mb-3 p-3 bg-muted/30 rounded-lg border-l-4 border-primary/30" {...props}>
-          <p className="text-sm leading-relaxed text-foreground flex items-start gap-2">
+        <div className="mb-3 p-3 bg-slate-700/40 rounded-lg border-l-4 border-indigo-400/60" {...props}>
+          <p className="text-sm leading-relaxed text-slate-200 flex items-start gap-2">
             {processContentWithIcons(children)}
           </p>
         </div>
       );
     }
-    
+
     return (
-      <p className="text-sm leading-relaxed text-foreground mb-3" {...props}>
+      <p className="text-sm leading-relaxed text-slate-200 mb-3" {...props}>
         {children}
       </p>
     );
@@ -111,25 +111,25 @@ const components = {
     </ol>
   ),
   li: ({ children, ...props }: any) => (
-    <li className="text-sm text-foreground flex items-start gap-2" {...props}>
-      <span className="text-primary mt-1.5 text-xs">•</span>
+    <li className="text-sm text-slate-200 flex items-start gap-2" {...props}>
+      <span className="text-indigo-400 mt-1.5 text-xs">•</span>
       <span className="flex-1">{children}</span>
     </li>
   ),
-  
+
   // Personalizza il testo in grassetto
   strong: ({ children, ...props }: any) => (
-    <strong className="font-semibold text-foreground" {...props}>
+    <strong className="font-semibold text-slate-100" {...props}>
       {children}
     </strong>
   ),
-  
+
   // Personalizza i link
   a: ({ children, href, ...props }: any) => (
-    <a 
-      href={href} 
-      className="text-primary hover:text-primary/80 underline font-medium transition-colors" 
-      target="_blank" 
+    <a
+      href={href}
+      className="text-indigo-400 hover:text-indigo-300 underline font-medium transition-colors"
+      target="_blank"
       rel="noopener noreferrer"
       {...props}
     >
@@ -139,21 +139,21 @@ const components = {
   
   // Personalizza le citazioni
   blockquote: ({ children, ...props }: any) => (
-    <blockquote className="border-l-4 border-primary/50 pl-4 py-2 my-4 bg-muted/20 rounded-r-lg italic text-muted-foreground" {...props}>
+    <blockquote className="border-l-4 border-indigo-400/50 pl-4 py-2 my-4 bg-slate-700/30 rounded-r-lg italic text-slate-300" {...props}>
       {children}
     </blockquote>
   ),
-  
+
   // Personalizza il codice inline
   code: ({ children, ...props }: any) => (
-    <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono text-foreground" {...props}>
+    <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-xs font-mono text-slate-200" {...props}>
       {children}
     </code>
   ),
-  
+
   // Personalizza i blocchi di codice
   pre: ({ children, ...props }: any) => (
-    <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-xs font-mono mb-4 border" {...props}>
+    <pre className="bg-slate-700/50 p-3 rounded-lg overflow-x-auto text-xs font-mono mb-4 border border-slate-600/30" {...props}>
       {children}
     </pre>
   ),
@@ -176,7 +176,7 @@ const processContentWithIcons = (content: any): React.ReactNode => {
         <>
           <IconComponent
             size={16}
-            className="text-primary flex-shrink-0 mt-0.5"
+            className="text-indigo-400 flex-shrink-0 mt-0.5"
           />
           <span className="flex-1">
             {beforeEmoji}

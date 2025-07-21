@@ -159,14 +159,14 @@ export default function Home() {
       description: 'Get intelligent travel recommendations, smart itinerary optimization, and 24/7 AI assistance for your trips.',
       icon: <SparklesIcon className="h-6 w-6 text-primary" />,
       delay: 100,
-      image: '/images/app-screenshot-2.jpg'
+      image: '/images/app-screenshots/4_Trip-Details_AI_Chat.png'
     },
     {
       title: 'Keep a Travel Journal',
       description: 'Document your journey with daily entries, organize photos in a gallery, and create a timeline of memories.',
       icon: <BookOpenIcon className="h-6 w-6 text-primary" />,
       delay: 200,
-      image: '/images/app-screenshot-2.jpg'
+      image: '/images/app-screenshots/10_TripPlanner_Journal_Timeline-View.jpeg'
     },
     {
       title: 'Track Expenses',
@@ -180,7 +180,7 @@ export default function Home() {
       description: 'Discover insights about your travel patterns with detailed analytics on destinations, frequency, duration, and spending habits.',
       icon: <TrendingUpIcon className="h-6 w-6 text-primary" />,
       delay: 400,
-      image: '/images/app-screenshot-3.jpg'
+      image: '/images/app-screenshots/2_Dashboard_Analytics.png'
     },
     {
       title: 'Collaborate',

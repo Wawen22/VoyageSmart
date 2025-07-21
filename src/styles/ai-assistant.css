@@ -1,0 +1,236 @@
+/* AI Assistant Modern UI Styles */
+
+/* Glassmorphism effect for the chat container */
+.ai-chat-container {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Smooth message animations */
+.message-slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.message-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Enhanced typing indicator */
+.typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgb(99, 102, 241);
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Floating animation for minimized button */
+.ai-float {
+  animation: aiFloat 3s ease-in-out infinite;
+}
+
+@keyframes aiFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(135deg, rgb(99, 102, 241), rgb(139, 92, 246));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced button hover effects */
+.ai-button-hover {
+  transition: all 0.2s ease;
+}
+
+.ai-button-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+}
+
+/* Message bubble effects */
+.user-message {
+  background: linear-gradient(135deg, rgb(79, 70, 229), rgb(99, 102, 241));
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.ai-message {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Suggestion button effects */
+.suggestion-button {
+  background: rgba(51, 65, 85, 0.6);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  transition: all 0.2s ease;
+}
+
+.suggestion-button:hover {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(99, 102, 241, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Online indicator pulse */
+.online-indicator {
+  animation: onlinePulse 2s infinite;
+}
+
+@keyframes onlinePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Scrollbar styling for dark theme */
+.ai-chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-chat-messages::-webkit-scrollbar-track {
+  background: rgba(51, 65, 85, 0.3);
+  border-radius: 3px;
+}
+
+.ai-chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 3px;
+}
+
+.ai-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
+}
+
+/* Input field focus effect */
+.ai-input-focus {
+  transition: all 0.2s ease;
+}
+
+.ai-input-focus:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  border-color: rgb(99, 102, 241);
+}
+
+/* Send button gradient animation */
+.send-button {
+  background: linear-gradient(135deg, rgb(79, 70, 229), rgb(139, 92, 246));
+  transition: all 0.2s ease;
+}
+
+.send-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgb(67, 56, 202), rgb(124, 58, 237));
+  transform: scale(1.05);
+}
+
+.send-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Header gradient background */
+.ai-header {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(51, 65, 85, 0.9));
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Footer gradient background */
+.ai-footer {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(51, 65, 85, 0.9));
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ai-chat-container {
+    /* Su mobile occupa 75% dell'altezza dal basso con bordi arrotondati in alto, lasciando spazio per la navigation bar */
+    border-radius: 1rem 1rem 0 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    max-height: 650px !important;
+    height: 75vh !important;
+    bottom: 70px !important; /* Spazio per la navigation bar */
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+  }
+
+  .ai-header {
+    border-radius: 1rem 1rem 0 0 !important;
+    padding-top: 1rem;
+  }
+
+  .ai-footer {
+    border-radius: 0 0 0 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+
+  .ai-chat-messages {
+    padding-bottom: 0;
+  }
+}
+
+/* Dark mode specific enhancements */
+@media (prefers-color-scheme: dark) {
+  .ai-chat-container {
+    background: rgba(15, 23, 42, 0.98);
+  }
+}
