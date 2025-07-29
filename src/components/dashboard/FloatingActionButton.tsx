@@ -42,7 +42,7 @@ export default function FloatingActionButton() {
   ];
 
   return (
-    <div className="fixed bottom-6 inset-x-0 text-center sm:inset-x-auto sm:right-6 sm:text-left z-50">
+    <div className="fixed bottom-6 inset-x-0 text-center sm:inset-x-auto sm:right-4 sm:text-center z-50">
       {/* Action buttons */}
       <div className={cn(
         "flex flex-col gap-3 mb-4 transition-all duration-300",

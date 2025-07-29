@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { getUserTotalTripCount } from '@/lib/subscription';
-import { MapPinIcon, UsersIcon, CrownIcon, SparklesIcon, TrendingUpIcon } from 'lucide-react';
+import { MapPinIcon, UsersIcon, CrownIcon, SparklesIcon, TrendingUpIcon, InfoIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 
 interface TripCounts {
   owned: number;
@@ -17,6 +19,8 @@ interface TripCounts {
 export default function TripCounterWidget() {
   const { user } = useAuth();
   const { subscription } = useSubscription();
+  const { showUpgradeModal } = usePremiumFeature();
+  const router = useRouter();
   const [tripCounts, setTripCounts] = useState<TripCounts>({ owned: 0, participating: 0, total: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +49,19 @@ export default function TripCounterWidget() {
 
     return () => clearInterval(interval);
   }, [user]);
+
+  // Handle info icon click
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (showUpgradeModal) {
+      showUpgradeModal();
+    } else {
+      // Fallback: redirect to pricing page
+      router.push('/pricing');
+    }
+  };
 
   // Don't show for non-authenticated users
   if (!user || loading) {
@@ -127,31 +144,54 @@ export default function TripCounterWidget() {
           )}>
             {tripCounts.total}/5
           </span>
-          <span className="text-xs font-medium text-muted-foreground">trips</span>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-muted-foreground">trips</span>
+          </div>
         </div>
 
         {/* Status indicators */}
-        {isAtLimit ? (
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1">
+          {isAtLimit ? (
             <Badge variant="destructive" className="text-xs px-2 py-0.5 font-semibold animate-pulse">
               Limit reached
             </Badge>
-          </div>
-        ) : isNearLimit ? (
-          <div className="flex items-center gap-1">
-            <TrendingUpIcon className="h-3 w-3 text-amber-600 dark:text-amber-400 animate-bounce" />
-            <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
-              Almost full
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1">
+          ) : isNearLimit ? (
+            <>
+              <TrendingUpIcon className="h-3 w-3 text-amber-600 dark:text-amber-400 animate-bounce" />
+              <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                Almost full
+              </span>
+            </>
+          ) : (
             <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
               {5 - tripCounts.total} left
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Info Icon */}
+      <button
+        onClick={handleInfoClick}
+        className={cn(
+          "relative p-1 rounded-full transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-1",
+          isAtLimit
+            ? "bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/60 focus:ring-red-300"
+            : isNearLimit
+            ? "bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 focus:ring-amber-300"
+            : "bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-900/60 focus:ring-blue-300"
+        )}
+        title="Upgrade to Premium for unlimited trips"
+      >
+        <InfoIcon className={cn(
+          "h-3 w-3 transition-colors duration-200",
+          isAtLimit
+            ? "text-red-600 dark:text-red-400"
+            : isNearLimit
+            ? "text-amber-600 dark:text-amber-400"
+            : "text-blue-600 dark:text-blue-400"
+        )} />
+      </button>
     </div>
   );
 }

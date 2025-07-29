@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import '@/styles/map.css';
+import '@/styles/modal-responsive.css';
 import { Providers } from '@/components/providers/Providers';
 import Navbar from '@/components/layout/Navbar';
 import MobileNavbar from '@/components/layout/MobileNavbar';
