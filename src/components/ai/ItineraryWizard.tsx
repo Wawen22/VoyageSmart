@@ -851,12 +851,11 @@ export default function ItineraryWizard({
     return (
       <button
         onClick={toggleMinimize}
-        className="fixed sm:bottom-4 sm:right-[180px] bottom-[100px] right-4 bg-[#8B5CF6] text-white p-3 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-[#7C3AED] transition-all duration-300 animate-float"
-        style={{ marginRight: '4%' }}
+        className="fixed sm:bottom-4 sm:right-[180px] bottom-[160px] sm:right-4 right-2 bg-[#8B5CF6] text-white p-3 rounded-full shadow-lg z-[49] flex items-center gap-2 hover:bg-[#7C3AED] transition-all duration-300 animate-float"
         aria-label="Apri wizard itinerario"
       >
-        <Calendar size={20} className="animate-pulse" />
-        <span className="sm:inline hidden">Wizard Itinerario</span>
+        <Calendar size={18} className="sm:w-5 sm:h-5 animate-pulse" />
+        <span className="sm:inline hidden text-sm">Wizard Itinerario</span>
       </button>
     );
   }
@@ -865,7 +864,7 @@ export default function ItineraryWizard({
     <>
       <div
         className={`
-          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 sm:right-[180px] bottom-[70px] right-4 w-[400px] sm:h-[550px] h-[500px]'}
+          fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 sm:right-[180px] bottom-[70px] sm:right-4 right-2 w-[calc(100vw-16px)] sm:w-[400px] sm:h-[550px] h-[500px]'}
           bg-background border border-border rounded-lg shadow-xl z-[99]
           flex flex-col transition-all duration-300 ease-in-out
           glass-effect animate-fade-in

@@ -765,34 +765,34 @@ export default function TripItinerary() {
         )}
 
         <div className="w-full mb-8">
-          <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-4 sm:gap-6">
+          <div className="flex flex-row sm:flex-row justify-center sm:justify-start gap-3 sm:gap-6">
             <button
               onClick={() => setActiveTab('itinerary')}
-              className={`group relative px-5 py-4 sm:px-8 sm:py-5 rounded-xl flex items-center gap-4 transition-all duration-300 border-2 ${
+              className={`group relative flex-1 sm:flex-none px-3 py-3 sm:px-8 sm:py-5 rounded-xl flex items-center gap-2 sm:gap-4 transition-all duration-300 border-2 ${
                 activeTab === 'itinerary'
                   ? 'bg-primary/10 text-primary border-primary shadow-md transform scale-105'
                   : 'bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground border-transparent hover:border-muted'
               }`}
             >
-              <div className={`p-3 rounded-full ${
+              <div className={`p-2 sm:p-3 rounded-full ${
                 activeTab === 'itinerary'
                   ? 'bg-primary/20'
                   : 'bg-muted group-hover:bg-muted/80'
               } transition-colors duration-300`}>
-                <CalendarIcon className={`h-6 w-6 ${
+                <CalendarIcon className={`h-5 w-5 sm:h-6 sm:w-6 ${
                   activeTab === 'itinerary' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
                 }`} />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-base sm:text-lg">Itinerary</span>
-                <span className="text-xs sm:text-sm text-muted-foreground">Plan your daily activities</span>
+                <span className="font-bold text-sm sm:text-base lg:text-lg">Itinerary</span>
+                <span className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Plan your daily activities</span>
               </div>
               {activeTab === 'itinerary' && (
                 <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-primary rounded-l-full"></div>
               )}
             </button>
 
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none">
               <button
                 onClick={() => {
                   if (hasJournalAccess) {
@@ -801,7 +801,7 @@ export default function TripItinerary() {
                     setShowJournalInfoModal(true);
                   }
                 }}
-                className={`group relative w-full px-5 py-4 sm:px-8 sm:py-5 rounded-xl flex items-center gap-4 transition-all duration-300 border-2 ${
+                className={`group relative w-full px-3 py-3 sm:px-8 sm:py-5 rounded-xl flex items-center gap-2 sm:gap-4 transition-all duration-300 border-2 ${
                   !hasJournalAccess
                     ? 'bg-muted/50 text-muted-foreground border-muted hover:border-amber-300 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 cursor-pointer'
                     : activeTab === 'journal'
@@ -809,7 +809,7 @@ export default function TripItinerary() {
                     : 'bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground border-transparent hover:border-muted'
                 }`}
               >
-                <div className={`p-3 rounded-full ${
+                <div className={`p-2 sm:p-3 rounded-full ${
                   !hasJournalAccess
                     ? 'bg-muted group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30'
                     : activeTab === 'journal'
@@ -817,23 +817,23 @@ export default function TripItinerary() {
                     : 'bg-muted group-hover:bg-muted/80'
                 } transition-colors duration-300`}>
                   {!hasJournalAccess ? (
-                    <LockIcon className="h-6 w-6 text-muted-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" />
+                    <LockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" />
                   ) : (
-                    <BookOpenIcon className={`h-6 w-6 ${
+                    <BookOpenIcon className={`h-5 w-5 sm:h-6 sm:w-6 ${
                       activeTab === 'journal' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
                     }`} />
                   )}
                 </div>
                 <div className="flex flex-col flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-base sm:text-lg">Journal</span>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <span className="font-bold text-sm sm:text-base lg:text-lg">Journal</span>
                     {!hasJournalAccess && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 group-hover:bg-amber-200 dark:group-hover:bg-amber-800/40 transition-colors">
+                      <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 group-hover:bg-amber-200 dark:group-hover:bg-amber-800/40 transition-colors">
                         Premium
                       </span>
                     )}
                   </div>
-                  <span className="text-xs sm:text-sm text-muted-foreground text-left">Keep a diary and photos</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground text-left hidden sm:block">Keep a diary and photos</span>
                 </div>
                 {activeTab === 'journal' && hasJournalAccess && (
                   <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-primary rounded-l-full"></div>
@@ -847,10 +847,10 @@ export default function TripItinerary() {
                     e.stopPropagation();
                     setShowJournalInfoModal(true);
                   }}
-                  className="absolute top-3 right-3 p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-800/40 transition-all duration-200 hover:scale-110 z-10 group/info"
+                  className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-800/40 transition-all duration-200 hover:scale-110 z-10 group/info"
                   title="Learn about Journal features"
                 >
-                  <InfoIcon className="h-4 w-4 text-amber-600 dark:text-amber-400 group-hover/info:text-amber-700 dark:group-hover/info:text-amber-300 transition-colors" />
+                  <InfoIcon className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 group-hover/info:text-amber-700 dark:group-hover/info:text-amber-300 transition-colors" />
                 </button>
               )}
             </div>
@@ -859,97 +859,102 @@ export default function TripItinerary() {
 
         {activeTab === 'itinerary' && (
           <div className="mt-0">
-            {/* Itinerary Controls */}
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 bg-card p-4 rounded-lg shadow-sm border border-border">
+            {/* Itinerary Controls - Mobile Optimized */}
+            <div className="flex flex-col gap-4 mb-6 bg-card p-3 sm:p-4 rounded-lg shadow-sm border border-border">
+              {/* Header Section */}
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-full bg-primary/10">
                   <CalendarIcon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Itinerary View</h3>
+                  <h3 className="font-medium text-sm sm:text-base">Itinerary View</h3>
                   <p className="text-xs text-muted-foreground">Choose how to display your schedule</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* View toggle */}
-                <div className="flex items-center bg-muted/50 rounded-md p-1">
+              {/* Controls Section - Mobile First */}
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4">
+                {/* View toggle - Mobile optimized */}
+                <div className="flex items-center bg-muted/50 rounded-md p-1 w-full sm:w-auto">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-1 ${
+                    className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-1 ${
                       viewMode === 'list'
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'text-foreground hover:bg-muted'
                     }`}
                     aria-label="List view"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
                     </svg>
-                    <span>List</span>
+                    <span className="hidden sm:inline">List</span>
                   </button>
                   <button
                     onClick={() => setViewMode('calendar')}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-1 ${
+                    className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-1 ${
                       viewMode === 'calendar'
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'text-foreground hover:bg-muted'
                     }`}
                     aria-label="Calendar view"
                   >
-                    <CalendarIcon className="h-4 w-4 mr-1" />
-                    <span>Calendar</span>
+                    <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Calendar</span>
                   </button>
                   <button
                     onClick={() => setViewMode('map')}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-1 ${
+                    className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-1 ${
                       viewMode === 'map'
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'text-foreground hover:bg-muted'
                     }`}
                     aria-label="Map view"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
                       <circle cx="12" cy="10" r="3"></circle>
                     </svg>
-                    <span>Map</span>
+                    <span className="hidden sm:inline">Map</span>
                   </button>
                 </div>
 
-                {/* AI Wizard button - visible only for AI subscribers */}
-                {hasAIAccess ? (
-                  <button
-                    onClick={() => setShowWizard(true)}
-                    className="bg-gradient-to-r from-purple-500 to-indigo-600 py-1.5 px-4 rounded-md shadow-sm text-sm font-medium text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 flex items-center gap-1"
-                    aria-label="Generate activities with AI"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span>AI Wizard</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => router.push('/pricing')}
-                    className="bg-gradient-to-r from-gray-500 to-gray-600 py-1.5 px-4 rounded-md shadow-sm text-sm font-medium text-white hover:from-gray-600 hover:to-gray-700 transition-all duration-200 flex items-center gap-1"
-                    aria-label="Upgrade to AI plan"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span>AI Plan</span>
-                  </button>
-                )}
+                {/* Action buttons - Mobile optimized, Desktop right-aligned */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:ml-auto">
+                  {/* AI Wizard button - visible only for AI subscribers */}
+                  {hasAIAccess ? (
+                    <button
+                      onClick={() => setShowWizard(true)}
+                      className="bg-gradient-to-r from-purple-500 to-indigo-600 py-2 sm:py-1.5 px-3 sm:px-4 rounded-md shadow-sm text-xs sm:text-sm font-medium text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center gap-1 min-h-[44px] sm:min-h-0"
+                      aria-label="Generate activities with AI"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      <span>AI Wizard</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => router.push('/pricing')}
+                      className="bg-gradient-to-r from-gray-500 to-gray-600 py-2 sm:py-1.5 px-3 sm:px-4 rounded-md shadow-sm text-xs sm:text-sm font-medium text-white hover:from-gray-600 hover:to-gray-700 transition-all duration-200 flex items-center justify-center gap-1 min-h-[44px] sm:min-h-0"
+                      aria-label="Upgrade to AI plan"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      <span>AI Plan</span>
+                    </button>
+                  )}
 
-                {/* Add day button */}
-                <button
-                  onClick={() => {
-                    setCurrentDay(null);
-                    setShowDayModal(true);
-                  }}
-                  className="bg-primary py-1.5 px-4 rounded-md shadow-sm text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all duration-200 flex items-center gap-1"
-                  aria-label="Add a new day"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span>Add Day</span>
-                </button>
+                  {/* Add day button */}
+                  <button
+                    onClick={() => {
+                      setCurrentDay(null);
+                      setShowDayModal(true);
+                    }}
+                    className="bg-primary py-2 sm:py-1.5 px-3 sm:px-4 rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all duration-200 flex items-center justify-center gap-1 min-h-[44px] sm:min-h-0"
+                    aria-label="Add a new day"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    <span>Add Day</span>
+                  </button>
+                </div>
               </div>
             </div>
 

@@ -76,6 +76,10 @@
   animation: aiFloat 3s ease-in-out infinite;
 }
 
+.animate-float {
+  animation: aiFloat 3s ease-in-out infinite;
+}
+
 @keyframes aiFloat {
   0%, 100% {
     transform: translateY(0px);
@@ -225,6 +229,30 @@
 
   .ai-chat-messages {
     padding-bottom: 0;
+  }
+
+  /* Mobile AI buttons positioning */
+  .ai-assistant-mobile {
+    bottom: 90px !important;
+    right: 8px !important;
+    z-index: 48 !important;
+  }
+
+  .ai-wizard-mobile {
+    bottom: 160px !important;
+    right: 8px !important;
+    z-index: 49 !important;
+  }
+
+  /* Ensure proper stacking and spacing */
+  .ai-buttons-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: fixed;
+    right: 8px;
+    bottom: 90px;
+    z-index: 50;
   }
 }
 
