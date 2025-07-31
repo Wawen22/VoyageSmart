@@ -101,7 +101,7 @@ export default function TripItinerary() {
 
   // Journal states
   const [activeTab, setActiveTab] = useState('itinerary');
-  const [journalTab, setJournalTab] = useState('entries');
+  const [journalTab, setJournalTab] = useState('timeline');
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<JournalEntry | null>(null);
   const [showMediaUploader, setShowMediaUploader] = useState(false);
