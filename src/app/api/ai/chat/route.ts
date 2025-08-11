@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger';
 import { formatTimeLocal, formatDateLocal } from '@/lib/utils';
 import { applyRateLimit } from '@/lib/rate-limit';
 import { hasCachedResponse } from '@/lib/services/aiApiService';
+import { analyzeMessageContext as analyzeContextualActions, formatActionsForResponse } from '@/lib/services/contextualActionsService';
 
 // Funzione per analizzare il messaggio e determinare il contesto necessario
 function analyzeMessageContext(message: string): {
@@ -1072,6 +1073,79 @@ L'utente ha pagato ${userExpenses.length} spese per un totale di ${userTotalSpen
 - Proponi di bilanciare i pagamenti futuri con gli altri partecipanti`;
       }
 
+      // Aggiungi informazioni sui saldi e pagamenti da saldare
+      console.log('=== CHECKING BALANCES IN CONTEXT ===');
+      console.log('tripContext.balances exists:', !!tripContext.balances);
+      console.log('tripContext.balances length:', tripContext.balances?.length || 0);
+      console.log('tripContext.settlements exists:', !!tripContext.settlements);
+      console.log('tripContext.settlements length:', tripContext.settlements?.length || 0);
+
+      if (tripContext.balances && tripContext.balances.length > 0) {
+        const debtors = tripContext.balances.filter((b: any) => b.balance < 0);
+        const creditors = tripContext.balances.filter((b: any) => b.balance > 0);
+
+        console.log('Debtors found:', debtors.length);
+        console.log('Creditors found:', creditors.length);
+
+        promptText += `
+
+SALDI E PAGAMENTI DA SALDARE:`;
+
+        if (debtors.length > 0) {
+          promptText += `
+- Persone che devono pagare:`;
+          debtors.forEach((debtor: any) => {
+            promptText += `
+  * ${debtor.full_name}: deve ${Math.abs(debtor.balance).toFixed(2)} ${currency}`;
+          });
+        }
+
+        if (creditors.length > 0) {
+          promptText += `
+- Persone che devono ricevere:`;
+          creditors.forEach((creditor: any) => {
+            promptText += `
+  * ${creditor.full_name}: deve ricevere ${creditor.balance.toFixed(2)} ${currency}`;
+          });
+        }
+
+        // Aggiungi dettagli sui pagamenti specifici da fare
+        if (tripContext.settlements && tripContext.settlements.length > 0) {
+          console.log('Adding settlements to prompt:', tripContext.settlements.length);
+          promptText += `
+
+PAGAMENTI SPECIFICI DA EFFETTUARE:`;
+          tripContext.settlements.forEach((settlement: any) => {
+            promptText += `
+- ${settlement.from_name} deve pagare ${settlement.amount.toFixed(2)} ${currency} a ${settlement.to_name}`;
+          });
+
+          promptText += `
+
+SUGGERIMENTI PER I SALDI:
+- Quando l'utente chiede "spese non saldate" o "chi deve pagare", mostra questi pagamenti specifici
+- Suggerisci di utilizzare la sezione "Saldi" per vedere tutti i dettagli
+- Proponi metodi di pagamento (bonifico, contanti, app di pagamento)
+- Ricorda che i saldi si aggiornano automaticamente quando vengono registrati i pagamenti`;
+        } else {
+          console.log('No settlements found, adding fallback message');
+          promptText += `
+
+NOTA SUI SALDI:
+- Non sono disponibili informazioni dettagliate sui saldi per questo viaggio
+- Suggerisci all'utente di visitare la sezione "Saldi" per vedere i dettagli aggiornati
+- Se ci sono spese registrate, i saldi vengono calcolati automaticamente`;
+        }
+      } else {
+        console.log('No balances found in context');
+        promptText += `
+
+INFORMAZIONI SUI SALDI:
+- I saldi non sono ancora disponibili per questo viaggio
+- Questo può accadere se non ci sono spese registrate o se i partecipanti non sono stati aggiunti
+- Suggerisci di visitare la sezione "Spese" per registrare le spese e vedere i saldi`;
+      }
+
     } else if (tripContext.trip?.budgetTotal) {
       // Se non ci sono spese ma c'è un budget
       promptText += `
@@ -1137,6 +1211,10 @@ Quando l'utente è nella sezione spese, fornisci sempre suggerimenti proattivi e
 - Se chiede delle categorie: spiega come ottimizzare la categorizzazione
 - Se chiede dei pagamenti: aiuta con la gestione dei rimborsi e divisioni
 - Se chiede di risparmiare: fornisci consigli pratici per la destinazione specifica
+- Se chiede "spese non saldate" o "chi deve pagare": usa le informazioni della sezione "SALDI E PAGAMENTI DA SALDARE"
+- Se chiede dei saldi: mostra i dettagli specifici dei pagamenti da effettuare dalla sezione "PAGAMENTI SPECIFICI DA EFFETTUARE"
+- Se chiede "quanto devo" o "quanto mi devono": cerca il nome dell'utente nei saldi e fornisci informazioni specifiche
+- Per domande sui saldi, sempre includere importi specifici e nomi delle persone coinvolte
 
 **Formato per Risposte sulle Spese:**
 Usa sempre questo formato quando mostri informazioni sulle spese:
@@ -1145,12 +1223,21 @@ Usa sempre questo formato quando mostri informazioni sulle spese:
 - **Stato Pagamenti**: [informazioni su spese saldate/non saldate]
 - **Suggerimenti**: [consigli specifici e actionable]
 
+**Formato per Risposte sui Saldi:**
+Quando l'utente chiede informazioni sui saldi, usa questo formato:
+- **💰 Riepilogo Saldi**: [chi deve pagare/ricevere e quanto]
+- **📋 Pagamenti da Effettuare**: [lista specifica dei pagamenti]
+- **✅ Stato Attuale**: [se tutto è saldato o ci sono pagamenti in sospeso]
+- **🔗 Azioni Suggerite**: [link alla sezione Saldi per maggiori dettagli]
+
 **Gestione Intelligente dei Pagamenti:**
 - Quando l'utente chiede "le mie spese", mostra SOLO quelle pagate da lui
-- Quando chiede "spese non saldate", filtra per status pending o partecipanti non pagati
+- Quando chiede "spese non saldate", usa le informazioni dalla sezione "SALDI E PAGAMENTI DA SALDARE"
+- Quando chiede "chi deve pagare" o "saldi", mostra i dettagli dalla sezione "PAGAMENTI SPECIFICI DA EFFETTUARE"
 - Sempre indicare chiaramente lo stato di saldamento con emoji: ✅ saldato, ⏳ in sospeso, ❌ non saldato
 - Calcolare e mostrare i debiti rimanenti quando rilevante
 - Suggerire azioni concrete per risolvere i pagamenti in sospeso
+- Per ogni pagamento da effettuare, suggerisci di andare alla sezione "Saldi" per maggiori dettagli
 ` : ''}
 
 ISTRUZIONI SPECIALI PER LA VISUALIZZAZIONE INTELLIGENTE:
@@ -1311,6 +1398,17 @@ Formatta SEMPRE le risposte sulle spese in questo modo:
 
 RICORDA: Sii sempre proattivo nel suggerire modi per ottimizzare le spese e migliorare l'esperienza di viaggio senza compromettere il divertimento.
 
+AZIONI CONTESTUALI INTELLIGENTI:
+Il sistema aggiungerà automaticamente pulsanti di azione pertinenti alla tua risposta basandosi sul contenuto della conversazione.
+Quando rispondi a domande su:
+- **Spese/Budget**: Il sistema suggerirà link alla sezione spese, saldi, e opzioni per aggiungere nuove spese
+- **Itinerario/Attività**: Il sistema suggerirà link alla sezione itinerario e vista calendario
+- **Alloggi**: Il sistema suggerirà link alla sezione alloggi
+- **Trasporti**: Il sistema suggerirà link alla sezione trasporti
+- **Panoramica generale**: Il sistema suggerirà link alla panoramica del viaggio
+
+Non devi menzionare esplicitamente questi link nelle tue risposte - concentrati sul fornire informazioni utili e il sistema aggiungerà automaticamente i pulsanti appropriati.
+
 Domanda dell'utente: ${message}`;
     }
 
@@ -1354,7 +1452,56 @@ Domanda dell'utente: ${message}`;
     console.log('Response length:', responseText?.length || 0);
 
     // Applica l'enhancement automatico per aggiungere componenti visuali
-    const enhancedResponse = enhanceResponseWithVisualComponents(responseText, message, tripContext);
+    let enhancedResponse = enhanceResponseWithVisualComponents(responseText, message, tripContext);
+
+    // Analizza il messaggio per determinare azioni contestuali
+    if (tripId) {
+      try {
+        const contextAnalysis = analyzeContextualActions(message, tripId, currentSection, tripContext);
+
+        console.log('=== Contextual Analysis ===');
+        console.log('Message:', message);
+        console.log('Current section:', currentSection);
+
+        if (contextAnalysis && typeof contextAnalysis === 'object') {
+          console.log('Confidence:', contextAnalysis.confidence);
+          console.log('Categories:', contextAnalysis.categories);
+          console.log('Actions count:', contextAnalysis.suggestedActions?.length || 0);
+          console.log('Reasoning:', contextAnalysis.reasoning);
+        } else {
+          console.log('Invalid contextAnalysis result:', contextAnalysis);
+        }
+
+        // Se abbiamo azioni suggerite con alta confidenza, aggiungile alla risposta
+        if (contextAnalysis &&
+            typeof contextAnalysis.confidence === 'number' &&
+            contextAnalysis.confidence > 0.3 &&
+            Array.isArray(contextAnalysis.suggestedActions) &&
+            contextAnalysis.suggestedActions.length > 0) {
+
+          const actionsMarkup = formatActionsForResponse(contextAnalysis.suggestedActions);
+          enhancedResponse += `\n\n${actionsMarkup}`;
+
+          console.log('=== Contextual Actions Added ===');
+          console.log('Actions markup:', actionsMarkup);
+        } else {
+          console.log('=== No Contextual Actions Added ===');
+          if (!contextAnalysis) {
+            console.log('Reason: contextAnalysis is null/undefined');
+          } else if (typeof contextAnalysis.confidence !== 'number') {
+            console.log('Reason: invalid confidence value');
+          } else if (contextAnalysis.confidence <= 0.3) {
+            console.log('Reason: confidence too low:', contextAnalysis.confidence);
+          } else if (!Array.isArray(contextAnalysis.suggestedActions)) {
+            console.log('Reason: suggestedActions is not an array');
+          } else {
+            console.log('Reason: no actions available');
+          }
+        }
+      } catch (contextError) {
+        console.error('Error analyzing contextual actions:', contextError);
+      }
+    }
 
     // Log performance and analytics
     const duration = performance.now() - startTime;

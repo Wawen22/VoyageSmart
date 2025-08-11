@@ -394,7 +394,9 @@ export async function getTripContext(tripId: string) {
       accommodations: [],
       transportation: [],
       itinerary: [],
-      expenses: []
+      expenses: [],
+      balances: [],
+      settlements: []
     };
 
     // Processa i risultati delle query parallele
@@ -535,6 +537,11 @@ export async function getTripContext(tripId: string) {
           }))
         }));
 
+        // Calculate balances and settlements
+        const { balances, settlements } = calculateExpenseBalances(tripContext.expenses, tripContext.participants);
+        tripContext.balances = balances;
+        tripContext.settlements = settlements;
+
         logger.debug('Expenses processed', {
           count: tripContext.expenses.length,
           totalAmount: tripContext.expenses.reduce((sum, e) => sum + e.amount, 0)
@@ -586,9 +593,96 @@ export async function getTripContext(tripId: string) {
       transportation: [],
       itinerary: [],
       expenses: [],
+      balances: [],
+      settlements: [],
       error: 'Non è stato possibile recuperare tutti i dettagli del viaggio'
     };
   }
+}
+
+/**
+ * Calculate expense balances and settlements for a trip
+ */
+function calculateExpenseBalances(expenses: any[], participants: any[]) {
+  // Initialize balances for all participants
+  const balanceMap = new Map<string, number>();
+  participants.forEach(p => {
+    balanceMap.set(p.user_id || p.id, 0);
+  });
+
+  // Calculate how much each person has paid and owes
+  expenses.forEach(expense => {
+    const payerId = expense.paid_by;
+
+    // Add what each participant owes
+    expense.participants.forEach((p: any) => {
+      const currentBalance = balanceMap.get(p.user_id) || 0;
+      balanceMap.set(p.user_id, currentBalance - p.amount);
+    });
+
+    // Add what the payer paid
+    const payerBalance = balanceMap.get(payerId) || 0;
+    balanceMap.set(payerId, payerBalance + expense.amount);
+  });
+
+  // Convert the balance map to an array
+  const balances: any[] = [];
+  balanceMap.forEach((balance, userId) => {
+    const participant = participants.find(p => (p.user_id || p.id) === userId);
+    if (participant) {
+      balances.push({
+        user_id: userId,
+        full_name: participant.full_name || participant.name,
+        balance: parseFloat(balance.toFixed(2)),
+      });
+    }
+  });
+
+  // Calculate settlements
+  const settlements = calculateSettlements(balances);
+
+  return { balances, settlements };
+}
+
+/**
+ * Calculate settlements between participants
+ */
+function calculateSettlements(balances: any[]) {
+  // Separate positive (creditors) and negative (debtors) balances
+  const creditors = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
+  const debtors = balances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance);
+
+  const settlements: any[] = [];
+
+  // Process each debtor in order
+  debtors.forEach(debtor => {
+    let remainingDebt = Math.abs(debtor.balance);
+
+    // Find all creditors this debtor needs to pay
+    while (remainingDebt > 0.01 && creditors.length > 0) {
+      const creditor = creditors[0];
+      const paymentAmount = Math.min(remainingDebt, creditor.balance);
+
+      if (paymentAmount > 0.01) {
+        settlements.push({
+          from_id: debtor.user_id,
+          from_name: debtor.full_name,
+          to_id: creditor.user_id,
+          to_name: creditor.full_name,
+          amount: parseFloat(paymentAmount.toFixed(2)),
+        });
+
+        remainingDebt -= paymentAmount;
+        creditor.balance -= paymentAmount;
+
+        if (creditor.balance < 0.01) {
+          creditors.shift();
+        }
+      }
+    }
+  });
+
+  return settlements;
 }
 
 /**

@@ -12,7 +12,6 @@
 | Resource | Description | Status |
 |----------|-------------|---------|
 | **[📏 Code Standards](./code-standards.md)** | Coding standards and best practices | ✅ Available |
-| **[🧪 Testing Framework](./testing-framework.md)** | Testing guidelines and procedures | ✅ Available |
 | **[🧪 Testing Guide](./testing.md)** | Comprehensive testing documentation | ✅ Available |
 | **[🔒 Security](./security-implementations.md)** | Security implementations and guidelines | ✅ Available |
 | **[🤝 Contributing](./contributing.md)** | How to contribute to VoyageSmart | ✅ Available |

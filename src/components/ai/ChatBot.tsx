@@ -962,6 +962,7 @@ export default function ChatBot({
                     content={message.content}
                     className="text-sm text-slate-200"
                     tripData={tripData}
+                    tripId={tripId}
                   />
                 </div>
                 {message.timestamp && (

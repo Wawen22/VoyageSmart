@@ -587,7 +587,7 @@ const testCards = {
 
 - **[API Documentation](../api/)** - Payment API endpoints
 - **[Security Guidelines](../development/security-implementations.md)** - Security best practices
-- **[Testing Framework](../development/testing-framework.md)** - Testing payment flows
+- **[Testing Guide](../development/testing.md)** - Testing payment flows
 
 ---
 

@@ -756,7 +756,7 @@ describe('Button Accessibility', () => {
 ## 🔗 Related Documentation
 
 - **[Code Standards](./code-standards.md)** - Development coding standards
-- **[Testing Framework](./testing-framework.md)** - Testing UI components
+- **[Testing Guide](./testing.md)** - Testing UI components
 - **[Frontend Architecture](../architecture/frontend-architecture.md)** - Frontend system design
 - **[Contributing](./contributing.md)** - How to contribute UI improvements
 

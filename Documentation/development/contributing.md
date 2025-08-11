@@ -443,7 +443,7 @@ Violations of the code of conduct should be reported to the maintainers. All rep
 ## 🔗 Additional Resources
 
 - **[Code Standards](./code-standards.md)** - Detailed coding guidelines
-- **[Testing Framework](./testing-framework.md)** - Testing best practices
+- **[Testing Guide](./testing.md)** - Testing best practices
 - **[Security Guidelines](./security-implementations.md)** - Security considerations
 - **[API Documentation](../api/)** - API reference guides
 

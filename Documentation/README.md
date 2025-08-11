@@ -79,7 +79,6 @@ Complete API documentation:
 ### 💻 [Development](./development/)
 Resources for developers and contributors:
 - **[Code Standards](./development/code-standards.md)** - Coding standards and best practices
-- **[Testing Framework](./development/testing-framework.md)** - Testing guidelines and procedures
 - **[Testing Guide](./development/testing.md)** - Comprehensive testing documentation
 - **[Security](./development/security-implementations.md)** - Security implementations and guidelines
 - **[Contributing](./development/contributing.md)** - How to contribute to VoyageSmart

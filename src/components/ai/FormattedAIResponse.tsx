@@ -26,11 +26,13 @@ import {
   Moon
 } from 'lucide-react';
 import AIDataContainer from './cards/AIDataContainer';
+import ContextualActionButtons, { ContextualAction, getActionIcon } from './ContextualActionButtons';
 
 interface FormattedAIResponseProps {
   content: string;
   className?: string;
   tripData?: any; // Trip context data for rendering structured components
+  tripId?: string; // Trip ID for contextual actions
 }
 
 // Mappa delle emoji agli icon components di Lucide
@@ -190,20 +192,69 @@ const processContentWithIcons = (content: any): React.ReactNode => {
   return content;
 };
 
-export default function FormattedAIResponse({ content, className = '', tripData }: FormattedAIResponseProps) {
+export default function FormattedAIResponse({ content, className = '', tripData, tripId }: FormattedAIResponseProps) {
+  // Function to parse contextual actions from content
+  const parseContextualActions = (text: string): { cleanText: string; actions: ContextualAction[] } => {
+    try {
+      const actionRegex = /\[CONTEXTUAL_ACTIONS:(.*?)\]/g;
+      let match;
+      const actions: ContextualAction[] = [];
+      let cleanText = text;
+
+      while ((match = actionRegex.exec(text)) !== null) {
+        try {
+          const actionsData = match[1];
+          const actionItems = actionsData.split(';;');
+
+          actionItems.forEach(item => {
+            try {
+              const [label, type, href, description] = item.split('|');
+              if (label && type && (type === 'link' || type === 'action')) {
+                actions.push({
+                  id: `action-${Date.now()}-${Math.random()}`,
+                  type: type as 'link' | 'action',
+                  label: label.trim(),
+                  description: description?.trim() || '',
+                  icon: getActionIcon('externalLink'),
+                  href: href?.trim() || undefined,
+                  variant: 'outline'
+                });
+              }
+            } catch (itemError) {
+              console.warn('Error parsing action item:', item, itemError);
+            }
+          });
+
+          // Remove the action marker from the text
+          cleanText = cleanText.replace(match[0], '');
+        } catch (matchError) {
+          console.warn('Error parsing action match:', match[0], matchError);
+        }
+      }
+
+      return { cleanText: cleanText.trim(), actions };
+    } catch (error) {
+      console.warn('Error parsing contextual actions:', error);
+      return { cleanText: text, actions: [] };
+    }
+  };
+
   // Function to parse and render structured data components
   const parseStructuredContent = (text: string) => {
     const parts = [];
     let currentIndex = 0;
 
+    // First, extract contextual actions
+    const { cleanText, actions } = parseContextualActions(text);
+
     // Look for structured data markers
     const structuredDataRegex = /\[AI_DATA:(transportation|itinerary|accommodations|expenses)(?::(\d+))?\]/g;
     let match;
 
-    while ((match = structuredDataRegex.exec(text)) !== null) {
+    while ((match = structuredDataRegex.exec(cleanText)) !== null) {
       // Add text before the marker
       if (match.index > currentIndex) {
-        const beforeText = text.slice(currentIndex, match.index);
+        const beforeText = cleanText.slice(currentIndex, match.index);
         if (beforeText.trim()) {
           parts.push(
             <div key={`text-${currentIndex}`} className="mb-4">
@@ -256,8 +307,8 @@ export default function FormattedAIResponse({ content, className = '', tripData 
     }
 
     // Add remaining text
-    if (currentIndex < text.length) {
-      const remainingText = text.slice(currentIndex);
+    if (currentIndex < cleanText.length) {
+      const remainingText = cleanText.slice(currentIndex);
       if (remainingText.trim()) {
         parts.push(
           <div key={`text-${currentIndex}`} className="mb-4">
@@ -272,13 +323,25 @@ export default function FormattedAIResponse({ content, className = '', tripData 
       }
     }
 
+    // Add contextual actions if any
+    if (actions.length > 0 && tripId) {
+      parts.push(
+        <ContextualActionButtons
+          key="contextual-actions"
+          actions={actions}
+          tripId={tripId}
+          className="mt-4"
+        />
+      );
+    }
+
     return parts.length > 0 ? parts : [
       <ReactMarkdown
         key="default"
         remarkPlugins={[remarkGfm]}
         components={components}
       >
-        {text}
+        {cleanText}
       </ReactMarkdown>
     ];
   };
