@@ -26,10 +26,12 @@ import { useRouter } from 'next/navigation';
 import AIProviderTest from '@/components/ai/AIProviderTest';
 import AzureOpenAIDebug from '@/components/ai/AzureOpenAIDebug';
 import ActiveProviderDisplay from '@/components/ai/ActiveProviderDisplay';
+import { useAIProvider } from '@/hooks/useAIProvider';
 
 export default function TestAIPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
+  const { currentProvider } = useAIProvider();
 
   // Statistiche mock per la dashboard
   const stats = [
@@ -166,6 +168,7 @@ export default function TestAIPage() {
 
 // Componente Overview Tab
 function OverviewTab() {
+  const { currentProvider } = useAIProvider();
   const providers = [
     {
       name: 'Google Gemini 2.0 Flash Exp',
@@ -205,44 +208,121 @@ function OverviewTab() {
     }
   ];
 
+  // Mappa dei provider per ottenere le informazioni
+  const providerInfoMap = {
+    'gemini': { name: 'Google Gemini 2.0 Flash Exp', icon: '✨', color: 'from-yellow-400 to-orange-400' },
+    'openai': { name: 'OpenAI GPT-5-nano', icon: '🤖', color: 'from-green-400 to-emerald-400' },
+    'deepseek': { name: 'DeepSeek R1', icon: '🧠', color: 'from-purple-400 to-pink-400' },
+    'gemini-openrouter': { name: 'Gemini 2.0 Flash Exp (OpenRouter)', icon: '⚡', color: 'from-cyan-400 to-blue-400' }
+  };
+
+  const activeProviderInfo = providerInfoMap[currentProvider];
+
   return (
     <div className="space-y-6">
+      {/* Provider Attivo - Sezione evidenziata */}
+      <Card className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-500/30 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-cyan-400">
+            <Settings className="h-5 w-5" />
+            Provider AI Attualmente Attivo
+          </CardTitle>
+          <CardDescription className="text-gray-300">
+            Il provider AI configurato e utilizzato dall'applicazione
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+            <div className={`p-3 rounded-xl bg-gradient-to-r ${activeProviderInfo.color} text-white shadow-lg text-2xl`}>
+              {activeProviderInfo.icon}
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-white mb-1">
+                {activeProviderInfo.name}
+              </h3>
+              <p className="text-sm text-cyan-300">
+                🔧 Configurato in: <code className="bg-gray-800 px-2 py-1 rounded text-xs">NEXT_PUBLIC_AI_DEFAULT_PROVIDER="{currentProvider}"</code>
+              </p>
+            </div>
+            <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30 px-4 py-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+              IN USO
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
       {/* Provider Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {providers.map((provider, index) => (
-          <Card key={index} className="overflow-hidden hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 hover:scale-105 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50">
-            <CardContent className="p-0">
-              <div className={`h-2 bg-gradient-to-r ${provider.color}`}></div>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-gradient-to-r ${provider.color} text-white shadow-lg`}>
-                      {provider.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg text-white">{provider.name}</h3>
-                      <p className="text-sm text-gray-400">{provider.model}</p>
-                    </div>
-                  </div>
-                  <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Attivo
-                  </Badge>
-                </div>
+        {providers.map((provider, index) => {
+          // Determina quale provider è attivo basandosi sul mapping
+          const providerKey = provider.name.includes('OpenRouter') ? 'gemini-openrouter' :
+                             provider.name.includes('GPT-5-nano') ? 'openai' :
+                             provider.name.includes('DeepSeek') ? 'deepseek' : 'gemini';
+          const isActive = providerKey === currentProvider;
 
-                <p className="text-gray-300 mb-4">{provider.description}</p>
-
-                <div className="flex flex-wrap gap-2">
-                  {provider.features.map((feature, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs bg-gray-700/50 text-gray-300 border-gray-600/50">
-                      {feature}
+          return (
+            <Card
+              key={index}
+              className={`overflow-hidden transition-all duration-300 bg-gray-800/50 backdrop-blur-sm border ${
+                isActive
+                  ? 'border-cyan-500/50 shadow-xl shadow-cyan-500/20 scale-105'
+                  : 'border-gray-700/50 hover:shadow-xl hover:shadow-cyan-500/10 hover:scale-105'
+              }`}
+            >
+              <CardContent className="p-0">
+                <div className={`h-2 bg-gradient-to-r ${provider.color} ${isActive ? 'animate-pulse' : ''}`}></div>
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg bg-gradient-to-r ${provider.color} text-white shadow-lg ${isActive ? 'shadow-cyan-500/25' : ''}`}>
+                        {provider.icon}
+                      </div>
+                      <div>
+                        <h3 className={`font-semibold text-lg ${isActive ? 'text-cyan-300' : 'text-white'}`}>
+                          {provider.name}
+                        </h3>
+                        <p className={`text-sm ${isActive ? 'text-cyan-400' : 'text-gray-400'}`}>
+                          {provider.model}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="default"
+                      className={`${
+                        isActive
+                          ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+                          : 'bg-green-500/20 text-green-400 border-green-500/30'
+                      }`}
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      {isActive ? 'IN USO' : 'Disponibile'}
                     </Badge>
-                  ))}
+                  </div>
+
+                  <p className={`mb-4 ${isActive ? 'text-cyan-200' : 'text-gray-300'}`}>
+                    {provider.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {provider.features.map((feature, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="secondary"
+                        className={`text-xs ${
+                          isActive
+                            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
+                            : 'bg-gray-700/50 text-gray-300 border-gray-600/50'
+                        }`}
+                      >
+                        {feature}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Quick Info */}
