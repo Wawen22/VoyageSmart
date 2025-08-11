@@ -22,17 +22,32 @@ export default function Navbar() {
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      // Check if the click is outside the menu
+      if (menuRef.current && !menuRef.current.contains(target)) {
+        // Add a small delay to allow link clicks to be processed first
+        setTimeout(() => {
+          setIsProfileMenuOpen(false);
+        }, 0);
+      }
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         setIsProfileMenuOpen(false);
       }
     };
 
     if (isProfileMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      // Use 'click' instead of 'mousedown' to allow link clicks to be processed
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('keydown', handleEscapeKey);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
     };
   }, [isProfileMenuOpen]);
 
@@ -241,13 +256,13 @@ export default function Navbar() {
             <TripCounterWidget />
             <ThemeSwitcher />
             {user ? (
-              <div className="ml-3 relative">
+              <div className="ml-3 relative" ref={menuRef}>
                 <div>
                   <button
                     type="button"
                     className="bg-secondary rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                     id="user-menu"
-                    aria-expanded="false"
+                    aria-expanded={isProfileMenuOpen}
                     aria-haspopup="true"
                     onClick={toggleProfileMenu}
                   >
@@ -270,7 +285,10 @@ export default function Navbar() {
                       href="/profile"
                       className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                       role="menuitem"
-                      onClick={() => setIsProfileMenuOpen(false)}
+                      onClick={(e) => {
+                        // Allow the navigation to happen first
+                        setTimeout(() => setIsProfileMenuOpen(false), 0);
+                      }}
                     >
                       Your Profile
                     </Link>
@@ -278,7 +296,10 @@ export default function Navbar() {
                       href="/subscription"
                       className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                       role="menuitem"
-                      onClick={() => setIsProfileMenuOpen(false)}
+                      onClick={(e) => {
+                        // Allow the navigation to happen first
+                        setTimeout(() => setIsProfileMenuOpen(false), 0);
+                      }}
                     >
                       Subscription {' '}
                       {subscription?.tier === 'premium' ? (
@@ -296,7 +317,10 @@ export default function Navbar() {
                           href="/admin"
                           className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                           role="menuitem"
-                          onClick={() => setIsProfileMenuOpen(false)}
+                          onClick={(e) => {
+                            // Allow the navigation to happen first
+                            setTimeout(() => setIsProfileMenuOpen(false), 0);
+                          }}
                         >
                           <span className="flex items-center">
                             <ShieldIcon className="h-4 w-4 mr-2 text-blue-500" />
@@ -307,7 +331,10 @@ export default function Navbar() {
                           href="/admin/promo-manager"
                           className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                           role="menuitem"
-                          onClick={() => setIsProfileMenuOpen(false)}
+                          onClick={(e) => {
+                            // Allow the navigation to happen first
+                            setTimeout(() => setIsProfileMenuOpen(false), 0);
+                          }}
                         >
                           <span className="flex items-center">
                             <TagIcon className="h-4 w-4 mr-2 text-purple-500" />
@@ -318,7 +345,10 @@ export default function Navbar() {
                           href="/admin/users"
                           className="block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors"
                           role="menuitem"
-                          onClick={() => setIsProfileMenuOpen(false)}
+                          onClick={(e) => {
+                            // Allow the navigation to happen first
+                            setTimeout(() => setIsProfileMenuOpen(false), 0);
+                          }}
                         >
                           <span className="flex items-center">
                             <UsersIcon className="h-4 w-4 mr-2 text-green-500" />
@@ -387,7 +417,10 @@ export default function Navbar() {
                     className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
                       pathname === '/dashboard' ? 'text-primary bg-muted' : 'text-foreground'
                     }`}
-                    onClick={() => setIsProfileMenuOpen(false)}
+                    onClick={(e) => {
+                      // Allow the navigation to happen first
+                      setTimeout(() => setIsProfileMenuOpen(false), 0);
+                    }}
                   >
                     <HomeIcon className="h-4 w-4" />
                     Dashboard
@@ -398,7 +431,10 @@ export default function Navbar() {
                     className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
                       pathname === '/profile' ? 'text-primary bg-muted' : 'text-foreground'
                     }`}
-                    onClick={() => setIsProfileMenuOpen(false)}
+                    onClick={(e) => {
+                      // Allow the navigation to happen first
+                      setTimeout(() => setIsProfileMenuOpen(false), 0);
+                    }}
                   >
                     <UserIcon className="h-4 w-4" />
                     Profile
@@ -409,7 +445,10 @@ export default function Navbar() {
                     className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
                       pathname === '/subscription' || pathname === '/pricing' ? 'text-primary bg-muted' : 'text-foreground'
                     }`}
-                    onClick={() => setIsProfileMenuOpen(false)}
+                    onClick={(e) => {
+                      // Allow the navigation to happen first
+                      setTimeout(() => setIsProfileMenuOpen(false), 0);
+                    }}
                   >
                     <TagIcon className="h-4 w-4" />
                     {user ? "Subscription" : "Pricing"}
@@ -420,7 +459,10 @@ export default function Navbar() {
                     className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
                       pathname.startsWith('/documentation') ? 'text-primary bg-muted' : 'text-foreground'
                     }`}
-                    onClick={() => setIsProfileMenuOpen(false)}
+                    onClick={(e) => {
+                      // Allow the navigation to happen first
+                      setTimeout(() => setIsProfileMenuOpen(false), 0);
+                    }}
                   >
                     <BookOpenIcon className="h-4 w-4" />
                     Documentation
@@ -432,7 +474,10 @@ export default function Navbar() {
                       className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
                         pathname.startsWith('/admin') ? 'text-primary bg-muted' : 'text-foreground'
                       }`}
-                      onClick={() => setIsProfileMenuOpen(false)}
+                      onClick={(e) => {
+                        // Allow the navigation to happen first
+                        setTimeout(() => setIsProfileMenuOpen(false), 0);
+                      }}
                     >
                       <ShieldIcon className="h-4 w-4" />
                       Admin

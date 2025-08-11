@@ -37,30 +37,30 @@ export async function middleware(req: NextRequest) {
       return res;
     }
 
-    // Create a Supabase client
-    const supabase = createMiddlewareClient({ req, res });
+    // Create a Supabase client with proper configuration
+    const supabase = createMiddlewareClient({
+      req,
+      res,
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    });
 
-    // Get the user's session without refreshing it every time
-    // Only refresh if the session is close to expiration or for specific routes
-    let sessionResult = await supabase.auth.getSession();
-    let session = sessionResult.data.session;
+    // Always refresh session to ensure we have the latest state
+    // This is crucial for proper session persistence
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    // Check if we need to refresh the session
-    // Only refresh for auth-related routes or if session exists but might be stale
-    const isAuthRoute = pathname.startsWith('/login') ||
-                       pathname.startsWith('/register') ||
-                       pathname.startsWith('/forgot-password');
-
-    if (isAuthRoute || (session && shouldRefreshSession(session))) {
-      await supabase.auth.refreshSession();
-      // Get the refreshed session
-      const refreshResult = await supabase.auth.getSession();
-      session = refreshResult.data.session;
+    if (sessionError) {
+      console.error('[Middleware] Session error:', sessionError);
     }
 
     // Check if the user is authenticated
     const isAuthenticated = !!session;
-    console.log('[Middleware] Path:', pathname, 'Authenticated:', isAuthenticated);
+    console.log('[Middleware] Path:', pathname, 'Authenticated:', isAuthenticated, 'Session ID:', session?.user?.id?.slice(0, 8) || 'none');
+
+    // Define auth routes
+    const isAuthRoute = pathname.startsWith('/login') ||
+                       pathname.startsWith('/register') ||
+                       pathname.startsWith('/forgot-password');
 
     // --- Temporarily disabling protected route logic ---
     /*
@@ -79,7 +79,8 @@ export async function middleware(req: NextRequest) {
     // --- End of disabled logic ---
 
     // Redirect authenticated users from auth routes to dashboard or redirect URL
-    if (isAuthRoute && isAuthenticated) {
+    // Only redirect if not already in a redirect loop
+    if (isAuthRoute && isAuthenticated && !req.nextUrl.searchParams.has('_redirected')) {
       console.log('[Middleware] Authenticated user on auth route. Checking for redirect...');
 
       // Check if there's a redirect parameter
@@ -87,7 +88,12 @@ export async function middleware(req: NextRequest) {
       const redirectTo = redirectParam || '/dashboard';
 
       console.log('[Middleware] Redirecting authenticated user to:', redirectTo);
-      return NextResponse.redirect(new URL(redirectTo, req.url));
+
+      // Add a flag to prevent redirect loops
+      const redirectUrl = new URL(redirectTo, req.url);
+      redirectUrl.searchParams.set('_redirected', 'true');
+
+      return NextResponse.redirect(redirectUrl);
     }
 
     console.log('[Middleware] Allowing request to proceed.');
