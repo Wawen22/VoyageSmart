@@ -629,7 +629,7 @@ describe('AI Chat Feature', () => {
 
 - **[API Endpoints](../api/ai-endpoints.md)** - AI API reference
 - **[Security Guidelines](../development/security-implementations.md)** - AI security practices
-- **[Testing Framework](../development/testing-framework.md)** - Testing AI features
+- **[Testing Guide](../development/testing.md)** - Testing AI features
 
 ---
 

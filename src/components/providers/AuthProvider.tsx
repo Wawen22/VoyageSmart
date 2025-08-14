@@ -1,14 +1,19 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthContext, User, signIn, signOut, signUp, resetPassword, updateProfile, supabase } from '@/lib/auth';
+import { AuthContext, User, signIn, signOut, signUp, resetPassword, updateProfile } from '@/lib/auth';
+import { clearAllCache, hardNavigate } from '@/lib/cache-utils';
+import { createClientSupabase } from '@/lib/supabase-client';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter(); // Initialize useRouter
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Use the proper Next.js Supabase client - memoize to prevent recreation
+  const supabase = useMemo(() => createClientSupabase(), []);
 
   useEffect(() => {
     // Check if there's an active session
@@ -17,13 +22,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(true);
         setError(null);
 
-        // First, try to refresh the session to ensure it's valid
+        // Get the current session with proper error handling
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
           console.error('Session error in checkSession:', sessionError);
           setUser(null);
           setError(sessionError);
+          setLoading(false);
           return;
         }
 
@@ -143,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   const handleSignUp = async (email: string, password: string, fullName: string) => {
     try {
@@ -259,23 +265,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // First set user to null to update UI immediately
       setUser(null);
 
+      // Clear all cached data BEFORE calling signOut
+      console.log('AuthProvider - Clearing all cached data...');
+      await clearAllCache();
+
       // Then call the actual signOut function
       await signOut();
 
       console.log('AuthProvider - Sign out successful, redirecting to login page');
 
-      // Clear any cached data
-      localStorage.removeItem('supabase.auth.token');
-      sessionStorage.clear();
+      // Force a hard navigation to clear any remaining state
+      hardNavigate('/login');
 
-      // Redirect to login page after sign out
-      router.push('/login');
     } catch (error) {
       console.error('AuthProvider - Sign out error:', error);
       setError(error as Error);
 
-      // Even if there's an error, we should still try to redirect
-      router.push('/login');
+      // Even if there's an error, we should still try to redirect with hard refresh
+      hardNavigate('/login');
     } finally {
       setLoading(false);
     }

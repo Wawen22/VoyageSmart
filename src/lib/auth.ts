@@ -4,7 +4,16 @@ import { createContext, useContext, useEffect, useState } from 'react';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create Supabase client with proper session persistence configuration
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce'
+  }
+});
 
 // Debounce utility for authentication requests
 let authTimeout: NodeJS.Timeout | null = null;
@@ -130,7 +139,9 @@ export const signIn = debounceAuth(_signIn);
 export async function signOut() {
   try {
     console.log('auth.ts - Executing signOut function');
-    const { error } = await supabase.auth.signOut();
+
+    // Use 'global' scope to sign out from all sessions
+    const { error } = await supabase.auth.signOut({ scope: 'global' });
 
     if (error) {
       console.error('auth.ts - Error during signOut:', error);

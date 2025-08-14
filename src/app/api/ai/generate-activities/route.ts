@@ -108,69 +108,28 @@ export async function POST(request: NextRequest) {
       console.log('Saltando la verifica di accesso al viaggio perché l\'utente non è autenticato');
     }
 
-    // Prepara il prompt per Gemini AI
+    // Prepara il prompt per l'AI
     const prompt = generatePrompt(tripData, preferences, days);
 
-    // Chiama l'API Gemini
-    // Utilizziamo la chiave API già definita in precedenza
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`;
+    // Usa il nuovo sistema AI unificato
+    const { callAIAPI } = await import('@/lib/services/aiApiService');
 
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            {
-              text: prompt
-            }
-          ]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 8000,
-      }
-    };
-
-    console.log('Chiamando Gemini API con URL:', url);
-    console.log('Request body:', JSON.stringify(requestBody).substring(0, 500) + '...');
+    console.log('Chiamando AI API per generazione attività...');
+    console.log('Prompt length:', prompt.length);
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      console.log('Risposta ricevuta da Gemini API, status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Gemini API error response (text):', errorText);
-
-        try {
-          const errorData = JSON.parse(errorText);
-          console.error('Gemini API error response (parsed):', errorData);
-        } catch (parseError) {
-          console.error('Impossibile analizzare la risposta di errore come JSON');
+      // Usa il provider di default o Gemini per la generazione di attività
+      const rawResponse = await callAIAPI(prompt, {
+        provider: 'gemini', // Usa Gemini per la generazione di attività per ora
+        timeout: 60000, // 60 secondi per attività complesse
+        retryConfig: {
+          maxRetries: 2,
+          baseDelay: 2000,
+          maxDelay: 10000,
+          backoffMultiplier: 2,
+          retryableStatuses: [429, 503, 502, 504, 408]
         }
-
-        throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
-      }
-
-      // Elabora la risposta
-      const data = await response.json();
-      console.log('Risposta Gemini API elaborata con successo');
-      // Verifica che la risposta sia valida
-      if (!data.candidates || data.candidates.length === 0 ||
-          !data.candidates[0].content || !data.candidates[0].content.parts ||
-          data.candidates[0].content.parts.length === 0) {
-        console.error('Risposta API non valida:', data);
-        throw new Error('Risposta API non valida');
-      }
-
-      const rawResponse = data.candidates[0].content.parts[0].text;
+      });
       console.log('Risposta grezza ricevuta:', rawResponse.substring(0, 200) + '...');
 
       // Estrai i vincoli temporali dalle preferenze dell'utente

@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth'; // Import useAuth
 import { supabase } from '@/lib/supabase'; // Keep for resetPassword
 import RateLimitInfo from '@/components/ui/RateLimitInfo';
+import { useAutoAuthCleanup } from '@/hooks/useAuthCleanup';
 
 export default function Login() {
   const router = useRouter();
@@ -20,6 +21,9 @@ export default function Login() {
   const [lastAttemptTime, setLastAttemptTime] = useState<number>(0);
   const [showRateLimitInfo, setShowRateLimitInfo] = useState<boolean>(false);
   const searchParams = useSearchParams();
+
+  // Automatically clear stale auth data when component mounts
+  useAutoAuthCleanup(!user);
 
   useEffect(() => {
     // Check if user just registered
@@ -43,6 +47,8 @@ export default function Login() {
       console.log('Login page loaded with redirect:', redirect);
     }
   }, [searchParams]);
+
+
 
   // Add effect to redirect if user is logged in
   useEffect(() => {
@@ -110,25 +116,13 @@ export default function Login() {
       // Sign in the user using the context's signIn function
       await signIn(email, password);
 
-      // The AuthProvider's onAuthStateChange or middleware should handle the redirect now.
-      console.log('Sign in initiated via context');
+      // The AuthProvider's onAuthStateChange and middleware will handle the redirect
+      console.log('Sign in successful - letting auth system handle redirect');
 
       // Show success message
       setSuccess('Login successful! Redirecting...');
 
-      // Get the return URL - check both returnUrl and redirect parameters
-      const returnUrl = searchParams.get('returnUrl');
-      const redirect = searchParams.get('redirect');
-      const redirectTo = returnUrl || redirect || '/dashboard';
-
-      console.log('Manual redirect to:', redirectTo);
-
-      // Manual redirect as a fallback
-      setTimeout(() => {
-        router.push(redirectTo);
-      }, 500);
-
-      console.log('Login successful, waiting for redirection');
+      // Let the auth system handle the redirect - no manual redirect needed
     } catch (err: any) {
       console.error('Login error:', err);
 

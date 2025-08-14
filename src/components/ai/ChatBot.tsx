@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
 import FormattedAIResponse from './FormattedAIResponse';
+import { useAIProvider } from '@/hooks/useAIProvider';
 import '@/styles/ai-assistant.css';
 
 type Message = {
@@ -65,6 +66,9 @@ export default function ChatBot({
   // Rileva la pagina corrente
   const pathname = usePathname();
 
+  // Hook per gestire il provider AI
+  const { currentProvider } = useAIProvider();
+
   // Determina la sezione corrente basata sull'URL
   const getCurrentSection = () => {
     if (pathname.includes('/expenses')) return 'expenses';
@@ -80,6 +84,7 @@ export default function ChatBot({
 
   // Stato per tracciare se il contesto è stato caricato
   const [contextLoaded, setContextLoaded] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState(false);
 
   // Debug info
   console.log('ChatBot inizializzato con Trip ID:', tripId, 'Trip Name:', tripName);
@@ -135,7 +140,8 @@ export default function ChatBot({
               tripName,
               tripData, // Passa i dati del viaggio direttamente
               isInitialMessage: true, // Indica che è il messaggio iniziale
-              currentSection: currentSection // Indica la sezione corrente
+              currentSection: currentSection, // Indica la sezione corrente
+              aiProvider: currentProvider // Usa il provider selezionato
             }),
           });
 
@@ -149,6 +155,22 @@ export default function ChatBot({
             setContextLoaded(true);
           } else {
             console.error('Errore nel caricamento del contesto:', response.status);
+
+            if (response.status === 429) {
+              console.warn('Rate limit raggiunto durante il caricamento del contesto. Riproverò più tardi.');
+              setRateLimitError(true);
+              setMessages([{
+                role: 'assistant',
+                content: `⚠️ Troppo traffico AI al momento. Riproverò a caricare il contesto tra 30 secondi. Nel frattempo puoi comunque chattare!`
+              }]);
+              // Riprova dopo 30 secondi
+              setTimeout(() => {
+                setRateLimitError(false);
+                loadContext();
+              }, 30000);
+              return;
+            }
+
             try {
               const errorData = await response.json();
               console.error('Dettagli errore:', errorData);
@@ -173,7 +195,8 @@ export default function ChatBot({
               tripId,
               tripName,
               isInitialMessage: true, // Indica che è il messaggio iniziale
-              currentSection: currentSection // Indica la sezione corrente
+              currentSection: currentSection, // Indica la sezione corrente
+              aiProvider: currentProvider // Usa il provider selezionato
             }),
           });
 
@@ -247,6 +270,10 @@ export default function ChatBot({
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Client-side small response cache to avoid flicker and reduce calls for exact repeats
+  const clientCacheRef = useRef<Map<string, { text: string; ts: number }>>(new Map());
+  const lastSendRef = useRef<number>(0);
+
   // Genera domande suggerite quando il contesto è caricato
   useEffect(() => {
     if (contextLoaded && tripData) {
@@ -265,9 +292,16 @@ export default function ChatBot({
   }, [messages, tripId]);
 
   const handleSendMessage = async (messageText?: string) => {
+    // Prevent while a request is in-flight
+    if (isLoading) return;
     // Use provided message or input field value
     const messageToSend = messageText || input;
     if (!messageToSend.trim()) return;
+
+    // Debounce rapid submissions (prevents double-clicks)
+    const now = Date.now();
+    if (now - lastSendRef.current < 500) return;
+    lastSendRef.current = now;
 
     // Add user message
     const userMessage: Message = {
@@ -285,6 +319,19 @@ export default function ChatBot({
     setIsLoading(true);
     setIsTyping(true);
 
+    // Check client cache first (10 min TTL)
+    const cacheKey = `${tripId}:${messageToSend.trim().toLowerCase()}`;
+    const cached = clientCacheRef.current.get(cacheKey);
+    if (cached && (now - cached.ts) < 10 * 60 * 1000) {
+      setTimeout(() => {
+        setMessages(prev => [...prev, { role: 'assistant', content: cached.text, timestamp: new Date() }]);
+        generateSuggestedQuestions();
+        setIsTyping(false);
+        setIsLoading(false);
+      }, 200);
+      return;
+    }
+
     try {
       // Call API
       console.log('Sending message to API:', {
@@ -300,7 +347,8 @@ export default function ChatBot({
         tripId,
         tripName,
         isInitialMessage: false, // Indica che non è il messaggio iniziale
-        currentSection: currentSection // Indica la sezione corrente
+        currentSection: currentSection, // Indica la sezione corrente
+        aiProvider: currentProvider // Usa il provider selezionato
       };
 
       // Includi i dati del viaggio se disponibili
@@ -317,17 +365,38 @@ export default function ChatBot({
       console.log('API response status:', response.status);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('API error response:', errorData);
+        const errorText = await response.text();
+        console.error('API error response status:', response.status);
+        console.error('API error response text:', errorText);
+
+        let errorData = {};
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error('Failed to parse error response as JSON:', e);
+        }
+
+        console.error('API error response parsed:', errorData);
 
         if (response.status === 401) {
           throw new Error('Autenticazione richiesta. Prova ad aggiornare la pagina e accedere nuovamente.');
+        } else if (response.status === 429) {
+          setRateLimitError(true);
+          // Reset rate limit error dopo 30 secondi
+          setTimeout(() => {
+            setRateLimitError(false);
+          }, 30000);
+          throw new Error('⚠️ Troppo traffico AI al momento. Attendi 30 secondi prima di riprovare.');
         } else {
-          throw new Error(`Errore ${response.status}: ${errorData.error || 'Risposta non valida'}`);
+          const errorMessage = (errorData as any)?.error || errorText || `Errore del server: ${response.status}`;
+          throw new Error(errorMessage);
         }
       }
 
       const data = await response.json();
+
+      // Cache client-side
+      clientCacheRef.current.set(cacheKey, { text: data.message, ts: Date.now() });
 
       // Simula l'effetto di digitazione
       setIsTyping(true);
@@ -893,6 +962,7 @@ export default function ChatBot({
                     content={message.content}
                     className="text-sm text-slate-200"
                     tripData={tripData}
+                    tripId={tripId}
                   />
                 </div>
                 {message.timestamp && (
@@ -971,14 +1041,14 @@ export default function ChatBot({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything about your trip..."
+            placeholder={rateLimitError ? "Attendi 30 secondi per il rate limiting..." : "Ask me anything about your trip..."}
             className="text-sm flex-1 px-4 py-3 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-slate-700/50 text-white placeholder-slate-400 shadow-sm ai-input-focus"
-            disabled={isLoading}
+            disabled={isLoading || rateLimitError}
             aria-label="Messaggio per l'assistente AI"
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || rateLimitError}
             className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-xl disabled:opacity-50 hover:from-indigo-500 hover:to-purple-500 transition-all duration-200 shadow-lg disabled:cursor-not-allowed send-button"
             aria-label="Invia messaggio"
           >

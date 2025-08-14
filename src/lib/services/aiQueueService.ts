@@ -17,6 +17,8 @@ class AIRequestQueue {
   private activeRequests = 0;
   private requestDelay = 1000; // 1 secondo tra le richieste
   private lastRequestTime = 0;
+  // Dedup map: cacheKey -> list of listeners waiting for same response
+  private dedupListeners: Map<string, { resolvers: Array<(v: string) => void>; rejecters: Array<(e: Error) => void> }> = new Map();
 
   /**
    * Add request to queue
@@ -58,6 +60,24 @@ class AIRequestQueue {
     }
 
     this.processing = true;
+
+    // Request de-duplication: if another item with same cacheKey is already enqueued/processing, attach listeners
+    const cacheKey: string | undefined = item.options?.cacheKey;
+    if (cacheKey && this.dedupListeners.has(cacheKey)) {
+      const entry = this.dedupListeners.get(cacheKey)!;
+      entry.resolvers.push(item.resolve);
+      entry.rejecters.push(item.reject);
+      this.processing = false; // do not increment activeRequests or process duplicate
+      logger.debug('Deduplicated AI request joined existing in-flight', { cacheKey });
+      // Immediately try next item
+      setTimeout(() => this.processQueue(), 0);
+      return;
+    }
+
+    if (cacheKey) {
+      this.dedupListeners.set(cacheKey, { resolvers: [item.resolve], rejecters: [item.reject] });
+    }
+
     this.activeRequests++;
 
     try {
@@ -75,18 +95,27 @@ class AIRequestQueue {
       this.lastRequestTime = Date.now();
 
       // Import the AI service here to avoid circular dependencies
-      const { callGeminiAPI } = await import('./aiApiService');
-      
-      logger.debug('Processing AI request from queue', { 
+      const { callAIAPI } = await import('./aiApiService');
+
+      logger.debug('Processing AI request from queue', {
         queueId: item.id,
         queueLength: this.queue.length,
         activeRequests: this.activeRequests
       });
 
-      const result = await callGeminiAPI(item.prompt, item.options);
-      item.resolve(result);
+      const result = await callAIAPI(item.prompt, item.options);
 
-      logger.debug('AI request completed successfully', { 
+      // Resolve primary + any deduplicated listeners
+      const cacheKey2: string | undefined = item.options?.cacheKey;
+      if (cacheKey2 && this.dedupListeners.has(cacheKey2)) {
+        const entry = this.dedupListeners.get(cacheKey2)!;
+        entry.resolvers.forEach(r => r(result));
+        this.dedupListeners.delete(cacheKey2);
+      } else {
+        item.resolve(result);
+      }
+
+      logger.debug('AI request completed successfully', {
         queueId: item.id,
         responseLength: result.length
       });
@@ -102,12 +131,19 @@ class AIRequestQueue {
       if (this.shouldRetry(error, item)) {
         item.retries++;
         this.queue.unshift(item); // Put back at front of queue
-        logger.debug('Retrying AI request', { 
-          queueId: item.id, 
-          retries: item.retries 
+        logger.debug('Retrying AI request', {
+          queueId: item.id,
+          retries: item.retries
         });
       } else {
-        item.reject(error);
+        const cacheKey2: string | undefined = item.options?.cacheKey;
+        if (cacheKey2 && this.dedupListeners.has(cacheKey2)) {
+          const entry = this.dedupListeners.get(cacheKey2)!;
+          entry.rejecters.forEach(rj => rj(error));
+          this.dedupListeners.delete(cacheKey2);
+        } else {
+          item.reject(error);
+        }
       }
     } finally {
       this.activeRequests--;
@@ -125,9 +161,9 @@ class AIRequestQueue {
    * Check if request should be retried
    */
   private shouldRetry(error: any, item: QueueItem): boolean {
-    const maxRetries = 2;
+    const maxRetries: number = typeof item.options?.queueRetryMax === 'number' ? item.options.queueRetryMax : 0; // default: no queue-level retries
     const retryableErrors = ['429', '503', '502', '504', 'ECONNRESET', 'ETIMEDOUT'];
-    
+
     if (item.retries >= maxRetries) {
       return false;
     }

@@ -49,6 +49,224 @@ function setCachedTripContext(tripId: string, data: any): void {
 }
 
 /**
+ * Raccoglie solo i dati necessari per un viaggio basandosi sui bisogni del contesto
+ * Ottimizzato per ridurre il carico di dati non necessari
+ */
+export async function getSelectiveTripContext(
+  tripId: string,
+  contextNeeds: {
+    needsItinerary: boolean;
+    needsAccommodations: boolean;
+    needsTransportation: boolean;
+    needsExpenses: boolean;
+    needsParticipants: boolean;
+    needsBasicInfo: boolean;
+  }
+) {
+  const startTime = performance.now();
+  logger.debug('Getting selective trip context', { tripId, contextNeeds });
+
+  if (!tripId) {
+    logger.error('Invalid trip ID provided', { tripId });
+    throw new Error('Trip ID is required');
+  }
+
+  // Check cache first (with context needs as part of cache key)
+  const cacheKey = `${tripId}:${JSON.stringify(contextNeeds)}`;
+  const cached = getCachedTripContext(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    // Always get basic trip info
+    const { data: trip, error: tripError } = await supabase
+      .from('trips')
+      .select('*')
+      .eq('id', tripId)
+      .single();
+
+    if (tripError) {
+      logger.error('Error fetching trip', { tripId, error: tripError });
+      throw new Error(`Failed to fetch trip: ${tripError.message}`);
+    }
+
+    if (!trip) {
+      logger.error('Trip not found', { tripId });
+      throw new Error('Trip not found');
+    }
+
+    // Initialize context with basic info
+    const context: any = {
+      trip,
+      participants: [],
+      accommodations: [],
+      transportation: [],
+      itinerary: [],
+      expenses: []
+    };
+
+    // Prepare parallel queries based on needs
+    const queries: Promise<any>[] = [];
+
+    // Participants (if needed)
+    if (contextNeeds.needsParticipants) {
+      queries.push(
+        supabase
+          .from('trip_participants')
+          .select(`
+            *,
+            users (
+              id,
+              full_name,
+              email
+            )
+          `)
+          .eq('trip_id', tripId)
+          .then(({ data, error }) => {
+            if (error) {
+              logger.error('Error fetching participants', { tripId, error });
+              return [];
+            }
+            return data || [];
+          })
+      );
+    } else {
+      queries.push(Promise.resolve([]));
+    }
+
+    // Accommodations (if needed)
+    if (contextNeeds.needsAccommodations) {
+      queries.push(
+        supabase
+          .from('accommodations')
+          .select('*')
+          .eq('trip_id', tripId)
+          .order('check_in_date', { ascending: true })
+          .then(({ data, error }) => {
+            if (error) {
+              logger.error('Error fetching accommodations', { tripId, error });
+              return [];
+            }
+            return data || [];
+          })
+      );
+    } else {
+      queries.push(Promise.resolve([]));
+    }
+
+    // Transportation (if needed)
+    if (contextNeeds.needsTransportation) {
+      queries.push(
+        supabase
+          .from('transportation')
+          .select('*')
+          .eq('trip_id', tripId)
+          .order('departure_time', { ascending: true })
+          .then(({ data, error }) => {
+            if (error) {
+              logger.error('Error fetching transportation', { tripId, error });
+              return [];
+            }
+            return data || [];
+          })
+      );
+    } else {
+      queries.push(Promise.resolve([]));
+    }
+
+    // Itinerary (if needed)
+    if (contextNeeds.needsItinerary) {
+      queries.push(
+        supabase
+          .from('itinerary_days')
+          .select(`
+            *,
+            activities (*)
+          `)
+          .eq('trip_id', tripId)
+          .order('day_date', { ascending: true })
+          .then(({ data, error }) => {
+            if (error) {
+              logger.error('Error fetching itinerary', { tripId, error });
+              return [];
+            }
+            return data || [];
+          })
+      );
+    } else {
+      queries.push(Promise.resolve([]));
+    }
+
+    // Expenses (if needed)
+    if (contextNeeds.needsExpenses) {
+      queries.push(
+        supabase
+          .from('expenses')
+          .select(`
+            *,
+            paid_by_user:users!expenses_paid_by_fkey (
+              id,
+              full_name,
+              email
+            ),
+            expense_participants (
+              *,
+              user:users (
+                id,
+                full_name,
+                email
+              )
+            )
+          `)
+          .eq('trip_id', tripId)
+          .order('date', { ascending: false })
+          .then(({ data, error }) => {
+            if (error) {
+              logger.error('Error fetching expenses', { tripId, error });
+              return [];
+            }
+            return data || [];
+          })
+      );
+    } else {
+      queries.push(Promise.resolve([]));
+    }
+
+    // Execute all queries in parallel
+    const [participants, accommodations, transportation, itinerary, expenses] = await Promise.all(queries);
+
+    // Assign results to context
+    context.participants = participants;
+    context.accommodations = accommodations;
+    context.transportation = transportation;
+    context.itinerary = itinerary;
+    context.expenses = expenses;
+
+    // Cache the result
+    setCachedTripContext(cacheKey, context);
+
+    const duration = performance.now() - startTime;
+    logger.debug('Selective trip context retrieved successfully', {
+      tripId,
+      duration: `${duration.toFixed(2)}ms`,
+      participantsCount: participants.length,
+      accommodationsCount: accommodations.length,
+      transportationCount: transportation.length,
+      itineraryDaysCount: itinerary.length,
+      expensesCount: expenses.length,
+      contextNeeds
+    });
+
+    return context;
+
+  } catch (error) {
+    logger.error('Error getting selective trip context', { tripId, error });
+    throw error;
+  }
+}
+
+/**
  * Raccoglie tutti i dati relativi a un viaggio per fornire contesto all'AI
  * Ottimizzato con caching e query parallele
  */
@@ -176,7 +394,9 @@ export async function getTripContext(tripId: string) {
       accommodations: [],
       transportation: [],
       itinerary: [],
-      expenses: []
+      expenses: [],
+      balances: [],
+      settlements: []
     };
 
     // Processa i risultati delle query parallele
@@ -317,6 +537,11 @@ export async function getTripContext(tripId: string) {
           }))
         }));
 
+        // Calculate balances and settlements
+        const { balances, settlements } = calculateExpenseBalances(tripContext.expenses, tripContext.participants);
+        tripContext.balances = balances;
+        tripContext.settlements = settlements;
+
         logger.debug('Expenses processed', {
           count: tripContext.expenses.length,
           totalAmount: tripContext.expenses.reduce((sum, e) => sum + e.amount, 0)
@@ -368,9 +593,96 @@ export async function getTripContext(tripId: string) {
       transportation: [],
       itinerary: [],
       expenses: [],
+      balances: [],
+      settlements: [],
       error: 'Non è stato possibile recuperare tutti i dettagli del viaggio'
     };
   }
+}
+
+/**
+ * Calculate expense balances and settlements for a trip
+ */
+function calculateExpenseBalances(expenses: any[], participants: any[]) {
+  // Initialize balances for all participants
+  const balanceMap = new Map<string, number>();
+  participants.forEach(p => {
+    balanceMap.set(p.user_id || p.id, 0);
+  });
+
+  // Calculate how much each person has paid and owes
+  expenses.forEach(expense => {
+    const payerId = expense.paid_by;
+
+    // Add what each participant owes
+    expense.participants.forEach((p: any) => {
+      const currentBalance = balanceMap.get(p.user_id) || 0;
+      balanceMap.set(p.user_id, currentBalance - p.amount);
+    });
+
+    // Add what the payer paid
+    const payerBalance = balanceMap.get(payerId) || 0;
+    balanceMap.set(payerId, payerBalance + expense.amount);
+  });
+
+  // Convert the balance map to an array
+  const balances: any[] = [];
+  balanceMap.forEach((balance, userId) => {
+    const participant = participants.find(p => (p.user_id || p.id) === userId);
+    if (participant) {
+      balances.push({
+        user_id: userId,
+        full_name: participant.full_name || participant.name,
+        balance: parseFloat(balance.toFixed(2)),
+      });
+    }
+  });
+
+  // Calculate settlements
+  const settlements = calculateSettlements(balances);
+
+  return { balances, settlements };
+}
+
+/**
+ * Calculate settlements between participants
+ */
+function calculateSettlements(balances: any[]) {
+  // Separate positive (creditors) and negative (debtors) balances
+  const creditors = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
+  const debtors = balances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance);
+
+  const settlements: any[] = [];
+
+  // Process each debtor in order
+  debtors.forEach(debtor => {
+    let remainingDebt = Math.abs(debtor.balance);
+
+    // Find all creditors this debtor needs to pay
+    while (remainingDebt > 0.01 && creditors.length > 0) {
+      const creditor = creditors[0];
+      const paymentAmount = Math.min(remainingDebt, creditor.balance);
+
+      if (paymentAmount > 0.01) {
+        settlements.push({
+          from_id: debtor.user_id,
+          from_name: debtor.full_name,
+          to_id: creditor.user_id,
+          to_name: creditor.full_name,
+          amount: parseFloat(paymentAmount.toFixed(2)),
+        });
+
+        remainingDebt -= paymentAmount;
+        creditor.balance -= paymentAmount;
+
+        if (creditor.balance < 0.01) {
+          creditors.shift();
+        }
+      }
+    }
+  });
+
+  return settlements;
 }
 
 /**

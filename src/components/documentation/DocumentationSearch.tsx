@@ -131,13 +131,7 @@ const searchData: SearchResult[] = [
     excerpt: 'Coding standards, best practices, TypeScript usage, and component structure guidelines.',
     type: 'page'
   },
-  {
-    title: 'Testing Framework',
-    path: '/documentation/development/testing-framework',
-    section: 'Development',
-    excerpt: 'Testing setup with Jest, React Testing Library, and end-to-end testing with Playwright.',
-    type: 'page'
-  },
+
   {
     title: 'Security Implementations',
     path: '/documentation/development/security-implementations',

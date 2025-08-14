@@ -256,9 +256,231 @@
   }
 }
 
+/* Contextual Action Buttons */
+.contextual-actions {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
+  border-radius: 12px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  backdrop-filter: blur(8px);
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contextual-actions button,
+.contextual-actions a {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+  border-radius: 8px;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+.contextual-actions button:hover,
+.contextual-actions a:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 8px 25px rgba(99, 102, 241, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.contextual-actions button:active,
+.contextual-actions a:active {
+  transform: translateY(-1px) scale(1.01);
+  transition: all 0.1s ease;
+}
+
+/* Enhanced ripple effect for action buttons */
+.contextual-actions button::before,
+.contextual-actions a::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.contextual-actions button:active::before,
+.contextual-actions a:active::before {
+  width: 120px;
+  height: 120px;
+  opacity: 1;
+}
+
+/* Shimmer effect on hover */
+.contextual-actions button::after,
+.contextual-actions a::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.contextual-actions button:hover::after,
+.contextual-actions a:hover::after {
+  left: 100%;
+}
+
+/* Enhanced action button variants */
+.contextual-action-primary {
+  background: linear-gradient(135deg,
+    rgb(99, 102, 241) 0%,
+    rgb(139, 92, 246) 50%,
+    rgb(168, 85, 247) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: white;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.contextual-action-primary:hover {
+  background: linear-gradient(135deg,
+    rgb(79, 70, 229) 0%,
+    rgb(124, 58, 237) 50%,
+    rgb(147, 51, 234) 100%);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+}
+
+.contextual-action-secondary {
+  background: linear-gradient(135deg,
+    rgba(51, 65, 85, 0.8) 0%,
+    rgba(71, 85, 105, 0.6) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: rgb(203, 213, 225);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.contextual-action-secondary:hover {
+  background: linear-gradient(135deg,
+    rgba(71, 85, 105, 0.9) 0%,
+    rgba(99, 102, 241, 0.3) 100%);
+  border-color: rgba(99, 102, 241, 0.6);
+  color: white;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+}
+
+.contextual-action-outline {
+  background: linear-gradient(135deg,
+    rgba(30, 41, 59, 0.6) 0%,
+    rgba(51, 65, 85, 0.4) 100%);
+  border: 1px solid rgba(100, 116, 139, 0.5);
+  color: rgb(148, 163, 184);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.contextual-action-outline:hover {
+  background: linear-gradient(135deg,
+    rgba(51, 65, 85, 0.8) 0%,
+    rgba(71, 85, 105, 0.6) 100%);
+  border-color: rgba(148, 163, 184, 0.7);
+  color: rgb(203, 213, 225);
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+}
+
+/* Responsive design for contextual actions */
+@media (max-width: 768px) {
+  .contextual-actions {
+    margin-top: 1rem;
+    padding: 0.75rem;
+  }
+
+  .contextual-actions button,
+  .contextual-actions a {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    min-height: 44px; /* Touch-friendly minimum */
+  }
+
+  /* Stack buttons vertically on very small screens */
+  @media (max-width: 480px) {
+    .contextual-actions .flex {
+      flex-direction: column;
+    }
+
+    .contextual-actions .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .contextual-actions button,
+    .contextual-actions a {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+@media (min-width: 769px) {
+  .contextual-actions button:hover,
+  .contextual-actions a:hover {
+    transform: translateY(-3px) scale(1.03);
+  }
+}
+
+/* Loading state for actions */
+.contextual-actions.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.contextual-actions.loading button,
+.contextual-actions.loading a {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Focus states for accessibility */
+.contextual-actions button:focus,
+.contextual-actions a:focus {
+  outline: 2px solid rgba(99, 102, 241, 0.8);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
 /* Dark mode specific enhancements */
 @media (prefers-color-scheme: dark) {
   .ai-chat-container {
     background: rgba(15, 23, 42, 0.98);
+  }
+
+  .contextual-actions {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.6));
+    border-color: rgba(99, 102, 241, 0.3);
   }
 }

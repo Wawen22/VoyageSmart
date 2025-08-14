@@ -84,7 +84,6 @@ export async function generateStaticParams() {
     
     // Development
     { section: 'development', file: 'code-standards' },
-    { section: 'development', file: 'testing-framework' },
     { section: 'development', file: 'security-implementations' },
     { section: 'development', file: 'testing' },
     { section: 'development', file: 'deployment' },

@@ -1,11 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTripContext } from '@/lib/services/tripContextService';
+import { getSelectiveTripContext } from '@/lib/services/tripContextService';
 import { queueAIRequest, getQueueStats } from '@/lib/services/aiQueueService';
 import { aiAnalytics } from '@/lib/services/aiAnalyticsService';
 import { validateInput, aiChatSchema, validateSecurity } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 import { formatTimeLocal, formatDateLocal } from '@/lib/utils';
 import { applyRateLimit } from '@/lib/rate-limit';
+import { hasCachedResponse } from '@/lib/services/aiApiService';
+import { analyzeMessageContext as analyzeContextualActions, formatActionsForResponse } from '@/lib/services/contextualActionsService';
+
+// Funzione per analizzare il messaggio e determinare il contesto necessario
+function analyzeMessageContext(message: string): {
+  needsItinerary: boolean;
+  needsAccommodations: boolean;
+  needsTransportation: boolean;
+  needsExpenses: boolean;
+  needsParticipants: boolean;
+  needsBasicInfo: boolean;
+} {
+  const lowerMessage = message.toLowerCase();
+
+  // Keywords per ogni categoria
+  const itineraryKeywords = [
+    'itinerario', 'attività', 'programma', 'cosa fare', 'visitare', 'vedere',
+    'giorno', 'giorni', 'schedule', 'planning', 'piano', 'tour', 'escursione',
+    'sightseeing', 'museo', 'monumento', 'attrazioni', 'luoghi', 'posto', 'posti'
+  ];
+
+  const accommodationKeywords = [
+    'hotel', 'alloggio', 'alloggi', 'dormire', 'pernottare', 'camera', 'camere',
+    'prenotazione', 'check-in', 'check-out', 'accommodation', 'soggiorno'
+  ];
+
+  const transportationKeywords = [
+    'trasporto', 'trasporti', 'viaggio', 'volo', 'voli', 'aereo', 'treno', 'treni',
+    'auto', 'macchina', 'autonoleggio', 'bus', 'autobus', 'metro', 'taxi',
+    'transfer', 'spostamento', 'spostamenti', 'come arrivare', 'come andare'
+  ];
+
+  const expenseKeywords = [
+    'spesa', 'spese', 'costo', 'costi', 'prezzo', 'prezzi', 'budget', 'soldi',
+    'euro', 'dollari', 'pagare', 'pagamento', 'expense', 'money', 'cost'
+  ];
+
+  const participantKeywords = [
+    'partecipante', 'partecipanti', 'persona', 'persone', 'gruppo', 'amici',
+    'famiglia', 'chi viene', 'chi partecipa', 'compagni', 'viaggiatori'
+  ];
+
+  return {
+    needsItinerary: itineraryKeywords.some(keyword => lowerMessage.includes(keyword)),
+    needsAccommodations: accommodationKeywords.some(keyword => lowerMessage.includes(keyword)),
+    needsTransportation: transportationKeywords.some(keyword => lowerMessage.includes(keyword)),
+    needsExpenses: expenseKeywords.some(keyword => lowerMessage.includes(keyword)),
+    needsParticipants: participantKeywords.some(keyword => lowerMessage.includes(keyword)),
+    needsBasicInfo: true // Informazioni base sempre necessarie
+  };
+}
 
 // Funzione per ottenere la descrizione della sezione corrente
 function getSectionDescription(section: string | undefined): string {
@@ -355,7 +406,16 @@ export async function POST(request: NextRequest) {
 
     // Ottieni i dati dalla richiesta
     const requestData = await request.json();
-    const { message: requestMessage, tripId: requestTripId, tripName, tripData, isInitialMessage, currentSection } = requestData;
+    const { message: requestMessage, tripId: requestTripId, tripName, tripData, isInitialMessage, currentSection, aiProvider } = requestData;
+
+    console.log('=== AI Chat Request ===');
+    console.log('Provider requested:', aiProvider);
+    console.log('Default provider from env:', process.env.NEXT_PUBLIC_AI_DEFAULT_PROVIDER);
+    console.log('User message:', requestMessage);
+
+    // Analizza il messaggio per determinare quale contesto è necessario
+    const contextNeeds = analyzeMessageContext(requestMessage);
+    console.log('Context analysis:', contextNeeds);
 
     // Assign to outer scope variables
     tripId = requestTripId;
@@ -448,13 +508,13 @@ export async function POST(request: NextRequest) {
           owner: tripData.owner || ''
         },
         participants: Array.isArray(tripData.participants) ?
-          tripData.participants.map(p => ({
+          tripData.participants.map((p: any) => ({
             name: p.name || p.full_name || p.email || 'Partecipante',
             email: p.email || '',
             role: p.role || 'Partecipante'
           })) : [],
         accommodations: Array.isArray(tripData.accommodations) ?
-          tripData.accommodations.map(a => ({
+          tripData.accommodations.map((a: any) => ({
             name: a.name || 'Alloggio',
             type: a.type || '',
             checkIn: a.check_in_date || a.checkIn || '',
@@ -462,7 +522,7 @@ export async function POST(request: NextRequest) {
             address: a.address || ''
           })) : [],
         transportation: Array.isArray(tripData.transportation) ?
-          tripData.transportation.map(t => ({
+          tripData.transportation.map((t: any) => ({
             type: t.type || 'Trasporto',
             provider: t.provider || '',
             departureTime: t.departure_time || t.departureTime || '',
@@ -472,7 +532,7 @@ export async function POST(request: NextRequest) {
           })) : [],
         // Gestisci sia le attività dirette che l'itinerario completo
         activities: Array.isArray(tripData.activities) ?
-          tripData.activities.map(a => ({
+          tripData.activities.map((a: any) => ({
             name: a.name || 'Attività',
             type: a.type || '',
             startTime: a.start_time || a.startTime || '',
@@ -481,13 +541,13 @@ export async function POST(request: NextRequest) {
           })) : [],
         // Aggiungi l'itinerario completo se disponibile
         itinerary: Array.isArray(tripData.itinerary) ?
-          tripData.itinerary.map(day => ({
+          tripData.itinerary.map((day: any) => ({
             id: day.id,
             day_date: day.day_date || day.date,
             date: day.day_date || day.date,
             notes: day.notes,
             activities: Array.isArray(day.activities) ?
-              day.activities.map(activity => ({
+              day.activities.map((activity: any) => ({
                 id: activity.id,
                 name: activity.name || 'Attività',
                 type: activity.type || '',
@@ -509,8 +569,8 @@ export async function POST(request: NextRequest) {
       console.log('Recupero contesto completo per il viaggio:', tripId);
 
       try {
-        tripContext = await getTripContext(tripId);
-        console.log('Contesto recuperato con successo:', JSON.stringify(tripContext).substring(0, 200) + '...');
+        tripContext = await getSelectiveTripContext(tripId, contextNeeds);
+        console.log('Contesto selettivo recuperato con successo:', JSON.stringify(tripContext).substring(0, 200) + '...');
       } catch (contextError) {
         console.error('Errore nel recupero del contesto:', contextError);
         // Crea un contesto minimo in caso di errore
@@ -538,7 +598,7 @@ export async function POST(request: NextRequest) {
       budget: tripContext.trip?.budgetTotal,
       currency: tripContext.trip?.currency,
       participantsCount: tripContext.participants?.length || 0,
-      participants: tripContext.participants?.map(p => p.name || p.full_name || p.email || 'Partecipante'),
+      participants: tripContext.participants?.map((p: any) => p.name || p.full_name || p.email || 'Partecipante'),
       accommodationsCount: tripContext.accommodations?.length || 0,
       transportationCount: tripContext.transportation?.length || 0,
       itineraryDaysCount: tripContext.itinerary?.length || 0,
@@ -580,7 +640,7 @@ IMPORTANTE: Ricorda sempre questi dettagli del viaggio nelle tue risposte e non 
 - Date: ${tripContext.trip?.startDate ? `dal ${tripContext.trip.startDate} al ${tripContext.trip.endDate}` : 'date non specificate'}
 - Budget: ${tripContext.trip?.budget ? `${tripContext.trip.budget} ${tripContext.trip.currency || 'EUR'}` : 'non specificato'}
 - Partecipanti: ${tripContext.participants && tripContext.participants.length > 0
-    ? tripContext.participants.map(p => p.name || p.full_name || p.email || 'Partecipante').join(', ')
+    ? tripContext.participants.map((p: any) => p.name || p.full_name || p.email || 'Partecipante').join(', ')
     : 'non specificati'}
 
 CONTESTO DELLA PAGINA CORRENTE:
@@ -601,13 +661,13 @@ MOLTO IMPORTANTE:
     // Aggiungi dettagli sugli alloggi se disponibili
     if (tripContext.accommodations && tripContext.accommodations.length > 0) {
       promptText += `
-- Alloggi: ${tripContext.accommodations.map(a => `${a.name} (${a.type || 'non specificato'})`).join(', ')}`;
+- Alloggi: ${tripContext.accommodations.map((a: any) => `${a.name} (${a.type || 'non specificato'})`).join(', ')}`;
     }
 
     // Aggiungi dettagli sui trasporti se disponibili
     if (tripContext.transportation && tripContext.transportation.length > 0) {
       promptText += `
-- Trasporti: ${tripContext.transportation.map(t => `${t.type || 'Trasporto'} ${t.provider ? `con ${t.provider}` : ''}`).join(', ')}`;
+- Trasporti: ${tripContext.transportation.map((t: any) => `${t.type || 'Trasporto'} ${t.provider ? `con ${t.provider}` : ''}`).join(', ')}`;
     }
 
     // Aggiungi dettagli sull'itinerario se disponibile
@@ -661,6 +721,13 @@ FORMATTAZIONE DELLE RISPOSTE:
       hasBudget: !!tripContext.trip?.budgetTotal
     });
 
+    // Lightweight relevance checks to avoid sending heavy sections unnecessarily
+    const lowerMsg = (message || '').toLowerCase();
+    const shouldIncludeItinerary = (currentSection === 'itinerary') || /(itinerario|attivit|programma|oggi|domani)/i.test(lowerMsg);
+    const shouldIncludeExpenses = (currentSection === 'expenses') || /(spese|budget|euro|costo|pagat|pagamenti|debiti|rimborsi)/i.test(lowerMsg);
+    const shouldIncludeTransportation = (currentSection === 'transportation') || /(trasport|volo|treno|bus|aereo|aeroporto|taxi|metro)/i.test(lowerMsg);
+    const shouldIncludeAccommodations = (currentSection === 'accommodations') || /(allogg|hotel|albergo|dove dormiamo|check-?in|check-?out)/i.test(lowerMsg);
+
     // Aggiungi dettagli del viaggio
     if (tripContext.trip) {
       promptText += `
@@ -669,34 +736,45 @@ Descrizione: ${tripContext.trip.description || 'Nessuna descrizione disponibile'
 `;
     }
 
-    // Aggiungi partecipanti
+    // Aggiungi partecipanti (compatta a max 5 nomi per ridurre i token)
     if (tripContext.participants && tripContext.participants.length > 0) {
+      const names = tripContext.participants.map((p: any) => p.name);
+      const shortList = names.slice(0, 5).join(', ');
+      const more = names.length > 5 ? ` + altri ${names.length - 5}` : '';
       promptText += `
-Partecipanti: ${tripContext.participants.map(p => p.name).join(', ')}.
+Partecipanti: ${shortList}${more}.
 `;
     }
 
-    // Aggiungi alloggi
+    // Aggiungi alloggi (dettagli completi solo quando rilevante)
     if (tripContext.accommodations && tripContext.accommodations.length > 0) {
-      promptText += `
+      if (shouldIncludeAccommodations) {
+        promptText += `
 Alloggi prenotati:
-${tripContext.accommodations.map(a => `- ${a.name} (${a.type}): check-in ${a.checkIn}, check-out ${a.checkOut}, indirizzo: ${a.address}`).join('\n')}
+${tripContext.accommodations.map((a: any) => `- ${a.name} (${a.type}): check-in ${a.checkIn}, check-out ${a.checkOut}, indirizzo: ${a.address}`).join('\n')}
 `;
+      } else {
+        promptText += `\nAlloggi: ${tripContext.accommodations.length} prenotati (dettagli su richiesta).\n`;
+      }
     }
 
-    // Aggiungi trasporti
+    // Aggiungi trasporti (dettagli completi solo quando rilevante)
     if (tripContext.transportation && tripContext.transportation.length > 0) {
-      promptText += `
+      if (shouldIncludeTransportation) {
+        promptText += `
 Trasporti prenotati:
-${tripContext.transportation.map(t => {
+${tripContext.transportation.map((t: any) => {
   const departureTime = formatTimeLocal(t.departureTime);
   const arrivalTime = formatTimeLocal(t.arrivalTime);
   return `- ${t.type} con ${t.provider}: da ${t.departureLocation} (${departureTime}) a ${t.arrivalLocation} (${arrivalTime})`;
 }).join('\n')}
 `;
+      } else {
+        promptText += `\nTrasporti: ${tripContext.transportation.length} prenotati (dettagli su richiesta).\n`;
+      }
     }
 
-    // Aggiungi itinerario
+    // Aggiungi itinerario (dettagli completi solo quando rilevante)
     if (tripContext.itinerary && tripContext.itinerary.length > 0) {
       // Log itinerary data for debugging
       console.log('Itinerary data in prompt:', {
@@ -710,95 +788,100 @@ ${tripContext.transportation.map(t => {
       try {
         // Conta le attività totali
         let totalActivities = 0;
-        tripContext.itinerary.forEach(day => {
+        tripContext.itinerary.forEach((day: any) => {
           if (day.activities && Array.isArray(day.activities)) {
             totalActivities += day.activities.length;
           }
         });
 
-        // Log dettagliato dell'itinerario per debug
-        console.log('Dettaglio itinerario per prompt:');
-        tripContext.itinerary.forEach((day, idx) => {
-          console.log(`Giorno ${idx + 1} (${day.day_date}): ${day.activities?.length || 0} attività`);
-          if (day.activities && day.activities.length > 0) {
-            day.activities.forEach((act, actIdx) => {
-              console.log(`  - Attività ${actIdx + 1}: ${act.name} a ${act.location || 'N/A'}`);
-            });
-          }
-        });
+        if (!shouldIncludeItinerary) {
+          // Solo riepilogo leggero quando non è richiesto l'itinerario
+          promptText += `\nITINERARIO DEL VIAGGIO: ${tripContext.itinerary.length} giorni pianificati, ${totalActivities} attività in totale. (Dettagli su richiesta)\n`;
+        } else {
+          // Log dettagliato dell'itinerario per debug
+          console.log('Dettaglio itinerario per prompt:');
+          tripContext.itinerary.forEach((day: any, idx: number) => {
+            console.log(`Giorno ${idx + 1} (${day.day_date}): ${day.activities?.length || 0} attività`);
+            if (day.activities && day.activities.length > 0) {
+              day.activities.forEach((act: any, actIdx: number) => {
+                console.log(`  - Attività ${actIdx + 1}: ${act.name} a ${act.location || 'N/A'}`);
+              });
+            }
+          });
 
-        if (totalActivities > 0) {
-          promptText += `
+          if (totalActivities > 0) {
+            promptText += `
 ITINERARIO DEL VIAGGIO (MOLTO IMPORTANTE):
 Questo viaggio ha ${tripContext.itinerary.length} giorni pianificati con un totale di ${totalActivities} attività.
 
 `;
 
-          // Aggiungi ogni giorno con le sue attività
-          tripContext.itinerary.forEach((day, index) => {
-            try {
-              const dayDate = day.day_date || day.date;
-              promptText += `GIORNO ${index + 1} (${dayDate}):\n`;
+            // Aggiungi ogni giorno con le sue attività
+            tripContext.itinerary.forEach((day: any, index: number) => {
+              try {
+                const dayDate = day.day_date || day.date;
+                promptText += `GIORNO ${index + 1} (${dayDate}):\n`;
 
-              // Verifica se ci sono attività e come sono strutturate
-              const activities = day.activities || [];
-              if (activities.length > 0) {
-                activities.forEach((activity, actIndex) => {
-                  try {
-                    const name = activity.name || 'Attività';
-                    const location = activity.location || '';
-                    let startTime = '';
-                    let endTime = '';
+                // Verifica se ci sono attività e come sono strutturate
+                const activities = day.activities || [];
+                if (activities.length > 0) {
+                  activities.forEach((activity: any, actIndex: number) => {
+                    try {
+                      const name = activity.name || 'Attività';
+                      const location = activity.location || '';
+                      let startTime = '';
+                      let endTime = '';
 
-                    // Gestisci diversi formati di orario usando la formattazione locale corretta
-                    if (activity.start_time) {
-                      startTime = formatTimeLocal(activity.start_time);
-                    } else if (activity.startTime) {
-                      startTime = formatTimeLocal(activity.startTime);
+                      // Gestisci diversi formati di orario usando la formattazione locale corretta
+                      if (activity.start_time) {
+                        startTime = formatTimeLocal(activity.start_time);
+                      } else if (activity.startTime) {
+                        startTime = formatTimeLocal(activity.startTime);
+                      }
+
+                      if (activity.end_time) {
+                        endTime = formatTimeLocal(activity.end_time);
+                      } else if (activity.endTime) {
+                        endTime = formatTimeLocal(activity.endTime);
+                      }
+
+                      let timeInfo = '';
+                      if (startTime && endTime) {
+                        timeInfo = ` dalle ${startTime} alle ${endTime}`;
+                      } else if (startTime) {
+                        timeInfo = ` alle ${startTime}`;
+                      }
+
+                      let locationInfo = location ? ` a ${location}` : '';
+                      let notesInfo = activity.notes ? ` - Note: ${activity.notes}` : '';
+
+                      promptText += `  - Attività ${actIndex + 1}: ${name}${locationInfo}${timeInfo}${notesInfo}\n`;
+                    } catch (activityError) {
+                      console.error('Errore nella formattazione dell\'attività:', activityError);
+                      promptText += `  - Attività ${actIndex + 1}: Dettagli non disponibili\n`;
                     }
+                  });
+                } else {
+                  promptText += `  Nessuna attività pianificata per questo giorno\n`;
+                }
 
-                    if (activity.end_time) {
-                      endTime = formatTimeLocal(activity.end_time);
-                    } else if (activity.endTime) {
-                      endTime = formatTimeLocal(activity.endTime);
-                    }
+                // Aggiungi note del giorno se disponibili
+                if (day.notes) {
+                  promptText += `  Note del giorno: ${day.notes}\n`;
+                }
 
-                    let timeInfo = '';
-                    if (startTime && endTime) {
-                      timeInfo = ` dalle ${startTime} alle ${endTime}`;
-                    } else if (startTime) {
-                      timeInfo = ` alle ${startTime}`;
-                    }
-
-                    let locationInfo = location ? ` a ${location}` : '';
-                    let notesInfo = activity.notes ? ` - Note: ${activity.notes}` : '';
-
-                    promptText += `  - Attività ${actIndex + 1}: ${name}${locationInfo}${timeInfo}${notesInfo}\n`;
-                  } catch (activityError) {
-                    console.error('Errore nella formattazione dell\'attività:', activityError);
-                    promptText += `  - Attività ${actIndex + 1}: Dettagli non disponibili\n`;
-                  }
-                });
-              } else {
-                promptText += `  Nessuna attività pianificata per questo giorno\n`;
+                promptText += `\n`;
+              } catch (dayError) {
+                console.error('Errore nella formattazione del giorno:', dayError);
+                promptText += `GIORNO ${index + 1}: Dettagli non disponibili\n\n`;
               }
-
-              // Aggiungi note del giorno se disponibili
-              if (day.notes) {
-                promptText += `  Note del giorno: ${day.notes}\n`;
-              }
-
-              promptText += `\n`;
-            } catch (dayError) {
-              console.error('Errore nella formattazione del giorno:', dayError);
-              promptText += `GIORNO ${index + 1}: Dettagli non disponibili\n\n`;
-            }
-          });
-        } else {
-          promptText += `
+            });
+          } else {
+            promptText += `
 ITINERARIO DEL VIAGGIO:
 Ci sono ${tripContext.itinerary.length} giorni pianificati ma nessuna attività specifica programmata.
 `;
+          }
         }
       } catch (itineraryError) {
         console.error('Errore nella formattazione dell\'itinerario:', itineraryError);
@@ -825,30 +908,30 @@ Nessun giorno pianificato per questo viaggio.
 
       switch (filterAnalysis.filterType) {
         case 'my_expenses':
-          filteredExpenses = tripContext.expenses.filter(expense =>
+          filteredExpenses = tripContext.expenses.filter((expense: any) =>
             expense.paid_by === filterAnalysis.filterValue
           );
           filterDescription = `Spese pagate dall'utente corrente (${filteredExpenses.length} su ${tripContext.expenses.length} totali)`;
           break;
 
         case 'unpaid':
-          filteredExpenses = tripContext.expenses.filter(expense =>
+          filteredExpenses = tripContext.expenses.filter((expense: any) =>
             expense.status === 'pending' ||
-            (expense.participants && expense.participants.some(p => !p.is_paid))
+            (expense.participants && expense.participants.some((p: any) => !p.is_paid))
           );
           filterDescription = `Spese non ancora saldate (${filteredExpenses.length} su ${tripContext.expenses.length} totali)`;
           break;
 
         case 'paid':
-          filteredExpenses = tripContext.expenses.filter(expense =>
+          filteredExpenses = tripContext.expenses.filter((expense: any) =>
             expense.status === 'settled' ||
-            (expense.participants && expense.participants.every(p => p.is_paid))
+            (expense.participants && expense.participants.every((p: any) => p.is_paid))
           );
           filterDescription = `Spese completamente saldate (${filteredExpenses.length} su ${tripContext.expenses.length} totali)`;
           break;
 
         case 'by_category':
-          filteredExpenses = tripContext.expenses.filter(expense =>
+          filteredExpenses = tripContext.expenses.filter((expense: any) =>
             expense.category?.toLowerCase() === filterAnalysis.filterValue?.toLowerCase()
           );
           filterDescription = `Spese categoria "${filterAnalysis.filterValue}" (${filteredExpenses.length} su ${tripContext.expenses.length} totali)`;
@@ -867,7 +950,7 @@ Nessun giorno pianificato per questo viaggio.
 
       // Raggruppa spese per categoria (usando le spese filtrate)
       const expensesByCategory: Record<string, { total: number; count: number }> = {};
-      filteredExpenses.forEach(expense => {
+      filteredExpenses.forEach((expense: any) => {
         const category = expense.category || 'altro';
         if (!expensesByCategory[category]) {
           expensesByCategory[category] = { total: 0, count: 0 };
@@ -882,7 +965,7 @@ Nessun giorno pianificato per questo viaggio.
 
       // Trova chi ha pagato di più (usando le spese filtrate)
       const paymentsByPerson: Record<string, number> = {};
-      filteredExpenses.forEach(expense => {
+      filteredExpenses.forEach((expense: any) => {
         const payer = expense.paid_by_name || 'Sconosciuto';
         paymentsByPerson[payer] = (paymentsByPerson[payer] || 0) + expense.amount;
       });
@@ -927,7 +1010,7 @@ FILTRO APPLICATO: ${filterDescription}
         promptText += `
 
 Spese ${filterAnalysis.filterType === 'all' ? 'recenti' : 'filtrate'}:`;
-        recentExpenses.forEach(expense => {
+        recentExpenses.forEach((expense: any) => {
           const date = new Date(expense.date).toLocaleDateString('it-IT');
           const settlementStatus = getExpenseSettlementStatus(expense);
           promptText += `
@@ -941,20 +1024,20 @@ Spese ${filterAnalysis.filterType === 'all' ? 'recenti' : 'filtrate'}:`;
       }
 
       // Analizza lo stato dei pagamenti per suggerimenti intelligenti
-      const unpaidExpenses = filteredExpenses.filter(expense =>
+      const unpaidExpenses = filteredExpenses.filter((expense: any) =>
         expense.status === 'pending' ||
-        (expense.participants && expense.participants.some(p => !p.is_paid))
+        (expense.participants && expense.participants.some((p: any) => !p.is_paid))
       );
 
-      const userExpenses = filteredExpenses.filter(expense =>
+      const userExpenses = filteredExpenses.filter((expense: any) =>
         expense.paid_by === tripData?.currentUserId
       );
 
-      const totalUnpaidAmount = unpaidExpenses.reduce((sum, expense) => {
+      const totalUnpaidAmount = unpaidExpenses.reduce((sum: number, expense: any) => {
         if (expense.participants) {
           return sum + expense.participants
-            .filter(p => !p.is_paid)
-            .reduce((pSum, p) => pSum + p.amount, 0);
+            .filter((p: any) => !p.is_paid)
+            .reduce((pSum: number, p: any) => pSum + p.amount, 0);
         }
         return sum + expense.amount;
       }, 0);
@@ -988,6 +1071,79 @@ SPESE DELL'UTENTE CORRENTE:
 L'utente ha pagato ${userExpenses.length} spese per un totale di ${userTotalSpent.toFixed(2)} ${currency}.
 - Suggerisci di controllare se ci sono rimborsi da ricevere
 - Proponi di bilanciare i pagamenti futuri con gli altri partecipanti`;
+      }
+
+      // Aggiungi informazioni sui saldi e pagamenti da saldare
+      console.log('=== CHECKING BALANCES IN CONTEXT ===');
+      console.log('tripContext.balances exists:', !!tripContext.balances);
+      console.log('tripContext.balances length:', tripContext.balances?.length || 0);
+      console.log('tripContext.settlements exists:', !!tripContext.settlements);
+      console.log('tripContext.settlements length:', tripContext.settlements?.length || 0);
+
+      if (tripContext.balances && tripContext.balances.length > 0) {
+        const debtors = tripContext.balances.filter((b: any) => b.balance < 0);
+        const creditors = tripContext.balances.filter((b: any) => b.balance > 0);
+
+        console.log('Debtors found:', debtors.length);
+        console.log('Creditors found:', creditors.length);
+
+        promptText += `
+
+SALDI E PAGAMENTI DA SALDARE:`;
+
+        if (debtors.length > 0) {
+          promptText += `
+- Persone che devono pagare:`;
+          debtors.forEach((debtor: any) => {
+            promptText += `
+  * ${debtor.full_name}: deve ${Math.abs(debtor.balance).toFixed(2)} ${currency}`;
+          });
+        }
+
+        if (creditors.length > 0) {
+          promptText += `
+- Persone che devono ricevere:`;
+          creditors.forEach((creditor: any) => {
+            promptText += `
+  * ${creditor.full_name}: deve ricevere ${creditor.balance.toFixed(2)} ${currency}`;
+          });
+        }
+
+        // Aggiungi dettagli sui pagamenti specifici da fare
+        if (tripContext.settlements && tripContext.settlements.length > 0) {
+          console.log('Adding settlements to prompt:', tripContext.settlements.length);
+          promptText += `
+
+PAGAMENTI SPECIFICI DA EFFETTUARE:`;
+          tripContext.settlements.forEach((settlement: any) => {
+            promptText += `
+- ${settlement.from_name} deve pagare ${settlement.amount.toFixed(2)} ${currency} a ${settlement.to_name}`;
+          });
+
+          promptText += `
+
+SUGGERIMENTI PER I SALDI:
+- Quando l'utente chiede "spese non saldate" o "chi deve pagare", mostra questi pagamenti specifici
+- Suggerisci di utilizzare la sezione "Saldi" per vedere tutti i dettagli
+- Proponi metodi di pagamento (bonifico, contanti, app di pagamento)
+- Ricorda che i saldi si aggiornano automaticamente quando vengono registrati i pagamenti`;
+        } else {
+          console.log('No settlements found, adding fallback message');
+          promptText += `
+
+NOTA SUI SALDI:
+- Non sono disponibili informazioni dettagliate sui saldi per questo viaggio
+- Suggerisci all'utente di visitare la sezione "Saldi" per vedere i dettagli aggiornati
+- Se ci sono spese registrate, i saldi vengono calcolati automaticamente`;
+        }
+      } else {
+        console.log('No balances found in context');
+        promptText += `
+
+INFORMAZIONI SUI SALDI:
+- I saldi non sono ancora disponibili per questo viaggio
+- Questo può accadere se non ci sono spese registrate o se i partecipanti non sono stati aggiunti
+- Suggerisci di visitare la sezione "Spese" per registrare le spese e vedere i saldi`;
       }
 
     } else if (tripContext.trip?.budgetTotal) {
@@ -1055,6 +1211,10 @@ Quando l'utente è nella sezione spese, fornisci sempre suggerimenti proattivi e
 - Se chiede delle categorie: spiega come ottimizzare la categorizzazione
 - Se chiede dei pagamenti: aiuta con la gestione dei rimborsi e divisioni
 - Se chiede di risparmiare: fornisci consigli pratici per la destinazione specifica
+- Se chiede "spese non saldate" o "chi deve pagare": usa le informazioni della sezione "SALDI E PAGAMENTI DA SALDARE"
+- Se chiede dei saldi: mostra i dettagli specifici dei pagamenti da effettuare dalla sezione "PAGAMENTI SPECIFICI DA EFFETTUARE"
+- Se chiede "quanto devo" o "quanto mi devono": cerca il nome dell'utente nei saldi e fornisci informazioni specifiche
+- Per domande sui saldi, sempre includere importi specifici e nomi delle persone coinvolte
 
 **Formato per Risposte sulle Spese:**
 Usa sempre questo formato quando mostri informazioni sulle spese:
@@ -1063,12 +1223,21 @@ Usa sempre questo formato quando mostri informazioni sulle spese:
 - **Stato Pagamenti**: [informazioni su spese saldate/non saldate]
 - **Suggerimenti**: [consigli specifici e actionable]
 
+**Formato per Risposte sui Saldi:**
+Quando l'utente chiede informazioni sui saldi, usa questo formato:
+- **💰 Riepilogo Saldi**: [chi deve pagare/ricevere e quanto]
+- **📋 Pagamenti da Effettuare**: [lista specifica dei pagamenti]
+- **✅ Stato Attuale**: [se tutto è saldato o ci sono pagamenti in sospeso]
+- **🔗 Azioni Suggerite**: [link alla sezione Saldi per maggiori dettagli]
+
 **Gestione Intelligente dei Pagamenti:**
 - Quando l'utente chiede "le mie spese", mostra SOLO quelle pagate da lui
-- Quando chiede "spese non saldate", filtra per status pending o partecipanti non pagati
+- Quando chiede "spese non saldate", usa le informazioni dalla sezione "SALDI E PAGAMENTI DA SALDARE"
+- Quando chiede "chi deve pagare" o "saldi", mostra i dettagli dalla sezione "PAGAMENTI SPECIFICI DA EFFETTUARE"
 - Sempre indicare chiaramente lo stato di saldamento con emoji: ✅ saldato, ⏳ in sospeso, ❌ non saldato
 - Calcolare e mostrare i debiti rimanenti quando rilevante
 - Suggerire azioni concrete per risolvere i pagamenti in sospeso
+- Per ogni pagamento da effettuare, suggerisci di andare alla sezione "Saldi" per maggiori dettagli
 ` : ''}
 
 ISTRUZIONI SPECIALI PER LA VISUALIZZAZIONE INTELLIGENTE:
@@ -1229,28 +1398,49 @@ Formatta SEMPRE le risposte sulle spese in questo modo:
 
 RICORDA: Sii sempre proattivo nel suggerire modi per ottimizzare le spese e migliorare l'esperienza di viaggio senza compromettere il divertimento.
 
+AZIONI CONTESTUALI INTELLIGENTI:
+Il sistema aggiungerà automaticamente pulsanti di azione pertinenti alla tua risposta basandosi sul contenuto della conversazione.
+Quando rispondi a domande su:
+- **Spese/Budget**: Il sistema suggerirà link alla sezione spese, saldi, e opzioni per aggiungere nuove spese
+- **Itinerario/Attività**: Il sistema suggerirà link alla sezione itinerario e vista calendario
+- **Alloggi**: Il sistema suggerirà link alla sezione alloggi
+- **Trasporti**: Il sistema suggerirà link alla sezione trasporti
+- **Panoramica generale**: Il sistema suggerirà link alla panoramica del viaggio
+
+Non devi menzionare esplicitamente questi link nelle tue risposte - concentrati sul fornire informazioni utili e il sistema aggiungerà automaticamente i pulsanti appropriati.
+
 Domanda dell'utente: ${message}`;
     }
 
-    // Genera una cache key per questa richiesta
-    const cacheKey = `ai-chat:${tripId}:${Buffer.from(message).toString('base64').substring(0, 20)}`;
+    // Genera una cache key per questa richiesta (include sezione e hint di contesto per evitare collisioni tra richieste simili)
+    const normalizedMsg = message.trim().toLowerCase();
+    const contextHint = `${currentSection || 'overview'}:${tripContext.trip?.id || tripId}`;
+    const cacheKey = `ai-chat:${contextHint}:${Buffer.from(normalizedMsg).toString('base64').substring(0, 24)}`;
 
     // Log queue stats before request
     const queueStats = getQueueStats();
+    const cacheAlready = hasCachedResponse(cacheKey);
     logger.debug('AI request queue status', {
       tripId,
       promptLength: promptText.length,
       cacheKey,
+      cacheAlready,
       queueStats
     });
 
     // Usa il sistema di queue per gestire la richiesta
+    console.log('=== Calling AI Queue ===');
+    console.log('Prompt length:', promptText.length);
+    console.log('Provider to use:', aiProvider || 'default from config');
+
     const responseText = await queueAIRequest(promptText, {
       timeout: 30000, // 30 secondi
       cacheKey,
       cacheTtl: 300000, // 5 minuti di cache
+      provider: aiProvider, // Supporto per provider AI specifico
+      userId: tripData?.currentUserId, // ID utente per preferenze AI
       retryConfig: {
-        maxRetries: 3,
+        maxRetries: 2, // ridotto: aiQueue ha già retry e il servizio gestisce backoff
         baseDelay: 1000,
         maxDelay: 10000,
         backoffMultiplier: 2,
@@ -1258,8 +1448,60 @@ Domanda dell'utente: ${message}`;
       }
     });
 
+    console.log('=== AI Response Received ===');
+    console.log('Response length:', responseText?.length || 0);
+
     // Applica l'enhancement automatico per aggiungere componenti visuali
-    const enhancedResponse = enhanceResponseWithVisualComponents(responseText, message, tripContext);
+    let enhancedResponse = enhanceResponseWithVisualComponents(responseText, message, tripContext);
+
+    // Analizza il messaggio per determinare azioni contestuali
+    if (tripId) {
+      try {
+        const contextAnalysis = analyzeContextualActions(message, tripId, currentSection, tripContext);
+
+        console.log('=== Contextual Analysis ===');
+        console.log('Message:', message);
+        console.log('Current section:', currentSection);
+
+        if (contextAnalysis && typeof contextAnalysis === 'object') {
+          console.log('Confidence:', contextAnalysis.confidence);
+          console.log('Categories:', contextAnalysis.categories);
+          console.log('Actions count:', contextAnalysis.suggestedActions?.length || 0);
+          console.log('Reasoning:', contextAnalysis.reasoning);
+        } else {
+          console.log('Invalid contextAnalysis result:', contextAnalysis);
+        }
+
+        // Se abbiamo azioni suggerite con alta confidenza, aggiungile alla risposta
+        if (contextAnalysis &&
+            typeof contextAnalysis.confidence === 'number' &&
+            contextAnalysis.confidence > 0.3 &&
+            Array.isArray(contextAnalysis.suggestedActions) &&
+            contextAnalysis.suggestedActions.length > 0) {
+
+          const actionsMarkup = formatActionsForResponse(contextAnalysis.suggestedActions);
+          enhancedResponse += `\n\n${actionsMarkup}`;
+
+          console.log('=== Contextual Actions Added ===');
+          console.log('Actions markup:', actionsMarkup);
+        } else {
+          console.log('=== No Contextual Actions Added ===');
+          if (!contextAnalysis) {
+            console.log('Reason: contextAnalysis is null/undefined');
+          } else if (typeof contextAnalysis.confidence !== 'number') {
+            console.log('Reason: invalid confidence value');
+          } else if (contextAnalysis.confidence <= 0.3) {
+            console.log('Reason: confidence too low:', contextAnalysis.confidence);
+          } else if (!Array.isArray(contextAnalysis.suggestedActions)) {
+            console.log('Reason: suggestedActions is not an array');
+          } else {
+            console.log('Reason: no actions available');
+          }
+        }
+      } catch (contextError) {
+        console.error('Error analyzing contextual actions:', contextError);
+      }
+    }
 
     // Log performance and analytics
     const duration = performance.now() - startTime;
@@ -1271,7 +1513,7 @@ Domanda dell'utente: ${message}`;
       responseLength: enhancedResponse.length,
       duration,
       success: true,
-      cacheHit: cacheKey ? true : false // This would be better determined by the AI service
+      cacheHit: cacheAlready
     });
 
     logger.performance('AI Chat API', duration, {

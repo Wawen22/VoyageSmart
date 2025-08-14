@@ -505,7 +505,7 @@ vercel rollback --target deployment-url
 ## 🔗 Related Documentation
 
 - **[Security Implementations](./security-implementations.md)** - Security best practices
-- **[Testing Framework](./testing-framework.md)** - Testing in production
+- **[Testing Guide](./testing.md)** - Testing in production
 - **[Code Standards](./code-standards.md)** - Code quality standards
 
 ---

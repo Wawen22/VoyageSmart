@@ -12,6 +12,10 @@ const requiredEnvVars = [
 const optionalEnvVars = [
   'SUPABASE_SERVICE_ROLE_KEY',
   'NEXT_PUBLIC_GEMINI_API_KEY',
+  'NEXT_PUBLIC_OPENAI_API_KEY',
+  'NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT',
+  'NEXT_PUBLIC_AZURE_OPENAI_API_VERSION',
+  'NEXT_PUBLIC_AZURE_OPENAI_DEPLOYMENT_NAME',
   'STRIPE_SECRET_KEY',
   'STRIPE_PUBLISHABLE_KEY',
   'STRIPE_WEBHOOK_SECRET',
@@ -69,9 +73,51 @@ export const config = {
 
   // AI configuration
   ai: {
+    // Default provider selection
+    defaultProvider: (process.env.NEXT_PUBLIC_AI_DEFAULT_PROVIDER as 'gemini' | 'openai' | 'deepseek' | 'gemini-openrouter') || 'gemini',
+
+    // Gemini configuration
+    gemini: {
+      apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+      model: 'gemini-2.0-flash-exp',
+      maxTokens: 4096,
+      temperature: 0.7,
+    },
+
+    // OpenAI configuration (Azure OpenAI)
+    openai: {
+      apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+      model: 'gpt-5-nano',
+      maxTokens: 4096,
+      temperature: 1.0, // GPT-5-nano supports temperature = 1
+      // Azure OpenAI specific configuration
+      azure: {
+        endpoint: process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT,
+        apiVersion: process.env.NEXT_PUBLIC_AZURE_OPENAI_API_VERSION || '2025-04-01-preview',
+        deploymentName: process.env.NEXT_PUBLIC_AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-5-nano',
+      },
+    },
+
+    // DeepSeek configuration (via OpenRouter)
+    deepseek: {
+      apiKey: process.env.NEXT_PUBLIC_OPENROUTER_API_KEY,
+      model: 'deepseek/deepseek-r1:free',
+      maxTokens: 4096,
+      temperature: 0.7,
+    },
+
+    // Gemini OpenRouter configuration
+    'gemini-openrouter': {
+      apiKey: process.env.NEXT_PUBLIC_OPENROUTER_GEMINI_API_KEY,
+      model: 'google/gemini-2.0-flash-exp:free',
+      maxTokens: 4096,
+      temperature: 0.7,
+    },
+
+    // Legacy support (deprecated)
     geminiApiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
     model: 'gemini-2.0-flash-exp',
-    maxTokens: 2048,
+    maxTokens: 4096,
     temperature: 0.7,
   },
 
