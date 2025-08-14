@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TravelInsights from './TravelInsights';
+import AnalyticsTimeline from './AnalyticsTimeline';
 
 interface Trip {
   id: string;
@@ -135,24 +136,8 @@ export default function AdvancedMetricsModal({ trips, trigger }: AdvancedMetrics
             </Card>
           </div>
 
-          {/* Travel Timeline Chart Placeholder */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" />
-                Travel Timeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
-                <div className="text-center space-y-2">
-                  <BarChart3Icon className="h-12 w-12 text-muted-foreground mx-auto" />
-                  <p className="text-muted-foreground">Interactive timeline chart</p>
-                  <p className="text-xs text-muted-foreground">Coming soon</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Travel Timeline */}
+          <AnalyticsTimeline trips={trips} />
 
           {/* Export Options */}
           <Card>
