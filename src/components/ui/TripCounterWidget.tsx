@@ -32,10 +32,9 @@ export default function TripCounterWidget() {
       }
 
       try {
-        const counts = await getUserTotalTripCount(user.id);
+        const counts = await getUserTotalTripCount();
         setTripCounts(counts);
       } catch (error) {
-        console.error('Error fetching trip counts:', error);
         setTripCounts({ owned: 0, participating: 0, total: 0 });
       } finally {
         setLoading(false);

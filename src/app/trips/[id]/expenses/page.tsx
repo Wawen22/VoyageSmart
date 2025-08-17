@@ -183,7 +183,6 @@ export default function ExpensesPage() {
         }
 
         // Otherwise fetch fresh data
-        console.log('[Expenses] Fetching fresh data');
 
         // Fetch trip details and participants in parallel
         const [tripResponse, participantsResponse] = await Promise.all([
@@ -231,11 +230,11 @@ export default function ExpensesPage() {
           .select(`
             *,
             users!inner(*),
-            expense_participants!inner(
+            expense_participants(
               user_id,
               amount,
               is_paid,
-              users:user_id!inner(*)
+              users(*)
             )
           `)
           .eq('trip_id', id)
@@ -279,7 +278,6 @@ export default function ExpensesPage() {
           sessionStorage.setItem(participantsCacheKey, JSON.stringify({ timestamp, data: formattedParticipants }));
           sessionStorage.setItem(expensesCacheKey, JSON.stringify({ timestamp, data: formattedExpenses }));
         } catch (e) {
-          console.error('Error caching data:', e);
           // Continue even if caching fails
         }
       } catch (err) {
@@ -446,11 +444,11 @@ export default function ExpensesPage() {
         .select(`
           *,
           users!inner(*),
-          expense_participants!inner(
+          expense_participants(
             user_id,
             amount,
             is_paid,
-            users:user_id!inner(*)
+            users(*)
           )
         `)
         .eq('trip_id', id)
@@ -620,7 +618,7 @@ export default function ExpensesPage() {
 
     try {
       setLoading(true);
-      console.log('Creating a simple settlement record');
+
 
       // Approccio semplificato: creiamo direttamente una spesa di tipo settlement
       // Questo è più affidabile e non richiede di cercare spese esistenti
@@ -643,10 +641,7 @@ export default function ExpensesPage() {
         ])
         .select();
 
-      if (newExpenseError) {
-        console.error('Error creating settlement expense:', newExpenseError);
-        throw newExpenseError;
-      }
+      if (newExpenseError) throw newExpenseError;
 
       console.log('Settlement expense created:', newExpense);
 
@@ -674,7 +669,6 @@ export default function ExpensesPage() {
       }
 
       // Refresh expenses to update the UI
-      console.log('Refreshing expenses');
       await refreshExpenses();
 
       // Show success message
@@ -684,7 +678,7 @@ export default function ExpensesPage() {
         variant: 'success',
       });
 
-      console.log('Payment marked as completed successfully');
+
     } catch (err) {
       console.error('Error marking payment as paid:', err);
       setError('Failed to mark payment as paid. Please try again.');

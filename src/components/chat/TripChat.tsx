@@ -97,7 +97,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
           .select(`
             id,
             role,
-            users:user_id (
+            users (
               id,
               full_name,
               avatar_url
@@ -114,7 +114,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
           .from('trip_chat_messages')
           .select(`
             *,
-            users:user_id (
+            users (
               id,
               full_name,
               avatar_url
@@ -181,7 +181,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
             .from('trip_chat_messages')
             .select(`
               *,
-              users:user_id (
+              users (
                 id,
                 full_name,
                 avatar_url
@@ -249,7 +249,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         ])
         .select(`
           *,
-          users:user_id (
+          users (
             id,
             full_name,
             avatar_url
@@ -447,7 +447,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         ])
         .select(`
           *,
-          users:user_id (
+          users (
             id,
             full_name,
             avatar_url

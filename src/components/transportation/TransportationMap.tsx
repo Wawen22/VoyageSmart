@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Transportation } from '@/lib/features/transportationSlice';
-import { format, parseISO } from 'date-fns';
 import MapboxWrapper from '../map/MapboxWrapper';
 
 interface TransportationMapProps {
@@ -122,18 +121,9 @@ function TransportationMapContent({
         el.style.backgroundSize = 'cover';
         el.style.cursor = 'pointer';
         
-        // Create popup with transportation info
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-          <strong>${transportation.provider || transportation.type}</strong>
-          <p>Departure: ${transportation.departure_location || 'Unknown'}</p>
-          ${transportation.departure_time ? 
-            `<p>Time: ${format(parseISO(transportation.departure_time), 'MMM d, yyyy HH:mm')}</p>` : ''}
-        `);
-
-        // Create and add marker
+        // Create and add marker (without popup for better UX)
         const marker = new mapboxgl.Marker(el)
           .setLngLat([lng, lat])
-          .setPopup(popup)
           .addTo(map.current!);
         
         // Add click handler if provided
@@ -163,18 +153,9 @@ function TransportationMapContent({
         el.style.backgroundSize = 'cover';
         el.style.cursor = 'pointer';
         
-        // Create popup with transportation info
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-          <strong>${transportation.provider || transportation.type}</strong>
-          <p>Arrival: ${transportation.arrival_location || 'Unknown'}</p>
-          ${transportation.arrival_time ? 
-            `<p>Time: ${format(parseISO(transportation.arrival_time), 'MMM d, yyyy HH:mm')}</p>` : ''}
-        `);
-
-        // Create and add marker
+        // Create and add marker (without popup for better UX)
         const marker = new mapboxgl.Marker(el)
           .setLngLat([lng, lat])
-          .setPopup(popup)
           .addTo(map.current!);
         
         // Add click handler if provided
@@ -251,20 +232,9 @@ function TransportationMapContent({
             el.style.backgroundSize = 'cover';
             el.style.cursor = 'pointer';
             
-            // Create popup with stop info
-            const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-              <strong>Stop: ${stop.location || 'Unknown'}</strong>
-              ${stop.arrival_time ? 
-                `<p>Arrival: ${format(parseISO(stop.arrival_time), 'MMM d, yyyy HH:mm')}</p>` : ''}
-              ${stop.departure_time ? 
-                `<p>Departure: ${format(parseISO(stop.departure_time), 'MMM d, yyyy HH:mm')}</p>` : ''}
-              ${stop.notes ? `<p>Notes: ${stop.notes}</p>` : ''}
-            `);
-
-            // Create and add marker
+            // Create and add marker (without popup for better UX)
             const marker = new mapboxgl.Marker(el)
               .setLngLat([lng, lat])
-              .setPopup(popup)
               .addTo(map.current!);
             
             // Add click handler if provided

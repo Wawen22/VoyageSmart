@@ -65,7 +65,7 @@ export const fetchJournalEntries = createAsyncThunk(
         .from('trip_journal')
         .select(`
           *,
-          user:user_id (
+          users (
             full_name,
             avatar_url
           )
@@ -89,7 +89,7 @@ export const fetchJournalMedia = createAsyncThunk(
         .from('trip_media')
         .select(`
           *,
-          user:user_id (
+          users (
             full_name,
             avatar_url
           )

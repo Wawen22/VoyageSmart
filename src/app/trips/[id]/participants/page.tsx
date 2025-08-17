@@ -97,7 +97,7 @@ export default function ParticipantsPage() {
             role,
             invitation_status,
             created_at,
-            users:user_id (
+            users (
               full_name,
               email,
               avatar_url
@@ -138,7 +138,7 @@ export default function ParticipantsPage() {
             expires_at,
             invite_code,
             invited_by,
-            users:invited_by (
+            users (
               full_name
             )
           `)

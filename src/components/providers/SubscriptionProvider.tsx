@@ -139,7 +139,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
 
     // Free users are limited to 5 trips (including trips they participate in)
-    const { total } = await getUserTotalTripCount(user.id);
+    const { total } = await getUserTotalTripCount();
     return total < 5;
   };
 

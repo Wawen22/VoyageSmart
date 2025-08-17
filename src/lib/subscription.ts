@@ -100,36 +100,47 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
   }
 }
 
-export async function getUserTripCount(userId: string): Promise<number> {
+export async function getUserTripCount(): Promise<number> {
   try {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return 0;
+    }
+
     const { count, error } = await supabase
       .from('trips')
       .select('*', { count: 'exact', head: true })
-      .eq('owner_id', userId);
+      .eq('owner_id', user.id);
 
     if (error) {
-      console.error('Error fetching user trip count:', error);
       return 0;
     }
 
     return count || 0;
   } catch (error) {
-    console.error('Error in getUserTripCount:', error);
     return 0;
   }
 }
 
 // New function to count all trips (owned + participating)
-export async function getUserTotalTripCount(userId: string): Promise<{ owned: number; participating: number; total: number }> {
+export async function getUserTotalTripCount(): Promise<{ owned: number; participating: number; total: number }> {
   try {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { owned: 0, participating: 0, total: 0 };
+    }
+
     // Count trips owned by user
     const { count: ownedCount, error: ownedError } = await supabase
       .from('trips')
       .select('*', { count: 'exact', head: true })
-      .eq('owner_id', userId);
+      .eq('owner_id', user.id);
 
     if (ownedError) {
-      console.error('Error fetching owned trip count:', ownedError);
       return { owned: 0, participating: 0, total: 0 };
     }
 
@@ -137,10 +148,9 @@ export async function getUserTotalTripCount(userId: string): Promise<{ owned: nu
     const { count: participatingCount, error: participatingError } = await supabase
       .from('trip_participants')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
+      .eq('user_id', user.id);
 
     if (participatingError) {
-      console.error('Error fetching participating trip count:', participatingError);
       return { owned: ownedCount || 0, participating: 0, total: ownedCount || 0 };
     }
 
@@ -150,7 +160,6 @@ export async function getUserTotalTripCount(userId: string): Promise<{ owned: nu
 
     return { owned, participating, total };
   } catch (error) {
-    console.error('Error in getUserTotalTripCount:', error);
     return { owned: 0, participating: 0, total: 0 };
   }
 }

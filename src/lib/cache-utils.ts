@@ -21,12 +21,9 @@ export function clearLocalStorage(): void {
 
     keysToRemove.forEach(key => {
       localStorage.removeItem(key);
-      console.log(`Removed localStorage key: ${key}`);
     });
-
-    console.log(`Cleared ${keysToRemove.length} localStorage items`);
   } catch (error) {
-    console.error('Error clearing localStorage:', error);
+    // Silently handle errors
   }
 }
 

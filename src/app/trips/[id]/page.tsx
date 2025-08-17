@@ -69,6 +69,7 @@ export default function TripDetails() {
   const { withPremiumAccess } = usePremiumFeature();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +86,8 @@ export default function TripDetails() {
 
         if (!user) return;
 
+
+
         // Fetch trip details
         const { data: tripData, error: tripError } = await supabase
           .from('trips')
@@ -93,6 +96,7 @@ export default function TripDetails() {
           .single();
 
         if (tripError) throw tripError;
+        if (!tripData) throw new Error('Trip not found');
 
         setTrip(tripData);
         setIsOwner(tripData.owner_id === user.id);
@@ -114,7 +118,6 @@ export default function TripDetails() {
         if (participantsError) throw participantsError;
 
         // Format participants data
-        // Safe type assertion after validating the structure
         const formattedParticipants = participantsData?.map((p: any) => ({
           id: p.id as string,
           user_id: p.user_id as string,
@@ -124,6 +127,27 @@ export default function TripDetails() {
         }));
 
         setParticipants(formattedParticipants);
+
+        // Fetch expenses
+        const { data: expensesData, error: expensesError } = await supabase
+          .from('expenses')
+          .select(`
+            id,
+            description,
+            amount,
+            currency,
+            date,
+            paid_by,
+            category,
+            users (
+              full_name
+            )
+          `)
+          .eq('trip_id', id)
+          .order('date', { ascending: false });
+
+        if (expensesError) throw expensesError;
+        setExpenses(expensesData || []);
 
         // Get trip count for free users
         if (subscription?.tier === 'free') {
@@ -136,6 +160,8 @@ export default function TripDetails() {
             setTripCount(count || 0);
           }
         }
+
+
       } catch (err) {
         console.error('Error fetching trip details:', err);
         setError('Failed to load trip details. Please try again.');

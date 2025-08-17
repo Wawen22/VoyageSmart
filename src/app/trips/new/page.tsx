@@ -141,10 +141,7 @@ export default function NewTrip() {
         ])
         .select();
 
-      if (insertError) {
-        console.error('Error inserting trip:', insertError);
-        throw insertError;
-      }
+      if (insertError) throw insertError;
 
       if (data && data[0]) {
         console.log('Trip created successfully:', data[0]);

@@ -115,16 +115,41 @@ export default function ChatBot({
     ];
   });
 
-  // Carica il contesto del viaggio all'avvio
-  useEffect(() => {
-    const loadContext = async () => {
-      try {
-        // Controlla se abbiamo già dei messaggi salvati (più di uno significa che c'è stata interazione)
-        if (messages.length > 1) {
-          console.log('Conversazione esistente trovata, non ricarico il contesto');
-          setContextLoaded(true);
-          return;
-        }
+  // Stato per prevenire chiamate multiple simultanee
+  const [isLoadingContext, setIsLoadingContext] = useState(false);
+
+  // Stato per gestire i retry con backoff esponenziale
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
+
+  // Circuit breaker: ferma le richieste dopo troppi errori 429 consecutivi
+  const [consecutiveErrors, setConsecutiveErrors] = useState(0);
+  const maxConsecutiveErrors = 3;
+  const [circuitBreakerActive, setCircuitBreakerActive] = useState(false);
+
+  // Funzione per caricare il contesto del viaggio (chiamata solo quando necessario)
+  const loadContext = async () => {
+    try {
+      // Controlla se il contesto è già stato caricato
+      if (contextLoaded) {
+        console.log('Contesto già caricato, skip');
+        return;
+      }
+
+      // Controlla se è già in corso un caricamento
+      if (isLoadingContext) {
+        console.log('Caricamento contesto già in corso, skip');
+        return;
+      }
+
+      // Controlla se abbiamo già dei messaggi salvati (più di uno significa che c'è stata interazione)
+      if (messages.length > 1) {
+        console.log('Conversazione esistente trovata, non ricarico il contesto');
+        setContextLoaded(true);
+        return;
+      }
+
+      setIsLoadingContext(true);
 
         // Se abbiamo i dati del viaggio passati direttamente, li utilizziamo
         if (tripData) {
@@ -153,21 +178,37 @@ export default function ChatBot({
               content: data.message || `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
             }]);
             setContextLoaded(true);
+            setRetryCount(0); // Reset retry count on success
           } else {
             console.error('Errore nel caricamento del contesto:', response.status);
 
             if (response.status === 429) {
-              console.warn('Rate limit raggiunto durante il caricamento del contesto. Riproverò più tardi.');
-              setRateLimitError(true);
-              setMessages([{
-                role: 'assistant',
-                content: `⚠️ Troppo traffico AI al momento. Riproverò a caricare il contesto tra 30 secondi. Nel frattempo puoi comunque chattare!`
-              }]);
-              // Riprova dopo 30 secondi
-              setTimeout(() => {
-                setRateLimitError(false);
-                loadContext();
-              }, 30000);
+              console.warn('Rate limit raggiunto durante il caricamento del contesto.');
+
+              if (retryCount < maxRetries) {
+                // Calcola il delay con backoff esponenziale: 2^retry * 5 secondi
+                const delay = Math.pow(2, retryCount) * 5000;
+                const delaySeconds = Math.ceil(delay / 1000);
+
+                setRateLimitError(true);
+                setMessages([{
+                  role: 'assistant',
+                  content: `⚠️ Troppo traffico AI al momento. Riproverò a caricare il contesto tra ${delaySeconds} secondi (tentativo ${retryCount + 1}/${maxRetries}). Nel frattempo puoi comunque chattare!`
+                }]);
+
+                setTimeout(() => {
+                  setRateLimitError(false);
+                  setRetryCount(prev => prev + 1);
+                  loadContext();
+                }, delay);
+              } else {
+                // Troppi tentativi, rinuncia
+                setMessages([{
+                  role: 'assistant',
+                  content: `⚠️ Non riesco a caricare il contesto del viaggio a causa del traffico elevato. Puoi comunque chattare normalmente!`
+                }]);
+                setRetryCount(0); // Reset per futuri tentativi
+              }
               return;
             }
 
@@ -208,6 +249,7 @@ export default function ChatBot({
               content: data.message || `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
             }]);
             setContextLoaded(true);
+            setRetryCount(0); // Reset retry count on success
           } else {
             console.error('Errore nel caricamento del contesto (fallback):', response.status);
             try {
@@ -223,21 +265,19 @@ export default function ChatBot({
             }]);
           }
         }
-      } catch (error) {
-        console.error('Errore nel caricamento del contesto:', error);
-        // Aggiorna il messaggio iniziale senza contesto
-        setMessages([{
-          role: 'assistant',
-          content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
-        }]);
-      } finally {
-        // In ogni caso, consideriamo il contesto come caricato
-        setContextLoaded(true);
-      }
-    };
-
-    loadContext();
-  }, [tripId, tripName, tripData, messages.length]);
+    } catch (error) {
+      console.error('Errore nel caricamento del contesto:', error);
+      // Aggiorna il messaggio iniziale senza contesto
+      setMessages([{
+        role: 'assistant',
+        content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
+      }]);
+    } finally {
+      // In ogni caso, consideriamo il contesto come caricato
+      setContextLoaded(true);
+      setIsLoadingContext(false);
+    }
+  };
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   // Inizializza isMinimized a true per impostazione predefinita, o carica dal localStorage se disponibile
@@ -274,12 +314,36 @@ export default function ChatBot({
   const clientCacheRef = useRef<Map<string, { text: string; ts: number }>>(new Map());
   const lastSendRef = useRef<number>(0);
 
-  // Genera domande suggerite quando il contesto è caricato
+  // Carica la cache dal localStorage all'avvio
   useEffect(() => {
-    if (contextLoaded && tripData) {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedCache = localStorage.getItem(`ai_cache_${tripId}`);
+        if (savedCache) {
+          const cacheData = JSON.parse(savedCache);
+          // Filtra le voci scadute (più di 1 ora)
+          const now = Date.now();
+          const validEntries = Object.entries(cacheData).filter(
+            ([_, value]: [string, any]) => (now - value.ts) < 60 * 60 * 1000
+          );
+
+          if (validEntries.length > 0) {
+            clientCacheRef.current = new Map(validEntries);
+            console.log('Cache AI caricata dal localStorage:', validEntries.length, 'voci');
+          }
+        }
+      } catch (error) {
+        console.warn('Errore nel caricamento della cache AI:', error);
+      }
+    }
+  }, [tripId]);
+
+  // Genera domande suggerite quando il contesto è caricato E la chat è aperta
+  useEffect(() => {
+    if (contextLoaded && tripData && !isMinimized) {
       generateSuggestedQuestions();
     }
-  }, [contextLoaded, tripData]);
+  }, [contextLoaded, tripData, isMinimized]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -294,13 +358,32 @@ export default function ChatBot({
   const handleSendMessage = async (messageText?: string) => {
     // Prevent while a request is in-flight
     if (isLoading) return;
+
+    // Prevent new messages if rate limit is active
+    if (rateLimitError) {
+      console.log('Rate limit attivo, messaggio bloccato');
+      return;
+    }
+
+    // Prevent new messages if circuit breaker is active
+    if (circuitBreakerActive) {
+      console.log('Circuit breaker attivo, messaggio bloccato');
+      return;
+    }
+
+    // Debouncing: prevent messages sent too quickly (min 2 seconds between messages)
+    const now = Date.now();
+    const timeSinceLastSend = now - lastSendRef.current;
+    if (timeSinceLastSend < 2000) {
+      console.log('Messaggio inviato troppo rapidamente, attendi', Math.ceil((2000 - timeSinceLastSend) / 1000), 'secondi');
+      return;
+    }
+
     // Use provided message or input field value
     const messageToSend = messageText || input;
     if (!messageToSend.trim()) return;
 
-    // Debounce rapid submissions (prevents double-clicks)
-    const now = Date.now();
-    if (now - lastSendRef.current < 500) return;
+    // Update last send timestamp
     lastSendRef.current = now;
 
     // Add user message
@@ -382,11 +465,50 @@ export default function ChatBot({
           throw new Error('Autenticazione richiesta. Prova ad aggiornare la pagina e accedere nuovamente.');
         } else if (response.status === 429) {
           setRateLimitError(true);
-          // Reset rate limit error dopo 30 secondi
+
+          // Incrementa il contatore di errori consecutivi
+          const newConsecutiveErrors = consecutiveErrors + 1;
+          setConsecutiveErrors(newConsecutiveErrors);
+
+          // Attiva il circuit breaker se troppi errori consecutivi
+          if (newConsecutiveErrors >= maxConsecutiveErrors) {
+            setCircuitBreakerActive(true);
+            console.warn('Circuit breaker attivato dopo', newConsecutiveErrors, 'errori 429 consecutivi');
+
+            // Disattiva il circuit breaker dopo 5 minuti
+            setTimeout(() => {
+              setCircuitBreakerActive(false);
+              setConsecutiveErrors(0);
+              console.log('Circuit breaker disattivato');
+            }, 5 * 60 * 1000); // 5 minuti
+          }
+
+          // Prova a leggere il retryAfter dal server
+          let serverRetryAfter = 30; // Default 30 secondi
+          try {
+            const retryAfterHeader = response.headers.get('Retry-After');
+            if (retryAfterHeader) {
+              serverRetryAfter = parseInt(retryAfterHeader);
+            } else if (errorData && errorData.retryAfter) {
+              serverRetryAfter = errorData.retryAfter;
+            }
+          } catch (e) {
+            console.warn('Impossibile leggere retryAfter, uso default');
+          }
+
+          // Usa il maggiore tra il nostro backoff e quello suggerito dal server
+          const ourBackoff = Math.min(Math.pow(2, retryCount) * 5000, 60000); // Max 60 secondi
+          const delay = Math.max(ourBackoff, serverRetryAfter * 1000);
+
           setTimeout(() => {
             setRateLimitError(false);
-          }, 30000);
-          throw new Error('⚠️ Troppo traffico AI al momento. Attendi 30 secondi prima di riprovare.');
+          }, delay);
+
+          const errorMessage = circuitBreakerActive
+            ? `🚫 Troppi errori consecutivi. Sistema temporaneamente disabilitato per 5 minuti.`
+            : `⚠️ Troppo traffico AI al momento. Attendi ${Math.ceil(delay / 1000)} secondi prima di riprovare.`;
+
+          throw new Error(errorMessage);
         } else {
           const errorMessage = (errorData as any)?.error || errorText || `Errore del server: ${response.status}`;
           throw new Error(errorMessage);
@@ -396,7 +518,18 @@ export default function ChatBot({
       const data = await response.json();
 
       // Cache client-side
-      clientCacheRef.current.set(cacheKey, { text: data.message, ts: Date.now() });
+      const cacheEntry = { text: data.message, ts: Date.now() };
+      clientCacheRef.current.set(cacheKey, cacheEntry);
+
+      // Salva la cache nel localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          const cacheObject = Object.fromEntries(clientCacheRef.current);
+          localStorage.setItem(`ai_cache_${tripId}`, JSON.stringify(cacheObject));
+        } catch (error) {
+          console.warn('Errore nel salvataggio della cache AI:', error);
+        }
+      }
 
       // Simula l'effetto di digitazione
       setIsTyping(true);
@@ -409,6 +542,10 @@ export default function ChatBot({
           content: data.message || 'Mi dispiace, non sono riuscito a elaborare una risposta.',
           timestamp: new Date()
         }]);
+
+        // Reset retry count and consecutive errors on successful message
+        setRetryCount(0);
+        setConsecutiveErrors(0);
 
         // Genera nuove domande suggerite dopo ogni risposta
         generateSuggestedQuestions();
@@ -467,6 +604,12 @@ export default function ChatBot({
     const newState = !isMinimized;
     setIsMinimized(newState);
 
+    // Se l'utente sta aprendo la chat per la prima volta, carica il contesto
+    if (!newState && !contextLoaded) {
+      console.log('Chat aperta per la prima volta, caricamento contesto...');
+      loadContext();
+    }
+
     // Su mobile, quando si apre la chat, va direttamente in fullscreen
     if (!newState && isMobile) {
       setIsExpanded(true);
@@ -484,8 +627,15 @@ export default function ChatBot({
     // Su mobile non permettiamo il toggle expand, è sempre fullscreen quando aperto
     if (isMobile) return;
 
+    const wasMinimized = isMinimized;
     setIsExpanded(!isExpanded);
     if (isMinimized) setIsMinimized(false);
+
+    // Se l'utente sta aprendo la chat per la prima volta, carica il contesto
+    if (wasMinimized && !contextLoaded) {
+      console.log('Chat aperta per la prima volta (expand), caricamento contesto...');
+      loadContext();
+    }
   };
 
   // Funzione per cancellare la conversazione
@@ -1041,14 +1191,20 @@ export default function ChatBot({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={rateLimitError ? "Attendi 30 secondi per il rate limiting..." : "Ask me anything about your trip..."}
+            placeholder={
+              circuitBreakerActive
+                ? "Sistema temporaneamente disabilitato (troppi errori)"
+                : rateLimitError
+                  ? "Attendi per il rate limiting..."
+                  : "Ask me anything about your trip..."
+            }
             className="text-sm flex-1 px-4 py-3 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-slate-700/50 text-white placeholder-slate-400 shadow-sm ai-input-focus"
-            disabled={isLoading || rateLimitError}
+            disabled={isLoading || rateLimitError || circuitBreakerActive}
             aria-label="Messaggio per l'assistente AI"
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading || rateLimitError}
+            disabled={!input.trim() || isLoading || rateLimitError || circuitBreakerActive}
             className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-xl disabled:opacity-50 hover:from-indigo-500 hover:to-purple-500 transition-all duration-200 shadow-lg disabled:cursor-not-allowed send-button"
             aria-label="Invia messaggio"
           >

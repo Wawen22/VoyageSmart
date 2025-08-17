@@ -347,7 +347,7 @@ export default function TransportationPage() {
             <Suspense fallback={<div className="h-96 bg-muted rounded-lg animate-pulse" />}>
               <LazyTransportationMap
                 transportations={transportations}
-                onTransportationClick={handleViewTransportation}
+                onMarkerClick={handleViewTransportation}
               />
             </Suspense>
           </TabsContent>

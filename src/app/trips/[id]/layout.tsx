@@ -147,38 +147,25 @@ export default function TripLayout({
           expenses: processedExpenses
         };
 
-        // Log itinerary data for debugging
-        console.log('Itinerary data:', {
-          daysCount: daysWithActivities.length,
-          activitiesCount: activitiesData ? activitiesData.length : 0,
-          sampleDay: daysWithActivities.length > 0 ? daysWithActivities[0] : null
-        });
+
 
         setTrip(tripWithDetails);
 
         // Fetch participants
         const { data: participantsData, error: participantsError } = await supabase
           .from('trip_participants')
-          .select(`
-            id,
-            user_id,
-            role,
-            users (
-              full_name,
-              email
-            )
-          `)
+          .select('*')
           .eq('trip_id', id);
 
         if (participantsError) throw participantsError;
 
-        // Format participants data
+        // Format participants data - Simple format since we're using * query
         const formattedParticipants = participantsData?.map((p: any) => ({
           id: p.id as string,
           user_id: p.user_id as string,
           role: p.role as string,
-          full_name: (p.users?.full_name as string) || 'Unknown',
-          email: (p.users?.email as string) || 'Unknown',
+          full_name: 'Loading...', // We'll load user details separately if needed
+          email: 'Loading...',
         }));
 
         setParticipants(formattedParticipants);
