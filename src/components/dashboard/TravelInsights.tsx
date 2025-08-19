@@ -190,42 +190,7 @@ export default function TravelInsights({ trips }: TravelInsightsProps) {
         </Card>
       )}
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3Icon className="h-5 w-5" />
-            Quick Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button className="p-4 text-left rounded-lg border border-border hover:bg-muted transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                  <TrendingUpIcon className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-medium">Annual Report</p>
-                  <p className="text-sm text-muted-foreground">Export your data</p>
-                </div>
-              </div>
-            </button>
 
-            <button className="p-4 text-left rounded-lg border border-border hover:bg-muted transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                  <PieChartIcon className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-medium">Travel Timeline</p>
-                  <p className="text-sm text-muted-foreground">View chronology</p>
-                </div>
-              </div>
-            </button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

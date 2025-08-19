@@ -49,7 +49,7 @@ export default function MobileNavbar() {
 
   return (
     <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-      <div className="flex justify-around items-center h-16 px-1">
+      <div className="flex justify-around items-center h-14 px-1">
         {/* Trip-specific navigation */}
         {/* Trip Planner */}
         <Link
@@ -61,10 +61,9 @@ export default function MobileNavbar() {
           }`}
         >
           <div className="relative">
-            <CalendarIcon className="h-5 w-5" />
+            <CalendarIcon className="h-6 w-6" />
             <BookOpenIcon className="h-3 w-3 absolute -bottom-1 -right-1 bg-background rounded-full p-0.5" />
           </div>
-          <span className="text-xs mt-1">Trip Planner</span>
         </Link>
 
         {/* Accommodations */}
@@ -77,12 +76,11 @@ export default function MobileNavbar() {
           } relative`}
         >
           <div className="relative">
-            <MapPinIcon className="h-5 w-5" />
+            <MapPinIcon className="h-6 w-6" />
             {!isSubscribed('premium') && (
               <SparklesIcon className="h-3 w-3 text-amber-500 absolute -top-1 -right-1 animate-pulse" />
             )}
           </div>
-          <span className="text-xs mt-1">Alloggi</span>
         </Link>
 
         {/* Transportation */}
@@ -95,12 +93,11 @@ export default function MobileNavbar() {
           } relative`}
         >
           <div className="relative">
-            <PlaneTakeoffIcon className="h-5 w-5" />
+            <PlaneTakeoffIcon className="h-6 w-6" />
             {!isSubscribed('premium') && (
               <SparklesIcon className="h-3 w-3 text-amber-500 absolute -top-1 -right-1 animate-pulse" />
             )}
           </div>
-          <span className="text-xs mt-1">Trasporti</span>
         </Link>
 
         {/* Expenses */}
@@ -112,8 +109,7 @@ export default function MobileNavbar() {
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <DollarSignIcon className="h-5 w-5" />
-          <span className="text-xs mt-1">Spese</span>
+          <DollarSignIcon className="h-6 w-6" />
         </Link>
 
         {/* Chat */}
@@ -125,8 +121,7 @@ export default function MobileNavbar() {
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <MessageCircleIcon className="h-5 w-5" />
-          <span className="text-xs mt-1">Chat</span>
+          <MessageCircleIcon className="h-6 w-6" />
         </Link>
       </div>
     </div>

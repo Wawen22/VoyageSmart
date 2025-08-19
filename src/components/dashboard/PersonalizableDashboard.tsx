@@ -58,14 +58,7 @@ export default function PersonalizableDashboard({ children, trips }: Personaliza
       order: 2,
       size: 'medium'
     },
-    {
-      id: 'quick-actions',
-      title: 'Azioni Rapide',
-      component: 'QuickActions',
-      visible: true,
-      order: 3,
-      size: 'medium'
-    },
+
     {
       id: 'recent-activity',
       title: 'Attività Recente',

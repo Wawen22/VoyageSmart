@@ -293,7 +293,7 @@ export default function InteractiveTripCard({ trip, viewMode = 'grid', index = 0
       <div
         ref={cardRef}
         className={cn(
-          "relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden",
+          "relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden interactive-trip-card",
           "hover:scale-[1.02] hover:-translate-y-1",
           status.shadowColor,
           status.cardEffect,
@@ -323,16 +323,16 @@ export default function InteractiveTripCard({ trip, viewMode = 'grid', index = 0
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
         )}
 
-        {/* Header with gradient */}
+        {/* Header with gradient - Mobile Optimized */}
         <div className={cn(
-          "relative h-24 sm:h-32 bg-gradient-to-br overflow-hidden",
+          "relative h-20 lg:h-24 xl:h-32 bg-gradient-to-br overflow-hidden",
           getCardGradient()
         )}>
 
-          {/* Floating Status Badge */}
-          <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
+          {/* Floating Status Badge - Mobile Optimized */}
+          <div className="absolute top-2 lg:top-3 xl:top-4 left-2 lg:left-3 xl:left-4 z-10">
             <Badge className={cn(
-              "text-xs font-bold px-3 py-1.5 rounded-full shadow-xl backdrop-blur-md transition-all duration-300",
+              "text-xs font-bold px-2 lg:px-3 py-1 lg:py-1.5 rounded-full shadow-xl backdrop-blur-md transition-all duration-300",
               status.bgSolid,
               status.textColor,
               "border border-white/30",
@@ -340,41 +340,41 @@ export default function InteractiveTripCard({ trip, viewMode = 'grid', index = 0
               status.text === 'Ongoing' && "animate-pulse"
             )}>
               <span className={cn(
-                "mr-1.5 transition-all duration-300",
+                "mr-1 lg:mr-1.5 transition-all duration-300",
                 status.text === 'Upcoming' && "animate-bounce",
                 status.text === 'Ongoing' && "animate-pulse"
               )}>
                 {status.emoji}
               </span>
-              <span className="hidden sm:inline">{status.text}</span>
-              <span className="sm:hidden">{status.text.split(' ')[0]}</span>
+              <span className="hidden lg:inline">{status.text}</span>
+              <span className="lg:hidden">{status.text.split(' ')[0]}</span>
             </Badge>
           </div>
 
-          {/* Action Button */}
-          <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
+          {/* Action Button - Mobile Optimized */}
+          <div className="absolute top-2 lg:top-3 xl:top-4 right-2 lg:right-3 xl:right-4">
             <button
               onClick={(e) => {
                 e.preventDefault();
                 setIsLiked(!isLiked);
               }}
               className={cn(
-                "p-1.5 sm:p-2 rounded-full backdrop-blur-sm transition-all duration-200",
+                "p-1 lg:p-1.5 xl:p-2 rounded-full backdrop-blur-sm transition-all duration-200",
                 isLiked ? "bg-red-500/20 text-red-400" : "bg-white/20 text-white hover:bg-white/30"
               )}
             >
-              <HeartIcon className={cn("h-3 w-3 sm:h-4 sm:w-4", isLiked && "fill-current")} />
+              <HeartIcon className={cn("h-3 w-3 lg:h-3.5 lg:w-3.5 xl:h-4 xl:w-4", isLiked && "fill-current")} />
             </button>
           </div>
 
-          {/* Magical Central Icon */}
+          {/* Magical Central Icon - Mobile Optimized */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className={cn(
-              "relative w-10 h-10 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center transition-all duration-500 shadow-xl",
+              "relative w-8 h-8 lg:w-10 lg:h-10 xl:w-14 xl:h-14 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center transition-all duration-500 shadow-xl",
               isHovered && "scale-125 rotate-6",
               status.text === 'Ongoing' && "animate-pulse"
             )}>
-              <MapPinIcon className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
+              <MapPinIcon className="h-4 w-4 lg:h-5 lg:w-5 xl:h-7 xl:w-7 text-white" />
 
               {/* Magical glow rings */}
               {(status.text === 'Upcoming' || status.text === 'Ongoing') && (
@@ -394,7 +394,7 @@ export default function InteractiveTripCard({ trip, viewMode = 'grid', index = 0
 
               {/* Floating status emoji with magical effects */}
               <div className={cn(
-                "absolute -bottom-1 -right-1 text-sm sm:text-base bg-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow-xl transition-all duration-300",
+                "absolute -bottom-1 -right-1 text-xs lg:text-sm xl:text-base bg-white rounded-full w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 flex items-center justify-center shadow-xl transition-all duration-300",
                 status.text === 'Upcoming' && "animate-bounce",
                 status.text === 'Ongoing' && "animate-ping",
                 isHovered && "scale-125"
@@ -405,57 +405,58 @@ export default function InteractiveTripCard({ trip, viewMode = 'grid', index = 0
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-3 sm:p-6 space-y-3 sm:space-y-4">
+        {/* Content - Mobile Optimized */}
+        <div className="p-3 lg:p-4 xl:p-6 space-y-2 lg:space-y-3 xl:space-y-4">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1 sm:mb-2 group-hover:text-primary transition-colors line-clamp-1">
+            <h3 className="text-base lg:text-lg xl:text-xl font-bold text-foreground mb-1 lg:mb-2 group-hover:text-primary transition-colors line-clamp-1">
               {trip.name}
             </h3>
 
             {trip.destination && (
-              <p className="text-muted-foreground flex items-center gap-2 mb-2 text-sm">
-                <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+              <p className="text-muted-foreground flex items-center gap-1.5 lg:gap-2 mb-2 text-sm">
+                <MapPinIcon className="h-3 w-3 lg:h-4 lg:w-4 text-primary flex-shrink-0" />
                 <span className="truncate">{trip.destination}</span>
               </p>
             )}
 
             {trip.description && (
-              <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2 leading-relaxed hidden sm:block">
+              <p className="text-muted-foreground text-xs lg:text-sm line-clamp-1 lg:line-clamp-2 leading-relaxed hidden lg:block">
                 {trip.description}
               </p>
             )}
           </div>
 
-          {/* Date Info */}
-          <div className="space-y-1 sm:space-y-2">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-              <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
+          {/* Date Info - Mobile Optimized */}
+          <div className="space-y-1 lg:space-y-2">
+            <div className="flex items-center gap-1.5 lg:gap-2 text-xs lg:text-sm text-muted-foreground">
+              <CalendarIcon className="h-3 w-3 lg:h-4 lg:w-4 text-emerald-500 flex-shrink-0" />
               <span className="truncate">
-                <span className="sm:hidden">{formatDate(trip.start_date)}</span>
-                <span className="hidden sm:inline">{formatDate(trip.start_date)} - {formatDate(trip.end_date)}</span>
+                <span className="lg:hidden">{formatDate(trip.start_date)}</span>
+                <span className="hidden lg:inline">{formatDate(trip.start_date)} - {formatDate(trip.end_date)}</span>
               </span>
             </div>
 
             {duration && (
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                <ClockIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500 flex-shrink-0" />
+              <div className="flex items-center gap-1.5 lg:gap-2 text-xs lg:text-sm text-muted-foreground">
+                <ClockIcon className="h-3 w-3 lg:h-4 lg:w-4 text-orange-500 flex-shrink-0" />
                 <span>{duration}</span>
               </div>
             )}
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-between pt-2 sm:pt-4 border-t border-border">
+          {/* Footer - Mobile Optimized */}
+          <div className="flex items-center justify-between pt-2 lg:pt-3 xl:pt-4 border-t border-border">
             <div className="text-xs text-muted-foreground">
-              <span className="hidden sm:inline">Created </span>{format(parseISO(trip.created_at), 'dd MMM')}
+              <span className="hidden lg:inline">Created </span>{format(parseISO(trip.created_at), 'dd MMM')}
             </div>
 
             <div className={cn(
-              "flex items-center gap-1 sm:gap-2 text-primary text-xs sm:text-sm font-medium transition-all duration-200",
+              "flex items-center gap-1 lg:gap-2 text-primary text-xs lg:text-sm font-medium transition-all duration-200",
               isHovered ? "translate-x-1" : ""
             )}>
-              <span>Explore</span>
-              <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden lg:inline">Explore</span>
+              <span className="lg:hidden">View</span>
+              <ArrowRightIcon className="h-3 w-3 lg:h-4 lg:w-4" />
             </div>
           </div>
         </div>

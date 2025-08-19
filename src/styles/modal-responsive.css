@@ -184,7 +184,42 @@
     margin: 0 auto !important;
     width: 100% !important;
     max-width: calc(100vw - 16px) !important;
-    max-height: calc(100vh - 16px) !important;
+    max-height: calc(100vh - 80px) !important; /* Leave space for mobile navigation */
     flex-shrink: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  /* Specific optimizations for Analytics Modal */
+  [data-radix-dialog-content] {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  [data-radix-dialog-content] .space-y-6,
+  [data-radix-dialog-content] .space-y-4,
+  [data-radix-dialog-content] .space-y-3 {
+    gap: 0.75rem !important;
+  }
+
+  [data-radix-dialog-content] .grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  [data-radix-dialog-content] .grid-cols-2,
+  [data-radix-dialog-content] .grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Compact cards on mobile */
+  [data-radix-dialog-content] .space-y-3 > * + * {
+    margin-top: 0.5rem !important;
+  }
+
+  /* Force proper scrolling */
+  [data-radix-dialog-content] > div:last-child {
+    overflow-y: auto !important;
+    flex: 1 !important;
+    min-height: 0 !important;
   }
 }

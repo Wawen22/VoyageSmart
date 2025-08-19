@@ -1,39 +1,41 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import Link from 'next/link';
-import { format, parseISO, isValid, differenceInDays, isSameMonth, isSameYear } from 'date-fns';
+import { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   CalendarIcon,
-  ClockIcon,
   MapPinIcon,
-  ArrowRightIcon,
-  StarIcon,
+  DollarSignIcon,
+  ClockIcon,
+  TrendingUpIcon,
+  FilterIcon,
+  PlayIcon,
   CheckCircleIcon,
-  PlayCircleIcon,
-  PlusIcon,
-  SparklesIcon,
-  RocketIcon,
-  TrophyIcon,
-  CameraIcon,
-  EditIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  CircleIcon
+  FileTextIcon,
+  SearchIcon,
+  DownloadIcon,
+  EyeIcon,
+  EyeOffIcon
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
+import Link from 'next/link';
 
-type Trip = {
+interface Trip {
   id: string;
   name: string;
-  description: string | null;
   start_date: string | null;
   end_date: string | null;
+  budget_total: number | null;
   destination: string | null;
+  preferences?: {
+    currency?: string;
+    destinations?: any;
+  };
   created_at: string;
-};
+}
 
 interface TripTimelineProps {
   trips: Trip[];
@@ -46,70 +48,80 @@ interface TimelineTrip extends Trip {
   daysUntil?: number;
   duration?: number;
   sortDate: Date;
+  year: number;
+  month: number;
 }
 
+type ViewMode = 'yearly' | 'monthly' | 'all';
+
 export default function TripTimeline({ trips, searchTerm = '', filter = 'all' }: TripTimelineProps) {
+  const [viewMode, setViewMode] = useState<ViewMode>('yearly');
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [hoveredTrip, setHoveredTrip] = useState<string | null>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [searchTermLocal, setSearchTermLocal] = useState(searchTerm);
+  // Default to compact view on mobile
+  const [compactView, setCompactView] = useState(true);
 
 
   // Process and categorize trips
   const processedTrips = useMemo(() => {
     const now = new Date();
-    
-    return trips.map((trip): TimelineTrip => {
-      const startDate = trip.start_date ? parseISO(trip.start_date) : null;
-      const endDate = trip.end_date ? parseISO(trip.end_date) : null;
-      
+
+    return trips.map(trip => {
+      const startDate = trip.start_date ? new Date(trip.start_date) : null;
+      const endDate = trip.end_date ? new Date(trip.end_date) : null;
+      const createdDate = new Date(trip.created_at);
+
       let status: TimelineTrip['status'] = 'planning';
       let daysUntil: number | undefined;
       let duration: number | undefined;
-      let sortDate = new Date(trip.created_at);
 
-      if (startDate && endDate && isValid(startDate) && isValid(endDate)) {
-        duration = differenceInDays(endDate, startDate) + 1;
-        
-        if (now < startDate) {
-          status = 'upcoming';
-          daysUntil = differenceInDays(startDate, now);
-          sortDate = startDate;
-        } else if (now >= startDate && now <= endDate) {
+      if (startDate && endDate) {
+        duration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (startDate <= now && endDate >= now) {
           status = 'ongoing';
-          sortDate = startDate;
+        } else if (startDate > now) {
+          status = 'upcoming';
+          daysUntil = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         } else {
           status = 'completed';
-          sortDate = endDate;
-        }
-      } else if (startDate && isValid(startDate)) {
-        if (now < startDate) {
-          status = 'upcoming';
-          daysUntil = differenceInDays(startDate, now);
-          sortDate = startDate;
-        } else {
-          status = 'ongoing';
-          sortDate = startDate;
         }
       }
+
+      const sortDate = startDate || createdDate;
 
       return {
         ...trip,
         status,
         daysUntil,
         duration,
-        sortDate
-      };
-    });
+        sortDate,
+        year: sortDate.getFullYear(),
+        month: sortDate.getMonth()
+      } as TimelineTrip;
+    }).sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
   }, [trips]);
 
 
 
-  // Filter and sort trips
+  // Filter trips based on current filters
   const filteredTrips = useMemo(() => {
     let filtered = processedTrips;
 
-    // Apply status filter
+    if (selectedYear) {
+      filtered = filtered.filter(trip => trip.year === selectedYear);
+    }
+
+    if (searchTermLocal) {
+      const term = searchTermLocal.toLowerCase();
+      filtered = filtered.filter(trip =>
+        trip.name.toLowerCase().includes(term) ||
+        trip.destination?.toLowerCase().includes(term)
+      );
+    }
+
+    // Apply the external filter prop (from dashboard header)
     if (filter !== 'all') {
       filtered = filtered.filter(trip => {
         if (filter === 'upcoming') return trip.status === 'upcoming';
@@ -119,510 +131,487 @@ export default function TripTimeline({ trips, searchTerm = '', filter = 'all' }:
       });
     }
 
-    // Apply search filter
+    // Apply the external searchTerm prop (from dashboard header)
     if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(trip =>
-        trip.name.toLowerCase().includes(searchLower) ||
-        trip.destination?.toLowerCase().includes(searchLower) ||
-        trip.description?.toLowerCase().includes(searchLower)
+        trip.name.toLowerCase().includes(term) ||
+        trip.destination?.toLowerCase().includes(term)
       );
     }
 
+    return filtered;
+  }, [processedTrips, selectedYear, searchTermLocal, filter, searchTerm]);
 
 
-    // Sort trips chronologically for timeline: past to future (left to right)
-    // Timeline Layout: [Passato] ← → [Oggi] ← → [Futuro]
-    return filtered.sort((a, b) => {
-      // Get actual dates for comparison, fallback to created_at for planning trips
-      const getComparisonDate = (trip: TimelineTrip) => {
-        if (trip.start_date) {
-          return new Date(trip.start_date).getTime();
-        }
-        // For planning trips without dates, use created_at but put them at the end (far future)
-        return new Date(trip.created_at).getTime() + 1000000000000;
-      };
 
-      const aDate = getComparisonDate(a);
-      const bDate = getComparisonDate(b);
-
-      // Sort by date: earliest (past) first → latest (future) last
-      // This creates a natural timeline flow from left to right
-      return aDate - bDate;
-    });
-  }, [processedTrips, filter, searchTerm]);
-
-  // Group trips by time periods
+  // Group trips by time period
   const groupedTrips = useMemo(() => {
-    const groups: { [key: string]: TimelineTrip[] } = {};
-    
+    const groups: Record<string, TimelineTrip[]> = {};
+
     filteredTrips.forEach(trip => {
       let groupKey: string;
-      
-      if (trip.status === 'ongoing') {
-        groupKey = 'Currently Traveling';
-      } else if (trip.status === 'upcoming') {
-        if (trip.daysUntil !== undefined && trip.daysUntil <= 7) {
-          groupKey = 'This Week';
-        } else if (trip.daysUntil !== undefined && trip.daysUntil <= 30) {
-          groupKey = 'This Month';
-        } else {
-          const year = trip.sortDate.getFullYear();
-          groupKey = `Upcoming ${year}`;
-        }
-      } else if (trip.status === 'completed') {
-        const year = trip.sortDate.getFullYear();
-        const currentYear = new Date().getFullYear();
-        if (year === currentYear) {
-          groupKey = `Completed ${year}`;
-        } else {
-          groupKey = `Memories ${year}`;
-        }
+
+      if (viewMode === 'yearly') {
+        groupKey = trip.year.toString();
+      } else if (viewMode === 'monthly') {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        groupKey = `${monthNames[trip.month]} ${trip.year}`;
       } else {
-        groupKey = 'Planning';
+        groupKey = 'all';
       }
-      
-      if (!groups[groupKey]) groups[groupKey] = [];
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
       groups[groupKey].push(trip);
     });
-    
+
     return groups;
+  }, [filteredTrips, viewMode]);
+
+  // Get available years
+  const availableYears = useMemo(() => {
+    const yearSet = new Set(processedTrips.map(trip => trip.year));
+    const years = Array.from(yearSet);
+    return years.sort((a, b) => b - a);
+  }, [processedTrips]);
+
+  // Calculate metrics for current view
+  const metrics = useMemo(() => {
+    const totalBudget = filteredTrips.reduce((sum, trip) => sum + (trip.budget_total || 0), 0);
+    const avgDuration = filteredTrips.length > 0
+      ? filteredTrips.reduce((sum, trip) => sum + (trip.duration || 0), 0) / filteredTrips.length
+      : 0;
+    const destinations = new Set(filteredTrips.map(trip => trip.destination).filter(Boolean)).size;
+
+    return {
+      totalTrips: filteredTrips.length,
+      totalBudget,
+      avgDuration: Math.round(avgDuration),
+      destinations
+    };
   }, [filteredTrips]);
-
-  // Create timeline items with year separators
-  const timelineItems = useMemo(() => {
-    const items: Array<{ type: 'year' | 'trip'; data: any; key: string }> = [];
-    const currentYear = new Date().getFullYear();
-
-    filteredTrips.forEach((trip, index) => {
-      const tripYear = trip.start_date ? new Date(trip.start_date).getFullYear() : currentYear;
-      const prevTrip = filteredTrips[index - 1];
-      const prevYear = prevTrip?.start_date ? new Date(prevTrip.start_date).getFullYear() : null;
-
-      // Add year separator if this is a new year
-      if (!prevYear || prevYear !== tripYear) {
-        items.push({
-          type: 'year',
-          data: {
-            year: tripYear,
-            isCurrentYear: tripYear === currentYear
-          },
-          key: `year-${tripYear}`
-        });
-      }
-
-      // Add the trip
-      items.push({
-        type: 'trip',
-        data: trip,
-        key: `trip-${trip.id}`
-      });
-    });
-
-    return items;
-  }, [filteredTrips]);
-
-  // Initialize scroll state and auto-scroll to current year
-  useEffect(() => {
-    const container = document.getElementById('timeline-container');
-    if (container) {
-      setCanScrollRight(container.scrollWidth > container.clientWidth);
-
-      // Auto-scroll to current year on load
-      const currentYear = new Date().getFullYear();
-      const currentYearIndex = timelineItems.findIndex(
-        item => item.type === 'year' && item.data.year === currentYear
-      );
-
-      if (currentYearIndex > 0) {
-        // Calculate position to center the current year
-        const itemWidth = 250; // Average width including gaps
-        const scrollPosition = Math.max(0, (currentYearIndex * itemWidth) - (container.clientWidth / 2));
-
-        setTimeout(() => {
-          container.scrollTo({ left: scrollPosition, behavior: 'smooth' });
-        }, 500); // Small delay to ensure everything is rendered
-      }
-    }
-  }, [timelineItems]);
-
-  const getGroupIcon = (groupName: string) => {
-    if (groupName.includes('Currently Traveling')) return StarIcon;
-    if (groupName.includes('This Week')) return RocketIcon;
-    if (groupName.includes('This Month')) return SparklesIcon;
-    if (groupName.includes('Upcoming')) return CalendarIcon;
-    if (groupName.includes('Completed')) return TrophyIcon;
-    if (groupName.includes('Memories')) return CameraIcon;
-    if (groupName.includes('Planning')) return EditIcon;
-    return SparklesIcon;
-  };
 
   const getStatusConfig = (status: TimelineTrip['status']) => {
     switch (status) {
+      case 'completed':
+        return {
+          color: 'bg-green-500',
+          textColor: 'text-green-700',
+          bgColor: 'bg-green-50 dark:bg-green-950/20',
+          icon: CheckCircleIcon,
+          label: 'Completed'
+        };
       case 'ongoing':
         return {
-          color: 'from-orange-500 to-red-500',
+          color: 'bg-orange-500',
+          textColor: 'text-orange-700',
           bgColor: 'bg-orange-50 dark:bg-orange-950/20',
-          textColor: 'text-orange-700 dark:text-orange-300',
-          icon: PlayCircleIcon,
-          dotColor: 'bg-orange-500',
-          pulseClass: 'animate-pulse'
+          icon: PlayIcon,
+          label: 'Ongoing'
         };
       case 'upcoming':
         return {
-          color: 'from-emerald-500 to-teal-500',
-          bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
-          textColor: 'text-emerald-700 dark:text-emerald-300',
+          color: 'bg-blue-500',
+          textColor: 'text-blue-700',
+          bgColor: 'bg-blue-50 dark:bg-blue-950/20',
           icon: CalendarIcon,
-          dotColor: 'bg-emerald-500',
-          pulseClass: 'animate-bounce'
-        };
-      case 'completed':
-        return {
-          color: 'from-purple-500 to-pink-500',
-          bgColor: 'bg-purple-50 dark:bg-purple-950/20',
-          textColor: 'text-purple-700 dark:text-purple-300',
-          icon: CheckCircleIcon,
-          dotColor: 'bg-purple-500',
-          pulseClass: ''
+          label: 'Upcoming'
         };
       default:
         return {
-          color: 'from-blue-500 to-cyan-500',
-          bgColor: 'bg-blue-50 dark:bg-blue-950/20',
-          textColor: 'text-blue-700 dark:text-blue-300',
-          icon: PlusIcon,
-          dotColor: 'bg-blue-500',
-          pulseClass: ''
+          color: 'bg-gray-500',
+          textColor: 'text-gray-700',
+          bgColor: 'bg-gray-50 dark:bg-gray-950/20',
+          icon: FileTextIcon,
+          label: 'Planning'
         };
     }
   };
 
-
-
-  if (filteredTrips.length === 0) {
+  if (trips.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-full flex items-center justify-center mb-6">
-          <ClockIcon className="h-12 w-12 text-blue-500" />
+      <div className="h-64 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg flex items-center justify-center border-2 border-dashed border-border">
+        <div className="text-center space-y-2">
+          <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto" />
+          <p className="text-muted-foreground">No trips to display</p>
+          <p className="text-xs text-muted-foreground">Create your first trip to see the timeline</p>
         </div>
-        <h3 className="text-xl font-semibold text-foreground mb-2">
-          No trips in timeline
-        </h3>
-        <p className="text-muted-foreground mb-6 max-w-md">
-          {searchTerm ? 'No results for current search.' : 'Start planning your first trip to see the timeline!'}
-        </p>
-        {!searchTerm && (
-          <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-            <Link href="/trips/new">
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Create First Trip
-            </Link>
-          </Button>
-        )}
       </div>
     );
   }
 
-  // Scroll handlers
-  const handleScroll = (direction: 'left' | 'right') => {
-    const container = document.getElementById('timeline-container');
-    if (!container) return;
-
-    const scrollAmount = 250; // Adjusted for mixed content (years + cards)
-    const newPosition = direction === 'left'
-      ? Math.max(0, scrollPosition - scrollAmount)
-      : scrollPosition + scrollAmount;
-
-    container.scrollTo({ left: newPosition, behavior: 'smooth' });
-    setScrollPosition(newPosition);
-
-    // Update scroll button states
-    setTimeout(() => {
-      setCanScrollLeft(newPosition > 0);
-      setCanScrollRight(newPosition < container.scrollWidth - container.clientWidth);
-    }, 300);
-  };
-
-  // Format date for timeline
-  const formatTimelineDate = (dateString: string | null) => {
-    if (!dateString) return { day: '--', month: 'TBD', year: '' };
-    try {
-      const date = parseISO(dateString);
-      if (!isValid(date)) return { day: '--', month: 'Invalid', year: '' };
-      return {
-        day: format(date, 'dd'),
-        month: format(date, 'MMM'),
-        year: format(date, 'yyyy')
-      };
-    } catch {
-      return { day: '--', month: 'Invalid', year: '' };
-    }
-  };
-
   return (
-    <div className="relative">
-      {/* Timeline Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-            <ClockIcon className="h-5 w-5 text-white" />
+    <div className="space-y-6">
+      {/* Controls - Mobile Optimized */}
+      <div className="space-y-3 lg:space-y-4">
+        {/* Mobile: Stack all controls vertically */}
+        <div className="flex flex-col gap-3 lg:hidden">
+          {/* Search */}
+          <div className="relative">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search trips..."
+              value={searchTermLocal}
+              onChange={(e) => setSearchTermLocal(e.target.value)}
+              className="pl-10 w-full"
+            />
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Trip Timeline</h2>
-            <p className="text-sm text-muted-foreground">
-              {filteredTrips.length} {filteredTrips.length === 1 ? 'trip' : 'trips'} • Scroll to explore
-            </p>
+
+          {/* Mobile Controls Row */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCompactView(!compactView)}
+              className="flex items-center gap-1 flex-1"
+            >
+              {compactView ? <EyeIcon className="h-3 w-3" /> : <EyeOffIcon className="h-3 w-3" />}
+              <span className="text-xs">{compactView ? 'Detail' : 'Compact'}</span>
+            </Button>
+            <Button variant="outline" size="sm" className="flex items-center gap-1 flex-1">
+              <DownloadIcon className="h-3 w-3" />
+              <span className="text-xs">Export</span>
+            </Button>
           </div>
         </div>
 
-        {/* Scroll Controls */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleScroll('left')}
-            disabled={!canScrollLeft}
-            className="h-8 w-8 p-0"
-          >
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleScroll('right')}
-            disabled={!canScrollRight}
-            className="h-8 w-8 p-0"
-          >
-            <ChevronRightIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Horizontal Timeline */}
-      <div className="relative">
-        {/* Timeline Line */}
-        <div className="absolute top-20 left-0 right-0 h-1 timeline-gradient-line z-0 rounded-full"></div>
-
-
-
-        {/* Scrollable Container */}
-        <div
-          id="timeline-container"
-          className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          onScroll={(e) => {
-            const target = e.target as HTMLDivElement;
-            setScrollPosition(target.scrollLeft);
-            setCanScrollLeft(target.scrollLeft > 0);
-            setCanScrollRight(target.scrollLeft < target.scrollWidth - target.clientWidth);
-          }}
-        >
-          {timelineItems.map((item) => {
-            if (item.type === 'year') {
-              // Year Separator
-              return (
-                <div key={item.key} className="relative flex-shrink-0 w-20 sm:w-24 flex flex-col items-center justify-center">
-                  {/* Timeline Dot for Year */}
-                  <div className="flex justify-center mb-3">
-                    <div className={cn(
-                      "relative w-6 h-6 sm:w-7 sm:h-7 rounded-full border-3 border-background z-10 flex items-center justify-center",
-                      item.data.isCurrentYear ? "bg-orange-500" : "bg-blue-500"
-                    )}>
-                      <CalendarIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
-
-                      {/* Pulse Ring for Current Year */}
-                      {item.data.isCurrentYear && (
-                        <div className="absolute inset-0 rounded-full bg-orange-400 animate-ping opacity-75"></div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Year Badge - Compact Design */}
-                  <div className={cn(
-                    "px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-sm sm:text-base shadow-md backdrop-blur-sm border text-center min-w-0",
-                    item.data.isCurrentYear
-                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-300/50 shadow-orange-500/30"
-                      : "bg-gradient-to-r from-blue-500 to-purple-600 text-white border-blue-300/30 shadow-blue-500/20"
-                  )}>
-                    <div className="text-lg sm:text-xl font-black leading-none">{item.data.year}</div>
-                    {item.data.isCurrentYear && (
-                      <div className="text-xs mt-0.5 opacity-90 leading-none">🕐</div>
-                    )}
-                  </div>
-                </div>
-              );
-            } else {
-              // Trip Card
-              const trip = item.data;
-              const config = getStatusConfig(trip.status);
-              const Icon = config.icon;
-              const isHovered = hoveredTrip === trip.id;
-              const startDate = formatTimelineDate(trip.start_date);
-              const endDate = formatTimelineDate(trip.end_date);
-
-              return (
-                <div key={item.key} className="relative flex-shrink-0 w-80">
-                  {/* Timeline Dot */}
-                  <div className="flex justify-center mb-4">
-                    <div className={cn(
-                      "relative w-6 h-6 rounded-full border-4 border-background z-10 flex items-center justify-center",
-                      config.dotColor,
-                      config.pulseClass
-                    )}>
-                      <Icon className="h-3 w-3 text-white" />
-
-                      {/* Pulse Ring for Ongoing Trips */}
-                      {trip.status === 'ongoing' && (
-                        <div className="absolute inset-0 rounded-full bg-orange-400 animate-ping opacity-75"></div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Trip Card */}
-                  <Link href={`/trips/${trip.id}`} className="block group">
-                    <div
-                      className={cn(
-                        "relative bg-card rounded-2xl border-2 overflow-hidden timeline-card-3d",
-                        config.bgColor,
-                        isHovered && "shadow-2xl"
-                      )}
-                      onMouseEnter={() => setHoveredTrip(trip.id)}
-                      onMouseLeave={() => setHoveredTrip(null)}
-                    >
-                      {/* Card Header with Gradient */}
-                      <div className={cn(
-                        "relative h-24 bg-gradient-to-br p-4 text-white",
-                        config.color
-                      )}>
-                        {/* Background Pattern */}
-                        <div className="absolute inset-0 bg-black/10"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-
-                        {/* Status Badge */}
-                        <div className="relative z-10 flex justify-between items-start">
-                          <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium">
-                            {trip.status === 'ongoing' && '🌟 Traveling'}
-                            {trip.status === 'upcoming' && '🚀 Upcoming'}
-                            {trip.status === 'completed' && '✅ Completed'}
-                            {trip.status === 'planning' && '📋 Planning'}
-                          </div>
-
-                          {trip.daysUntil !== undefined && trip.status === 'upcoming' && (
-                            <div className="bg-white/30 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-bold">
-                              {trip.daysUntil === 0 ? 'Today!' : `${trip.daysUntil}d`}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Card Content */}
-                      <div className="p-4 space-y-3">
-                        {/* Trip Title */}
-                        <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                          {trip.name}
-                        </h3>
-
-                        {/* Destination */}
-                        {trip.destination && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <MapPinIcon className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-medium">{trip.destination}</span>
-                          </div>
-                        )}
-
-                        {/* Date Range */}
-                        <div className="flex items-center justify-between">
-                          {trip.start_date ? (
-                            <div className="text-center">
-                              <div className="text-xs text-muted-foreground">Departure</div>
-                              <div className="font-bold text-foreground">{startDate.day}</div>
-                              <div className="text-xs text-muted-foreground">{startDate.month}</div>
-                            </div>
-                          ) : (
-                            <div className="text-center">
-                              <div className="text-xs text-muted-foreground">Date</div>
-                              <div className="font-bold text-muted-foreground">TBD</div>
-                            </div>
-                          )}
-
-                          {trip.start_date && trip.end_date && (
-                            <>
-                              <div className="flex-1 flex justify-center">
-                                <ArrowRightIcon className="h-4 w-4 text-muted-foreground" />
-                              </div>
-                              <div className="text-center">
-                                <div className="text-xs text-muted-foreground">Return</div>
-                                <div className="font-bold text-foreground">{endDate.day}</div>
-                                <div className="text-xs text-muted-foreground">{endDate.month}</div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Duration */}
-                        {trip.duration && (
-                          <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded-full py-1 px-3">
-                            <ClockIcon className="h-3 w-3" />
-                            <span>{trip.duration} {trip.duration === 1 ? 'day' : 'days'}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Hover Glow Effect */}
-                      <div className={cn(
-                        "absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 rounded-2xl",
-                        config.color,
-                        isHovered && "opacity-10"
-                      )} />
-                    </div>
-                  </Link>
-                </div>
-              );
-            }
-          })}
-        </div>
-      </div>
-
-      {/* Timeline Progress Indicator */}
-      {timelineItems.length > 4 && (
-        <div className="flex justify-center mt-6">
-          <div className="flex items-center gap-2 bg-muted/50 rounded-full px-4 py-2">
-            <span className="text-xs text-muted-foreground">Scroll to see all items</span>
-            <div className="flex gap-1">
-              {Array.from({ length: Math.ceil(timelineItems.length / 4) }).map((_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-colors",
-                    i === Math.floor(scrollPosition / 250) ? "bg-primary" : "bg-muted-foreground/30"
-                  )}
-                />
-              ))}
+        {/* Desktop: Original layout */}
+        <div className="hidden lg:flex gap-4 items-center justify-between">
+          <div className="flex flex-wrap gap-2">
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search trips..."
+                value={searchTermLocal}
+                onChange={(e) => setSearchTermLocal(e.target.value)}
+                className="pl-10 w-64"
+              />
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCompactView(!compactView)}
+              className="flex items-center gap-2"
+            >
+              {compactView ? <EyeIcon className="h-4 w-4" /> : <EyeOffIcon className="h-4 w-4" />}
+              {compactView ? 'Detailed' : 'Compact'}
+            </Button>
+          </div>
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <DownloadIcon className="h-4 w-4" />
+            Export Timeline
+          </Button>
+        </div>
+
+        {/* Filter Controls - Mobile Optimized */}
+        <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap">
+          {/* View Mode - Full width on mobile */}
+          <div className="flex rounded-lg border border-border overflow-hidden w-full lg:w-auto">
+            {(['yearly', 'monthly', 'all'] as ViewMode[]).map((mode) => (
+              <Button
+                key={mode}
+                variant={viewMode === mode ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode(mode)}
+                className="rounded-none border-0 flex-1 lg:flex-none text-xs lg:text-sm"
+              >
+                {mode === 'yearly' ? 'Years' : mode === 'monthly' ? 'Months' : 'All'}
+              </Button>
+            ))}
           </div>
         </div>
-      )}
 
-      {/* Timeline Legend */}
-      <div className="flex items-center justify-center gap-6 mt-8 p-4 bg-muted/30 rounded-xl backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse shadow-lg shadow-orange-500/50"></div>
-          <span className="text-xs font-medium text-muted-foreground">Traveling</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-emerald-500 rounded-full shadow-lg shadow-emerald-500/50"></div>
-          <span className="text-xs font-medium text-muted-foreground">Upcoming</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-purple-500 rounded-full shadow-lg shadow-purple-500/50"></div>
-          <span className="text-xs font-medium text-muted-foreground">Completed</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50"></div>
-          <span className="text-xs font-medium text-muted-foreground">Planning</span>
-        </div>
+        {/* Year Selector - Mobile Optimized */}
+        {availableYears.length > 1 && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedYear(null)}
+              className={cn(
+                "text-xs lg:text-sm flex-1 lg:flex-none min-w-0",
+                !selectedYear && "bg-primary text-primary-foreground"
+              )}
+            >
+              All Years
+            </Button>
+            {availableYears.slice(0, 3).map(year => (
+              <Button
+                key={year}
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedYear(year)}
+                className={cn(
+                  "text-xs lg:text-sm flex-1 lg:flex-none min-w-0",
+                  selectedYear === year && "bg-primary text-primary-foreground"
+                )}
+              >
+                {year}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Metrics Summary - Mobile Optimized */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        {[
+          { icon: TrendingUpIcon, value: metrics.totalTrips, label: 'Trips', color: 'blue' },
+          { icon: DollarSignIcon, value: formatCurrency(metrics.totalBudget), label: 'Total Budget', color: 'green' },
+          { icon: ClockIcon, value: metrics.avgDuration, label: 'Avg Days', color: 'purple' },
+          { icon: MapPinIcon, value: metrics.destinations, label: 'Destinations', color: 'orange' }
+        ].map((metric) => {
+          const Icon = metric.icon;
+          return (
+            <div key={metric.label}>
+              <Card className="p-3 lg:p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <div className={cn(
+                    "w-8 h-8 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center flex-shrink-0",
+                    metric.color === 'blue' && "bg-blue-100 dark:bg-blue-900",
+                    metric.color === 'green' && "bg-green-100 dark:bg-green-900",
+                    metric.color === 'purple' && "bg-purple-100 dark:bg-purple-900",
+                    metric.color === 'orange' && "bg-orange-100 dark:bg-orange-900"
+                  )}>
+                    <Icon className={cn(
+                      "h-4 w-4 lg:h-5 lg:w-5",
+                      metric.color === 'blue' && "text-blue-600",
+                      metric.color === 'green' && "text-green-600",
+                      metric.color === 'purple' && "text-purple-600",
+                      metric.color === 'orange' && "text-orange-600"
+                    )} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg lg:text-2xl font-bold truncate">
+                      {metric.value}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{metric.label}</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Timeline */}
+      <Card className="timeline-mobile-optimized">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base lg:text-lg">
+            <CalendarIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+            Travel Timeline
+            <Badge variant="secondary" className="ml-auto text-xs">
+              {Object.keys(groupedTrips).length} {viewMode === 'yearly' ? 'Years' : viewMode === 'monthly' ? 'Months' : 'Periods'}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {Object.keys(groupedTrips).length === 0 ? (
+            <div className="h-32 flex items-center justify-center text-muted-foreground">
+              <div className="text-center space-y-2">
+                <FilterIcon className="h-8 w-8 mx-auto" />
+                <p>No trips match the current filters</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {Object.entries(groupedTrips)
+                .sort(([a], [b]) => {
+                  if (viewMode === 'all') return 0;
+                  return viewMode === 'yearly'
+                    ? parseInt(b) - parseInt(a)
+                    : new Date(b).getTime() - new Date(a).getTime();
+                })
+                .map(([period, periodTrips]) => (
+                  <div key={period} className="relative">
+                    {/* Period Header */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-primary rounded-full"></div>
+                        <h3 className="text-lg font-semibold">{period}</h3>
+                      </div>
+                      <div className="flex-1 h-px bg-border"></div>
+                      <Badge variant="outline">
+                        {periodTrips.length} trip{periodTrips.length !== 1 ? 's' : ''}
+                      </Badge>
+                    </div>
+
+                    {/* Timeline Line */}
+                    <div className="relative">
+                      <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border"></div>
+
+                      {/* Trips */}
+                      <div className="space-y-6">
+                        {periodTrips
+                          .sort((a, b) => {
+                            // Sort by creation date: most recent first within the same period
+                            const dateA = new Date(a.created_at).getTime();
+                            const dateB = new Date(b.created_at).getTime();
+                            return dateB - dateA; // Descending order (newest first)
+                          })
+                          .map((trip) => {
+                          const config = getStatusConfig(trip.status);
+                          const Icon = config.icon;
+                          const isHovered = hoveredTrip === trip.id;
+
+                          return (
+                            <div
+                              key={trip.id}
+                              className="relative flex items-start gap-3 sm:gap-6"
+                              onMouseEnter={() => setHoveredTrip(trip.id)}
+                              onMouseLeave={() => setHoveredTrip(null)}
+                            >
+                              {/* Timeline Dot */}
+                              <div className="relative z-10 flex-shrink-0">
+                                <div className={cn(
+                                  "w-10 h-10 sm:w-12 sm:h-12 rounded-full border-3 sm:border-4 border-background flex items-center justify-center transition-all duration-300",
+                                  config.color,
+                                  isHovered && "scale-110 shadow-lg"
+                                )}>
+                                  <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                                </div>
+                              </div>
+
+                              {/* Trip Card */}
+                              <Link
+                                href={`/trips/${trip.id}`}
+                                className="flex-1 group"
+                              >
+                                <Card className={cn(
+                                  "transition-all duration-300 hover:shadow-lg",
+                                  config.bgColor,
+                                  isHovered && "scale-[1.02] shadow-xl"
+                                )}>
+                                  <CardContent className={cn("p-3 lg:p-4", compactView && "p-2 lg:p-3")}>
+                                    {compactView ? (
+                                      // Compact View - Mobile Optimized
+                                      <div className="space-y-2">
+                                        <div className="flex items-start justify-between gap-2">
+                                          <div className="flex-1 min-w-0">
+                                            <h4 className="font-medium text-sm group-hover:text-primary transition-colors truncate">
+                                              {trip.name}
+                                            </h4>
+                                            <Badge variant="secondary" className={cn("text-xs mt-1", config.textColor)}>
+                                              {config.label}
+                                            </Badge>
+                                          </div>
+                                          {trip.budget_total && (
+                                            <div className="text-sm font-medium text-right flex-shrink-0">
+                                              {formatCurrency(trip.budget_total, trip.preferences?.currency)}
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                                          {trip.destination && (
+                                            <div className="flex items-center gap-1">
+                                              <MapPinIcon className="h-3 w-3 flex-shrink-0" />
+                                              <span className="truncate">{trip.destination}</span>
+                                            </div>
+                                          )}
+                                          {trip.start_date && (
+                                            <div className="flex items-center gap-1">
+                                              <CalendarIcon className="h-3 w-3" />
+                                              {new Date(trip.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </div>
+                                          )}
+                                          {trip.duration && (
+                                            <div className="flex items-center gap-1">
+                                              <ClockIcon className="h-3 w-3" />
+                                              {trip.duration}d
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      // Detailed View - Mobile Optimized
+                                      <div className="space-y-3">
+                                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 lg:gap-4">
+                                          <div className="flex-1 space-y-2">
+                                            <div className="flex flex-col lg:flex-row lg:items-center gap-2">
+                                              <h4 className="font-semibold text-base lg:text-lg group-hover:text-primary transition-colors">
+                                                {trip.name}
+                                              </h4>
+                                              <Badge variant="secondary" className={config.textColor}>
+                                                {config.label}
+                                              </Badge>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 lg:flex lg:flex-wrap gap-2 lg:gap-4 text-sm text-muted-foreground">
+                                              {trip.destination && (
+                                                <div className="flex items-center gap-1">
+                                                  <MapPinIcon className="h-4 w-4" />
+                                                  {trip.destination}
+                                                </div>
+                                              )}
+
+                                              {trip.start_date && (
+                                                <div className="flex items-center gap-1">
+                                                  <CalendarIcon className="h-4 w-4" />
+                                                  <span className="truncate">
+                                                    {new Date(trip.start_date).toLocaleDateString()}
+                                                    {trip.end_date && ` - ${new Date(trip.end_date).toLocaleDateString()}`}
+                                                  </span>
+                                                </div>
+                                              )}
+
+                                              {trip.duration && (
+                                                <div className="flex items-center gap-1">
+                                                  <ClockIcon className="h-4 w-4" />
+                                                  {trip.duration} days
+                                                </div>
+                                              )}
+
+                                              {trip.budget_total && (
+                                                <div className="flex items-center gap-1">
+                                                  <DollarSignIcon className="h-4 w-4" />
+                                                  {formatCurrency(trip.budget_total, trip.preferences?.currency)}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        {/* Status-specific info */}
+                                        {trip.status === 'upcoming' && trip.daysUntil && (
+                                          <div className="text-sm text-blue-600 dark:text-blue-400">
+                                            Starts in {trip.daysUntil} day{trip.daysUntil !== 1 ? 's' : ''}
+                                          </div>
+                                        )}
+
+                                        {trip.status === 'ongoing' && (
+                                          <div className="text-sm text-orange-600 dark:text-orange-400 flex items-center gap-1">
+                                            <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                                            Currently traveling
+                                          </div>
+                                        )}
+
+                                        {/* Quick Actions - Hidden on mobile */}
+                                        <div className="hidden lg:flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <Button size="sm" variant="outline" className="text-xs">
+                                            View Details
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                              </Link>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import TravelInsights from './TravelInsights';
-import AnalyticsTimeline from './AnalyticsTimeline';
 
 interface Trip {
   id: string;
@@ -50,19 +49,19 @@ export default function AdvancedMetricsModal({ trips, trigger }: AdvancedMetrics
       <DialogTrigger asChild>
         {trigger || defaultTrigger}
       </DialogTrigger>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <BarChart3Icon className="h-6 w-6 text-primary" />
+      <DialogContent className="w-[95vw] max-w-6xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6 lg:w-full lg:h-auto lg:max-h-[90vh]">
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg lg:text-xl">
+            <BarChart3Icon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-primary" />
             Travel Analytics & Insights
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
+        <div className="space-y-3 sm:space-y-4 lg:space-y-6 overflow-y-auto flex-1">
           <TravelInsights trips={trips} />
-          
+
           {/* Additional Advanced Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {/* Travel Patterns */}
             <Card>
               <CardHeader>
@@ -136,9 +135,6 @@ export default function AdvancedMetricsModal({ trips, trigger }: AdvancedMetrics
             </Card>
           </div>
 
-          {/* Travel Timeline */}
-          <AnalyticsTimeline trips={trips} />
-
           {/* Export Options */}
           <Card>
             <CardHeader>
@@ -148,14 +144,14 @@ export default function AdvancedMetricsModal({ trips, trigger }: AdvancedMetrics
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="outline" size="sm">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                   Export PDF Report
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                   Download CSV Data
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                   Share Analytics
                 </Button>
               </div>

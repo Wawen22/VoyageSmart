@@ -119,26 +119,26 @@ export default function InteractiveDashboardHeader({
       </div>
 
 
-      <div className="relative z-10 px-6 py-6 lg:px-8">
+      <div className="relative z-10 px-6 py-3 lg:py-6 lg:px-8 dashboard-header-mobile dashboard-mobile-refresh">
         {/* Welcome Section */}
-        <div className="mb-6">
+        <div className="mb-4 lg:mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
             {/* Left side - Greeting */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 lg:gap-4">
               <div className="relative">
                 <div className={cn(
-                  "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
+                  "w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
                   greeting.color
                 )}>
-                  <GreetingIcon className="h-6 w-6 text-white" />
+                  <GreetingIcon className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+              <div className="space-y-0.5 lg:space-y-1">
+                <h1 className="text-xl lg:text-2xl xl:text-3xl font-bold text-foreground">
                   {greeting.text}, {userName}!
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-sm lg:text-base text-muted-foreground">
                   You have <span className="font-semibold text-foreground">{tripCount}</span> {tripCount === 1 ? 'trip' : 'trips'} planned
                 </p>
               </div>
@@ -163,8 +163,8 @@ export default function InteractiveDashboardHeader({
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-6">
+        {/* Desktop Search Bar */}
+        <div className="hidden lg:block mb-4 lg:mb-6 search-mobile">
           <div className="relative">
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
@@ -174,7 +174,7 @@ export default function InteractiveDashboardHeader({
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              className="w-full pl-10 pr-4 py-2.5 lg:py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
             />
             {searchTerm && (
               <button
@@ -188,7 +188,7 @@ export default function InteractiveDashboardHeader({
         </div>
 
         {/* Filter Tabs with Stats and View Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 mb-4 lg:mb-6 filter-tabs-mobile">
           {/* Filter Tabs */}
           <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
             {filterOptions.map((option, index) => {

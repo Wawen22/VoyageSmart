@@ -13,6 +13,10 @@ import ModernLoadingSkeleton, {
   ModernHeaderLoadingSkeleton
 } from '@/components/dashboard/ModernLoadingSkeleton';
 import FloatingActionButton from '@/components/dashboard/FloatingActionButton';
+import StickySearchBar from '@/components/dashboard/StickySearchBar';
+import PullToRefresh from '@/components/dashboard/PullToRefresh';
+import BottomSheetFilters from '@/components/dashboard/BottomSheetFilters';
+import SwipeableStats from '@/components/dashboard/SwipeableStats';
 
 import { useAnimationOptimization, useOptimizedLoading } from '@/hooks/usePerformance';
 import { useDashboardShortcuts } from '@/components/ui/KeyboardShortcutsHelp';
@@ -42,6 +46,8 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState<string>('created_desc');
   const [viewMode, setViewMode] = useState<'grid' | 'timeline' | 'map'>('grid');
   const [selectedYear, setSelectedYear] = useState<string>('all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
 
   // Reset year filter when main filter changes
   useEffect(() => {
@@ -138,6 +144,16 @@ export default function Dashboard() {
           console.log('Dashboard - Trips fetched successfully:', data?.length || 0);
           setTrips(data || []);
           setTripCount(data?.length || 0);
+
+          // Calculate available years
+          const years = new Set<number>();
+          data?.forEach(trip => {
+            if (trip.start_date) {
+              const year = new Date(trip.start_date).getFullYear();
+              years.add(year);
+            }
+          });
+          setAvailableYears(Array.from(years).sort((a, b) => b - a));
         } catch (fetchError) {
           console.error('Dashboard - Error in fetch operation:', fetchError);
 
@@ -158,6 +174,16 @@ export default function Dashboard() {
 
             console.log('Dashboard - Owner trips fetched:', ownerTrips?.length || 0);
             setTrips(ownerTrips || []);
+
+            // Calculate available years
+            const years = new Set<number>();
+            ownerTrips?.forEach(trip => {
+              if (trip.start_date) {
+                const year = new Date(trip.start_date).getFullYear();
+                years.add(year);
+              }
+            });
+            setAvailableYears(Array.from(years).sort((a, b) => b - a));
           } catch (fallbackError) {
             console.error('Dashboard - Fallback approach also failed:', fallbackError);
             setError('Could not load your trips. Please try again later.');
@@ -171,6 +197,46 @@ export default function Dashboard() {
 
     fetchTrips();
   }, [user]);
+
+  // Pull-to-refresh function
+  const handleRefresh = async () => {
+    if (!user || isRefreshing) return;
+
+    setIsRefreshing(true);
+    try {
+      console.log('Dashboard - Refreshing trips...');
+
+      const { data, error } = await supabase
+        .from('trips')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Dashboard - Error refreshing trips:', error);
+        throw error;
+      }
+
+      console.log('Dashboard - Trips refreshed successfully:', data?.length || 0);
+      setTrips(data || []);
+      setTripCount(data?.length || 0);
+      setError(null);
+
+      // Calculate available years
+      const years = new Set<number>();
+      data?.forEach(trip => {
+        if (trip.start_date) {
+          const year = new Date(trip.start_date).getFullYear();
+          years.add(year);
+        }
+      });
+      setAvailableYears(Array.from(years).sort((a, b) => b - a));
+    } catch (refreshError) {
+      console.error('Dashboard - Error during refresh:', refreshError);
+      setError('Could not refresh trips. Please try again.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Not set';
@@ -259,10 +325,18 @@ export default function Dashboard() {
   ).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background relative mobile-smooth-scroll mobile-no-horizontal-scroll">
+      {/* Sticky Search Bar for Mobile */}
+      <StickySearchBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        placeholder="Search your adventures..."
+      />
 
-      {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8 lg:px-8" role="main" id="main-content">
+      {/* Pull to Refresh Wrapper */}
+      <PullToRefresh onRefresh={handleRefresh} disabled={loading || isRefreshing}>
+        {/* Main Content */}
+        <main className="relative z-10 max-w-7xl mx-auto px-6 py-8 lg:px-8" role="main" id="main-content">
         {/* Error Message */}
         {error && (
           <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-700 dark:text-red-400 animate-fade-in-up">
@@ -295,10 +369,29 @@ export default function Dashboard() {
         />
       )}
 
+      {/* Mobile Components */}
+      <div className="lg:hidden relative z-10 max-w-7xl mx-auto px-4 pb-4">
+        {/* Swipeable Stats */}
+        <SwipeableStats trips={trips} className="mb-4" />
+
+        {/* Bottom Sheet Filters */}
+        <div className="flex justify-center">
+          <BottomSheetFilters
+            filter={filter}
+            setFilter={setFilter}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            availableYears={availableYears}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
+        </div>
+      </div>
+
       {/* Trips Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pb-8 lg:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-6 xl:px-8 pb-8">
         {/* Content Section */}
-        <div className="space-y-8">
+        <div className="space-y-6 lg:space-y-8">
 
           {loading ? (
             <ModernLoadingSkeleton viewMode={viewMode === 'map' ? 'grid' : viewMode} count={6} />
@@ -319,7 +412,7 @@ export default function Dashboard() {
               filter={filter}
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4 xl:gap-6 grid-mobile-optimized">
               {filteredTrips.map((trip, index) => (
                 <InteractiveTripCard
                   key={trip.id}
@@ -332,6 +425,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      </PullToRefresh>
 
       {/* Floating Action Button */}
       <FloatingActionButton />

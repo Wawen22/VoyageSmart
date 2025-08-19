@@ -1663,7 +1663,7 @@ export function CompactWeatherWidget() {
 
   return (
     <div className={cn(
-      "relative overflow-hidden bg-gradient-to-br rounded-xl p-4 shadow-lg transition-all duration-300 hover:shadow-xl border border-white/20",
+      "relative overflow-hidden bg-gradient-to-br rounded-xl p-3 shadow-lg transition-all duration-300 hover:shadow-xl border border-white/20 compact-weather-mobile dashboard-mobile-refresh",
       getGradientByCondition(weather.condition)
     )}>
       {/* Background pattern */}
@@ -1673,29 +1673,29 @@ export function CompactWeatherWidget() {
 
       <div className="relative z-10">
         {/* Header with location and controls */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1 text-white text-xs opacity-90">
-            <MapPinIcon className="h-3 w-3" />
-            <span className="truncate max-w-[120px]">{weather.location}</span>
+            <MapPinIcon className="h-2.5 w-2.5" />
+            <span className="truncate max-w-[100px]">{weather.location}</span>
           </div>
 
           <div className="flex items-center gap-1">
             <button
               onClick={refreshWeather}
               disabled={loading}
-              className="p-1 rounded-md hover:bg-white/20 transition-colors"
+              className="p-0.5 rounded-md hover:bg-white/20 transition-colors"
               title="Refresh weather"
             >
               <RefreshCwIcon className={cn(
-                "h-3 w-3 text-white",
+                "h-2.5 w-2.5 text-white",
                 loading && "animate-spin"
               )} />
             </button>
 
             <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
               <DialogTrigger asChild>
-                <button className="p-1 rounded-md hover:bg-white/20 transition-colors" title="Change location">
-                  <SettingsIcon className="h-3 w-3 text-white" />
+                <button className="p-0.5 rounded-md hover:bg-white/20 transition-colors" title="Change location">
+                  <SettingsIcon className="h-2.5 w-2.5 text-white" />
                 </button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -1737,38 +1737,38 @@ export function CompactWeatherWidget() {
         </div>
 
         {/* Main weather info */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-2 mb-2">
           {getWeatherIconCompact(weather.condition, weather.icon)}
           <div className="text-white">
-            <div className="text-xl font-bold">{weather.temperature}°C</div>
+            <div className="text-lg font-bold">{weather.temperature}°C</div>
             <div className="text-xs opacity-90 capitalize">{weather.description || weather.condition}</div>
           </div>
         </div>
 
-        {/* Additional weather details */}
-        <div className="grid grid-cols-3 gap-2 text-white text-xs">
+        {/* Additional weather details - More Compact */}
+        <div className="grid grid-cols-3 gap-1 text-white text-xs">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <ThermometerIcon className="h-3 w-3 opacity-75" />
+            <div className="flex items-center justify-center gap-0.5 mb-0.5">
+              <ThermometerIcon className="h-2.5 w-2.5 opacity-75" />
             </div>
-            <div className="opacity-75">Humidity</div>
-            <div className="font-semibold">{weather.humidity}%</div>
+            <div className="opacity-75 text-xs">Humidity</div>
+            <div className="font-semibold text-xs">{weather.humidity}%</div>
           </div>
 
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <WindIcon className="h-3 w-3 opacity-75" />
+            <div className="flex items-center justify-center gap-0.5 mb-0.5">
+              <WindIcon className="h-2.5 w-2.5 opacity-75" />
             </div>
-            <div className="opacity-75">Wind</div>
-            <div className="font-semibold">{weather.windSpeed} km/h</div>
+            <div className="opacity-75 text-xs">Wind</div>
+            <div className="font-semibold text-xs">{weather.windSpeed} km/h</div>
           </div>
 
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <EyeIcon className="h-3 w-3 opacity-75" />
+            <div className="flex items-center justify-center gap-0.5 mb-0.5">
+              <EyeIcon className="h-2.5 w-2.5 opacity-75" />
             </div>
-            <div className="opacity-75">Visibility</div>
-            <div className="font-semibold">{weather.visibility} km</div>
+            <div className="opacity-75 text-xs">Visibility</div>
+            <div className="font-semibold text-xs">{weather.visibility} km</div>
           </div>
         </div>
       </div>

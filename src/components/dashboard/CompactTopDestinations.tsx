@@ -53,7 +53,7 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
   }
 
   return (
-    <div className="bg-gradient-to-r from-blue-50/40 to-purple-50/40 dark:from-blue-950/15 dark:to-purple-950/15 rounded-xl p-4 border border-border/40 shadow-sm">
+    <div className="bg-gradient-to-r from-blue-50/40 to-purple-50/40 dark:from-blue-950/15 dark:to-purple-950/15 rounded-xl p-4 lg:p-4 border border-border/40 shadow-sm">
       {/* Desktop Layout */}
       <div className="hidden lg:flex lg:items-center gap-4">
         {/* Header */}
@@ -126,16 +126,16 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
         </div>
       </div>
 
-      {/* Mobile Layout */}
-      <div className="lg:hidden space-y-4">
+      {/* Mobile Layout - More Compact */}
+      <div className="lg:hidden space-y-2 compact-destinations-mobile dashboard-mobile-refresh">
         {/* Header Row */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-              <GlobeIcon className="h-3.5 w-3.5 text-white" />
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+              <GlobeIcon className="h-3 w-3 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-sm">Top Destinations</h3>
+              <h3 className="font-semibold text-xs">Top Destinations</h3>
             </div>
           </div>
 
@@ -143,9 +143,9 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
           <AdvancedMetricsModal
             trips={trips}
             trigger={
-              <button className="group relative bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-300 transform active:scale-95 shadow-md overflow-hidden">
-                <div className="relative flex items-center gap-1.5">
-                  <BarChart3Icon className="h-3 w-3" />
+              <button className="group relative bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-2 py-1 rounded-md font-medium text-xs transition-all duration-300 transform active:scale-95 shadow-md overflow-hidden">
+                <div className="relative flex items-center gap-1">
+                  <BarChart3Icon className="h-2.5 w-2.5" />
                   <span>Analytics</span>
                 </div>
               </button>
@@ -154,12 +154,12 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
         </div>
 
         {/* Destinations Row */}
-        <div className="flex flex-wrap gap-2 justify-center">
+        <div className="flex flex-wrap gap-1.5 justify-center">
           {topDestinations.map((country, index) => (
             <div
               key={country}
               className={cn(
-                "px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300 active:scale-95 shadow-sm",
+                "px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 active:scale-95 shadow-sm",
                 index === 0 && "bg-gradient-to-r from-blue-500 to-purple-600 text-white",
                 index === 1 && "bg-gradient-to-r from-green-500 to-teal-600 text-white",
                 index === 2 && "bg-gradient-to-r from-orange-500 to-red-600 text-white"
@@ -170,15 +170,15 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
           ))}
         </div>
 
-        {/* Stats Row */}
-        <div className="flex items-center justify-center gap-8 pt-2 border-t border-border/30">
+        {/* Stats Row - More Compact */}
+        <div className="flex items-center justify-center gap-6 pt-1 border-t border-border/30">
           <div className="text-center">
-            <p className="text-xl font-bold text-primary">{trips.length}</p>
+            <p className="text-lg font-bold text-primary">{trips.length}</p>
             <p className="text-xs text-muted-foreground">Trips</p>
           </div>
-          <div className="w-px h-8 bg-border/50"></div>
+          <div className="w-px h-6 bg-border/50"></div>
           <div className="text-center">
-            <p className="text-xl font-bold text-emerald-600">{topDestinations.length}</p>
+            <p className="text-lg font-bold text-emerald-600">{topDestinations.length}</p>
             <p className="text-xs text-muted-foreground">Countries</p>
           </div>
         </div>

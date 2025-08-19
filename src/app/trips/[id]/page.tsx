@@ -539,134 +539,134 @@ export default function TripDetails() {
           </div>
         </div>
 
-        {/* Trip Actions */}
-        <div className="mt-10 animate-content-fade-in" style={{ animationDelay: '200ms' }}>
-          <div className="flex items-center justify-between mb-6">
+        {/* Trip Actions - Mobile Optimized */}
+        <div className="mt-8 lg:mt-10 animate-content-fade-in" style={{ animationDelay: '200ms' }}>
+          <div className="flex items-center justify-between mb-4 lg:mb-6">
             <div className="flex items-center">
               <div className="p-2 rounded-full bg-primary/10 mr-3">
-                <MapPinIcon className="h-5 w-5 text-primary" />
+                <MapPinIcon className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-foreground">Trip Actions</h2>
-                <p className="text-sm text-muted-foreground">Manage your trip activities</p>
+                <h2 className="text-lg lg:text-xl font-bold text-foreground">Trip Actions</h2>
+                <p className="text-xs lg:text-sm text-muted-foreground hidden lg:block">Manage your trip activities</p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5 lg:gap-6 trip-actions-mobile">
             <Link href={`/trips/${id}/itinerary`} className="group">
-              <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
+              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
                 {/* Card background decoration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
 
-                <div className="flex flex-col items-center text-center mb-4 relative">
-                  <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
+                <div className="flex flex-col items-center text-center relative">
+                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
                     <div className="relative">
-                      <CalendarIcon className="h-8 w-8 text-primary" />
-                      <BookOpenIcon className="h-4 w-4 text-primary absolute -bottom-1 -right-1 bg-background rounded-full p-0.5" />
+                      <CalendarIcon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
+                      <BookOpenIcon className="h-3 w-3 lg:h-4 lg:w-4 text-primary absolute -bottom-1 -right-1 bg-background rounded-full p-0.5" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Trip Planner</h3>
+                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Trip Planner</h3>
+                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
+                    Plan activities, keep a journal and photo gallery
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground relative text-center">
-                  Plan activities, keep a journal and photo gallery
-                </p>
               </div>
             </Link>
 
             <Link href={`/trips/${id}/accommodations`} className="group cursor-pointer">
-              <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
+              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
                 {/* Card background decoration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
 
                 {/* Free plan counter */}
                 {subscription?.tier === 'free' && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm">
-                      {accommodationCount}/5 Free
+                  <div className="absolute top-2 lg:top-3 right-2 lg:right-3 z-10">
+                    <span className="inline-flex items-center px-1.5 lg:px-2.5 py-1 lg:py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm">
+                      {accommodationCount}/5
                     </span>
                   </div>
                 )}
 
-                <div className="flex flex-col items-center text-center mb-4 relative">
-                  <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <Building2Icon className="h-8 w-8 text-primary" />
+                <div className="flex flex-col items-center text-center relative">
+                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
+                    <Building2Icon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Accommodations</h3>
+                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Accommodations</h3>
+                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
+                    Manage hotels and places to stay
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground relative text-center">
-                  Manage hotels and places to stay
-                </p>
               </div>
             </Link>
 
             <Link href={`/trips/${id}/transportation`} className="group cursor-pointer">
-              <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
+              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
                 {/* Card background decoration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
 
                 {/* Free plan counter */}
                 {subscription?.tier === 'free' && (
-                  <div className="absolute top-3 right-3 z-10">
-                    <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm">
-                      {transportationCount}/5 Free
+                  <div className="absolute top-2 lg:top-3 right-2 lg:right-3 z-10">
+                    <span className="inline-flex items-center px-1.5 lg:px-2.5 py-1 lg:py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm">
+                      {transportationCount}/5
                     </span>
                   </div>
                 )}
 
-                <div className="flex flex-col items-center text-center mb-4 relative">
-                  <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <PlaneTakeoffIcon className="h-8 w-8 text-primary" />
+                <div className="flex flex-col items-center text-center relative">
+                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
+                    <PlaneTakeoffIcon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Transportation</h3>
+                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Transportation</h3>
+                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
+                    Track flights, trains, and other transport
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground relative text-center">
-                  Track flights, trains, and other transport
-                </p>
               </div>
             </Link>
 
             <Link href={`/trips/${id}/expenses`} className="group">
-              <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
+              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
                 {/* Card background decoration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
 
-                <div className="flex flex-col items-center text-center mb-4 relative">
-                  <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <DollarSignIcon className="h-8 w-8 text-primary" />
+                <div className="flex flex-col items-center text-center relative">
+                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
+                    <DollarSignIcon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Expenses</h3>
+                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Expenses</h3>
+                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
+                    Track and split trip expenses
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground relative text-center">
-                  Track and split trip expenses
-                </p>
               </div>
             </Link>
 
 
 
             <Link href={`/trips/${id}/chat`} className="group">
-              <div className="bg-card border-2 border-border rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
+              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
                 {/* Card background decoration */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
 
-                <div className="absolute top-3 right-3 z-10">
+                <div className="absolute top-2 lg:top-3 right-2 lg:right-3 z-10">
                   <UnreadBadge tripId={id as string} />
                 </div>
-                <div className="flex flex-col items-center text-center mb-4 relative">
-                  <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <MessageCircleIcon className="h-8 w-8 text-primary" />
+                <div className="flex flex-col items-center text-center relative">
+                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
+                    <MessageCircleIcon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">Group Chat</h3>
+                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Group Chat</h3>
+                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
+                    Chat with trip participants
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground relative text-center">
-                  Chat with trip participants
-                </p>
               </div>
             </Link>
           </div>
