@@ -98,76 +98,113 @@ export default function TransportationDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-xl">
-              {getIcon(transportation.type)}
-              <span className="ml-2">
-                {transportation.provider || transportation.type.charAt(0).toUpperCase() + transportation.type.slice(1)}
-              </span>
-              {transportation.status && (
-                <Badge variant={getStatusBadgeVariant(transportation.status) as any} className="ml-2">
-                  {getStatusLabel(transportation.status)}
-                </Badge>
-              )}
-            </DialogTitle>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto glass-card border-sky-500/20">
+          {/* Modern Background Elements */}
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-cyan-500/5 opacity-50 rounded-2xl"></div>
+          <div className="absolute -top-12 -right-12 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl opacity-50"></div>
+
+          <DialogHeader className="relative z-10">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-sky-500/20 to-cyan-500/20 backdrop-blur-sm border border-white/20">
+                {getIcon(transportation.type)}
+              </div>
+              <div className="flex-1">
+                <DialogTitle className="text-xl font-bold">
+                  <span className="bg-gradient-to-r from-foreground via-sky-500 to-foreground bg-clip-text text-transparent">
+                    {transportation.provider || transportation.type.charAt(0).toUpperCase() + transportation.type.slice(1)}
+                  </span>
+                </DialogTitle>
+                <div className="flex items-center space-x-2 mt-1">
+                  {transportation.status && (
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusBadgeVariant(transportation.status) === 'default' ? 'bg-sky-500/20 text-sky-600 border-sky-500/30' : 'bg-green-500/20 text-green-600 border-green-500/30'}`}>
+                      {getStatusLabel(transportation.status)}
+                    </span>
+                  )}
+                  {transportation.booking_reference && (
+                    <span className="text-sm text-muted-foreground">
+                      Ref: {transportation.booking_reference}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </DialogHeader>
           
-          <div className="space-y-6 py-4">
-            {/* Basic Info */}
+          <div className="space-y-6 py-4 relative z-10">
+            {/* Travel Information Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Departure Info */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-lg">Departure</h3>
-                
+              <div className="glass-info-card p-4 rounded-2xl">
+                <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center">
+                  <div className="p-1.5 rounded-lg bg-green-500/20 mr-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  </div>
+                  Departure
+                </h3>
+
                 {transportation.departure_time && (
-                  <div className="flex items-start">
-                    <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Date & Time</p>
-                      <p className="text-sm">{format(parseISO(transportation.departure_time), 'EEEE, MMMM d, yyyy HH:mm')}</p>
+                  <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 mb-3">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div className="p-1 rounded-lg bg-blue-500/20">
+                        <CalendarIcon className="h-3 w-3 text-blue-500" />
+                      </div>
+                      <p className="text-xs font-medium text-muted-foreground">Date & Time</p>
                     </div>
+                    <p className="text-sm font-semibold text-foreground">
+                      {format(parseISO(transportation.departure_time), 'EEEE, MMMM d, yyyy HH:mm')}
+                    </p>
                   </div>
                 )}
-                
+
                 {transportation.departure_location && (
-                  <div className="flex items-start">
-                    <MapPinIcon className="h-4 w-4 mr-2 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Location</p>
-                      <p className="text-sm">{transportation.departure_location}</p>
+                  <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div className="p-1 rounded-lg bg-purple-500/20">
+                        <MapPinIcon className="h-3 w-3 text-purple-500" />
+                      </div>
+                      <p className="text-xs font-medium text-muted-foreground">Location</p>
                     </div>
+                    <p className="text-sm font-semibold text-foreground">{transportation.departure_location}</p>
                   </div>
                 )}
               </div>
               
               {/* Arrival Info */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-lg">Arrival</h3>
-                
+              <div className="glass-info-card p-4 rounded-2xl">
+                <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center">
+                  <div className="p-1.5 rounded-lg bg-red-500/20 mr-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  </div>
+                  Arrival
+                </h3>
+
                 {transportation.arrival_time && (
-                  <div className="flex items-start">
-                    <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Date & Time</p>
-                      <p className="text-sm">{format(parseISO(transportation.arrival_time), 'EEEE, MMMM d, yyyy HH:mm')}</p>
+                  <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 mb-3">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div className="p-1 rounded-lg bg-blue-500/20">
+                        <CalendarIcon className="h-3 w-3 text-blue-500" />
+                      </div>
+                      <p className="text-xs font-medium text-muted-foreground">Date & Time</p>
                     </div>
+                    <p className="text-sm font-semibold text-foreground">
+                      {format(parseISO(transportation.arrival_time), 'EEEE, MMMM d, yyyy HH:mm')}
+                    </p>
                   </div>
                 )}
-                
+
                 {transportation.arrival_location && (
-                  <div className="flex items-start">
-                    <MapPinIcon className="h-4 w-4 mr-2 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Location</p>
-                      <p className="text-sm">{transportation.arrival_location}</p>
+                  <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div className="p-1 rounded-lg bg-purple-500/20">
+                        <MapPinIcon className="h-3 w-3 text-purple-500" />
+                      </div>
+                      <p className="text-xs font-medium text-muted-foreground">Location</p>
                     </div>
+                    <p className="text-sm font-semibold text-foreground">{transportation.arrival_location}</p>
                   </div>
                 )}
               </div>
             </div>
-            
-            <Separator />
             
             {/* Additional Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -293,34 +330,40 @@ export default function TransportationDetailsModal({
             )}
           </div>
           
-          <DialogFooter className="flex justify-between sm:justify-end gap-2">
-            {canEdit && (
-              <Button 
-                variant="destructive" 
-                onClick={() => setShowDeleteConfirm(true)}
-                disabled={loading}
-                className="flex items-center"
-              >
-                <TrashIcon className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            )}
-            
-            {canEdit && (
-              <Button 
-                variant="outline" 
-                onClick={onEdit}
-                disabled={loading}
-                className="flex items-center"
-              >
-                <EditIcon className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            )}
-            
-            <Button onClick={onClose} disabled={loading}>
-              Close
-            </Button>
+          <DialogFooter className="relative z-10 pt-6 border-t border-white/10">
+            <div className="flex flex-col sm:flex-row sm:justify-between w-full gap-3">
+              {canEdit && (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={loading}
+                  className="glass-button inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                >
+                  <TrashIcon className="h-4 w-4 mr-2" />
+                  Delete
+                </button>
+              )}
+
+              <div className="flex space-x-3 sm:ml-auto">
+                {canEdit && (
+                  <button
+                    onClick={onEdit}
+                    disabled={loading}
+                    className="glass-button-primary inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                  >
+                    <EditIcon className="h-4 w-4 mr-2" />
+                    Edit
+                  </button>
+                )}
+
+                <button
+                  onClick={onClose}
+                  disabled={loading}
+                  className="glass-button inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

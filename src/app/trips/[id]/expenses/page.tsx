@@ -696,17 +696,50 @@ export default function ExpensesPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="bg-card border-b border-border">
-          <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
-            <BackButton href={`/trips/${id}`} label="Back to Trip" />
+        <header className="relative overflow-hidden mb-6">
+          {/* Modern Glassmorphism Background - Amber/Orange Theme */}
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-background/95 to-orange-500/10 backdrop-blur-xl"></div>
+
+          {/* Animated Background Elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl animate-pulse glass-orb-float"></div>
+            <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl animate-pulse glass-orb-float" style={{ animationDelay: '2s' }}></div>
+            <div className="absolute inset-0 opacity-[0.02] glass-grid-pattern"></div>
           </div>
 
-          <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-            <div className="flex flex-col space-y-2">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
-                <DollarSignIcon className="h-6 w-6 mr-2" />
-                Expenses
-              </h1>
+          {/* Glass border effect */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
+
+          {/* Navigation Bar with Glass Effect */}
+          <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
+            <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+              <BackButton
+                href={`/trips/${id}`}
+                label="Back to Trip"
+                theme="amber"
+              />
+            </div>
+          </div>
+
+          {/* Main Header Content */}
+          <div className="max-w-7xl mx-auto py-4 px-4 sm:py-8 md:py-12 sm:px-6 lg:px-8 relative z-10">
+            <div className="animate-glass-fade-in">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-white/20">
+                    <DollarSignIcon className="h-6 w-6 text-amber-500" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                    <span className="bg-gradient-to-r from-foreground via-amber-500 to-foreground bg-clip-text text-transparent">
+                      Expenses
+                    </span>
+                  </h1>
+                  <div className="h-4 bg-muted-foreground/20 rounded w-48 mt-2 animate-pulse"></div>
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -736,54 +769,195 @@ export default function ExpensesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
-          <BackButton href={`/trips/${id}`} label="Back to Trip" />
+      <header className="relative overflow-hidden mb-6">
+        {/* Modern Glassmorphism Background - Amber/Orange Theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-background/95 to-orange-500/10 backdrop-blur-xl"></div>
+
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Floating orbs */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl animate-pulse glass-orb-float"></div>
+          <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl animate-pulse glass-orb-float" style={{ animationDelay: '2s' }}></div>
+
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-[0.02] glass-grid-pattern"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col space-y-2">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
-              <DollarSignIcon className="h-6 w-6 mr-2" />
-              Expenses
-            </h1>
-            {trip && (
-              <p className="text-sm text-muted-foreground">
-                {trip.name} • {trip.destination || 'No destination'}
-              </p>
-            )}
+        {/* Glass border effect */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
+
+        {/* Navigation Bar with Glass Effect */}
+        <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+            <BackButton
+              href={`/trips/${id}`}
+              label="Back to Trip"
+              theme="amber"
+            />
+          </div>
+        </div>
+
+        {/* Main Header Content */}
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:py-8 md:py-12 sm:px-6 lg:px-8 relative z-10 trip-header-mobile expenses-header-mobile">
+          <div className="animate-glass-fade-in">
+            {/* Section Title with Modern Typography */}
+            <div className="relative mb-6">
+              {/* Mobile Layout - Stacked */}
+              <div className="flex flex-col space-y-4 md:hidden">
+                <div className="flex items-center space-x-3">
+                  <div className="relative flex-shrink-0">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-white/20">
+                      <DollarSignIcon className="h-5 w-5 text-amber-500" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl font-bold">
+                      <span className="bg-gradient-to-r from-foreground via-amber-500 to-foreground bg-clip-text text-transparent">
+                        Expenses
+                      </span>
+                    </h1>
+                    {trip && (
+                      <p className="text-sm text-muted-foreground mt-1 truncate">
+                        {trip.name} • {trip.destination || 'No destination'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stats Widget - Mobile */}
+                <div className="flex justify-center">
+                  <div className="glass-info-card flex items-center px-4 py-2 rounded-xl">
+                    <div className="p-1 rounded-full bg-amber-500/20 mr-2">
+                      <ReceiptIcon className="h-3 w-3 text-amber-500" />
+                    </div>
+                    <div className="text-center">
+                      <span className="text-sm font-bold text-amber-500">{expenses.length}</span>
+                      <span className="text-xs text-muted-foreground ml-1">
+                        {expenses.length === 1 ? 'Expense' : 'Expenses'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Layout - Side by Side */}
+              <div className="hidden md:flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-white/20">
+                      <DollarSignIcon className="h-6 w-6 text-amber-500" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                      <span className="bg-gradient-to-r from-foreground via-amber-500 to-foreground bg-clip-text text-transparent">
+                        Expenses
+                      </span>
+                    </h1>
+                    {trip && (
+                      <p className="text-base text-muted-foreground mt-1">
+                        {trip.name} • {trip.destination || 'No destination'}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stats Widget - Desktop */}
+                <div className="flex-shrink-0">
+                  <div className="glass-info-card flex items-center px-4 py-2.5 rounded-2xl">
+                    <div className="p-1.5 rounded-full bg-amber-500/20 mr-3">
+                      <ReceiptIcon className="h-4 w-4 text-amber-500" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-amber-500">{expenses.length}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {expenses.length === 1 ? 'Expense' : 'Expenses'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-amber-500/20 rounded-full animate-ping"></div>
+              <div className="absolute -bottom-1 -right-4 w-2 h-2 bg-orange-500/30 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <Tabs
-            defaultValue="expenses"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="expenses" className="flex items-center gap-2">
-                <ReceiptIcon className="h-4 w-4" />
-                <span>Expenses</span>
-              </TabsTrigger>
-              <TabsTrigger value="balances" className="flex items-center gap-2">
-                <BarChart3Icon className="h-4 w-4" />
-                <span>Balances</span>
-              </TabsTrigger>
-            </TabsList>
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 expenses-section-mobile">
+        {/* Controls Section - Modernized */}
+        <div className="mb-6 glass-card rounded-2xl p-4 md:p-6 animate-glass-fade-in expenses-controls-mobile" style={{ animationDelay: '100ms' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Add Button */}
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setIsAddExpenseModalOpen(true)}
+                className="glass-button-primary inline-flex items-center px-4 py-2.5 rounded-xl font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-amber-500/25"
+              >
+                <div className="p-1 rounded-lg bg-white/20 mr-2">
+                  <PlusIcon className="h-4 w-4" />
+                </div>
+                Add Expense
+              </button>
 
-            <Button
-              onClick={() => setIsAddExpenseModalOpen(true)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 mb-6 w-full sm:w-auto"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Expense
-            </Button>
+              {/* Quick Stats */}
+              <div className="hidden md:flex items-center space-x-4 text-sm text-muted-foreground">
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                  <span>{expenses.length} total</span>
+                </div>
+                {expenses.length > 0 && (
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <span>{balances.filter(b => b.balance === 0).length} settled</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
-            <TabsContent value="expenses" className="mt-0">
+        {/* View Mode Tabs - Modernized */}
+        <Tabs
+          defaultValue="expenses"
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="mb-6"
+        >
+          <div className="glass-card rounded-2xl p-4 animate-glass-fade-in expenses-view-mobile" style={{ animationDelay: '200ms' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">Financial Overview</h3>
+                <p className="text-sm text-muted-foreground">Track expenses and manage balances</p>
+              </div>
+
+              <div className="flex justify-center sm:justify-end">
+                <TabsList className="glass-nav rounded-xl p-1 border border-white/20 bg-background/50 backdrop-blur-sm">
+                  <TabsTrigger
+                    value="expenses"
+                    className="flex items-center px-4 py-2 rounded-lg data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-600 data-[state=active]:shadow-sm transition-all duration-300 hover:bg-amber-500/10"
+                  >
+                    <ReceiptIcon className="h-4 w-4 mr-2" />
+                    Expenses
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="balances"
+                    className="flex items-center px-4 py-2 rounded-lg data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-600 data-[state=active]:shadow-sm transition-all duration-300 hover:bg-amber-500/10"
+                  >
+                    <BarChart3Icon className="h-4 w-4 mr-2" />
+                    Balances
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
+          </div>
+
+          <TabsContent value="expenses" className="mt-0">
+            <div className="animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
               <ExpenseList
                 expenses={expenses}
                 participants={participants}
@@ -794,9 +968,11 @@ export default function ExpensesPage() {
                   setIsEditExpenseModalOpen(true);
                 }}
               />
-            </TabsContent>
+            </div>
+          </TabsContent>
 
-            <TabsContent value="balances" className="mt-0">
+          <TabsContent value="balances" className="mt-0">
+            <div className="animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
               <ExpenseBalances
                 balances={balances}
                 settlements={settlements}
@@ -804,9 +980,9 @@ export default function ExpensesPage() {
                 currentUserId={user?.id}
                 onMarkAsPaid={handleMarkAsPaid}
               />
-            </TabsContent>
-          </Tabs>
-        </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <AddExpenseModal

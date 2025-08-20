@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/lib/auth';
-import { SmileIcon, MapPinIcon, CloudIcon, CalendarIcon } from 'lucide-react';
+import { SmileIcon, MapPinIcon, CloudIcon, CalendarIcon, BookOpenIcon } from 'lucide-react';
 
 interface JournalEntryFormProps {
   isOpen: boolean;
@@ -162,61 +162,113 @@ export default function JournalEntryForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{entry ? 'Edit Journal Entry' : 'New Journal Entry'}</DialogTitle>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto glass-card border-purple-500/20 journal-modal-mobile">
+        {/* Modern Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-indigo-500/5 opacity-50 rounded-2xl"></div>
+        <div className="absolute -top-12 -right-12 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl opacity-50"></div>
+
+        <DialogHeader className="relative z-10">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-sm border border-white/20">
+              <BookOpenIcon className="h-5 w-5 text-purple-500" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-bold">
+                <span className="bg-gradient-to-r from-foreground via-purple-500 to-foreground bg-clip-text text-transparent">
+                  {entry ? 'Edit Journal Entry' : 'New Journal Entry'}
+                </span>
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                {entry ? 'Update your travel memory' : 'Capture your travel memory'}
+              </p>
+            </div>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Journal title"
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6 py-4 relative z-10">
+          {/* Basic Information Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-purple-500/20 mr-2">
+                <BookOpenIcon className="h-4 w-4 text-purple-500" />
+              </div>
+              Basic Information
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title" className="text-sm font-medium text-foreground">Title</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Give your memory a title..."
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm mt-1"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="entryDate" className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-purple-500" />
+                  Date
+                </Label>
+                <Input
+                  id="entryDate"
+                  type="date"
+                  value={entryDate}
+                  onChange={(e) => setEntryDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm mt-1"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="entryDate" className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4" />
-              Date
-            </Label>
-            <Input
-              id="entryDate"
-              type="date"
-              value={entryDate}
-              onChange={(e) => setEntryDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]}
-              className="w-full"
-            />
+          {/* Content Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-indigo-500/20 mr-2">
+                <svg className="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </div>
+              Your Story
+            </h3>
+
+            <div>
+              <Label htmlFor="content" className="text-sm font-medium text-foreground">Content</Label>
+              <Textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write your thoughts, experiences and memories..."
+                className="glass-button border-white/20 bg-background/50 backdrop-blur-sm mt-1 min-h-[200px] resize-none"
+                required
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your thoughts, experiences and memories..."
-              className="min-h-[200px]"
-              required
-            />
-          </div>
+          {/* Mood & Location Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-amber-500/20 mr-2">
+                <SmileIcon className="h-4 w-4 text-amber-500" />
+              </div>
+              Mood & Location
+            </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <SmileIcon className="h-4 w-4" />
-                Mood
-              </Label>
-              <select
-                value={mood || ''}
-                onChange={(e) => setMood(e.target.value || null)}
-                className="w-full border border-input bg-background text-foreground rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <SmileIcon className="h-4 w-4 text-amber-500" />
+                  Mood
+                </Label>
+                <select
+                  value={mood || ''}
+                  onChange={(e) => setMood(e.target.value || null)}
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm mt-1 w-full py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
                 <option value="">Select a mood</option>
                 {moods.map((m) => (
                   <option key={m.value} value={m.value}>
@@ -226,45 +278,59 @@ export default function JournalEntryForm({
               </select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="location" className="flex items-center gap-2">
-                <MapPinIcon className="h-4 w-4" />
-                Location
-              </Label>
-              <Input
-                id="location"
-                value={location || ''}
-                onChange={(e) => setLocation(e.target.value || null)}
-                placeholder="Where are you?"
-              />
+              <div>
+                <Label htmlFor="location" className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <MapPinIcon className="h-4 w-4 text-green-500" />
+                  Location
+                </Label>
+                <Input
+                  id="location"
+                  value={location || ''}
+                  onChange={(e) => setLocation(e.target.value || null)}
+                  placeholder="Where are you?"
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm mt-1"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="isPrivate"
-              checked={isPrivate}
-              onChange={(e) => setIsPrivate(e.target.checked)}
-              className="rounded border-gray-300 text-primary focus:ring-primary"
-            />
-            <Label htmlFor="isPrivate" className="cursor-pointer">
-              Private journal (visible only to you)
-            </Label>
+          {/* Privacy Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <div className="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                id="isPrivate"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+                className="rounded border-white/30 text-purple-500 focus:ring-purple-500 bg-background/50 backdrop-blur-sm"
+              />
+              <Label htmlFor="isPrivate" className="text-sm font-medium text-foreground flex items-center gap-2 cursor-pointer">
+                <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Private journal (visible only to you)
+              </Label>
+            </div>
           </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : entry ? 'Update' : 'Save'}
-            </Button>
+          <DialogFooter className="relative z-10 pt-6 border-t border-white/10">
+            <div className="flex space-x-3 w-full sm:justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="glass-button flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="glass-button-primary flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Saving...' : entry ? 'Update Entry' : 'Create Entry'}
+              </button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

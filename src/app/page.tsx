@@ -59,6 +59,12 @@ export default function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [selectedMedia, setSelectedMedia] = useState<{
+    src: string;
+    alt: string;
+    title: string;
+    type: 'image' | 'video';
+  } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const aiRef = useRef<HTMLDivElement>(null);
@@ -120,6 +126,28 @@ export default function Home() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const openMediaPopup = (src: string, alt: string, title: string, type: 'image' | 'video' = 'image') => {
+    setSelectedMedia({ src, alt, title, type });
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  };
+
+  const closeMediaPopup = () => {
+    setSelectedMedia(null);
+    document.body.style.overflow = 'unset'; // Restore scrolling
+  };
+
+  // Close popup on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedMedia) {
+        closeMediaPopup();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [selectedMedia]);
 
 
 
@@ -447,73 +475,89 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section ref={featuresRef} className="py-24 md:py-32 relative overflow-hidden bg-gradient-to-b from-background to-muted/10">
+      <section ref={featuresRef} className="py-16 md:py-24 relative overflow-hidden bg-gradient-to-b from-background to-muted/10">
         {/* Background Elements */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-primary/8 to-transparent rounded-full blur-3xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full border border-primary/20 mb-6 animate-fade-in">
+          <div className="text-center mb-12 md:mb-16">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full border border-primary/20 mb-6 animate-fade-in backdrop-blur-sm">
               <AwardIcon className="h-5 w-5" />
               <span className="font-semibold">Powerful Features</span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
               Everything You Need
               <span className="block bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 In One Place
               </span>
             </h2>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto animate-fade-in delay-100 leading-relaxed">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in delay-100 leading-relaxed">
               From planning to memories, we've got every aspect of your journey covered
             </p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+          {/* Features Grid - Modern Compact Design */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {features.map((feature, index) => (
-              <Card
+              <div
                 key={index}
-                className="group relative overflow-hidden border-2 border-border/50 hover:border-primary/30 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 rounded-3xl"
+                className="group relative overflow-hidden bg-gradient-to-br from-background/80 via-background/60 to-background/40 backdrop-blur-xl border border-border/30 hover:border-primary/40 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02]"
                 style={{ animationDelay: `${feature.delay}ms` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                {/* Glassy Background Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-2xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent opacity-50 rounded-2xl"></div>
 
-                <CardHeader className="relative z-10 pb-4">
+                {/* Content */}
+                <div className="relative z-10">
+                  {/* Header */}
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="p-4 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-300 shadow-lg group-hover:scale-110">
+                    <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-300 shadow-md group-hover:scale-110 backdrop-blur-sm">
                       {feature.icon}
                     </div>
-                    <div>
-                      <CardTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300">
                         {feature.title}
-                      </CardTitle>
+                      </h3>
                     </div>
                   </div>
-                </CardHeader>
 
-                <CardContent className="relative z-10 pt-0">
-                  <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
+                  {/* Description */}
+                  <p className="text-muted-foreground leading-relaxed mb-4 text-sm">
                     {feature.description}
                   </p>
 
-                  {/* Feature Image */}
-                  <div className="relative overflow-hidden rounded-2xl mb-6 group-hover:scale-[1.02] transition-transform duration-500">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
+                  {/* Feature Preview */}
+                  <div
+                    className="relative overflow-hidden rounded-xl mb-4 group-hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
+                    onClick={() => openMediaPopup(feature.image, feature.title, feature.title, 'image')}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10 rounded-xl"></div>
                     <Image
                       src={feature.image}
                       alt={feature.title}
-                      width={600}
-                      height={400}
-                      className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-105"
+                      width={400}
+                      height={200}
+                      className="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-105 rounded-xl"
                     />
+                    {/* Play Button Overlay */}
+                    <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <div className="p-3 bg-background/90 backdrop-blur-md rounded-full border border-primary/30 shadow-xl hover:scale-110 transition-transform duration-300 group">
+                        <PlayIcon className="h-6 w-6 text-primary ml-0.5" />
+                      </div>
+                    </div>
+                    {/* Corner Play Icon */}
+                    <div className="absolute top-3 right-3 z-20 p-2 bg-background/80 backdrop-blur-sm rounded-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <PlayIcon className="h-4 w-4 text-primary" />
+                    </div>
                   </div>
 
                   {/* Feature Highlight */}
-                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-4 border border-primary/20 group-hover:border-primary/30 transition-all duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                      <p className="text-sm font-medium text-primary/90">
+                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-3 border border-primary/20 group-hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
+                    <div className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse mt-1.5 flex-shrink-0"></div>
+                      <p className="text-xs font-medium text-primary/90 leading-relaxed">
                         {index === 0 && "Create detailed day-by-day plans for your entire trip"}
                         {index === 1 && "Get personalized recommendations and smart suggestions powered by AI"}
                         {index === 2 && "Document your journey with photos and daily entries"}
@@ -523,12 +567,12 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                </CardContent>
+                </div>
 
                 {/* Decorative Elements */}
-                <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-              </Card>
+                <div className="absolute top-2 right-2 w-16 h-16 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+              </div>
             ))}
           </div>
 
@@ -536,12 +580,12 @@ export default function Home() {
           <div className="text-center">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-12 py-6 rounded-2xl text-lg font-semibold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
+              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-8 py-4 rounded-xl text-base font-semibold shadow-xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 backdrop-blur-sm"
             >
               <Link href="/register" className="flex items-center gap-3">
-                <TrendingUpIcon className="h-6 w-6" />
+                <TrendingUpIcon className="h-5 w-5" />
                 Explore All Features
-                <ArrowRightIcon className="h-5 w-5 animate-bounce-horizontal" />
+                <ArrowRightIcon className="h-4 w-4 animate-bounce-horizontal" />
               </Link>
             </Button>
           </div>
@@ -555,70 +599,73 @@ export default function Home() {
 
 
       {/* AI Features Section */}
-      <section ref={aiRef} className="py-20 md:py-24 bg-gradient-to-b from-primary/5 to-background relative overflow-hidden">
+      <section ref={aiRef} className="py-16 md:py-24 bg-gradient-to-b from-primary/5 to-background relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-purple-500/8 via-primary/5 to-transparent rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-indigo-500/6 via-primary/4 to-transparent rounded-full blur-3xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            {/* Left Side - Content */}
-            <div className="flex-1 text-center lg:text-left">
-              <div className="space-y-8">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/10 via-primary/10 to-indigo-500/10 text-purple-600 px-4 py-2 rounded-full border border-purple-500/20">
-                  <SparklesIcon className="h-5 w-5" />
-                  <span className="font-semibold">AI Powered</span>
-                </div>
+          {/* Section Header */}
+          <div className="text-center mb-12 lg:mb-16">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/10 via-primary/10 to-indigo-500/10 text-purple-600 px-4 py-2 rounded-full border border-purple-500/20 mb-6">
+              <SparklesIcon className="h-5 w-5" />
+              <span className="font-semibold">AI Powered</span>
+            </div>
 
-                <h2 className="text-4xl md:text-5xl font-bold leading-tight">
-                  <span className="bg-gradient-to-r from-purple-600 via-primary to-indigo-600 bg-clip-text text-transparent">
-                    Intelligent Travel
-                  </span>
-                  <br />
-                  <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                    Planning
-                  </span>
-                </h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6">
+              <span className="bg-gradient-to-r from-purple-600 via-primary to-indigo-600 bg-clip-text text-transparent">
+                Intelligent Travel
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                Planning
+              </span>
+            </h2>
 
-                <p className="text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  Experience the future of travel planning with our AI-powered assistant that learns your preferences and provides personalized recommendations.
-                </p>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Experience the future of travel planning with our AI-powered assistant that learns your preferences and provides personalized recommendations.
+            </p>
+          </div>
 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl shadow-md">
-                      <SparklesIcon className="h-6 w-6 text-purple-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-purple-600">24/7 AI Travel Assistant</h3>
-                      <p className="text-muted-foreground">Get instant answers and personalized suggestions</p>
-                    </div>
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            {/* Left Side - Features List */}
+            <div className="flex-1 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+                <div className="flex items-start gap-4 p-4 rounded-2xl bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/10 hover:border-purple-500/20 transition-all duration-300 group">
+                  <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                    <SparklesIcon className="h-6 w-6 text-purple-500" />
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 rounded-xl shadow-md">
-                      <CalendarIcon className="h-6 w-6 text-indigo-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-indigo-600">AI Itinerary Wizard</h3>
-                      <p className="text-muted-foreground">Generate complete day-by-day plans</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl shadow-md">
-                      <DollarSignIcon className="h-6 w-6 text-purple-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-purple-600">Smart Budget Optimization</h3>
-                      <p className="text-muted-foreground">Maximize your experience within your budget</p>
-                    </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg md:text-xl font-bold text-purple-600 mb-2">24/7 AI Travel Assistant</h3>
+                    <p className="text-sm md:text-base text-muted-foreground">Get instant answers and personalized suggestions</p>
                   </div>
                 </div>
 
+                <div className="flex items-start gap-4 p-4 rounded-2xl bg-gradient-to-br from-indigo-500/5 to-indigo-500/10 border border-indigo-500/10 hover:border-indigo-500/20 transition-all duration-300 group">
+                  <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                    <CalendarIcon className="h-6 w-6 text-indigo-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg md:text-xl font-bold text-indigo-600 mb-2">AI Itinerary Wizard</h3>
+                    <p className="text-sm md:text-base text-muted-foreground">Generate complete day-by-day plans</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 rounded-2xl bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/10 hover:border-purple-500/20 transition-all duration-300 group sm:col-span-2 lg:col-span-1">
+                  <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                    <DollarSignIcon className="h-6 w-6 text-purple-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg md:text-xl font-bold text-purple-600 mb-2">Smart Budget Optimization</h3>
+                    <p className="text-sm md:text-base text-muted-foreground">Maximize your experience within your budget</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 text-center lg:text-left">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-purple-500 via-primary to-indigo-600 hover:from-purple-600 hover:via-primary/90 hover:to-indigo-700 text-white px-8 py-6 rounded-xl text-lg font-semibold shadow-xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
+                  className="bg-gradient-to-r from-purple-500 via-primary to-indigo-600 hover:from-purple-600 hover:via-primary/90 hover:to-indigo-700 text-white px-8 py-4 md:py-6 rounded-xl text-base md:text-lg font-semibold shadow-xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
                   onClick={() => scrollToSection(pricingRef)}
                 >
                   <SparklesIcon className="h-5 w-5 mr-2" />
@@ -628,19 +675,19 @@ export default function Home() {
             </div>
 
             {/* Right Side - AI Demo */}
-            <div className="flex-1 mt-12 lg:mt-0">
-              <div className="bg-gradient-to-br from-purple-500/10 via-primary/5 to-indigo-500/10 rounded-2xl p-6 border border-purple-500/20 shadow-xl backdrop-blur-sm">
-                <div className="bg-gradient-to-br from-card/95 to-card/85 rounded-xl p-6 shadow-lg border border-border/50">
+            <div className="flex-1 w-full max-w-lg lg:max-w-none">
+              <div className="bg-gradient-to-br from-purple-500/10 via-primary/5 to-indigo-500/10 rounded-2xl p-4 md:p-6 border border-purple-500/20 shadow-xl backdrop-blur-sm">
+                <div className="bg-gradient-to-br from-card/95 to-card/85 rounded-xl p-4 md:p-6 shadow-lg border border-border/50">
                   {/* Header */}
                   <div className="flex items-center mb-4">
                     <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mr-3 shadow-md">
-                        <SparklesIcon className="h-5 w-5 text-white" />
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mr-3 shadow-md">
+                        <SparklesIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
                       </div>
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
                     </div>
                     <div>
-                      <span className="font-bold text-base bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">AI Travel Assistant</span>
+                      <span className="font-bold text-sm md:text-base bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">AI Travel Assistant</span>
                       <p className="text-xs text-muted-foreground">Online • Ready to help</p>
                     </div>
                   </div>
@@ -657,15 +704,15 @@ export default function Home() {
                       <p className="text-sm mb-2">Based on your trip to Rome (June 15-20) and your interest in history and food, I recommend:</p>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
-                          <CalendarIcon className="h-4 w-4 text-indigo-500" />
+                          <CalendarIcon className="h-4 w-4 text-indigo-500 flex-shrink-0" />
                           <span className="text-xs">Colosseum tour (morning, avoid crowds)</span>
                         </div>
                         <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
-                          <DollarSignIcon className="h-4 w-4 text-indigo-500" />
+                          <DollarSignIcon className="h-4 w-4 text-indigo-500 flex-shrink-0" />
                           <span className="text-xs">Trastevere food tour (evening)</span>
                         </div>
                         <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
-                          <MapPinIcon className="h-4 w-4 text-indigo-500" />
+                          <MapPinIcon className="h-4 w-4 text-indigo-500 flex-shrink-0" />
                           <span className="text-xs">Vatican Museums (book skip-the-line)</span>
                         </div>
                       </div>
@@ -1174,55 +1221,55 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-20 border-t border-border/50 bg-gradient-to-b from-background/95 to-primary/5 backdrop-blur-sm relative overflow-hidden">
+      <footer className="py-12 md:py-20 border-t border-border/50 bg-gradient-to-b from-background/95 to-primary/5 backdrop-blur-sm relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/10 to-transparent"></div>
         <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-primary/8 rounded-full filter blur-3xl"></div>
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/6 rounded-full filter blur-2xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
             <div className="md:col-span-2">
-              <div className="flex items-center mb-8">
+              <div className="flex items-center mb-6 md:mb-8">
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-2xl filter blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-                  <div className="relative bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm rounded-2xl p-6 border border-primary/20 shadow-lg">
+                  <div className="relative bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm rounded-2xl p-4 md:p-6 border border-primary/20 shadow-lg">
                     <Image
                       src="/images/logo-voyage_smart.png"
                       alt="Voyage Smart Logo"
                       width={240}
                       height={60}
-                      className="h-16 w-auto relative z-10 group-hover:scale-105 transition-transform duration-300"
+                      className="h-12 md:h-16 w-auto relative z-10 group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                 </div>
               </div>
-              <p className="text-muted-foreground max-w-lg mb-8 text-lg leading-relaxed">
+              <p className="text-muted-foreground max-w-lg mb-6 md:mb-8 text-base md:text-lg leading-relaxed">
                 AI-powered travel planning made easy. Plan trips, manage expenses, keep a travel journal, get intelligent recommendations, and collaborate with friends all in one place.
               </p>
-              <div className="flex space-x-4">
-                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+              <div className="flex space-x-3 md:space-x-4">
+                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20 h-10 w-10 md:h-12 md:w-12">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20 h-10 w-10 md:h-12 md:w-12">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20 h-10 w-10 md:h-12 md:w-12">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                <Button variant="ghost" size="icon" className="rounded-2xl hover:bg-primary/10 transition-all duration-300 hover:scale-110 group border border-transparent hover:border-primary/20 h-10 w-10 md:h-12 md:w-12">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground group-hover:text-primary transition-colors duration-300"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                 </Button>
               </div>
             </div>
 
             <div>
-              <h3 className="font-bold text-xl mb-8 text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">Quick Links</h3>
-              <ul className="space-y-5">
+              <h3 className="font-bold text-lg md:text-xl mb-4 md:mb-8 text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">Quick Links</h3>
+              <ul className="space-y-3 md:space-y-5">
                 <li>
                   <button
                     onClick={() => scrollToSection(featuresRef)}
-                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-lg"
+                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-base md:text-lg"
                   >
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Features</span>
@@ -1231,7 +1278,7 @@ export default function Home() {
                 <li>
                   <button
                     onClick={() => scrollToSection(pricingRef)}
-                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-lg"
+                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-base md:text-lg"
                   >
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Plans & Pricing</span>
@@ -1240,14 +1287,14 @@ export default function Home() {
                 <li>
                   <button
                     onClick={() => scrollToSection(faqRef)}
-                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-lg"
+                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-base md:text-lg"
                   >
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">FAQ</span>
                   </button>
                 </li>
                 <li>
-                  <Link href="/documentation" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                  <Link href="/documentation" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Documentation</span>
                   </Link>
@@ -1256,28 +1303,28 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="font-bold text-xl mb-8 text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">Get Started</h3>
-              <ul className="space-y-5">
+              <h3 className="font-bold text-lg md:text-xl mb-4 md:mb-8 text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">Get Started</h3>
+              <ul className="space-y-3 md:space-y-5">
                 <li>
-                  <Link href="/login" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                  <Link href="/login" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Log In</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/register" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                  <Link href="/register" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Sign Up Free</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                  <Link href="#" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Privacy Policy</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-lg">
+                  <Link href="#" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Terms of Service</span>
                   </Link>
@@ -1287,23 +1334,23 @@ export default function Home() {
           </div>
 
           {/* Footer Bottom */}
-          <div className="mt-20 pt-8 border-t border-gradient-to-r from-transparent via-border/50 to-transparent">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="flex items-center gap-4">
-                <p className="text-muted-foreground text-lg">© {new Date().getFullYear()} VoyageSmart. All rights reserved.</p>
+          <div className="mt-12 md:mt-20 pt-6 md:pt-8 border-t border-gradient-to-r from-transparent via-border/50 to-transparent">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
+              <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-center md:text-left">
+                <p className="text-muted-foreground text-sm md:text-lg">© {new Date().getFullYear()} VoyageSmart. All rights reserved.</p>
                 <div className="hidden md:flex items-center gap-2">
                   <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
                   <span className="text-sm text-primary font-medium">Made with ❤️ for travelers</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <Badge variant="secondary" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
-                  <SparklesIcon className="h-4 w-4 mr-2" />
+              <div className="flex items-center gap-3 md:gap-4">
+                <Badge variant="secondary" className="px-3 py-1.5 md:px-4 md:py-2 bg-primary/10 text-primary border-primary/20 text-xs md:text-sm">
+                  <SparklesIcon className="h-3 w-3 md:h-4 md:w-4 mr-1.5 md:mr-2" />
                   AI-Powered
                 </Badge>
-                <Badge variant="secondary" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
-                  <ShieldIcon className="h-4 w-4 mr-2" />
+                <Badge variant="secondary" className="px-3 py-1.5 md:px-4 md:py-2 bg-primary/10 text-primary border-primary/20 text-xs md:text-sm">
+                  <ShieldIcon className="h-3 w-3 md:h-4 md:w-4 mr-1.5 md:mr-2" />
                   Secure
                 </Badge>
               </div>
@@ -1436,6 +1483,77 @@ export default function Home() {
         <div className="h-safe-area-inset-bottom"></div>
       </div>
 
+      {/* Media Popup Modal */}
+      {selectedMedia && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={closeMediaPopup}
+        >
+          <div
+            className="relative max-w-6xl max-h-[90vh] w-full bg-background/95 backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border/50 bg-gradient-to-r from-background/80 to-background/60">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                {selectedMedia.title}
+              </h3>
+              <button
+                onClick={closeMediaPopup}
+                className="p-2 hover:bg-muted/50 rounded-xl transition-colors duration-200 group"
+              >
+                <XIcon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
+              </button>
+            </div>
+
+            {/* Media Content */}
+            <div className="p-6">
+              {selectedMedia.type === 'image' ? (
+                <div className="relative">
+                  <Image
+                    src={selectedMedia.src}
+                    alt={selectedMedia.alt}
+                    width={1200}
+                    height={800}
+                    className="w-full h-auto max-h-[70vh] object-contain rounded-xl"
+                    priority
+                  />
+                </div>
+              ) : (
+                <div className="relative">
+                  <video
+                    src={selectedMedia.src}
+                    controls
+                    autoPlay
+                    className="w-full h-auto max-h-[70vh] object-contain rounded-xl"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {selectedMedia.type === 'image' ? 'Click outside to close' : 'Video preview'}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="px-3 py-1 bg-primary/10 text-primary border-primary/20">
+                    <PlayIcon className="h-3 w-3 mr-1" />
+                    {selectedMedia.type === 'image' ? 'Preview' : 'Video'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Decorative Elements */}
+            <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-xl opacity-50"></div>
+            <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-lg opacity-30"></div>
+          </div>
+        </div>
+      )}
 
     </main>
   );

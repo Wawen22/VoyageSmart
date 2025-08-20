@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
-import { RocketIcon, TagIcon, LockIcon, SparklesIcon } from 'lucide-react';
+import { RocketIcon, TagIcon, LockIcon, SparklesIcon, UserIcon } from 'lucide-react';
 
 export default function Profile() {
   const { user, updateProfile, signOut } = useAuth();
@@ -83,17 +84,47 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-foreground">Your Profile</h1>
-          <div className="sm:hidden">
-            <ThemeSwitcher />
+      <header className="relative overflow-hidden mb-6">
+        {/* Modern Glassmorphism Background - Default Theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/95 to-primary/10 backdrop-blur-xl"></div>
+
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Floating orbs */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl animate-pulse glass-orb-float"></div>
+          <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-primary/20 rounded-full blur-2xl animate-pulse glass-orb-float" style={{ animationDelay: '2s' }}></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-start mb-4">
+            <BackButton href="/dashboard" label="Back to Dashboard" theme="default" />
+            <div className="sm:hidden">
+              <ThemeSwitcher />
+            </div>
+          </div>
+
+          <div className="flex flex-col space-y-3">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/20 backdrop-blur-sm border border-white/20">
+                <UserIcon className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold">
+                  <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
+                    Your Profile
+                  </span>
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Manage your account settings and preferences
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-card shadow overflow-hidden sm:rounded-lg">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+        <div className="glass-card rounded-2xl overflow-hidden animate-glass-fade-in">
           <div className="px-4 py-5 sm:p-6">
             {error && (
               <div className="bg-destructive/10 border-l-4 border-destructive p-4 text-destructive mb-6">

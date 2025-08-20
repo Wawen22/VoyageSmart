@@ -7,11 +7,13 @@ import { JournalEntry, JournalMedia, fetchJournalEntries, fetchJournalMedia } fr
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
-import { CalendarIcon, ImageIcon, BookOpenIcon, FilterIcon, XIcon } from 'lucide-react';
+import { CalendarIcon, ImageIcon, BookOpenIcon, FilterIcon, XIcon, PlusIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 interface MemoriesTimelineProps {
   tripId: string;
+  onAddEntry?: () => void;
+  onUploadMedia?: () => void;
 }
 
 type TimelineItem = {
@@ -21,7 +23,7 @@ type TimelineItem = {
   data: JournalEntry | JournalMedia;
 };
 
-export default function MemoriesTimeline({ tripId }: MemoriesTimelineProps) {
+export default function MemoriesTimeline({ tripId, onAddEntry, onUploadMedia }: MemoriesTimelineProps) {
   const dispatch = useDispatch<AppDispatch>();
   const { entries, media, loading } = useSelector((state: RootState) => state.journal);
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
@@ -151,6 +153,46 @@ export default function MemoriesTimeline({ tripId }: MemoriesTimelineProps) {
               <ImageIcon className="h-4 w-4 mr-1" />
               Photos/Videos
             </Button>
+          </div>
+
+          {/* Dynamic Action Buttons */}
+          <div className="flex gap-2">
+            {filter === 'entries' && onAddEntry && (
+              <button
+                onClick={onAddEntry}
+                className="relative overflow-hidden px-3 py-1.5 rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center gap-1 group shadow-lg shadow-purple-500/25"
+              >
+                {/* Glassy Background - Purple Theme */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-purple-400/15 to-indigo-500/20 backdrop-blur-sm border border-purple-500/30 rounded-lg"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+
+                {/* Content */}
+                <div className="relative z-10 flex items-center gap-1">
+                  <PlusIcon className="h-3 w-3 text-purple-600 group-hover:text-purple-500 transition-colors" />
+                  <span className="text-purple-600 group-hover:text-purple-500 transition-colors text-xs font-medium">
+                    New Entry
+                  </span>
+                </div>
+              </button>
+            )}
+            {filter === 'media' && onUploadMedia && (
+              <button
+                onClick={onUploadMedia}
+                className="relative overflow-hidden px-3 py-1.5 rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center gap-1 group shadow-lg shadow-purple-500/25"
+              >
+                {/* Glassy Background - Purple Theme */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-purple-400/15 to-indigo-500/20 backdrop-blur-sm border border-purple-500/30 rounded-lg"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+
+                {/* Content */}
+                <div className="relative z-10 flex items-center gap-1">
+                  <PlusIcon className="h-3 w-3 text-purple-600 group-hover:text-purple-500 transition-colors" />
+                  <span className="text-purple-600 group-hover:text-purple-500 transition-colors text-xs font-medium">
+                    Upload
+                  </span>
+                </div>
+              </button>
+            )}
           </div>
 
         <div className="flex flex-wrap gap-2">

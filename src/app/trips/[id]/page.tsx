@@ -285,63 +285,99 @@ export default function TripDetails() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent"></div>
-          <svg className="absolute top-0 left-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path d="M0,0 L100,0 L100,100 L0,100 Z" fill="url(#header-pattern)" />
-            <defs>
-              <pattern id="header-pattern" patternUnits="userSpaceOnUse" width="20" height="20" patternTransform="rotate(45)">
-                <rect width="1" height="1" fill="currentColor" className="text-primary/5" />
-              </pattern>
-            </defs>
-          </svg>
-        </div>
+      <header className="relative overflow-hidden">
+        {/* Modern Glassmorphism Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/95 to-secondary/10 backdrop-blur-xl"></div>
 
-        <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center relative z-10">
-          <div className="flex items-center gap-3">
-            <BackButton href="/dashboard" label="Back to Dashboard" className="hover:scale-105 transition-transform" />
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Floating orbs */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-secondary/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-[0.02]">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+              backgroundSize: '24px 24px'
+            }}></div>
           </div>
-
-          {isOwner && (
-            <div className="flex space-x-2">
-              <Link
-                href={`/trips/${id}/edit`}
-                className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all hover:scale-105 hover:shadow-md"
-              >
-                <PencilIcon className="h-3 w-3 mr-1" />
-                Edit
-              </Link>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive disabled:opacity-50 transition-all hover:scale-105 hover:shadow-md"
-              >
-                <TrashIcon className="h-3 w-3 mr-1" />
-                {deleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          )}
         </div>
 
-        <div className="max-w-7xl mx-auto py-6 px-3 sm:py-8 sm:px-6 lg:px-8 relative z-10">
-          <div className="animate-content-fade-in">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground truncate relative inline-block">
-              {trip.name}
-              <span className="absolute -bottom-1 left-0 w-1/3 h-1 bg-primary rounded-full"></span>
-            </h1>
-            <div className="flex flex-col sm:flex-row sm:items-center mt-3 space-y-2 sm:space-y-0">
+        {/* Glass border effect */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border/50 to-transparent"></div>
+
+        {/* Navigation Bar with Glass Effect */}
+        <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <BackButton
+                href="/dashboard"
+                label="Back to Dashboard"
+                theme="default"
+              />
+            </div>
+
+            {isOwner && (
+              <div className="flex space-x-2">
+                <Link
+                  href={`/trips/${id}/edit`}
+                  className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-primary-foreground bg-primary/90 hover:bg-primary backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
+                >
+                  <PencilIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
+                  Edit
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-destructive/25"
+                >
+                  <TrashIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Header Content */}
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:py-8 md:py-12 sm:px-6 lg:px-8 relative z-10 trip-header-mobile">
+          <div className="animate-glass-fade-in">
+            {/* Trip Title with Modern Typography */}
+            <div className="relative mb-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground relative">
+                <span className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
+                  {trip.name}
+                </span>
+                {/* Animated underline */}
+                <div className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary rounded-full animate-pulse"
+                     style={{ width: `${Math.min(trip.name.length * 8, 200)}px` }}></div>
+              </h1>
+
+              {/* Decorative elements */}
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-primary/20 rounded-full animate-ping"></div>
+              <div className="absolute -bottom-1 -right-4 w-2 h-2 bg-secondary/30 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+            </div>
+
+            {/* Trip Info Cards with Glassmorphism */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 md:gap-4">
               {trip.destination && (
-                <div className="flex items-center text-sm text-muted-foreground mr-4 bg-muted/20 px-3 py-1 rounded-full">
-                  <MapPinIcon className="h-4 w-4 mr-1 text-primary" />
-                  <span className="truncate">{trip.destination}</span>
+                <div className="group glass-info-card glass-info-card-mobile flex items-center text-sm px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                  <div className="p-1 sm:p-1.5 rounded-full bg-primary/20 mr-2 sm:mr-3 group-hover:bg-primary/30 transition-colors duration-300">
+                    <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  </div>
+                  <span className="text-foreground font-medium truncate text-xs sm:text-sm">{trip.destination}</span>
                 </div>
               )}
+
               {trip.start_date && trip.end_date && (
-                <div className="flex items-center text-sm text-muted-foreground bg-muted/20 px-3 py-1 rounded-full">
-                  <CalendarIcon className="h-4 w-4 mr-1 text-primary" />
-                  <span>{formatDate(trip.start_date)} - {formatDate(trip.end_date)}</span>
+                <div className="group glass-info-card glass-info-card-mobile flex items-center text-sm px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                  <div className="p-1 sm:p-1.5 rounded-full bg-secondary/20 mr-2 sm:mr-3 group-hover:bg-secondary/30 transition-colors duration-300">
+                    <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-secondary" />
+                  </div>
+                  <span className="text-foreground font-medium text-xs sm:text-sm">
+                    {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+                  </span>
                 </div>
               )}
             </div>
@@ -350,131 +386,204 @@ export default function TripDetails() {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Weather Forecast - Moved to top */}
-        <div className="mb-6 animate-content-fade-in" style={{ animationDelay: '50ms' }}>
+        {/* Weather Forecast - Modernized */}
+        <div className="mb-6 animate-glass-fade-in" style={{ animationDelay: '50ms' }}>
           <TripWeather
             destinations={trip.preferences?.destinations}
-            className="bg-gradient-to-r from-primary/5 to-transparent rounded-lg shadow-sm"
+            className="glass-card rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300"
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Trip Details */}
-          <div className="bg-card shadow overflow-hidden sm:rounded-lg lg:col-span-2 animate-content-fade-in relative">
-            {/* Card decoration */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full"></div>
-            <div className="absolute bottom-0 left-0 w-16 h-16 bg-primary/5 rounded-tr-full"></div>
+        <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3 trip-details-grid-mobile">
+          {/* Trip Details - Modernized */}
+          <div className="glass-card rounded-2xl lg:col-span-2 animate-glass-fade-in relative overflow-hidden group hover:shadow-2xl transition-all duration-500 trip-details-card-mobile" style={{ animationDelay: '100ms' }}>
+            {/* Modern Background Elements */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+            <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-secondary/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700" style={{ transitionDelay: '200ms' }}></div>
 
-            <div className="px-4 py-5 sm:px-6 relative">
-              <h2 className="text-lg leading-6 font-medium text-foreground flex items-center">
-                <FileTextIcon className="h-5 w-5 mr-2 text-primary" />
-                Trip Details
-              </h2>
-              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                Overview of your trip information
-              </p>
+            {/* Header Section */}
+            <div className="relative z-10 p-4 md:p-6 border-b border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 rounded-xl bg-primary/20 backdrop-blur-sm group-hover:bg-primary/30 transition-all duration-300 group-hover:scale-110">
+                    <FileTextIcon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg md:text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                      Trip Details
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Overview of your trip information
+                    </p>
+                  </div>
+                </div>
+
+                {/* Status Indicator */}
+                <div className="hidden sm:flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-muted-foreground">Active</span>
+                </div>
+              </div>
             </div>
-            <div className="border-t border-border px-4 py-5 sm:p-0 relative">
-              <dl className="sm:divide-y sm:divide-border">
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors group stagger-content-item">
-                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                    <div className="p-1.5 rounded-md bg-primary/10 mr-2 group-hover:bg-primary/20 transition-colors">
+            {/* Content Section */}
+            <div className="relative z-10 p-4 md:p-6 space-y-4">
+              {/* Destinations */}
+              <div className="group/item p-4 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 hover:bg-background/50 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="p-2 rounded-lg bg-primary/20 group-hover/item:bg-primary/30 transition-all duration-300 group-hover/item:scale-110">
                       <MapPinIcon className="h-4 w-4 text-primary" />
                     </div>
-                    Destinations
-                  </dt>
-                  <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2 group-hover:text-primary/90 transition-colors">
-                    {trip.preferences?.destinations?.destinations?.length > 0 ? (
-                      <div className="flex flex-col space-y-2">
-                        {trip.preferences.destinations.destinations.map((dest, index) => (
-                          <div key={dest.id} className="flex items-center">
-                            <span className={`inline-flex items-center ${trip.preferences?.destinations?.primary === dest.id ? 'font-medium text-primary' : ''}`}>
-                              {index + 1}. {dest.name}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-foreground mb-2 group-hover/item:text-primary transition-colors">
+                      Destinations
+                    </h3>
+                    <div className="text-sm text-muted-foreground">
+                      {trip.preferences?.destinations?.destinations?.length > 0 ? (
+                        <div className="space-y-2">
+                          {trip.preferences.destinations.destinations.map((dest, index) => (
+                            <div key={dest.id} className="flex items-center justify-between p-2 rounded-lg bg-background/50 hover:bg-background/70 transition-colors">
+                              <span className={`font-medium ${trip.preferences?.destinations?.primary === dest.id ? 'text-primary' : 'text-foreground'}`}>
+                                {index + 1}. {dest.name}
+                              </span>
                               {trip.preferences?.destinations?.primary === dest.id && (
-                                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">Primary</span>
+                                <span className="px-2 py-1 text-xs rounded-full bg-primary/20 text-primary border border-primary/30">
+                                  Primary
+                                </span>
                               )}
-                            </span>
-                          </div>
-                        ))}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-foreground">{trip.destination || 'Not specified'}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Dates */}
+              <div className="group/item p-4 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 hover:bg-background/50 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]">
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="p-2 rounded-lg bg-blue-500/20 group-hover/item:bg-blue-500/30 transition-all duration-300 group-hover/item:scale-110">
+                      <CalendarIcon className="h-4 w-4 text-blue-500" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-foreground mb-1 group-hover/item:text-blue-500 transition-colors">
+                      Travel Dates
+                    </h3>
+                    <p className="text-sm text-foreground font-medium">
+                      {formatDate(trip.start_date)} to {formatDate(trip.end_date)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Budget */}
+              <div className="group/item p-4 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 hover:bg-background/50 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]">
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="p-2 rounded-lg bg-green-500/20 group-hover/item:bg-green-500/30 transition-all duration-300 group-hover/item:scale-110">
+                      <BanknoteIcon className="h-4 w-4 text-green-500" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-foreground mb-1 group-hover/item:text-green-500 transition-colors">
+                      Budget
+                    </h3>
+                    <p className="text-sm text-foreground font-medium">
+                      {formatTripBudget(trip.budget_total, trip.preferences?.currency)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Privacy & Description Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Privacy */}
+                <div className="group/item p-4 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 hover:bg-background/50 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="p-2 rounded-lg bg-purple-500/20 group-hover/item:bg-purple-500/30 transition-all duration-300 group-hover/item:scale-110">
+                        <LockIcon className="h-4 w-4 text-purple-500" />
                       </div>
-                    ) : (
-                      trip.destination || 'Not specified'
-                    )}
-                  </dd>
-                </div>
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors group stagger-content-item">
-                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                    <div className="p-1.5 rounded-md bg-primary/10 mr-2 group-hover:bg-primary/20 transition-colors">
-                      <CalendarIcon className="h-4 w-4 text-primary" />
                     </div>
-                    Dates
-                  </dt>
-                  <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2 group-hover:text-primary/90 transition-colors">
-                    {formatDate(trip.start_date)} to {formatDate(trip.end_date)}
-                  </dd>
-                </div>
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors group stagger-content-item">
-                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                    <div className="p-1.5 rounded-md bg-primary/10 mr-2 group-hover:bg-primary/20 transition-colors">
-                      <BanknoteIcon className="h-4 w-4 text-primary" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-foreground mb-2 group-hover/item:text-purple-500 transition-colors">
+                        Privacy
+                      </h3>
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                        trip.is_private
+                          ? 'bg-primary/20 text-primary border-primary/30'
+                          : 'bg-green-500/20 text-green-500 border-green-500/30'
+                      }`}>
+                        {trip.is_private ? 'Private' : 'Public'}
+                      </span>
                     </div>
-                    Budget
-                  </dt>
-                  <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2 group-hover:text-primary/90 transition-colors">
-                    {formatTripBudget(trip.budget_total, trip.preferences?.currency)}
-                  </dd>
+                  </div>
                 </div>
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors group stagger-content-item">
-                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                    <div className="p-1.5 rounded-md bg-primary/10 mr-2 group-hover:bg-primary/20 transition-colors">
-                      <LockIcon className="h-4 w-4 text-primary" />
+
+                {/* Description */}
+                <div className="group/item p-4 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 hover:bg-background/50 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="p-2 rounded-lg bg-orange-500/20 group-hover/item:bg-orange-500/30 transition-all duration-300 group-hover/item:scale-110">
+                        <FileTextIcon className="h-4 w-4 text-orange-500" />
+                      </div>
                     </div>
-                    Privacy
-                  </dt>
-                  <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2">
-                    <span className={`px-3 py-1 rounded-full text-xs transition-all ${trip.is_private ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'} group-hover:shadow-sm`}>
-                      {trip.is_private ? 'Private' : 'Public'}
-                    </span>
-                  </dd>
-                </div>
-                <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 hover:bg-muted/10 transition-colors group stagger-content-item">
-                  <dt className="text-sm font-medium text-muted-foreground flex items-center">
-                    <div className="p-1.5 rounded-md bg-primary/10 mr-2 group-hover:bg-primary/20 transition-colors">
-                      <FileTextIcon className="h-4 w-4 text-primary" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-foreground mb-1 group-hover/item:text-orange-500 transition-colors">
+                        Description
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {trip.description || 'No description provided'}
+                      </p>
                     </div>
-                    Description
-                  </dt>
-                  <dd className="mt-1 text-sm text-foreground sm:mt-0 sm:col-span-2 group-hover:text-primary/90 transition-colors">
-                    {trip.description || 'No description provided'}
-                  </dd>
+                  </div>
                 </div>
-              </dl>
+              </div>
             </div>
           </div>
 
-          {/* Participants - Moved to right column */}
-          <div className="bg-card shadow overflow-hidden sm:rounded-lg animate-content-fade-in relative" style={{ animationDelay: '100ms' }}>
-            {/* Card decoration */}
-            <div className="absolute top-0 left-0 w-20 h-20 bg-primary/5 rounded-br-full"></div>
-            <div className="absolute bottom-0 right-0 w-12 h-12 bg-primary/5 rounded-tl-full"></div>
+          {/* Participants Card - Modernized */}
+          <div className="glass-card rounded-2xl animate-glass-fade-in relative overflow-hidden group hover:shadow-2xl transition-all duration-500 participants-card-mobile" style={{ animationDelay: '200ms' }}>
+            {/* Modern Background Elements */}
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute -top-16 -right-16 w-32 h-32 bg-secondary/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
-            <div className="px-4 py-5 sm:px-6 flex justify-between items-center relative">
-              <div>
-                <h2 className="text-lg leading-6 font-medium text-foreground flex items-center">
-                  <div className="p-1.5 rounded-md bg-primary/10 mr-2">
-                    <UsersIcon className="h-4 w-4 text-primary" />
+            {/* Header Section */}
+            <div className="relative z-10 p-4 md:p-6 border-b border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 rounded-xl bg-secondary/20 backdrop-blur-sm group-hover:bg-secondary/30 transition-all duration-300 group-hover:scale-110">
+                    <UsersIcon className="h-5 w-5 text-secondary" />
                   </div>
-                  Participants
-                </h2>
-                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                  People joining this trip
-                </p>
+                  <div>
+                    <h2 className="text-lg md:text-xl font-bold text-foreground group-hover:text-secondary transition-colors duration-300">
+                      Participants
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      People joining this trip
+                    </p>
+                  </div>
+                </div>
+
+                {/* Participant Count Badge */}
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 text-xs font-medium bg-secondary/20 text-secondary rounded-full border border-secondary/30">
+                    {participants.length} {participants.length === 1 ? 'person' : 'people'}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex space-x-2">
+              {/* Action Buttons */}
+              <div className="flex space-x-2 mt-4">
                 <Link
                   href={`/trips/${id}/participants`}
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-foreground bg-secondary hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-all hover:scale-105 hover:shadow-sm"
+                  className="glass-button-primary flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 text-xs font-medium rounded-xl transition-all duration-300 hover:scale-105"
                 >
                   Manage
                 </Link>
@@ -482,190 +591,347 @@ export default function TripDetails() {
                 {isOwner && (
                   <Link
                     href={`/trips/${id}/invite`}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all hover:scale-105 hover:shadow-sm"
+                    className="glass-button inline-flex items-center justify-center px-4 py-2 text-xs font-medium rounded-xl text-primary-foreground bg-primary/90 hover:bg-primary transition-all duration-300 hover:scale-105 hover:shadow-lg"
                   >
                     Invite
                   </Link>
                 )}
               </div>
             </div>
-            <div className="border-t border-border relative">
-              <ul className="divide-y divide-border">
-                {participants.length === 0 ? (
-                  <li className="px-4 py-8 sm:px-6 text-center">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <div className="p-3 rounded-full bg-muted/20">
-                        <UsersIcon className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <p className="text-sm text-muted-foreground">No participants yet</p>
-                      {isOwner && (
-                        <Link
-                          href={`/trips/${id}/invite`}
-                          className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 transition-all hover:scale-105"
-                        >
-                          Invite People
-                        </Link>
-                      )}
+
+            {/* Participants List */}
+            <div className="relative z-10 p-4 md:p-6">
+              {participants.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="flex flex-col items-center justify-center space-y-4">
+                    <div className="p-4 rounded-2xl bg-muted/20 backdrop-blur-sm">
+                      <UsersIcon className="h-8 w-8 text-muted-foreground" />
                     </div>
-                  </li>
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-1">No participants yet</p>
+                      <p className="text-xs text-muted-foreground">Invite people to join your trip</p>
+                    </div>
+                    {isOwner && (
+                      <Link
+                        href={`/trips/${id}/invite`}
+                        className="glass-button-primary inline-flex items-center px-4 py-2 text-xs font-medium rounded-xl transition-all duration-300 hover:scale-105"
+                      >
+                        Invite People
+                      </Link>
+                    )}
+                  </div>
+                </div>
                 ) : (
-                  participants.map((participant, index) => (
-                    <li key={participant.id} className={`px-4 py-4 sm:px-6 hover:bg-muted/10 transition-all stagger-content-item group`} style={{ animationDelay: `${index * 100 + 100}ms` }}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary/20 transition-colors group-hover:scale-110 transform duration-200">
-                            <span className="text-primary font-medium">
-                              {participant.full_name.charAt(0).toUpperCase()}
+                  <div className="space-y-3">
+                    {participants.map((participant, index) => (
+                      <div
+                        key={participant.id}
+                        className="group/participant p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 hover:bg-background/50 hover:border-white/20 transition-all duration-300 hover:scale-[1.02] animate-glass-slide-up"
+                        style={{ animationDelay: `${index * 100 + 100}ms` }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="relative">
+                              <div className="h-10 w-10 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl flex items-center justify-center group-hover/participant:scale-110 transition-all duration-300 backdrop-blur-sm border border-white/20">
+                                <span className="text-primary font-bold text-sm">
+                                  {participant.full_name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              {participant.role === 'owner' && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-background"></div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-semibold text-foreground group-hover/participant:text-primary transition-colors truncate">
+                                {participant.full_name}
+                              </div>
+                              <div className="text-xs text-muted-foreground truncate">{participant.email}</div>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
+                              participant.role === 'owner'
+                                ? 'bg-primary/20 text-primary border-primary/30'
+                                : 'bg-secondary/20 text-secondary border-secondary/30'
+                            } group-hover/participant:shadow-sm`}>
+                              {participant.role}
                             </span>
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                              {participant.full_name}
-                            </div>
-                            <div className="text-sm text-muted-foreground">{participant.email}</div>
-                          </div>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full transition-all ${participant.role === 'owner' ? 'bg-primary/10 text-primary' : 'bg-secondary/50 text-secondary-foreground'} group-hover:shadow-sm`}>
-                            {participant.role}
-                          </span>
                         </div>
                       </div>
-                    </li>
-                  ))
+                    ))}
+                  </div>
                 )}
-              </ul>
             </div>
           </div>
         </div>
 
-        {/* Trip Actions - Mobile Optimized */}
-        <div className="mt-8 lg:mt-10 animate-content-fade-in" style={{ animationDelay: '200ms' }}>
-          <div className="flex items-center justify-between mb-4 lg:mb-6">
-            <div className="flex items-center">
-              <div className="p-2 rounded-full bg-primary/10 mr-3">
-                <MapPinIcon className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg lg:text-xl font-bold text-foreground">Trip Actions</h2>
-                <p className="text-xs lg:text-sm text-muted-foreground hidden lg:block">Manage your trip activities</p>
+        {/* Trip Actions - Modernized */}
+        <div className="mt-8 lg:mt-12 animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
+          {/* Section Header */}
+          <div className="relative mb-6 lg:mb-8 trip-actions-section-mobile">
+            <div className="glass-card rounded-2xl p-4 md:p-6 border-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur-sm border border-white/20">
+                      <MapPinIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
+                      Trip Actions
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Manage your trip activities and explore features
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="hidden md:flex items-center space-x-4">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-primary">{participants.length}</div>
+                    <div className="text-xs text-muted-foreground">Members</div>
+                  </div>
+                  <div className="w-px h-8 bg-border"></div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-secondary">5</div>
+                    <div className="text-xs text-muted-foreground">Features</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-5 lg:gap-6 trip-actions-mobile">
+          {/* Actions Grid */}
+          <div className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-3 xl:grid-cols-5 trip-actions-grid-mobile">
+            {/* Trip Planner */}
             <Link href={`/trips/${id}/itinerary`} className="group">
-              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
-                {/* Card background decoration */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
+              <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                {/* Modern Background Elements */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -top-12 -right-12 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+                <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-purple-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700" style={{ transitionDelay: '200ms' }}></div>
 
-                <div className="flex flex-col items-center text-center relative">
-                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <div className="relative">
-                      <CalendarIcon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
-                      <BookOpenIcon className="h-3 w-3 lg:h-4 lg:w-4 text-primary absolute -bottom-1 -right-1 bg-background rounded-full p-0.5" />
+                <div className="relative z-10 flex flex-col items-center text-center h-full">
+                  {/* Icon Container */}
+                  <div className="relative mb-4">
+                    <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                      <div className="relative">
+                        <CalendarIcon className="h-6 w-6 md:h-8 md:w-8 text-blue-500" />
+                        <div className="absolute -bottom-1 -right-1 p-1 bg-background rounded-full border border-white/20">
+                          <BookOpenIcon className="h-3 w-3 text-purple-500" />
+                        </div>
+                      </div>
+                    </div>
+                    {/* Floating indicator */}
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-blue-500 transition-colors duration-300 mb-2">
+                      Trip Planner
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed hidden md:block">
+                      Plan activities, keep a journal and photo gallery
+                    </p>
+                  </div>
+
+                  {/* Action Indicator */}
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center text-xs text-blue-500 font-medium">
+                      <span>Explore</span>
+                      <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Trip Planner</h3>
-                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
-                    Plan activities, keep a journal and photo gallery
-                  </p>
                 </div>
               </div>
             </Link>
 
-            <Link href={`/trips/${id}/accommodations`} className="group cursor-pointer">
-              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
-                {/* Card background decoration */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
+            {/* Accommodations */}
+            <Link href={`/trips/${id}/accommodations`} className="group">
+              <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                {/* Modern Background Elements */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -top-12 -right-12 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
                 {/* Free plan counter */}
                 {subscription?.tier === 'free' && (
-                  <div className="absolute top-2 lg:top-3 right-2 lg:right-3 z-10">
-                    <span className="inline-flex items-center px-1.5 lg:px-2.5 py-1 lg:py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm">
+                  <div className="absolute top-3 right-3 z-20">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 backdrop-blur-sm">
                       {accommodationCount}/5
                     </span>
                   </div>
                 )}
 
-                <div className="flex flex-col items-center text-center relative">
-                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <Building2Icon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
+                <div className="relative z-10 flex flex-col items-center text-center h-full">
+                  {/* Icon Container */}
+                  <div className="relative mb-4">
+                    <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                      <Building2Icon className="h-6 w-6 md:h-8 md:w-8 text-emerald-500" />
+                    </div>
+                    {/* Status indicator */}
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Accommodations</h3>
-                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
-                    Manage hotels and places to stay
-                  </p>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-emerald-500 transition-colors duration-300 mb-2">
+                      Accommodations
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed hidden md:block">
+                      Manage hotels and places to stay
+                    </p>
+                  </div>
+
+                  {/* Action Indicator */}
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center text-xs text-emerald-500 font-medium">
+                      <span>Manage</span>
+                      <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Link>
 
-            <Link href={`/trips/${id}/transportation`} className="group cursor-pointer">
-              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
-                {/* Card background decoration */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
+            {/* Transportation */}
+            <Link href={`/trips/${id}/transportation`} className="group">
+              <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                {/* Modern Background Elements */}
+                <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 via-transparent to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -top-12 -right-12 w-24 h-24 bg-sky-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
                 {/* Free plan counter */}
                 {subscription?.tier === 'free' && (
-                  <div className="absolute top-2 lg:top-3 right-2 lg:right-3 z-10">
-                    <span className="inline-flex items-center px-1.5 lg:px-2.5 py-1 lg:py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 shadow-sm">
+                  <div className="absolute top-3 right-3 z-20">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-500/20 text-sky-600 border border-sky-500/30 backdrop-blur-sm">
                       {transportationCount}/5
                     </span>
                   </div>
                 )}
 
-                <div className="flex flex-col items-center text-center relative">
-                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <PlaneTakeoffIcon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
+                <div className="relative z-10 flex flex-col items-center text-center h-full">
+                  {/* Icon Container */}
+                  <div className="relative mb-4">
+                    <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-sky-500/20 to-cyan-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                      <PlaneTakeoffIcon className="h-6 w-6 md:h-8 md:w-8 text-sky-500" />
+                    </div>
+                    {/* Motion indicator */}
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-sky-400 rounded-full animate-pulse"></div>
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Transportation</h3>
-                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
-                    Track flights, trains, and other transport
-                  </p>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-sky-500 transition-colors duration-300 mb-2">
+                      Transportation
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed hidden md:block">
+                      Track flights, trains, and other transport
+                    </p>
+                  </div>
+
+                  {/* Action Indicator */}
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center text-xs text-sky-500 font-medium">
+                      <span>Track</span>
+                      <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Link>
 
+            {/* Expenses */}
             <Link href={`/trips/${id}/expenses`} className="group">
-              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
-                {/* Card background decoration */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
+              <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                {/* Modern Background Elements */}
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -top-12 -right-12 w-24 h-24 bg-amber-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
-                <div className="flex flex-col items-center text-center relative">
-                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <DollarSignIcon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
+                <div className="relative z-10 flex flex-col items-center text-center h-full">
+                  {/* Icon Container */}
+                  <div className="relative mb-4">
+                    <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                      <DollarSignIcon className="h-6 w-6 md:h-8 md:w-8 text-amber-500" />
+                    </div>
+                    {/* Money indicator */}
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Expenses</h3>
-                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
-                    Track and split trip expenses
-                  </p>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-amber-500 transition-colors duration-300 mb-2">
+                      Expenses
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed hidden md:block">
+                      Track and split trip expenses
+                    </p>
+                  </div>
+
+                  {/* Action Indicator */}
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center text-xs text-amber-500 font-medium">
+                      <span>Track</span>
+                      <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Link>
 
-
-
+            {/* Group Chat */}
             <Link href={`/trips/${id}/chat`} className="group">
-              <div className="bg-card border-2 border-border rounded-xl p-3 lg:p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer hover:shadow-xl group-hover:translate-y-[-2px] lg:group-hover:translate-y-[-4px] duration-300 relative overflow-hidden h-full">
-                {/* Card background decoration */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:scale-150"></div>
+              <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                {/* Modern Background Elements */}
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -top-12 -right-12 w-24 h-24 bg-violet-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
-                <div className="absolute top-2 lg:top-3 right-2 lg:right-3 z-10">
+                {/* Unread Badge */}
+                <div className="absolute top-3 right-3 z-20">
                   <UnreadBadge tripId={id as string} />
                 </div>
-                <div className="flex flex-col items-center text-center relative">
-                  <div className="p-2 lg:p-3 rounded-full bg-primary/10 mb-2 lg:mb-4 group-hover:bg-primary/20 transition-colors transform group-hover:scale-110 duration-300">
-                    <MessageCircleIcon className="h-5 w-5 lg:h-8 lg:w-8 text-primary" />
+
+                <div className="relative z-10 flex flex-col items-center text-center h-full">
+                  {/* Icon Container */}
+                  <div className="relative mb-4">
+                    <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                      <MessageCircleIcon className="h-6 w-6 md:h-8 md:w-8 text-violet-500" />
+                    </div>
+                    {/* Chat indicator */}
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-violet-400 rounded-full animate-pulse"></div>
                   </div>
-                  <h3 className="text-sm lg:text-xl font-bold text-foreground group-hover:text-primary transition-colors">Group Chat</h3>
-                  <p className="mt-1 lg:mt-2 text-xs lg:text-sm text-muted-foreground relative text-center hidden lg:block">
-                    Chat with trip participants
-                  </p>
+
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-violet-500 transition-colors duration-300 mb-2">
+                      Group Chat
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed hidden md:block">
+                      Chat with trip participants
+                    </p>
+                  </div>
+
+                  {/* Action Indicator */}
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center text-xs text-violet-500 font-medium">
+                      <span>Chat</span>
+                      <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Link>

@@ -103,29 +103,47 @@ export default function TripChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
-          <BackButton href={`/trips/${id}`} label="Back to Trip" />
+    <div className="min-h-screen bg-background">
+      <header className="relative overflow-hidden mb-6">
+        {/* Modern Glassmorphism Background - Violet/Pink Theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-background/95 to-pink-500/10 backdrop-blur-xl"></div>
+
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Floating orbs */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/20 rounded-full blur-3xl animate-pulse glass-orb-float"></div>
+          <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-pink-500/20 rounded-full blur-2xl animate-pulse glass-orb-float" style={{ animationDelay: '2s' }}></div>
         </div>
 
-        <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col space-y-2">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
-              <MessageCircleIcon className="h-6 w-6 mr-2" />
-              Chat
-            </h1>
-            {trip && (
-              <p className="text-sm text-muted-foreground">
-                {trip.name} {trip.destination && `• ${trip.destination}`}
-              </p>
-            )}
+        <div className="relative z-10 max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-start mb-4">
+            <BackButton href={`/trips/${id}`} label="Back to Trip" theme="violet" />
+          </div>
+
+          <div className="flex flex-col space-y-3">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20">
+                <MessageCircleIcon className="h-6 w-6 text-violet-500" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold">
+                  <span className="bg-gradient-to-r from-foreground via-violet-500 to-foreground bg-clip-text text-transparent">
+                    Group Chat
+                  </span>
+                </h1>
+                {trip && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {trip.name} {trip.destination && `• ${trip.destination}`}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col max-w-7xl mx-auto w-full">
-        <div className="flex-1 flex flex-col">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+        <div className="glass-card rounded-2xl overflow-hidden animate-glass-fade-in h-[calc(100vh-200px)]">
           <TripChat tripId={id as string} tripName={trip.name} />
         </div>
       </main>

@@ -111,110 +111,120 @@ export default function ActivityItem({
   };
 
   return (
-    <div
-      className={`border border-l-4 rounded-md p-3 hover:shadow-md transition-all hover-lift animate-fade-in ${isSelected ? 'bg-primary/5 ring-1 ring-primary/20' : ''}`}
-      style={{ borderLeftColor: getPriorityBorderColor(activity.priority) }}
-    >
-      <div className="flex justify-between items-start gap-2">
-        {isSelectable && (
-          <div className="pt-1">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={(checked) => onSelectChange?.(activity.id, checked === true)}
-              aria-label={`Seleziona ${activity.name}`}
-            />
+    <div className={`glass-card rounded-2xl p-4 group hover:shadow-2xl transition-all duration-500 md:hover:scale-[1.02] hover:-translate-y-1 activity-item-mobile w-full max-w-full ${isSelected ? 'bg-blue-500/10 ring-2 ring-blue-500/30' : ''}`}>
+      {/* Modern Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+      <div className="absolute -top-12 -right-12 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+
+      {/* Priority Border */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl"
+        style={{ backgroundColor: getPriorityBorderColor(activity.priority) }}
+      ></div>
+
+      <div className="relative z-10">
+        <div className="flex justify-between items-start gap-3">
+          {isSelectable && (
+            <div className="pt-1 flex-shrink-0">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={(checked) => onSelectChange?.(activity.id, checked === true)}
+                aria-label={`Select ${activity.name}`}
+                className="border-white/30"
+              />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm sm:text-base font-bold text-foreground group-hover:text-blue-500 transition-colors duration-300 truncate">{activity.name}</h3>
+
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              {activity.start_time && (
+                <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-600 border border-blue-500/30">
+                  <ClockIcon className="h-3 w-3 mr-1" />
+                  {formatTime(activity.start_time)}
+                  {activity.end_time && ` - ${formatTime(activity.end_time)}`}
+                </div>
+              )}
+
+              {activity.location && (
+                <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-600 border border-purple-500/30">
+                  <MapPinIcon className="h-3 w-3 mr-1" />
+                  <span className="truncate max-w-[120px]">{activity.location}</span>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm sm:text-base font-medium text-foreground truncate">{activity.name}</h3>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-            {activity.start_time && (
-              <span className="inline-flex items-center text-xs text-muted-foreground">
-                <ClockIcon className="h-3 w-3 mr-1 text-muted-foreground" />
-                {formatTime(activity.start_time)}
-                {activity.end_time && ` - ${formatTime(activity.end_time)}`}
-              </span>
-            )}
-
-            {activity.location && (
-              <span className="inline-flex items-center text-xs text-muted-foreground">
-                <MapPinIcon className="h-3 w-3 mr-1 text-muted-foreground" />
-                <span className="truncate max-w-[150px]">{activity.location}</span>
-              </span>
-            )}
+          <div className="flex-shrink-0">
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getPriorityColor(activity.priority)}`}>
+              {getPriorityLabel(activity.priority)}
+            </span>
           </div>
-        </div>
-
-        <Badge className={`text-xs ${getPriorityColor(activity.priority)}`}>
-          {getPriorityLabel(activity.priority)}
-        </Badge>
       </div>
 
-      {activity.notes && (
-        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{activity.notes}</p>
-      )}
+        {activity.notes && (
+          <div className="mt-3 p-3 rounded-xl bg-background/30 border border-white/10">
+            <p className="text-xs text-muted-foreground line-clamp-2">{activity.notes}</p>
+          </div>
+        )}
 
-      <div className="mt-3 pt-2 border-t border-border flex justify-between items-center">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {activity.cost && (
-            <span className="inline-flex items-center">
-              <DollarSignIcon className="h-3 w-3 mr-1" />
-              {formatCurrency(activity.cost, activity.currency)}
-            </span>
-          )}
-          {activity.booking_reference && (
-            <span className="inline-flex items-center">
-              <FileIcon className="h-3 w-3 mr-1" />
-              <span className="truncate max-w-[80px]">{activity.booking_reference}</span>
-            </span>
-          )}
-        </div>
+        <div className="mt-4 pt-3 border-t border-white/10 flex justify-between items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            {activity.cost && (
+              <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-600 border border-green-500/30">
+                <DollarSignIcon className="h-3 w-3 mr-1" />
+                {formatCurrency(activity.cost, activity.currency)}
+              </div>
+            )}
+            {activity.booking_reference && (
+              <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-500/20 text-orange-600 border border-orange-500/30">
+                <FileIcon className="h-3 w-3 mr-1" />
+                <span className="truncate max-w-[80px]">{activity.booking_reference}</span>
+              </div>
+            )}
+          </div>
 
-        <div className="flex items-center gap-1">
-          {onViewDetails && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 hover:bg-accent hover:text-accent-foreground transition-colors"
-              onClick={() => onViewDetails(activity)}
-              aria-label="View details"
+          <div className="flex items-center gap-1">
+            {onViewDetails && (
+              <button
+                onClick={() => onViewDetails(activity)}
+                className="p-2 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 transition-all duration-300 hover:scale-110"
+                aria-label="View details"
+              >
+                <EyeIcon className="h-4 w-4" />
+              </button>
+            )}
+
+            <button
+              onClick={() => onEdit(activity)}
+              className="p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-600 transition-all duration-300 hover:scale-110"
+              aria-label="Edit activity"
             >
-              <EyeIcon className="h-3.5 w-3.5" />
-            </Button>
-          )}
+              <EditIcon className="h-4 w-4" />
+            </button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-primary hover:bg-primary/10 transition-colors"
-            onClick={() => onEdit(activity)}
-            aria-label="Edit activity"
-          >
-            <EditIcon className="h-3.5 w-3.5" />
-          </Button>
+            {onMove && (
+              <button
+                onClick={() => onMove(activity)}
+                className="p-2 rounded-xl bg-green-500/20 hover:bg-green-500/30 text-green-600 transition-all duration-300 hover:scale-110"
+                aria-label="Move activity"
+              >
+                <MoveIcon className="h-4 w-4" />
+              </button>
+            )}
 
-          {onMove && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-primary hover:bg-primary/10 transition-colors"
-              onClick={() => onMove(activity)}
-              aria-label="Move activity"
+            <button
+              onClick={handleDeleteClick}
+              className={`p-2 rounded-xl transition-all duration-300 hover:scale-110 ${
+                confirmDelete
+                  ? 'bg-red-500/30 text-red-600 animate-pulse'
+                  : 'bg-red-500/20 hover:bg-red-500/30 text-red-600'
+              }`}
+              aria-label={confirmDelete ? 'Confirm delete' : 'Delete activity'}
             >
-              <MoveIcon className="h-3.5 w-3.5" />
-            </Button>
-          )}
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`h-7 w-7 p-0 transition-colors ${confirmDelete ? 'text-destructive bg-destructive/10 animate-pulse-once' : 'text-destructive/80 hover:bg-destructive/10 hover:text-destructive'}`}
-            onClick={handleDeleteClick}
-            aria-label={confirmDelete ? 'Confirm delete' : 'Delete activity'}
-          >
-            <TrashIcon className="h-3.5 w-3.5" />
-          </Button>
+              <TrashIcon className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

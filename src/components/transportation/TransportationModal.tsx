@@ -282,19 +282,50 @@ export default function TransportationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {transportation ? 'Edit Transportation' : 'Add Transportation'}
-          </DialogTitle>
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto glass-card border-sky-500/20">
+        {/* Modern Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-cyan-500/5 opacity-50 rounded-2xl"></div>
+        <div className="absolute -top-12 -right-12 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl opacity-50"></div>
+
+        <DialogHeader className="relative z-10">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-sky-500/20 to-cyan-500/20 backdrop-blur-sm border border-white/20">
+              <PlaneTakeoffIcon className="h-5 w-5 text-sky-500" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-bold">
+                <span className="bg-gradient-to-r from-foreground via-sky-500 to-foreground bg-clip-text text-transparent">
+                  {transportation ? 'Edit Transportation' : 'Add Transportation'}
+                </span>
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                {transportation ? 'Update transportation details' : 'Add a new way to travel for your trip'}
+              </p>
+            </div>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="relative z-10">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsList className="glass-nav rounded-xl p-1 border border-white/20 grid w-full grid-cols-3">
+              <TabsTrigger
+                value="basic"
+                className="rounded-lg data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-600 transition-all duration-300"
+              >
+                Basic Info
+              </TabsTrigger>
+              <TabsTrigger
+                value="details"
+                className="rounded-lg data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-600 transition-all duration-300"
+              >
+                Details
+              </TabsTrigger>
+              <TabsTrigger
+                value="documents"
+                className="rounded-lg data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-600 transition-all duration-300"
+              >
+                Documents
+              </TabsTrigger>
             </TabsList>
 
             {/* Basic Info Tab */}
@@ -614,21 +645,24 @@ export default function TransportationModal({
             </TabsContent>
           </Tabs>
 
-          <DialogFooter className="mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading || uploadingFiles}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading || uploadingFiles}
-            >
-              {loading || uploadingFiles ? 'Saving...' : transportation ? 'Update' : 'Add'}
-            </Button>
+          <DialogFooter className="relative z-10 pt-6 border-t border-white/10 mt-6">
+            <div className="flex space-x-3 w-full sm:justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading || uploadingFiles}
+                className="glass-button flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading || uploadingFiles}
+                className="glass-button-primary flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
+              >
+                {loading || uploadingFiles ? 'Saving...' : transportation ? 'Update' : 'Add'}
+              </button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

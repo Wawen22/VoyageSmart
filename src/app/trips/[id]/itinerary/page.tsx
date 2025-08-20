@@ -729,70 +729,179 @@ export default function TripItinerary() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
-          <BackButton href={`/trips/${id}`} label="Back to Trip" />
+      <header className="relative overflow-hidden mb-6">
+        {/* Modern Glassmorphism Background - Blue/Purple Theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-background/95 to-purple-500/10 backdrop-blur-xl"></div>
+
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Floating orbs */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl animate-pulse glass-orb-float"></div>
+          <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl animate-pulse glass-orb-float" style={{ animationDelay: '2s' }}></div>
+
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-[0.02] glass-grid-pattern"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto py-2 pb-3 px-3 sm:py-3 sm:pb-4 sm:px-6 lg:px-8">
-          {/* Header mobile-first */}
-          <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
-            {/* Title */}
-            <div className="overflow-hidden">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground truncate flex items-center">
-                <div className="relative">
-                  <CalendarIcon className="h-6 w-6 mr-2" />
-                  <BookOpenIcon className="h-3 w-3 absolute -bottom-1 -right-1 bg-card rounded-full p-0.5" />
-                </div>
-                Trip Planner
-              </h1>
-              <p className="text-sm text-muted-foreground truncate">
-                {trip.name} {trip.destination && `• ${trip.destination}`}
-              </p>
-            </div>
+        {/* Glass border effect */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
 
-            {/* No controls here anymore */}
-            <div></div>
+        {/* Navigation Bar with Glass Effect */}
+        <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+            <BackButton
+              href={`/trips/${id}`}
+              label="Back to Trip"
+              theme="blue"
+            />
+          </div>
+        </div>
+
+        {/* Main Header Content */}
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:py-8 md:py-12 sm:px-6 lg:px-8 relative z-10 trip-header-mobile itinerary-header-mobile">
+          <div className="animate-glass-fade-in">
+            {/* Section Title with Modern Typography */}
+            <div className="relative mb-6">
+              {/* Mobile Layout - Stacked */}
+              <div className="flex flex-col space-y-4 md:hidden">
+                <div className="flex items-center space-x-3">
+                  <div className="relative flex-shrink-0">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20">
+                      <CalendarIcon className="h-5 w-5 text-blue-500" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl font-bold">
+                      <span className="bg-gradient-to-r from-foreground via-blue-500 to-foreground bg-clip-text text-transparent">
+                        Trip Planner
+                      </span>
+                    </h1>
+                    {trip && (
+                      <p className="text-sm text-muted-foreground mt-1 truncate">
+                        {trip.name} {trip.destination && `• ${trip.destination}`}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stats Widget - Mobile */}
+                <div className="flex justify-center">
+                  <div className="glass-info-card flex items-center px-4 py-2 rounded-xl">
+                    <div className="p-1 rounded-full bg-blue-500/20 mr-2">
+                      <BookOpenIcon className="h-3 w-3 text-blue-500" />
+                    </div>
+                    <div className="text-center">
+                      <span className="text-sm font-bold text-blue-500">{itineraryDays.length}</span>
+                      <span className="text-xs text-muted-foreground ml-1">
+                        {itineraryDays.length === 1 ? 'Day' : 'Days'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Layout - Side by Side */}
+              <div className="hidden md:flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20">
+                      <CalendarIcon className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                      <span className="bg-gradient-to-r from-foreground via-blue-500 to-foreground bg-clip-text text-transparent">
+                        Trip Planner
+                      </span>
+                    </h1>
+                    {trip && (
+                      <p className="text-base text-muted-foreground mt-1">
+                        {trip.name} {trip.destination && `• ${trip.destination}`}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stats Widget - Desktop */}
+                <div className="flex-shrink-0">
+                  <div className="glass-info-card flex items-center px-4 py-2.5 rounded-2xl">
+                    <div className="p-1.5 rounded-full bg-blue-500/20 mr-3">
+                      <BookOpenIcon className="h-4 w-4 text-blue-500" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-blue-500">{itineraryDays.length}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {itineraryDays.length === 1 ? 'Day' : 'Days'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500/20 rounded-full animate-ping"></div>
+              <div className="absolute -bottom-1 -right-4 w-2 h-2 bg-purple-500/30 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 itinerary-section-mobile">
+        {/* Error Message - Modernized */}
         {error && (
-          <div className="bg-destructive/10 border-l-4 border-destructive p-3 text-destructive mb-4 sm:mb-6 text-sm sm:text-base rounded-r-md">
-            <p>{error}</p>
+          <div className="glass-card rounded-2xl p-4 mb-6 bg-gradient-to-r from-destructive/10 to-red-500/5 border-destructive/30 animate-glass-fade-in">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-destructive/20 backdrop-blur-sm">
+                <svg className="h-5 w-5 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium text-destructive">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="w-full mb-8">
-          <div className="flex flex-row sm:flex-row justify-center sm:justify-start gap-3 sm:gap-6">
+        {/* Main Tabs - Modernized */}
+        <div className="glass-card rounded-2xl p-4 md:p-6 animate-glass-fade-in itinerary-main-tabs-mobile mb-8" style={{ animationDelay: '100ms' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-1">Trip Management</h3>
+              <p className="text-sm text-muted-foreground">Plan your itinerary and capture memories</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-2 sm:gap-6 w-full">
             <button
               onClick={() => setActiveTab('itinerary')}
-              className={`group relative flex-1 sm:flex-none px-3 py-3 sm:px-8 sm:py-5 rounded-xl flex items-center gap-2 sm:gap-4 transition-all duration-300 border-2 ${
+              className={`group relative w-full sm:w-auto sm:flex-1 px-3 py-3 sm:px-8 sm:py-6 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-4 transition-all duration-300 itinerary-tab-mobile ${
                 activeTab === 'itinerary'
-                  ? 'bg-primary/10 text-primary border-primary shadow-md transform scale-105'
-                  : 'bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground border-transparent hover:border-muted'
+                  ? 'glass-button-primary bg-gradient-to-br from-blue-500/20 to-purple-500/10 border-blue-500/30 shadow-lg shadow-blue-500/25 sm:scale-105'
+                  : 'glass-button-inactive bg-gradient-to-br from-background/50 via-background/30 to-background/50 backdrop-blur-sm border border-white/10 hover:bg-gradient-to-br hover:from-blue-500/10 hover:via-blue-500/5 hover:to-purple-500/10 hover:border-blue-500/20 hover:shadow-md hover:shadow-blue-500/10'
               }`}
             >
-              <div className={`p-2 sm:p-3 rounded-full ${
+              <div className={`p-1.5 sm:p-3 rounded-lg sm:rounded-xl backdrop-blur-sm border border-white/20 flex-shrink-0 ${
                 activeTab === 'itinerary'
-                  ? 'bg-primary/20'
-                  : 'bg-muted group-hover:bg-muted/80'
-              } transition-colors duration-300`}>
-                <CalendarIcon className={`h-5 w-5 sm:h-6 sm:w-6 ${
-                  activeTab === 'itinerary' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
-                }`} />
+                  ? 'bg-blue-500/20 text-blue-600 shadow-sm'
+                  : 'bg-background/20 text-muted-foreground group-hover:bg-blue-500/15 group-hover:text-blue-500 group-hover:shadow-sm'
+              } transition-all duration-300`}>
+                <CalendarIcon className="h-4 w-4 sm:h-6 sm:w-6" />
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-sm sm:text-base lg:text-lg">Itinerary</span>
+              <div className="flex flex-col text-left flex-1 min-w-0">
+                <span className={`font-bold text-sm sm:text-base lg:text-lg truncate ${
+                  activeTab === 'itinerary' ? 'text-blue-600' : 'text-foreground group-hover:text-blue-600'
+                } transition-colors duration-300`}>Itinerary</span>
                 <span className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Plan your daily activities</span>
               </div>
               {activeTab === 'itinerary' && (
-                <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-primary rounded-l-full"></div>
+                <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-1 h-8 sm:h-12 bg-gradient-to-b from-blue-500 to-purple-500 rounded-l-full"></div>
               )}
             </button>
 
-            <div className="relative flex-1 sm:flex-none">
+            <div className="relative w-full sm:w-auto sm:flex-1">
               <button
                 onClick={() => {
                   if (hasJournalAccess) {
@@ -801,42 +910,46 @@ export default function TripItinerary() {
                     setShowJournalInfoModal(true);
                   }
                 }}
-                className={`group relative w-full px-3 py-3 sm:px-8 sm:py-5 rounded-xl flex items-center gap-2 sm:gap-4 transition-all duration-300 border-2 ${
+                className={`group relative w-full px-3 py-3 sm:px-8 sm:py-6 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-4 transition-all duration-300 itinerary-tab-mobile ${
                   !hasJournalAccess
-                    ? 'bg-muted/50 text-muted-foreground border-muted hover:border-amber-300 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 cursor-pointer'
+                    ? 'glass-button-inactive bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-orange-500/10 backdrop-blur-sm border border-amber-500/20 hover:bg-gradient-to-br hover:from-amber-500/15 hover:via-amber-400/10 hover:to-orange-500/15 hover:border-amber-500/30 hover:shadow-md hover:shadow-amber-500/10 cursor-pointer'
                     : activeTab === 'journal'
-                    ? 'bg-primary/10 text-primary border-primary shadow-md transform scale-105'
-                    : 'bg-card hover:bg-muted/50 text-muted-foreground hover:text-foreground border-transparent hover:border-muted'
+                    ? 'glass-button-primary bg-gradient-to-br from-purple-500/20 to-blue-500/10 border-purple-500/30 shadow-lg shadow-purple-500/25 sm:scale-105'
+                    : 'glass-button-inactive bg-gradient-to-br from-background/50 via-background/30 to-background/50 backdrop-blur-sm border border-white/10 hover:bg-gradient-to-br hover:from-purple-500/10 hover:via-purple-500/5 hover:to-blue-500/10 hover:border-purple-500/20 hover:shadow-md hover:shadow-purple-500/10'
                 }`}
               >
-                <div className={`p-2 sm:p-3 rounded-full ${
+                <div className={`p-1.5 sm:p-3 rounded-lg sm:rounded-xl backdrop-blur-sm border border-white/20 flex-shrink-0 ${
                   !hasJournalAccess
-                    ? 'bg-muted group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30'
+                    ? 'bg-amber-500/20 text-amber-600 group-hover:bg-amber-500/30 group-hover:shadow-sm'
                     : activeTab === 'journal'
-                    ? 'bg-primary/20'
-                    : 'bg-muted group-hover:bg-muted/80'
-                } transition-colors duration-300`}>
+                    ? 'bg-purple-500/20 text-purple-600 shadow-sm'
+                    : 'bg-background/20 text-muted-foreground group-hover:bg-purple-500/15 group-hover:text-purple-500 group-hover:shadow-sm'
+                } transition-all duration-300`}>
                   {!hasJournalAccess ? (
-                    <LockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" />
+                    <LockIcon className="h-4 w-4 sm:h-6 sm:w-6" />
                   ) : (
-                    <BookOpenIcon className={`h-5 w-5 sm:h-6 sm:w-6 ${
-                      activeTab === 'journal' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
-                    }`} />
+                    <BookOpenIcon className="h-4 w-4 sm:h-6 sm:w-6" />
                   )}
                 </div>
-                <div className="flex flex-col flex-1">
+                <div className="flex flex-col flex-1 text-left min-w-0">
                   <div className="flex items-center gap-1 sm:gap-2">
-                    <span className="font-bold text-sm sm:text-base lg:text-lg">Journal</span>
+                    <span className={`font-bold text-sm sm:text-base lg:text-lg truncate ${
+                      !hasJournalAccess
+                        ? 'text-amber-600'
+                        : activeTab === 'journal'
+                        ? 'text-purple-600'
+                        : 'text-foreground group-hover:text-purple-600'
+                    } transition-colors duration-300`}>Journal</span>
                     {!hasJournalAccess && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-500 group-hover:bg-amber-200 dark:group-hover:bg-amber-800/40 transition-colors">
+                      <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-600 border border-amber-500/30 backdrop-blur-sm flex-shrink-0">
                         Premium
                       </span>
                     )}
                   </div>
-                  <span className="text-xs sm:text-sm text-muted-foreground text-left hidden sm:block">Keep a diary and photos</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Keep a diary and photos</span>
                 </div>
                 {activeTab === 'journal' && hasJournalAccess && (
-                  <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-primary rounded-l-full"></div>
+                  <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-1 h-12 bg-gradient-to-b from-purple-500 to-blue-500 rounded-l-full"></div>
                 )}
               </button>
 
@@ -847,10 +960,10 @@ export default function TripItinerary() {
                     e.stopPropagation();
                     setShowJournalInfoModal(true);
                   }}
-                  className="absolute top-2 right-2 sm:top-3 sm:right-3 p-1.5 sm:p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 hover:bg-amber-200 dark:hover:bg-amber-800/40 transition-all duration-200 hover:scale-110 z-10 group/info"
+                  className="absolute top-3 right-3 p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-sm border border-amber-500/30 transition-all duration-300 hover:scale-110 z-10 group/info"
                   title="Learn about Journal features"
                 >
-                  <InfoIcon className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600 dark:text-amber-400 group-hover/info:text-amber-700 dark:group-hover/info:text-amber-300 transition-colors" />
+                  <InfoIcon className="h-4 w-4 text-amber-600 group-hover/info:text-amber-700 transition-colors" />
                 </button>
               )}
             </div>
@@ -859,121 +972,149 @@ export default function TripItinerary() {
 
         {activeTab === 'itinerary' && (
           <div className="mt-0">
-            {/* Itinerary Controls - Mobile Optimized */}
-            <div className="flex flex-col gap-4 mb-6 bg-card p-3 sm:p-4 rounded-lg shadow-sm border border-border">
-              {/* Header Section */}
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <CalendarIcon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-sm sm:text-base">Itinerary View</h3>
-                  <p className="text-xs text-muted-foreground">Choose how to display your schedule</p>
-                </div>
-              </div>
-
-              {/* Controls Section - Mobile First */}
-              <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4">
-                {/* View toggle - Mobile optimized */}
-                <div className="flex items-center bg-muted/50 rounded-md p-1 w-full sm:w-auto">
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-1 ${
-                      viewMode === 'list'
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-foreground hover:bg-muted'
-                    }`}
-                    aria-label="List view"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                    </svg>
-                    <span className="hidden sm:inline">List</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode('calendar')}
-                    className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-1 ${
-                      viewMode === 'calendar'
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-foreground hover:bg-muted'
-                    }`}
-                    aria-label="Calendar view"
-                  >
-                    <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Calendar</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode('map')}
-                    className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-1 ${
-                      viewMode === 'map'
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-foreground hover:bg-muted'
-                    }`}
-                    aria-label="Map view"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                      <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                    <span className="hidden sm:inline">Map</span>
-                  </button>
+            {/* Itinerary Controls - Ultra Compact */}
+            <div className="glass-card rounded-xl p-3 animate-glass-fade-in itinerary-controls-mobile mb-3" style={{ animationDelay: '200ms' }}>
+              {/* Single Row Layout */}
+              <div className="flex items-center justify-between gap-3">
+                {/* View toggle - Ultra Compact Horizontal */}
+                <div className="flex items-center gap-2">
+                  <div className="p-1 rounded-lg bg-blue-500/20 backdrop-blur-sm flex-shrink-0">
+                    <CalendarIcon className="h-3.5 w-3.5 text-blue-500" />
+                  </div>
+                  <div className="glass-nav rounded-lg p-0.5 border border-white/20 bg-background/50 backdrop-blur-sm flex">
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-all duration-300 ${
+                        viewMode === 'list'
+                          ? 'bg-blue-500/20 text-blue-600 shadow-sm'
+                          : 'text-muted-foreground hover:text-blue-600 hover:bg-blue-500/10'
+                      }`}
+                      aria-label="List view"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                      </svg>
+                      List
+                    </button>
+                    <button
+                      onClick={() => setViewMode('calendar')}
+                      className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-all duration-300 ${
+                        viewMode === 'calendar'
+                          ? 'bg-blue-500/20 text-blue-600 shadow-sm'
+                          : 'text-muted-foreground hover:text-blue-600 hover:bg-blue-500/10'
+                      }`}
+                      aria-label="Calendar view"
+                    >
+                      <CalendarIcon className="h-3 w-3 mr-1" />
+                      Calendar
+                    </button>
+                    <button
+                      onClick={() => setViewMode('map')}
+                      className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-all duration-300 ${
+                        viewMode === 'map'
+                          ? 'bg-blue-500/20 text-blue-600 shadow-sm'
+                          : 'text-muted-foreground hover:text-blue-600 hover:bg-blue-500/10'
+                      }`}
+                      aria-label="Map view"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                      </svg>
+                      Map
+                    </button>
+                  </div>
                 </div>
 
-                {/* Action buttons - Mobile optimized, Desktop right-aligned */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto sm:ml-auto">
-                  {/* AI Wizard button - visible only for AI subscribers */}
+                {/* Action buttons - Mobile Ultra Compact */}
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-1.5 w-full sm:w-auto sm:flex-shrink-0 action-buttons-mobile">
+                  {/* AI Wizard button - Glassy Purple */}
                   {hasAIAccess ? (
                     <button
                       onClick={() => setShowWizard(true)}
-                      className="bg-gradient-to-r from-purple-500 to-indigo-600 py-2 sm:py-1.5 px-3 sm:px-4 rounded-md shadow-sm text-xs sm:text-sm font-medium text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center gap-1 min-h-[44px] sm:min-h-0"
+                      className="relative overflow-hidden px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center gap-1 sm:gap-1.5 group min-w-0 w-full sm:w-auto"
                       aria-label="Generate activities with AI"
                     >
-                      <Sparkles className="h-4 w-4" />
-                      <span>AI Wizard</span>
+                      {/* Glassy Background - Purple Theme */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-purple-400/15 to-indigo-500/20 backdrop-blur-sm border border-purple-500/30 rounded-md sm:rounded-lg"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md sm:rounded-lg"></div>
+
+                      {/* Content */}
+                      <div className="relative z-10 flex items-center gap-1 sm:gap-1.5">
+                        <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600 group-hover:text-purple-500 transition-colors flex-shrink-0" />
+                        <span className="text-purple-600 group-hover:text-purple-500 transition-colors text-xs font-medium">AI Wizard</span>
+                      </div>
                     </button>
                   ) : (
                     <button
                       onClick={() => router.push('/pricing')}
-                      className="bg-gradient-to-r from-gray-500 to-gray-600 py-2 sm:py-1.5 px-3 sm:px-4 rounded-md shadow-sm text-xs sm:text-sm font-medium text-white hover:from-gray-600 hover:to-gray-700 transition-all duration-200 flex items-center justify-center gap-1 min-h-[44px] sm:min-h-0"
+                      className="relative overflow-hidden px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center gap-1 sm:gap-1.5 group min-w-0 w-full sm:w-auto"
                       aria-label="Upgrade to AI plan"
                     >
-                      <Sparkles className="h-4 w-4" />
-                      <span>AI Plan</span>
+                      {/* Glassy Background - Gray Theme */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-500/20 via-gray-400/15 to-gray-600/20 backdrop-blur-sm border border-gray-500/30 rounded-md sm:rounded-lg"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md sm:rounded-lg"></div>
+
+                      {/* Content */}
+                      <div className="relative z-10 flex items-center gap-1 sm:gap-1.5">
+                        <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-600 group-hover:text-gray-500 transition-colors flex-shrink-0" />
+                        <span className="text-gray-600 group-hover:text-gray-500 transition-colors text-xs font-medium">AI Plan</span>
+                      </div>
                     </button>
                   )}
 
-                  {/* Add day button */}
+                  {/* Add day button - Glassy Blue */}
                   <button
                     onClick={() => {
                       setCurrentDay(null);
                       setShowDayModal(true);
                     }}
-                    className="bg-primary py-2 sm:py-1.5 px-3 sm:px-4 rounded-md shadow-sm text-xs sm:text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all duration-200 flex items-center justify-center gap-1 min-h-[44px] sm:min-h-0"
+                    className="relative overflow-hidden px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center gap-1 sm:gap-1.5 group min-w-0 w-full sm:w-auto"
                     aria-label="Add a new day"
                   >
-                    <PlusIcon className="h-4 w-4" />
-                    <span>Add Day</span>
+                    {/* Glassy Background - Blue Theme */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-blue-400/15 to-cyan-500/20 backdrop-blur-sm border border-blue-500/30 rounded-md sm:rounded-lg"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md sm:rounded-lg"></div>
+
+                    {/* Content */}
+                    <div className="relative z-10 flex items-center gap-1 sm:gap-1.5">
+                      <PlusIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600 group-hover:text-blue-500 transition-colors flex-shrink-0" />
+                      <span className="text-blue-600 group-hover:text-blue-500 transition-colors text-xs font-medium">Add Day</span>
+                    </div>
                   </button>
                 </div>
               </div>
             </div>
 
           {itineraryDays.length === 0 ? (
-          <div className="bg-card shadow rounded-lg p-4 sm:p-6 text-center">
-            <h2 className="text-xl font-semibold mb-4">Nessun giorno nell'itinerario</h2>
-            <p className="text-muted-foreground mb-6">
-              Inizia a pianificare il tuo viaggio aggiungendo giorni al tuo itinerario.
-            </p>
-            <button
-              onClick={() => {
-                setCurrentDay(null);
-                setShowDayModal(true);
-              }}
-              className="bg-primary py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-            >
-              Aggiungi il tuo primo giorno
-            </button>
-          </div>
+            <div className="glass-card rounded-2xl p-12 text-center animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
+              <div className="flex flex-col items-center space-y-6">
+                <div className="relative">
+                  <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20">
+                    <CalendarIcon className="h-12 w-12 text-blue-500" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-400/20 rounded-full animate-ping"></div>
+                </div>
+
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-foreground">No itinerary days yet</h2>
+                  <p className="text-muted-foreground max-w-md">
+                    Start planning your trip by adding your first day and activities.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setCurrentDay(null);
+                    setShowDayModal(true);
+                  }}
+                  className="glass-button-primary inline-flex items-center px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
+                >
+                  <PlusIcon className="h-4 w-4 mr-2" />
+                  Add Your First Day
+                </button>
+              </div>
+            </div>
         ) : viewMode === 'list' ? (
           <div className="space-y-6">
             {itineraryDays.map((day) => (
@@ -1091,95 +1232,171 @@ export default function TripItinerary() {
 
         {activeTab === 'journal' && hasJournalAccess && (
           <div className="mt-0 w-full">
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-              <div className="flex bg-muted/30 p-1 rounded-lg shadow-sm">
-                <button
-                  onClick={() => setJournalTab('entries')}
-                  className={`px-3 py-2 text-sm font-medium flex items-center gap-1 rounded-md transition-all duration-200 ${
-                    journalTab === 'entries'
-                      ? 'bg-card shadow-sm text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <BookOpenIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Entries</span>
-                </button>
-                <button
-                  onClick={() => setJournalTab('gallery')}
-                  className={`px-3 py-2 text-sm font-medium flex items-center gap-1 rounded-md transition-all duration-200 ${
-                    journalTab === 'gallery'
-                      ? 'bg-card shadow-sm text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <ImageIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Gallery</span>
-                </button>
-                <button
-                  onClick={() => setJournalTab('timeline')}
-                  className={`px-3 py-2 text-sm font-medium flex items-center gap-1 rounded-md transition-all duration-200 ${
-                    journalTab === 'timeline'
-                      ? 'bg-card shadow-sm text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <ClockIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Timeline</span>
-                </button>
-              </div>
+            {/* Journal Controls - Horizontal Layout */}
+            <div className="glass-card rounded-xl p-4 animate-glass-fade-in journal-controls-mobile mb-4" style={{ animationDelay: '200ms' }}>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                {/* Header */}
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-xl bg-purple-500/20 backdrop-blur-sm">
+                    <BookOpenIcon className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Travel Journal</h3>
+                    <p className="text-sm text-muted-foreground">Capture memories and moments</p>
+                  </div>
+                </div>
 
-              <div>
-                {journalTab === 'entries' && (
-                  <Button onClick={handleAddEntry} className="flex items-center gap-1 bg-primary hover:bg-primary/90 transition-colors">
-                    <PlusIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">New Entry</span>
-                    <span className="sm:hidden">Entry</span>
-                  </Button>
-                )}
-                {journalTab === 'gallery' && (
-                  <Button onClick={handleToggleMediaUploader} className="flex items-center gap-1 bg-primary hover:bg-primary/90 transition-colors">
-                    <PlusIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">Upload Media</span>
-                    <span className="sm:hidden">Upload</span>
-                  </Button>
-                )}
+                {/* Navigation Only */}
+                <div className="flex justify-center sm:justify-end">
+                  <div className="glass-nav rounded-xl p-1 border border-white/20 bg-background/50 backdrop-blur-sm flex">
+                    <button
+                      onClick={() => setJournalTab('entries')}
+                      className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                        journalTab === 'entries'
+                          ? 'bg-purple-500/20 text-purple-600 shadow-sm'
+                          : 'text-muted-foreground hover:text-purple-600 hover:bg-purple-500/10'
+                      }`}
+                    >
+                      <BookOpenIcon className="h-4 w-4 mr-2" />
+                      Entries
+                    </button>
+                    <button
+                      onClick={() => setJournalTab('gallery')}
+                      className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                        journalTab === 'gallery'
+                          ? 'bg-purple-500/20 text-purple-600 shadow-sm'
+                          : 'text-muted-foreground hover:text-purple-600 hover:bg-purple-500/10'
+                      }`}
+                    >
+                      <ImageIcon className="h-4 w-4 mr-2" />
+                      Gallery
+                    </button>
+                    <button
+                      onClick={() => setJournalTab('timeline')}
+                      className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                        journalTab === 'timeline'
+                          ? 'bg-purple-500/20 text-purple-600 shadow-sm'
+                          : 'text-muted-foreground hover:text-purple-600 hover:bg-purple-500/10'
+                      }`}
+                    >
+                      <ClockIcon className="h-4 w-4 mr-2" />
+                      Timeline
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
             {journalTab === 'entries' && (
-              <div className="space-y-6">
-                {journalLoading && entries.length === 0 ? (
-                  <div className="flex justify-center items-center py-12">
-                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+              <div className="glass-card rounded-2xl p-4 animate-glass-fade-in">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 rounded-lg bg-purple-500/20 backdrop-blur-sm">
+                      <BookOpenIcon className="h-4 w-4 text-purple-500" />
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground">Journal Entries</h3>
                   </div>
-                ) : entries.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground mb-4">
-                      You haven't created any journal entries for this trip yet.
-                    </p>
-                    <Button onClick={handleAddEntry}>
-                      <PlusIcon className="h-4 w-4 mr-2" />
-                      Create your first entry
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-6">
-                    {entries.map((entry) => (
-                      <JournalEntryCard
-                        key={entry.id}
-                        entry={entry}
-                        onEdit={handleEditEntry}
-                      />
-                    ))}
-                  </div>
-                )}
+
+                  {/* NEW ENTRY Button - Inside Card */}
+                  <button
+                    onClick={handleAddEntry}
+                    className="relative overflow-hidden px-4 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 flex items-center gap-2 group shadow-lg shadow-purple-500/25"
+                  >
+                    {/* Glassy Background - Purple Theme */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-purple-400/15 to-indigo-500/20 backdrop-blur-sm border border-purple-500/30 rounded-xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+
+                    {/* Content */}
+                    <div className="relative z-10 flex items-center gap-2">
+                      <PlusIcon className="h-4 w-4 text-purple-600 group-hover:text-purple-500 transition-colors" />
+                      <span className="text-purple-600 group-hover:text-purple-500 transition-colors text-sm font-medium">
+                        New Entry
+                      </span>
+                    </div>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {journalLoading && entries.length === 0 ? (
+                    <div className="p-12 text-center">
+                      <div className="flex flex-col items-center space-y-4">
+                        <div className="relative">
+                          <div className="p-4 rounded-2xl bg-purple-500/20 backdrop-blur-sm border border-white/20">
+                            <div className="animate-spin h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+                          </div>
+                        </div>
+                        <p className="text-muted-foreground">Loading your journal entries...</p>
+                      </div>
+                    </div>
+                  ) : entries.length === 0 ? (
+                    <div className="p-12 text-center">
+                      <div className="flex flex-col items-center space-y-6">
+                        <div className="relative">
+                          <div className="p-6 rounded-3xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-sm border border-white/20">
+                            <BookOpenIcon className="h-12 w-12 text-purple-500" />
+                          </div>
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-purple-400/20 rounded-full animate-ping"></div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <h2 className="text-xl font-bold text-foreground">No journal entries yet</h2>
+                          <p className="text-muted-foreground max-w-md">
+                            Start documenting your travel memories and experiences.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {entries.map((entry, index) => (
+                        <div
+                          key={entry.id}
+                          className="glass-card rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-500 md:hover:scale-[1.02] hover:-translate-y-1"
+                          style={{ animationDelay: `${index * 100}ms` }}
+                        >
+                          <JournalEntryCard
+                            entry={entry}
+                            onEdit={handleEditEntry}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
             {journalTab === 'gallery' && (
-              <div>
+              <div className="glass-card rounded-2xl p-4 animate-glass-fade-in">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-1.5 rounded-lg bg-purple-500/20 backdrop-blur-sm">
+                      <ImageIcon className="h-4 w-4 text-purple-500" />
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground">Media Gallery</h3>
+                  </div>
+
+                  {/* UPLOAD MEDIA Button - Inside Card */}
+                  <button
+                    onClick={handleToggleMediaUploader}
+                    className="relative overflow-hidden px-4 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 flex items-center gap-2 group shadow-lg shadow-purple-500/25"
+                  >
+                    {/* Glassy Background - Purple Theme */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-purple-400/15 to-indigo-500/20 backdrop-blur-sm border border-purple-500/30 rounded-xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+
+                    {/* Content */}
+                    <div className="relative z-10 flex items-center gap-2">
+                      <PlusIcon className="h-4 w-4 text-purple-600 group-hover:text-purple-500 transition-colors" />
+                      <span className="text-purple-600 group-hover:text-purple-500 transition-colors text-sm font-medium">
+                        Upload Media
+                      </span>
+                    </div>
+                  </button>
+                </div>
+
                 {showMediaUploader && (
-                  <div className="mb-6">
+                  <div className="mb-4 p-4 rounded-xl bg-background/30 border border-white/10">
                     <SimpleMediaUploader
                       tripId={id as string}
                       onUploadComplete={() => {
@@ -1189,6 +1406,7 @@ export default function TripItinerary() {
                     />
                   </div>
                 )}
+
                 <MediaGallery
                   media={media}
                   tripId={id as string}
@@ -1197,7 +1415,19 @@ export default function TripItinerary() {
             )}
 
             {journalTab === 'timeline' && (
-              <MemoriesTimeline tripId={id as string} />
+              <div className="glass-card rounded-2xl p-4 animate-glass-fade-in">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="p-1.5 rounded-lg bg-purple-500/20 backdrop-blur-sm">
+                    <ClockIcon className="h-4 w-4 text-purple-500" />
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground">Timeline</h3>
+                </div>
+                <MemoriesTimeline
+                  tripId={id as string}
+                  onAddEntry={handleAddEntry}
+                  onUploadMedia={handleToggleMediaUploader}
+                />
+              </div>
             )}
           </div>
         )}

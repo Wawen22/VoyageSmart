@@ -109,68 +109,105 @@ export default function AccommodationDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl flex items-center">
-              <Building2Icon className="h-5 w-5 mr-2" />
-              {accommodation.name}
-            </DialogTitle>
-            {accommodation.type && (
-              <DialogDescription>
-                {getAccommodationTypeLabel(accommodation.type)}
-              </DialogDescription>
-            )}
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto glass-card border-emerald-500/20">
+          {/* Modern Background Elements */}
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 opacity-50 rounded-2xl"></div>
+          <div className="absolute -top-12 -right-12 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl opacity-50"></div>
+
+          <DialogHeader className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-white/20">
+                  <Building2Icon className="h-5 w-5 text-emerald-500" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold">
+                    <span className="bg-gradient-to-r from-foreground via-emerald-500 to-foreground bg-clip-text text-transparent">
+                      {accommodation.name}
+                    </span>
+                  </DialogTitle>
+                  {accommodation.type && (
+                    <div className="mt-1">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-600 border border-emerald-500/30">
+                        {getAccommodationTypeLabel(accommodation.type)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Status Indicator */}
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <span className="text-xs text-muted-foreground">Active</span>
+              </div>
+            </div>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
-            {/* Dates */}
+          <div className="space-y-6 py-4 relative z-10">
+            {/* Dates Section */}
             {(accommodation.check_in_date || accommodation.check_out_date) && (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                {accommodation.check_in_date && (
-                  <div className="flex items-center">
-                    <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Check-in</p>
-                      <p className="text-sm">
+              <div className="glass-info-card p-4 rounded-2xl">
+                <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center">
+                  <div className="p-1.5 rounded-lg bg-blue-500/20 mr-2">
+                    <CalendarIcon className="h-4 w-4 text-blue-500" />
+                  </div>
+                  Stay Dates
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {accommodation.check_in_date && (
+                    <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <div className="p-1 rounded-lg bg-green-500/20">
+                          <CalendarIcon className="h-3 w-3 text-green-500" />
+                        </div>
+                        <p className="text-xs font-medium text-muted-foreground">Check-in</p>
+                      </div>
+                      <p className="text-sm font-semibold text-foreground">
                         {format(parseISO(accommodation.check_in_date), 'PPP')}
                       </p>
                     </div>
-                  </div>
-                )}
-                
-                {accommodation.check_out_date && (
-                  <div className="flex items-center">
-                    <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Check-out</p>
-                      <p className="text-sm">
+                  )}
+
+                  {accommodation.check_out_date && (
+                    <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <div className="p-1 rounded-lg bg-orange-500/20">
+                          <CalendarIcon className="h-3 w-3 text-orange-500" />
+                        </div>
+                        <p className="text-xs font-medium text-muted-foreground">Check-out</p>
+                      </div>
+                      <p className="text-sm font-semibold text-foreground">
                         {format(parseISO(accommodation.check_out_date), 'PPP')}
                       </p>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             )}
             
-            <Separator />
-            
-            {/* Address and Map */}
+            {/* Address and Map Section */}
             {accommodation.address && (
-              <div className="space-y-2">
-                <div className="flex items-start">
-                  <MapPinIcon className="h-4 w-4 mr-2 text-muted-foreground mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium">Address</p>
-                    <p className="text-sm">{accommodation.address}</p>
+              <div className="glass-info-card p-4 rounded-2xl">
+                <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center">
+                  <div className="p-1.5 rounded-lg bg-purple-500/20 mr-2">
+                    <MapPinIcon className="h-4 w-4 text-purple-500" />
                   </div>
+                  Location
+                </h3>
+
+                <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 mb-4">
+                  <p className="text-sm font-medium text-foreground">{accommodation.address}</p>
                 </div>
-                
+
                 {accommodation.coordinates && (
-                  <LazyMapView
-                    coordinates={accommodation.coordinates}
-                    interactive={false}
-                    height="200px"
-                  />
+                  <div className="rounded-xl overflow-hidden border border-white/20">
+                    <LazyMapView
+                      coordinates={accommodation.coordinates}
+                      interactive={false}
+                      height="200px"
+                    />
+                  </div>
                 )}
               </div>
             )}
@@ -251,39 +288,43 @@ export default function AccommodationDetailsModal({
             )}
           </div>
           
-          <DialogFooter>
-            {canEdit && (
-              <>
-                <Button
+          <DialogFooter className="relative z-10 pt-6 border-t border-white/10">
+            <div className="flex flex-col sm:flex-row sm:justify-between w-full gap-3">
+              {canEdit && (
+                <button
                   type="button"
-                  variant="destructive"
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={loading}
-                  className="sm:mr-auto"
+                  className="glass-button inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 disabled:opacity-50"
                 >
                   <TrashIcon className="h-4 w-4 mr-2" />
                   Delete
-                </Button>
-                
-                <Button
+                </button>
+              )}
+
+              <div className="flex space-x-3 sm:ml-auto">
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={onEdit}
+                    disabled={loading}
+                    className="glass-button-primary inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                  >
+                    <EditIcon className="h-4 w-4 mr-2" />
+                    Edit
+                  </button>
+                )}
+
+                <button
                   type="button"
-                  onClick={onEdit}
+                  onClick={onClose}
                   disabled={loading}
+                  className="glass-button inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
                 >
-                  <EditIcon className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
-              </>
-            )}
-            
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Close
-            </Button>
+                  Close
+                </button>
+              </div>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

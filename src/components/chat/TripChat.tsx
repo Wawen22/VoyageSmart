@@ -22,7 +22,8 @@ import {
   FileType as FilePdfIcon,
   Archive as FileArchiveIcon,
   Video as FileVideoIcon,
-  Music as FileAudioIcon
+  Music as FileAudioIcon,
+  MessageCircle as MessageCircleIcon
 } from 'lucide-react';
 import LoginPrompt from '@/components/auth/LoginPrompt';
 import { v4 as uuidv4 } from 'uuid';
@@ -530,54 +531,87 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Chat header */}
-      <div className="bg-card border-b p-3 flex justify-between items-center">
-        <div>
-          <h2 className="text-lg font-semibold">{tripName} Chat</h2>
-          <p className="text-xs text-muted-foreground">{participants.length} participants</p>
-        </div>
-        <div className="flex -space-x-2">
-          {participants.slice(0, 3).map((participant) => (
-            <Avatar key={participant.id} className="h-8 w-8 border-2 border-background">
-              {participant.users.avatar_url ? (
-                <AvatarImage src={participant.users.avatar_url} alt={participant.users.full_name} />
-              ) : (
-                <AvatarFallback>{getInitials(participant.users.full_name)}</AvatarFallback>
-              )}
-            </Avatar>
-          ))}
-          {participants.length > 3 && (
-            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium border-2 border-background">
-              +{participants.length - 3}
+    <div className="flex flex-col h-full chat-mobile">
+      {/* Chat header - Modernized */}
+      <div className="relative p-4 border-b border-white/10 bg-gradient-to-r from-violet-500/5 to-pink-500/5 backdrop-blur-sm">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20">
+              <MessageCircleIcon className="h-5 w-5 text-violet-500" />
             </div>
-          )}
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">{tripName}</h2>
+              <p className="text-sm text-muted-foreground">{participants.length} participants online</p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            {/* Participants Avatars */}
+            <div className="flex -space-x-2">
+              {participants.slice(0, 3).map((participant, index) => (
+                <div
+                  key={participant.id}
+                  className="relative group"
+                  style={{ zIndex: 10 - index }}
+                >
+                  <Avatar className="h-9 w-9 border-2 border-white/20 backdrop-blur-sm transition-all duration-300 group-hover:scale-110">
+                    {participant.users.avatar_url ? (
+                      <AvatarImage src={participant.users.avatar_url} alt={participant.users.full_name} />
+                    ) : (
+                      <AvatarFallback className="bg-gradient-to-br from-violet-500/20 to-pink-500/20 text-violet-600 font-medium">
+                        {getInitials(participant.users.full_name)}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white/20"></div>
+                </div>
+              ))}
+              {participants.length > 3 && (
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm flex items-center justify-center text-xs font-medium border-2 border-white/20 text-violet-600">
+                  +{participants.length - 3}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Messages container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages container - Modernized */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-violet-500/5">
         {messages.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">Nessun messaggio. Inizia la conversazione!</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 mb-6">
+              <MessageCircleIcon className="h-12 w-12 text-violet-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">No messages yet</h3>
+            <p className="text-muted-foreground max-w-md">
+              Start the conversation! Share your thoughts, plans, or just say hello to your travel companions.
+            </p>
           </div>
         ) : (
-          messages.map((message) => (
+          messages.map((message, index) => (
             <div
               key={message.id}
-              className={`flex ${message.user_id === user?.id ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${message.user_id === user?.id ? 'justify-end' : 'justify-start'} animate-glass-slide-up`}
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className={`flex max-w-[80%] ${message.user_id === user?.id ? 'flex-row-reverse' : 'flex-row'}`}>
-                <Avatar className={`h-8 w-8 ${message.user_id === user?.id ? 'ml-2' : 'mr-2'}`}>
-                  {message.users.avatar_url ? (
-                    <AvatarImage src={message.users.avatar_url} alt={message.users.full_name} />
-                  ) : (
-                    <AvatarFallback>{getInitials(message.users.full_name)}</AvatarFallback>
-                  )}
-                </Avatar>
-                <div>
-                  <div className={`flex items-center ${message.user_id === user?.id ? 'justify-end' : 'justify-start'}`}>
-                    <span className="text-xs text-muted-foreground">
+              <div className={`flex max-w-[80%] ${message.user_id === user?.id ? 'flex-row-reverse' : 'flex-row'} group`}>
+                <div className="relative">
+                  <Avatar className={`h-9 w-9 ${message.user_id === user?.id ? 'ml-3' : 'mr-3'} border-2 border-white/20 backdrop-blur-sm transition-all duration-300 group-hover:scale-110`}>
+                    {message.users.avatar_url ? (
+                      <AvatarImage src={message.users.avatar_url} alt={message.users.full_name} />
+                    ) : (
+                      <AvatarFallback className="bg-gradient-to-br from-violet-500/20 to-pink-500/20 text-violet-600 font-medium">
+                        {getInitials(message.users.full_name)}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white/20"></div>
+                </div>
+
+                <div className="flex flex-col">
+                  <div className={`flex items-center mb-1 ${message.user_id === user?.id ? 'justify-end' : 'justify-start'}`}>
+                    <span className="text-xs font-medium text-muted-foreground">
                       {message.user_id === user?.id ? 'You' : message.users.full_name}
                     </span>
                     <span className="text-xs text-muted-foreground mx-1">•</span>
@@ -585,11 +619,12 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
                       {formatTimestamp(message.created_at)}
                     </span>
                   </div>
+
                   <div
-                    className={`mt-1 p-3 rounded-lg ${
+                    className={`relative p-3 rounded-2xl backdrop-blur-sm border transition-all duration-300 group-hover:scale-[1.02] ${
                       message.user_id === user?.id
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
+                        ? 'bg-gradient-to-br from-violet-500/20 to-pink-500/20 border-violet-500/30 text-foreground'
+                        : 'bg-background/50 border-white/20 text-foreground'
                     }`}
                   >
                     {message.is_system_message ? (
@@ -647,15 +682,15 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message input */}
-      <div className="p-3 border-t">
+      {/* Message input - Modernized */}
+      <div className="p-4 border-t border-white/10 bg-gradient-to-r from-violet-500/5 to-pink-500/5 backdrop-blur-sm">
         {/* File preview if a file is selected */}
         {selectedFile && (
-          <div className="mb-3 p-2 border rounded-md bg-muted/30">
+          <div className="mb-4 p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-white/20">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {selectedFile.type.startsWith('image/') ? (
-                  <div className="relative w-12 h-12 rounded-md overflow-hidden bg-background">
+                  <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-background border border-white/20">
                     <img
                       src={URL.createObjectURL(selectedFile)}
                       alt="Preview"
@@ -663,89 +698,90 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
                     />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 rounded-md bg-background flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 flex items-center justify-center">
                     {getFileIcon(selectedFile.type)}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+                  <p className="text-sm font-medium truncate text-foreground">{selectedFile.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {(selectedFile.size / 1024).toFixed(1)} KB
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={handleRemoveFile}
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 flex items-center justify-center transition-all duration-300 hover:scale-105"
               >
-                <XIcon className="h-4 w-4" />
+                <XIcon className="h-4 w-4 text-red-500" />
                 <span className="sr-only">Remove file</span>
-              </Button>
+              </button>
             </div>
           </div>
         )}
 
-        <div className="flex space-x-2">
-          <div className="flex-1 flex flex-col">
-            <Textarea
-              placeholder="Scrivi un messaggio..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className="min-h-[80px] resize-none"
-              disabled={!isParticipant}
-            />
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <div className="relative">
+              <Textarea
+                placeholder="Type your message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={handleKeyPress}
+                className="min-h-[60px] resize-none glass-button border-white/20 bg-background/50 backdrop-blur-sm rounded-xl pr-12 focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50"
+                disabled={!isParticipant}
+              />
+
+              {/* Attachment button inside textarea */}
+              <button
+                type="button"
+                onClick={handleOpenFileSelector}
+                disabled={!isParticipant || sending}
+                className="absolute right-2 bottom-2 p-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/30 transition-all duration-300 hover:scale-105 disabled:opacity-50"
+              >
+                <PaperclipIcon className="h-4 w-4 text-violet-500" />
+              </button>
+            </div>
 
             <div className="flex justify-between items-center mt-2">
               <p className="text-xs text-muted-foreground">
-                Premi Invio per inviare, Shift+Invio per una nuova riga
+                Press Enter to send, Shift+Enter for new line
               </p>
-
-              {/* Hidden file input */}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileSelect}
-                className="hidden"
-                accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-zip-compressed"
-              />
-
-              <div className="flex items-center gap-2">
-                {/* File size info */}
-                <span className="text-xs text-muted-foreground">
-                  Max: {MAX_FILE_SIZE_LABEL}
-                </span>
-
-                {/* Attachment button */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleOpenFileSelector}
-                  disabled={!isParticipant || sending}
-                  className="h-8 px-2"
-                >
-                  <PaperclipIcon className="h-4 w-4 mr-1" />
-                  <span className="text-xs">Allega</span>
-                </Button>
-              </div>
+              <span className="text-xs text-muted-foreground">
+                Max: {MAX_FILE_SIZE_LABEL}
+              </span>
             </div>
+
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+              accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-zip-compressed"
+            />
           </div>
 
-          <Button
+          {/* Send button - Aligned with textarea height */}
+          <button
             onClick={selectedFile ? handleSendMessageWithAttachment : handleSendMessage}
             disabled={((!newMessage.trim() && !selectedFile) || sending || !isParticipant)}
-            className="self-end"
+            className="relative overflow-hidden h-[60px] w-[60px] rounded-xl font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center group shadow-lg shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed self-start"
           >
-            {sending || uploadingFile ? (
-              <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
-            ) : (
-              <SendIcon className="h-4 w-4" />
-            )}
+            {/* Glassy Background - Violet Theme */}
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 via-violet-400/15 to-pink-500/20 backdrop-blur-sm border border-violet-500/30 rounded-xl"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+
+            {/* Content */}
+            <div className="relative z-10">
+              {sending || uploadingFile ? (
+                <div className="h-5 w-5 border-2 border-t-transparent border-violet-500 rounded-full animate-spin" />
+              ) : (
+                <SendIcon className="h-5 w-5 text-violet-600 group-hover:text-violet-500 transition-colors" />
+              )}
+            </div>
             <span className="sr-only">Send</span>
-          </Button>
+          </button>
         </div>
       </div>
     </div>

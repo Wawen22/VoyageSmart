@@ -267,43 +267,66 @@ export default function AccommodationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {accommodation ? 'Edit Accommodation' : 'Add Accommodation'}
-          </DialogTitle>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto glass-card border-emerald-500/20">
+        {/* Modern Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 opacity-50 rounded-2xl"></div>
+        <div className="absolute -top-12 -right-12 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl opacity-50"></div>
+
+        <DialogHeader className="relative z-10">
+          <div className="flex items-center space-x-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-white/20">
+              <Building2Icon className="h-5 w-5 text-emerald-500" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-bold">
+                <span className="bg-gradient-to-r from-foreground via-emerald-500 to-foreground bg-clip-text text-transparent">
+                  {accommodation ? 'Edit Accommodation' : 'Add Accommodation'}
+                </span>
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                {accommodation ? 'Update accommodation details' : 'Add a new place to stay for your trip'}
+              </p>
+            </div>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          {/* Name and Type */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="flex items-center">
-                <Building2Icon className="h-4 w-4 mr-1" />
-                Name *
-              </Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Hotel name or title"
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6 py-4 relative z-10">
+          {/* Basic Information Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 mr-2">
+                <Building2Icon className="h-4 w-4 text-emerald-500" />
+              </div>
+              Basic Information
+            </h3>
 
-            <div className="space-y-2">
-              <Label htmlFor="type" className="flex items-center">
-                <TagIcon className="h-4 w-4 mr-1" />
-                Type
-              </Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => handleSelectChange('type', value)}
-              >
-                <SelectTrigger id="type">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium text-foreground">
+                  Name *
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Hotel name or title"
+                  required
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="type" className="text-sm font-medium text-foreground">
+                  Type
+                </Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) => handleSelectChange('type', value)}
+                >
+                  <SelectTrigger id="type" className="glass-button border-white/20 bg-background/50 backdrop-blur-sm">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
                 <SelectContent>
                   {accommodationTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
@@ -311,195 +334,246 @@ export default function AccommodationModal({
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+                </Select>
+              </div>
             </div>
           </div>
 
-          {/* Dates */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="checkInDate" className="flex items-center">
-                <CalendarIcon className="h-4 w-4 mr-1" />
-                Check-in Date
+          {/* Dates Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-blue-500/20 mr-2">
+                <CalendarIcon className="h-4 w-4 text-blue-500" />
+              </div>
+              Stay Dates
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="checkInDate" className="text-sm font-medium text-foreground">
+                  Check-in Date
+                </Label>
+                <Input
+                  id="checkInDate"
+                  name="checkInDate"
+                  type="date"
+                  value={formData.checkInDate}
+                  onChange={handleChange}
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="checkOutDate" className="text-sm font-medium text-foreground">
+                  Check-out Date
               </Label>
-              <Input
-                id="checkInDate"
-                name="checkInDate"
-                type="date"
-                value={formData.checkInDate}
+                <Input
+                  id="checkOutDate"
+                  name="checkOutDate"
+                  type="date"
+                  value={formData.checkOutDate}
+                  onChange={handleChange}
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Location Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-purple-500/20 mr-2">
+                <MapPinIcon className="h-4 w-4 text-purple-500" />
+              </div>
+              Location
+            </h3>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-sm font-medium text-foreground">
+                  Address
+                </Label>
+                <Input
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Full address"
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+
+              {/* Map */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">
+                  Location on Map
+                  <span className="text-xs text-muted-foreground ml-2">
+                    (Click on the map to set location)
+                  </span>
+                </Label>
+                <div className="rounded-xl overflow-hidden border border-white/20">
+                  <LazyMapView
+                    address={formData.address}
+                    coordinates={coordinates}
+                    interactive={true}
+                    onLocationSelect={handleLocationSelect}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Booking Details Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-amber-500/20 mr-2">
+                <TicketIcon className="h-4 w-4 text-amber-500" />
+              </div>
+              Booking Details
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bookingReference" className="text-sm font-medium text-foreground">
+                  Booking Reference
+                </Label>
+                <Input
+                  id="bookingReference"
+                  name="bookingReference"
+                  value={formData.bookingReference}
+                  onChange={handleChange}
+                  placeholder="Reservation number"
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contactInfo" className="text-sm font-medium text-foreground">
+                  Contact Information
+                </Label>
+                <Input
+                  id="contactInfo"
+                  name="contactInfo"
+                  value={formData.contactInfo}
+                  onChange={handleChange}
+                  placeholder="Phone, email, etc."
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Cost Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-green-500/20 mr-2">
+                <DollarSignIcon className="h-4 w-4 text-green-500" />
+              </div>
+              Cost Information
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cost" className="text-sm font-medium text-foreground">
+                  Cost
+                </Label>
+                <Input
+                  id="cost"
+                  name="cost"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.cost}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="currency" className="text-sm font-medium text-foreground">
+                  Currency
+                </Label>
+                <Select
+                  value={formData.currency}
+                  onValueChange={(value) => handleSelectChange('currency', value)}
+                >
+                  <SelectTrigger id="currency" className="glass-button border-white/20 bg-background/50 backdrop-blur-sm">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map((currency) => (
+                      <SelectItem key={currency.value} value={currency.value}>
+                        {currency.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-slate-500/20 mr-2">
+                <FileTextIcon className="h-4 w-4 text-slate-500" />
+              </div>
+              Additional Notes
+            </h3>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes" className="text-sm font-medium text-foreground">
+                Notes
+              </Label>
+              <Textarea
+                id="notes"
+                name="notes"
+                value={formData.notes}
                 onChange={handleChange}
+                placeholder="Additional information, special requests, etc."
+                rows={3}
+                className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="checkOutDate" className="flex items-center">
-                <CalendarIcon className="h-4 w-4 mr-1" />
-                Check-out Date
-              </Label>
-              <Input
-                id="checkOutDate"
-                name="checkOutDate"
-                type="date"
-                value={formData.checkOutDate}
-                onChange={handleChange}
-              />
-            </div>
           </div>
 
-          {/* Address and Map */}
-          <div className="space-y-2">
-            <Label htmlFor="address" className="flex items-center">
-              <MapPinIcon className="h-4 w-4 mr-1" />
-              Address
-            </Label>
-            <Input
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Full address"
-            />
-          </div>
-
-          {/* Map */}
-          <div className="space-y-2">
-            <Label className="flex items-center">
-              <MapPinIcon className="h-4 w-4 mr-1" />
-              Location on Map
-              <span className="text-xs text-muted-foreground ml-2">
-                (Click on the map to set location)
-              </span>
-            </Label>
-            <LazyMapView
-              address={formData.address}
-              coordinates={coordinates}
-              interactive={true}
-              onLocationSelect={handleLocationSelect}
-            />
-          </div>
-
-          {/* Booking Reference and Contact */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="bookingReference" className="flex items-center">
-                <TicketIcon className="h-4 w-4 mr-1" />
-                Booking Reference
-              </Label>
-              <Input
-                id="bookingReference"
-                name="bookingReference"
-                value={formData.bookingReference}
-                onChange={handleChange}
-                placeholder="Reservation number"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contactInfo" className="flex items-center">
-                <PhoneIcon className="h-4 w-4 mr-1" />
-                Contact Information
-              </Label>
-              <Input
-                id="contactInfo"
-                name="contactInfo"
-                value={formData.contactInfo}
-                onChange={handleChange}
-                placeholder="Phone, email, etc."
-              />
-            </div>
-          </div>
-
-          {/* Cost and Currency */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="cost" className="flex items-center">
-                <DollarSignIcon className="h-4 w-4 mr-1" />
-                Cost
-              </Label>
-              <Input
-                id="cost"
-                name="cost"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.cost}
-                onChange={handleChange}
-                placeholder="0.00"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency" className="flex items-center">
-                <DollarSignIcon className="h-4 w-4 mr-1" />
-                Currency
-              </Label>
-              <Select
-                value={formData.currency}
-                onValueChange={(value) => handleSelectChange('currency', value)}
-              >
-                <SelectTrigger id="currency">
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencies.map((currency) => (
-                    <SelectItem key={currency.value} value={currency.value}>
-                      {currency.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes" className="flex items-center">
-              <FileTextIcon className="h-4 w-4 mr-1" />
-              Notes
-            </Label>
-            <Textarea
-              id="notes"
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              placeholder="Additional information, special requests, etc."
-              rows={3}
-            />
-          </div>
-
-          {/* Documents */}
-          <div className="space-y-2">
-            <Label className="flex items-center">
-              <FileIcon className="h-4 w-4 mr-1" />
+          {/* Documents Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-indigo-500/20 mr-2">
+                <FileIcon className="h-4 w-4 text-indigo-500" />
+              </div>
               Documents
-            </Label>
+            </h3>
 
             {/* Existing documents */}
             {documents.length > 0 && (
-              <div className="space-y-2 mb-2">
-                <p className="text-sm text-muted-foreground">Existing documents:</p>
+              <div className="space-y-3 mb-4">
+                <p className="text-sm font-medium text-foreground">Existing documents:</p>
                 <div className="space-y-2">
                   {documents.map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
-                      <div className="flex items-center">
-                        <FileIcon className="h-4 w-4 mr-2" />
+                    <div key={index} className="flex items-center justify-between p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
+                      <div className="flex items-center space-x-2">
+                        <div className="p-1 rounded-lg bg-indigo-500/20">
+                          <FileIcon className="h-3 w-3 text-indigo-500" />
+                        </div>
                         <a
                           href={doc.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-primary hover:underline truncate max-w-[200px]"
+                          className="text-sm text-primary hover:underline truncate max-w-[200px] font-medium"
                         >
                           {doc.name}
                         </a>
                       </div>
-                      <Button
+                      <button
                         type="button"
-                        variant="ghost"
-                        size="sm"
                         onClick={() => handleRemoveDocument(index)}
+                        className="p-1 rounded-lg hover:bg-destructive/20 transition-colors"
                       >
-                        <XIcon className="h-4 w-4" />
-                      </Button>
+                        <XIcon className="h-4 w-4 text-destructive" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -508,23 +582,24 @@ export default function AccommodationModal({
 
             {/* New files to upload */}
             {newFiles.length > 0 && (
-              <div className="space-y-2 mb-2">
-                <p className="text-sm text-muted-foreground">Files to upload:</p>
+              <div className="space-y-3 mb-4">
+                <p className="text-sm font-medium text-foreground">Files to upload:</p>
                 <div className="space-y-2">
                   {newFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
-                      <div className="flex items-center">
-                        <FileIcon className="h-4 w-4 mr-2" />
-                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                    <div key={index} className="flex items-center justify-between p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
+                      <div className="flex items-center space-x-2">
+                        <div className="p-1 rounded-lg bg-green-500/20">
+                          <FileIcon className="h-3 w-3 text-green-500" />
+                        </div>
+                        <span className="text-sm truncate max-w-[200px] font-medium">{file.name}</span>
                       </div>
-                      <Button
+                      <button
                         type="button"
-                        variant="ghost"
-                        size="sm"
                         onClick={() => handleRemoveNewFile(index)}
+                        className="p-1 rounded-lg hover:bg-destructive/20 transition-colors"
                       >
-                        <XIcon className="h-4 w-4" />
-                      </Button>
+                        <XIcon className="h-4 w-4 text-destructive" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -535,11 +610,13 @@ export default function AccommodationModal({
             <div className="flex items-center justify-center w-full">
               <label
                 htmlFor="fileUpload"
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 border-muted-foreground/25 hover:bg-muted"
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer backdrop-blur-sm bg-background/30 border-white/20 hover:bg-background/50 transition-all duration-300"
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <UploadIcon className="w-8 h-8 mb-3 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
+                  <div className="p-2 rounded-lg bg-indigo-500/20 mb-3">
+                    <UploadIcon className="w-6 h-6 text-indigo-500" />
+                  </div>
+                  <p className="mb-2 text-sm text-foreground">
                     <span className="font-semibold">Click to upload</span> or drag and drop
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -557,21 +634,24 @@ export default function AccommodationModal({
             </div>
           </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading || uploadingFiles}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading || uploadingFiles || !formData.name}
-            >
-              {loading || uploadingFiles ? 'Saving...' : accommodation ? 'Update' : 'Add'}
-            </Button>
+          <DialogFooter className="relative z-10 pt-6 border-t border-white/10">
+            <div className="flex space-x-3 w-full sm:justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading || uploadingFiles}
+                className="glass-button flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading || uploadingFiles || !formData.name}
+                className="glass-button-primary flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50"
+              >
+                {loading || uploadingFiles ? 'Saving...' : accommodation ? 'Update' : 'Add'}
+              </button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

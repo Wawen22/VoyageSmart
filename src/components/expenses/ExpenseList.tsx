@@ -35,29 +35,40 @@ export default function ExpenseList({ expenses, participants, currency, onDelete
 
   if (expenses.length === 0) {
     return (
-      <Card className="bg-card border border-border">
-        <CardContent className="pt-6">
-          <div className="text-center py-12">
-            <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-2">No expenses yet</h3>
-            <p className="text-muted-foreground">
-              Add your first expense to start tracking your trip spending.
+      <div className="glass-card rounded-2xl p-12 text-center animate-glass-fade-in">
+        <div className="flex flex-col items-center space-y-6">
+          <div className="relative">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-white/20">
+              <ReceiptIcon className="h-12 w-12 text-amber-500" />
+            </div>
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-400/20 rounded-full animate-ping"></div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-foreground">No expenses yet</h3>
+            <p className="text-muted-foreground max-w-md">
+              Add your first expense to start tracking your trip spending and managing balances.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {expenses.map((expense) => (
-        <ExpenseCard
+    <div className="space-y-4 expense-grid-mobile">
+      {expenses.map((expense, index) => (
+        <div
           key={expense.id}
-          expense={expense}
-          onDelete={onDelete}
-          onEdit={onEdit}
-        />
+          className="animate-stagger-in"
+          style={{ animationDelay: `${index * 100 + 400}ms` }}
+        >
+          <ExpenseCard
+            expense={expense}
+            onDelete={onDelete}
+            onEdit={onEdit}
+          />
+        </div>
       ))}
     </div>
   );

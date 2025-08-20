@@ -84,3 +84,16 @@ button {
 .hover-effect {
   @apply transition-all duration-200 ease-in-out hover:scale-105;
 }
+
+/* Glass button styles */
+.glass-button-primary {
+  @apply backdrop-blur-sm bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30 text-primary hover:shadow-lg hover:shadow-primary/25;
+}
+
+.glass-button-inactive {
+  @apply backdrop-blur-sm border transition-all duration-300;
+}
+
+.glass-nav {
+  @apply backdrop-blur-sm border transition-all duration-300;
+}

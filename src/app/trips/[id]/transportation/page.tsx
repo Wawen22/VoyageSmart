@@ -221,135 +221,316 @@ export default function TransportationPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border mb-6">
-        <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
-          <BackButton href={`/trips/${id}`} label="Back to Trip" />
+      <header className="relative overflow-hidden mb-6">
+        {/* Modern Glassmorphism Background - Sky/Cyan Theme */}
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 via-background/95 to-cyan-500/10 backdrop-blur-xl"></div>
+
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Floating orbs */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/20 rounded-full blur-3xl animate-pulse glass-orb-float"></div>
+          <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl animate-pulse glass-orb-float" style={{ animationDelay: '2s' }}></div>
+
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-[0.02] glass-grid-pattern"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-            <div className="flex flex-col space-y-2">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
-                <PlaneTakeoffIcon className="h-6 w-6 mr-2" />
-                Transportation
-              </h1>
+        {/* Glass border effect */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sky-500/50 to-transparent"></div>
 
-              {trip && (
-                <p className="text-sm text-muted-foreground">
-                  {trip.name} {trip.destination && `• ${trip.destination}`}
-                </p>
-              )}
-            </div>
+        {/* Navigation Bar with Glass Effect */}
+        <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+            <BackButton
+              href={`/trips/${id}`}
+              label="Back to Trip"
+              theme="orange"
+            />
+          </div>
+        </div>
 
-            {/* Counter Widget */}
-            <div className="flex-shrink-0">
-              {/* Desktop version */}
-              <div className="hidden sm:block">
-                <TransportationCounterWidget count={transportations.length} />
+        {/* Main Header Content */}
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:py-8 md:py-12 sm:px-6 lg:px-8 relative z-10 trip-header-mobile transportation-header-mobile">
+          <div className="animate-glass-fade-in">
+            {/* Section Title with Modern Typography */}
+            <div className="relative mb-6">
+              {/* Mobile Layout - Stacked */}
+              <div className="flex flex-col space-y-4 md:hidden">
+                <div className="flex items-center space-x-3">
+                  <div className="relative flex-shrink-0">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-sky-500/20 to-cyan-500/20 backdrop-blur-sm border border-white/20">
+                      <PlaneTakeoffIcon className="h-5 w-5 text-sky-500" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl font-bold">
+                      <span className="bg-gradient-to-r from-foreground via-sky-500 to-foreground bg-clip-text text-transparent">
+                        Transportation
+                      </span>
+                    </h1>
+                    {trip && (
+                      <p className="text-sm text-muted-foreground mt-1 truncate">
+                        {trip.name} {trip.destination && `• ${trip.destination}`}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Counter Widget - Mobile */}
+                <div className="flex justify-center">
+                  <div className="glass-info-card flex items-center px-4 py-2 rounded-xl">
+                    <div className="p-1 rounded-full bg-sky-500/20 mr-2">
+                      <PlaneTakeoffIcon className="h-3 w-3 text-sky-500" />
+                    </div>
+                    <div className="text-center">
+                      <span className="text-sm font-bold text-sky-500">{transportations.length}</span>
+                      <span className="text-xs text-muted-foreground ml-1">
+                        {transportations.length === 1 ? 'Trip' : 'Trips'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              {/* Mobile version */}
-              <div className="block sm:hidden">
-                <TransportationCounterWidget count={transportations.length} compact />
+
+              {/* Desktop Layout - Side by Side */}
+              <div className="hidden md:flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <div className="p-3 rounded-2xl bg-gradient-to-br from-sky-500/20 to-cyan-500/20 backdrop-blur-sm border border-white/20">
+                      <PlaneTakeoffIcon className="h-6 w-6 text-sky-500" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-sky-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+                      <span className="bg-gradient-to-r from-foreground via-sky-500 to-foreground bg-clip-text text-transparent">
+                        Transportation
+                      </span>
+                    </h1>
+                    {trip && (
+                      <p className="text-base text-muted-foreground mt-1">
+                        {trip.name} {trip.destination && `• ${trip.destination}`}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Counter Widget - Desktop */}
+                <div className="flex-shrink-0">
+                  <div className="glass-info-card flex items-center px-4 py-2.5 rounded-2xl">
+                    <div className="p-1.5 rounded-full bg-sky-500/20 mr-3">
+                      <PlaneTakeoffIcon className="h-4 w-4 text-sky-500" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-sky-500">{transportations.length}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {transportations.length === 1 ? 'Trip' : 'Trips'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {/* Decorative elements */}
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-sky-500/20 rounded-full animate-ping"></div>
+              <div className="absolute -bottom-1 -right-4 w-2 h-2 bg-cyan-500/30 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 transportation-section-mobile">
+        {/* Free plan limitation warning - Modernized */}
         {subscription?.tier === 'free' && transportations.length >= 4 && (
-          <div className="mb-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangleIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              <p className="text-sm text-amber-700 dark:text-amber-300">
-                {transportations.length >= 5
-                  ? "You've reached the free plan limit of 5 transportation items per trip. Upgrade to Premium for unlimited transportation."
-                  : `You're approaching the free plan limit (${transportations.length}/5 transportation items). Upgrade to Premium for unlimited transportation.`
-                }
-              </p>
+          <div className="mb-6 glass-card rounded-2xl p-4 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 animate-glass-fade-in">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-amber-500/20 backdrop-blur-sm">
+                <AlertTriangleIcon className="h-5 w-5 text-amber-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">
+                  {transportations.length >= 5
+                    ? "You've reached the free plan limit of 5 transportation items per trip."
+                    : `You're approaching the free plan limit (${transportations.length}/5 transportation items).`
+                  }
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upgrade to Premium for unlimited transportation.
+                </p>
+              </div>
             </div>
           </div>
         )}
 
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {canEdit && (
-            <Button 
-              onClick={handleAddTransportation}
-              disabled={!canAddMore}
-              className={!canAddMore ? 'opacity-50 cursor-not-allowed' : ''}
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Transportation
-              {!canAddMore && subscription?.tier === 'free' && (
-                <span className="ml-2 text-xs">(Limit reached)</span>
-              )}
-            </Button>
-          )}
+        {/* Controls Section - Modernized */}
+        <div className="mb-6 glass-card rounded-2xl p-4 md:p-6 animate-glass-fade-in transportation-controls-mobile" style={{ animationDelay: '100ms' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Add Button */}
+            {canEdit && (
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={handleAddTransportation}
+                  disabled={!canAddMore}
+                  className={`glass-button-primary inline-flex items-center px-4 py-2.5 rounded-xl font-medium transition-all duration-300 hover:scale-105 ${
+                    !canAddMore ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-sky-500/25'
+                  }`}
+                >
+                  <div className="p-1 rounded-lg bg-white/20 mr-2">
+                    <PlusIcon className="h-4 w-4" />
+                  </div>
+                  Add Transportation
+                  {!canAddMore && subscription?.tier === 'free' && (
+                    <span className="ml-2 text-xs opacity-75">(Limit reached)</span>
+                  )}
+                </button>
+
+                {/* Quick Stats */}
+                <div className="hidden md:flex items-center space-x-4 text-sm text-muted-foreground">
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
+                    <span>{transportations.length} total</span>
+                  </div>
+                  {subscription?.tier === 'free' && (
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                      <span>{5 - transportations.length} remaining</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* View Mode Tabs - Modernized */}
         <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-6">
-          <TabsList className="grid w-full max-w-xs grid-cols-2">
-            <TabsTrigger value="list" className="flex items-center">
-              <ListIcon className="h-4 w-4 mr-2" />
-              List View
-            </TabsTrigger>
-            <TabsTrigger value="map" className="flex items-center">
-              <MapIcon className="h-4 w-4 mr-2" />
-              Map View
-            </TabsTrigger>
-          </TabsList>
+          <div className="glass-card rounded-2xl p-4 animate-glass-fade-in transportation-view-mobile" style={{ animationDelay: '200ms' }}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">View Options</h3>
+                <p className="text-sm text-muted-foreground">Choose how to display your transportation</p>
+              </div>
+
+              <div className="flex justify-center sm:justify-end">
+                <TabsList className="glass-nav rounded-xl p-1 border border-white/20 bg-background/50 backdrop-blur-sm">
+                  <TabsTrigger
+                    value="list"
+                    className="flex items-center px-4 py-2 rounded-lg data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-600 data-[state=active]:shadow-sm transition-all duration-300 hover:bg-sky-500/10"
+                  >
+                    <ListIcon className="h-4 w-4 mr-2" />
+                    List View
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="map"
+                    className="flex items-center px-4 py-2 rounded-lg data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-600 data-[state=active]:shadow-sm transition-all duration-300 hover:bg-sky-500/10"
+                  >
+                    <MapIcon className="h-4 w-4 mr-2" />
+                    Map View
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
+          </div>
 
           <TabsContent value="list" className="mt-0">
             {loading && transportations.length === 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <TransportationSkeleton key={i} />
-                ))}
-              </div>
+              <TransportationSkeleton />
             ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-destructive mb-4">Error loading transportations: {error}</p>
-                <Button onClick={() => dispatch(fetchTransportations(id as string))}>
-                  Try Again
-                </Button>
+              <div className="glass-card rounded-2xl p-8 text-center animate-glass-fade-in">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="p-4 rounded-2xl bg-destructive/20 backdrop-blur-sm">
+                    <AlertTriangleIcon className="h-8 w-8 text-destructive" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">Something went wrong</h3>
+                    <p className="text-destructive text-sm mb-4">Error loading transportations: {error}</p>
+                  </div>
+                  <button
+                    onClick={() => dispatch(fetchTransportations(id as string))}
+                    className="glass-button-primary inline-flex items-center px-4 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    Try Again
+                  </button>
+                </div>
               </div>
             ) : transportations.length === 0 ? (
-              <div className="text-center py-12">
-                <PlaneTakeoffIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">No transportation yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Add your flights, trains, and other transportation to keep track of your journey.
-                </p>
-                {canEdit && (
-                  <Button onClick={handleAddTransportation} disabled={!canAddMore}>
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Add Transportation
-                  </Button>
-                )}
+              <div className="glass-card rounded-2xl p-12 text-center animate-glass-fade-in">
+                <div className="flex flex-col items-center space-y-6">
+                  <div className="relative">
+                    <div className="p-6 rounded-3xl bg-gradient-to-br from-sky-500/20 to-cyan-500/20 backdrop-blur-sm border border-white/20">
+                      <PlaneTakeoffIcon className="h-12 w-12 text-sky-500" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-sky-400/20 rounded-full animate-ping"></div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-foreground">No transportation yet</h3>
+                    <p className="text-muted-foreground max-w-md">
+                      Add your flights, trains, and other transportation to keep track of your journey.
+                    </p>
+                  </div>
+
+                  {canEdit && (
+                    <button
+                      onClick={handleAddTransportation}
+                      disabled={!canAddMore}
+                      className="glass-button-primary inline-flex items-center px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-sky-500/25 disabled:opacity-50"
+                    >
+                      <div className="p-1 rounded-lg bg-white/20 mr-2">
+                        <PlusIcon className="h-4 w-4" />
+                      </div>
+                      Add Your First Trip
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {transportations.map((transportation) => (
-                  <TransportationCard
-                    key={transportation.id}
-                    transportation={transportation}
-                    onEdit={canEdit ? handleEditTransportation : undefined}
-                    onView={handleViewTransportation}
-                    canEdit={canEdit}
-                    getIcon={getTransportationIcon}
-                  />
-                ))}
+              <div className="animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transportation-grid-mobile">
+                  {transportations.map((transportation, index) => (
+                    <div
+                      key={transportation.id}
+                      className="animate-stagger-in"
+                      style={{ animationDelay: `${index * 100 + 400}ms` }}
+                    >
+                      <TransportationCard
+                        transportation={transportation}
+                        onEdit={canEdit ? handleEditTransportation : undefined}
+                        onView={handleViewTransportation}
+                        canEdit={canEdit}
+                        getIcon={getTransportationIcon}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="map" className="mt-0">
-            <Suspense fallback={<div className="h-96 bg-muted rounded-lg animate-pulse" />}>
-              <LazyTransportationMap
-                transportations={transportations}
-                onMarkerClick={handleViewTransportation}
-              />
-            </Suspense>
+            <div className="glass-card rounded-2xl overflow-hidden animate-glass-fade-in transportation-map-mobile" style={{ animationDelay: '300ms' }}>
+              <div className="p-4 border-b border-white/10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-xl bg-sky-500/20 backdrop-blur-sm">
+                    <MapIcon className="h-5 w-5 text-sky-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Map View</h3>
+                    <p className="text-sm text-muted-foreground">Explore transportation routes on the map</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <Suspense fallback={<div className="h-96 bg-muted/20 rounded-lg animate-pulse" />}>
+                  <LazyTransportationMap
+                    transportations={transportations}
+                    onMarkerClick={handleViewTransportation}
+                  />
+                </Suspense>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

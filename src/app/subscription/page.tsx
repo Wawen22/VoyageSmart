@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import BackButton from '@/components/ui/BackButton';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -199,28 +200,44 @@ export default function SubscriptionPage() {
   return (
     <PageLayout transitionType="fade">
       <div className="min-h-screen bg-background">
-        <header className="bg-card border-b border-border">
-          <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
-            <Link href="/profile" className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeftIcon className="h-4 w-4 mr-2" />
-              Back to Profile
-            </Link>
+        <header className="relative overflow-hidden mb-6">
+          {/* Modern Glassmorphism Background - Purple Theme */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-background/95 to-indigo-500/10 backdrop-blur-xl"></div>
+
+          {/* Animated Background Elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Floating orbs */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl animate-pulse glass-orb-float"></div>
+            <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl animate-pulse glass-orb-float" style={{ animationDelay: '2s' }}></div>
           </div>
 
-          <div className="max-w-7xl mx-auto py-3 px-3 sm:py-6 sm:px-6 lg:px-8">
-            <div className="flex flex-col space-y-2">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex items-center">
-                <TagIcon className="h-6 w-6 mr-2" />
-                Subscription Management
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Manage your subscription plan and payment details
-              </p>
+          <div className="relative z-10 max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-start mb-4">
+              <BackButton href="/profile" label="Back to Profile" theme="purple" />
             </div>
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+          <div className="mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-sm border border-white/20">
+                <TagIcon className="h-6 w-6 text-purple-500" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold">
+                  <span className="bg-gradient-to-r from-foreground via-purple-500 to-foreground bg-clip-text text-transparent">
+                    Subscription Management
+                  </span>
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Manage your subscription plan and payment details
+                </p>
+              </div>
+            </div>
+          </div>
+
+
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full max-w-md grid-cols-3">
               <TabsTrigger value="overview" className="flex items-center justify-center">
