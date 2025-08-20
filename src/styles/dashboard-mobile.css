@@ -58,10 +58,157 @@
     padding-bottom: 0.625rem !important;
   }
 
-  /* Filter Tabs Mobile */
+  /* Filter Tabs Mobile - Enhanced with Glass Effect */
   .filter-tabs-mobile {
     gap: 0.75rem !important;
-    margin-bottom: 1rem !important;
+  }
+
+  /* Glass Background Effect */
+  .filter-tabs-mobile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.1) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  /* Dark mode glass effect */
+  @media (prefers-color-scheme: dark) {
+    .filter-tabs-mobile::before {
+      background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.02) 50%,
+        rgba(255, 255, 255, 0.05) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  /* Filter buttons enhanced */
+  .filter-tabs-mobile button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 0.75rem !important;
+    font-weight: 500 !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .filter-tabs-mobile button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.05));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: inherit;
+  }
+
+  .filter-tabs-mobile button:hover::before {
+    opacity: 1;
+  }
+
+  .filter-tabs-mobile button:active {
+    transform: scale(0.95) !important;
+  }
+
+  .filter-tabs-mobile button.active {
+    transform: scale(1.02) !important;
+    box-shadow:
+      0 4px 20px rgba(var(--primary), 0.3),
+      0 1px 3px rgba(var(--primary), 0.2) !important;
+  }
+
+  /* Filter button icons */
+  .filter-tabs-mobile button svg {
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
+  }
+
+  .filter-tabs-mobile button:hover svg {
+    transform: scale(1.1) !important;
+  }
+
+  .filter-tabs-mobile button.active svg {
+    transform: scale(1.15) !important;
+    filter: drop-shadow(0 0 4px rgba(var(--primary), 0.5)) !important;
+  }
+
+  /* Mobile filter button optimizations */
+  @media (max-width: 640px) {
+    .filter-tabs-mobile button {
+      padding: 0.5rem 0.875rem !important;
+      font-size: 0.75rem !important;
+      min-height: 2.25rem !important;
+      border-radius: 0.625rem !important;
+    }
+
+    .filter-tabs-mobile button svg {
+      width: 0.875rem !important;
+      height: 0.875rem !important;
+    }
+
+    .filter-tabs-mobile button span:last-child {
+      padding: 0.125rem 0.375rem !important;
+      font-size: 0.625rem !important;
+      border-radius: 0.375rem !important;
+    }
+  }
+
+  /* Shimmer effect for glass container */
+  .filter-tabs-mobile::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: shimmer 3s infinite;
+    border-radius: inherit;
+  }
+
+  @keyframes shimmer {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+
+  /* Hover effects for the entire container */
+  .filter-tabs-mobile:hover::before {
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .filter-tabs-mobile:hover::before {
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
   }
 
   /* Analytics Modal Mobile Fixes */
@@ -297,12 +444,16 @@
   .swipeable-stats-mobile {
     -webkit-overflow-scrolling: touch !important;
     scroll-behavior: smooth !important;
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1)) !important;
+    border: 1px solid rgba(var(--border), 0.4) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
   }
 
   .swipeable-stats-mobile .stat-card {
     transition: all 0.2s ease !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
+    background: rgba(var(--card), 0.8) !important;
   }
 
   .swipeable-stats-mobile .stat-card:active {
@@ -316,6 +467,39 @@
   .swipeable-stats-mobile .dots-indicator.active {
     background: rgba(var(--primary), 1) !important;
     transform: scaleX(2.5) !important;
+  }
+
+  /* Dark mode gradient for stats */
+  @media (prefers-color-scheme: dark) {
+    .swipeable-stats-mobile {
+      background: linear-gradient(to right, rgba(30, 58, 138, 0.15), rgba(88, 28, 135, 0.15)) !important;
+    }
+  }
+
+  /* Mobile Analytics Button */
+  .mobile-analytics-button {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+  }
+
+  .mobile-analytics-button:active {
+    transform: scale(0.95) !important;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4) !important;
+  }
+
+  /* Stats Header Layout */
+  .stats-header-mobile {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 0.75rem !important;
+    padding: 0 1rem !important;
+  }
+
+  .stats-header-mobile h3 {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: rgba(var(--muted-foreground), 1) !important;
   }
 
   /* Touch optimizations */

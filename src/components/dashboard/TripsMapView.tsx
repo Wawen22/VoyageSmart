@@ -85,7 +85,7 @@ function TripsMapContent({ mapboxgl, trips, searchTerm, filter }: TripsMapConten
 
   // Create trip marker function
   const createTripMarker = (trip: ProcessedTrip, mapboxgl: any) => {
-    if (!trip.coordinates) return null;
+    if (!trip.coordinates || !map.current) return null;
 
     // Create custom marker element
     const el = document.createElement('div');
@@ -251,7 +251,7 @@ function TripsMapContent({ mapboxgl, trips, searchTerm, filter }: TripsMapConten
           filteredTrips.forEach(trip => {
             if (!trip.coordinates) return;
             const marker = createTripMarker(trip, mapboxgl);
-            markers.current.push(marker);
+            if (marker) markers.current.push(marker);
           });
 
           console.log('Created', markers.current.length, 'markers immediately');
@@ -288,7 +288,7 @@ function TripsMapContent({ mapboxgl, trips, searchTerm, filter }: TripsMapConten
       if (!trip.coordinates) return;
 
       const marker = createTripMarker(trip, mapboxgl);
-      markers.current.push(marker);
+      if (marker) markers.current.push(marker);
     });
 
     console.log('Created', markers.current.length, 'markers');
@@ -336,7 +336,7 @@ function TripsMapContent({ mapboxgl, trips, searchTerm, filter }: TripsMapConten
       filteredTrips.forEach(trip => {
         if (!trip.coordinates) return;
         const marker = createTripMarker(trip, mapboxgl);
-        markers.current.push(marker);
+        if (marker) markers.current.push(marker);
       });
 
       console.log('Force recreated', markers.current.length, 'markers');

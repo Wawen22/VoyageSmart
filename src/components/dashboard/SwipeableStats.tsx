@@ -12,10 +12,12 @@ import {
   UsersIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import MobileAnalyticsButton from './MobileAnalyticsButton';
 
 interface SwipeableStatsProps {
   trips: any[];
   className?: string;
+  showAnalyticsButton?: boolean;
 }
 
 interface StatCard {
@@ -29,7 +31,7 @@ interface StatCard {
   textColor: string;
 }
 
-export default function SwipeableStats({ trips, className }: SwipeableStatsProps) {
+export default function SwipeableStats({ trips, className, showAnalyticsButton = false }: SwipeableStatsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -211,9 +213,14 @@ export default function SwipeableStats({ trips, className }: SwipeableStatsProps
   };
 
   return (
-    <div className={cn("lg:hidden swipeable-stats-mobile", className)}>
-      <div className="mb-3">
-        <h3 className="text-sm font-medium text-muted-foreground px-4">Quick Stats</h3>
+    <div className={cn("lg:hidden swipeable-stats-mobile bg-gradient-to-r from-blue-50/40 to-purple-50/40 dark:from-blue-950/15 dark:to-purple-950/15 rounded-xl border border-border/40 shadow-sm", className)}>
+      <div className="mb-3 px-4 pt-4">
+        <div className="flex items-center justify-between stats-header-mobile">
+          <h3 className="text-sm font-medium text-muted-foreground">Quick Stats</h3>
+          {showAnalyticsButton && (
+            <MobileAnalyticsButton trips={trips} />
+          )}
+        </div>
       </div>
       
       <div 
@@ -270,7 +277,7 @@ export default function SwipeableStats({ trips, className }: SwipeableStatsProps
       </div>
 
       {/* Dots indicator */}
-      <div className="flex justify-center gap-1 mt-3">
+      <div className="flex justify-center gap-1 mt-3 pb-4">
         {Array.from({ length: maxIndex + 1 }).map((_, index) => (
           <button
             key={index}

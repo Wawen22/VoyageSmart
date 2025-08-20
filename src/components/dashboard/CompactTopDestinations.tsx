@@ -53,7 +53,7 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
   }
 
   return (
-    <div className="bg-gradient-to-r from-blue-50/40 to-purple-50/40 dark:from-blue-950/15 dark:to-purple-950/15 rounded-xl p-4 lg:p-4 border border-border/40 shadow-sm">
+    <div className="hidden lg:block bg-gradient-to-r from-blue-50/40 to-purple-50/40 dark:from-blue-950/15 dark:to-purple-950/15 rounded-xl p-4 lg:p-4 border border-border/40 shadow-sm">
       {/* Desktop Layout */}
       <div className="hidden lg:flex lg:items-center gap-4">
         {/* Header */}
@@ -126,8 +126,8 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
         </div>
       </div>
 
-      {/* Mobile Layout - More Compact */}
-      <div className="lg:hidden space-y-2 compact-destinations-mobile dashboard-mobile-refresh">
+      {/* Mobile Layout - Hidden (replaced by SwipeableStats) */}
+      <div className="hidden space-y-2 compact-destinations-mobile dashboard-mobile-refresh">
         {/* Header Row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

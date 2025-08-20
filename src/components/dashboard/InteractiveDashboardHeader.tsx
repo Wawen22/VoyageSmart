@@ -11,24 +11,26 @@ import {
   MoonIcon,
   CloudIcon,
   CalendarIcon,
-  ClockIcon,
-  FilterIcon
+  FilterIcon,
+  GlobeIcon,
+  RocketIcon,
+  PlaneIcon,
+  CheckCircleIcon
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import WeatherWidget, { CompactWeatherWidget } from './WeatherWidget';
 import CompactTopDestinations from './CompactTopDestinations';
+import SwipeableStats from './SwipeableStats';
 
 interface InteractiveDashboardHeaderProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   filter: 'all' | 'upcoming' | 'ongoing' | 'past';
   setFilter: (filter: 'all' | 'upcoming' | 'ongoing' | 'past') => void;
-  viewMode: 'grid' | 'timeline' | 'map';
-  setViewMode: (mode: 'grid' | 'timeline' | 'map') => void;
+  viewMode: 'grid' | 'map';
+  setViewMode: (mode: 'grid' | 'map') => void;
   tripCount: number;
   userName?: string;
   stats: {
@@ -86,28 +88,28 @@ export default function InteractiveDashboardHeader({
       label: 'All Trips',
       color: 'from-slate-600 to-slate-700',
       count: stats.total,
-      emoji: '🌍'
+      icon: GlobeIcon
     },
     {
       value: 'upcoming',
       label: 'Upcoming',
       color: 'from-emerald-600 to-emerald-700',
       count: stats.upcoming,
-      emoji: '🚀'
+      icon: RocketIcon
     },
     {
       value: 'ongoing',
       label: 'Ongoing',
       color: 'from-orange-600 to-red-700',
       count: stats.ongoing,
-      emoji: '✈️'
+      icon: PlaneIcon
     },
     {
       value: 'past',
       label: 'Completed',
       color: 'from-purple-600 to-purple-700',
       count: stats.completed,
-      emoji: '✅'
+      icon: CheckCircleIcon
     }
   ];
 
@@ -163,6 +165,11 @@ export default function InteractiveDashboardHeader({
           </div>
         </div>
 
+        {/* Mobile Quick Stats - Before Weather Widget */}
+        <div className="lg:hidden mb-4">
+          <SwipeableStats trips={trips} showAnalyticsButton={true} />
+        </div>
+
         {/* Desktop Search Bar */}
         <div className="hidden lg:block mb-4 lg:mb-6 search-mobile">
           <div className="relative">
@@ -187,11 +194,15 @@ export default function InteractiveDashboardHeader({
           </div>
         </div>
 
-        {/* Filter Tabs with Stats and View Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 mb-4 lg:mb-6 filter-tabs-mobile">
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-            {filterOptions.map((option, index) => {
+        {/* Filter Tabs with Stats and View Controls - Mobile Optimized */}
+        <div className="relative mb-4 lg:mb-6">
+          {/* Glass Background Container */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-white/10 dark:from-white/5 dark:via-white/2 dark:to-white/5 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-white/10 shadow-lg"></div>
+
+          <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 p-4 lg:p-5 filter-tabs-mobile">
+            {/* Filter Tabs - Mobile Optimized */}
+            <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+            {filterOptions.map((option) => {
               const isActive = filter === option.value;
 
               return (
@@ -199,19 +210,21 @@ export default function InteractiveDashboardHeader({
                   key={option.value}
                   onClick={() => setFilter(option.value as any)}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200",
+                    "flex items-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg font-medium transition-all duration-200 mobile-touch-optimized",
+                    "text-xs lg:text-sm",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border"
+                      ? "bg-primary text-primary-foreground shadow-md scale-105"
+                      : "bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50 hover:border-border active:scale-95"
                   )}
                 >
-                  <span className="text-sm">{option.emoji}</span>
-                  <span className="text-sm">{option.label}</span>
+                  <option.icon className="h-3.5 w-3.5 lg:h-4 lg:w-4 flex-shrink-0" />
+                  <span className="hidden sm:inline text-xs lg:text-sm">{option.label}</span>
+                  <span className="sm:hidden text-xs font-semibold">{option.label.split(' ')[0]}</span>
                   <span className={cn(
-                    "text-xs px-2 py-0.5 rounded-full font-semibold",
+                    "text-xs px-1.5 lg:px-2 py-0.5 rounded-full font-semibold",
                     isActive
                       ? "bg-primary-foreground/20 text-primary-foreground"
-                      : "bg-background text-foreground"
+                      : "bg-background/80 text-foreground"
                   )}>
                     {option.count}
                   </span>
@@ -279,22 +292,12 @@ export default function InteractiveDashboardHeader({
               >
                 <GridIcon className="h-4 w-4" />
               </button>
-              <button
-                onClick={() => setViewMode('timeline')}
-                className={cn(
-                  "p-1.5 rounded-md transition-all duration-200",
-                  viewMode === 'timeline'
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                )}
-                title="Timeline View"
-              >
-                <ClockIcon className="h-4 w-4" />
-              </button>
+
             </div>
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

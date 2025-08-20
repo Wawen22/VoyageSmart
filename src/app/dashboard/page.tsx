@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import InteractiveDashboardHeader from '@/components/dashboard/InteractiveDashboardHeader';
 import InteractiveTripCard from '@/components/dashboard/InteractiveTripCard';
 import InteractiveEmptyState from '@/components/dashboard/InteractiveEmptyState';
-import TripTimeline from '@/components/dashboard/TripTimeline';
+
 import ModernLoadingSkeleton, {
   ModernStatsLoadingSkeleton,
   ModernHeaderLoadingSkeleton
@@ -15,7 +15,6 @@ import ModernLoadingSkeleton, {
 import FloatingActionButton from '@/components/dashboard/FloatingActionButton';
 import StickySearchBar from '@/components/dashboard/StickySearchBar';
 import PullToRefresh from '@/components/dashboard/PullToRefresh';
-import BottomSheetFilters from '@/components/dashboard/BottomSheetFilters';
 import SwipeableStats from '@/components/dashboard/SwipeableStats';
 
 import { useAnimationOptimization, useOptimizedLoading } from '@/hooks/usePerformance';
@@ -44,7 +43,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [tripCount, setTripCount] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<string>('created_desc');
-  const [viewMode, setViewMode] = useState<'grid' | 'timeline' | 'map'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
@@ -243,22 +242,7 @@ export default function Dashboard() {
     return new Date(dateString).toLocaleDateString();
   };
 
-  // Get available years for filter
-  const availableYears = trips.reduce((years, trip) => {
-    if (trip.start_date) {
-      const year = new Date(trip.start_date).getFullYear();
-      if (!years.includes(year)) {
-        years.push(year);
-      }
-    } else {
-      // Planning trips count as current year
-      const currentYear = new Date().getFullYear();
-      if (!years.includes(currentYear)) {
-        years.push(currentYear);
-      }
-    }
-    return years;
-  }, [] as number[]).sort((a, b) => a - b);
+
 
   // Filter trips based on the selected filter, search term, and year
   const filteredTrips = trips.filter(trip => {
@@ -369,24 +353,7 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Mobile Components */}
-      <div className="lg:hidden relative z-10 max-w-7xl mx-auto px-4 pb-4">
-        {/* Swipeable Stats */}
-        <SwipeableStats trips={trips} className="mb-4" />
 
-        {/* Bottom Sheet Filters */}
-        <div className="flex justify-center">
-          <BottomSheetFilters
-            filter={filter}
-            setFilter={setFilter}
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
-            availableYears={availableYears}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-          />
-        </div>
-      </div>
 
       {/* Trips Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-6 xl:px-8 pb-8">
@@ -399,12 +366,6 @@ export default function Dashboard() {
             <InteractiveEmptyState />
           ) : filteredTrips.length === 0 ? (
             <InteractiveEmptyState searchTerm={searchTerm} filter={filter} />
-          ) : viewMode === 'timeline' ? (
-            <TripTimeline
-              trips={filteredTrips}
-              searchTerm={searchTerm}
-              filter={filter}
-            />
           ) : viewMode === 'map' ? (
             <TripsMapView
               trips={filteredTrips as any}
