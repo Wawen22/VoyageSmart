@@ -5,6 +5,12 @@ import { usePathname } from 'next/navigation';
 import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
 import FormattedAIResponse from './FormattedAIResponse';
 import { useAIProvider } from '@/hooks/useAIProvider';
+import { handleAccommodationConversation, completeAccommodationConversation } from '@/lib/services/aiConversationService';
+import { resetConversation } from '@/lib/services/conversationStateService';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/lib/store';
+import { addAccommodation } from '@/lib/features/accommodationSlice';
+import ConversationUIHandler from './ConversationUIHandler';
 import '@/styles/ai-assistant.css';
 
 type Message = {
@@ -69,6 +75,9 @@ export default function ChatBot({
   // Hook per gestire il provider AI
   const { currentProvider } = useAIProvider();
 
+  // Redux dispatch per le azioni
+  const dispatch = useDispatch<AppDispatch>();
+
   // Determina la sezione corrente basata sull'URL
   const getCurrentSection = () => {
     if (pathname.includes('/expenses')) return 'expenses';
@@ -84,6 +93,8 @@ export default function ChatBot({
 
   // Stato per tracciare se il contesto è stato caricato
   const [contextLoaded, setContextLoaded] = useState(false);
+  // Stato per tracciare se l'utente ha mai aperto la chat
+  const [hasEverOpened, setHasEverOpened] = useState(false);
   const [rateLimitError, setRateLimitError] = useState(false);
 
   // Debug info
@@ -117,6 +128,13 @@ export default function ChatBot({
 
   // Stato per prevenire chiamate multiple simultanee
   const [isLoadingContext, setIsLoadingContext] = useState(false);
+
+  // Stato per gestire i componenti UI conversazionali
+  const [activeUIComponent, setActiveUIComponent] = useState<{
+    component: string;
+    props: any;
+    messageIndex: number;
+  } | null>(null);
 
   // Stato per gestire i retry con backoff esponenziale
   const [retryCount, setRetryCount] = useState(0);
@@ -338,6 +356,14 @@ export default function ChatBot({
     }
   }, [tripId]);
 
+  // Reset del contesto conversazionale quando il componente si monta
+  useEffect(() => {
+    if (tripData?.currentUserId) {
+      console.log('=== Component mounted, resetting any residual conversation context ===');
+      resetConversation(tripId, tripData.currentUserId);
+    }
+  }, [tripId, tripData?.currentUserId]);
+
   // Genera domande suggerite quando il contesto è caricato E la chat è aperta
   useEffect(() => {
     if (contextLoaded && tripData && !isMinimized) {
@@ -354,6 +380,55 @@ export default function ChatBot({
       localStorage.setItem(`chat_messages_${tripId}`, JSON.stringify(messages));
     }
   }, [messages, tripId]);
+
+  // Gestisce le azioni dell'utente sui componenti UI conversazionali
+  const handleUIAction = async (action: string, value?: any) => {
+    console.log('=== UI Action ===', action, value);
+
+    // Per le azioni di conferma/cancellazione, gestisci direttamente senza rimuovere il componente UI
+    if (action === 'confirmed' || action === 'cancelled') {
+      // Non rimuovere il componente UI ancora, lo faremo dopo il salvataggio
+
+      // Simula l'invio di un messaggio basato sull'azione
+      const messageToSend = action === 'confirmed' ? 'CONFIRM_SAVE_ACCOMMODATION' : 'CANCEL_ACCOMMODATION';
+      console.log('=== Sending special message ===', messageToSend);
+
+      // Invia il messaggio speciale per il salvataggio
+      await handleSendMessage(messageToSend);
+      return;
+    }
+
+    // Per altre azioni, rimuovi il componente UI attivo
+    setActiveUIComponent(null);
+
+    // Simula l'invio di un messaggio basato sull'azione
+    let messageToSend = '';
+
+    switch (action) {
+      case 'date_selected':
+        messageToSend = value;
+        break;
+      case 'type_selected':
+        console.log('=== Type selected from UI ===', value);
+        // Assicurati che il messaggio sia in lowercase per il parsing
+        messageToSend = value.toLowerCase();
+        break;
+      case 'currency_selected':
+        console.log('=== Currency selected from UI ===', value);
+        // Assicurati che il messaggio sia in uppercase per la valuta
+        messageToSend = value.toUpperCase();
+        break;
+      default:
+        messageToSend = value || action;
+    }
+
+    console.log('=== Final message to send ===', messageToSend);
+
+    // Invia il messaggio simulato
+    if (messageToSend) {
+      await handleSendMessage(messageToSend);
+    }
+  };
 
   const handleSendMessage = async (messageText?: string) => {
     // Prevent while a request is in-flight
@@ -397,6 +472,166 @@ export default function ChatBot({
     // Clear input field only if we're using it (not for suggested questions)
     if (!messageText) {
       setInput('');
+    }
+
+    // Check for active conversation first (before making API call)
+    if (tripData?.currentUserId) {
+      try {
+        console.log('=== Checking for active conversation ===');
+        console.log('Message:', messageToSend);
+        console.log('Trip ID:', tripId);
+        console.log('User ID:', tripData.currentUserId);
+
+        const conversationResponse = handleAccommodationConversation(
+          messageToSend,
+          tripId,
+          tripData.currentUserId
+        );
+        console.log('=== Conversation response received ===', conversationResponse);
+
+        // Se la conversazione ha gestito il messaggio (ha un messaggio o shouldContinue è true)
+        if (conversationResponse.message || conversationResponse.shouldContinue || conversationResponse.action) {
+          console.log('=== Conversation handled the message ===');
+
+          // Handle conversation response (always add message if there is one)
+          if (conversationResponse.message) {
+            const assistantMessage: Message = {
+              role: 'assistant',
+              content: conversationResponse.message,
+              timestamp: new Date()
+            };
+
+            setMessages(prev => {
+              const newMessages = [...prev, assistantMessage];
+
+              // Se c'è un componente UI da mostrare, salvalo con l'indice del messaggio
+              if (conversationResponse.uiComponent) {
+                setActiveUIComponent({
+                  component: conversationResponse.uiComponent,
+                  props: conversationResponse.uiProps || {},
+                  messageIndex: newMessages.length - 1
+                });
+              } else if (conversationResponse.shouldContinue) {
+                // Solo rimuovi il componente UI se la conversazione continua
+                setActiveUIComponent(null);
+              }
+
+              return newMessages;
+            });
+          }
+
+          setIsLoading(false);
+          setIsTyping(false);
+
+          // If we need to save accommodation, do it now
+          if (conversationResponse.action === 'save_accommodation' && conversationResponse.data) {
+            console.log('=== SAVE ACCOMMODATION ACTION TRIGGERED ===');
+            console.log('Conversation response:', conversationResponse);
+            console.log('Data to save:', conversationResponse.data);
+
+            // Aggiorna il componente UI per mostrare lo stato di caricamento
+            if (activeUIComponent && activeUIComponent.component === 'data_summary') {
+              setActiveUIComponent({
+                ...activeUIComponent,
+                props: {
+                  ...activeUIComponent.props,
+                  loading: true
+                }
+              });
+            }
+
+            try {
+              console.log('=== Dispatching addAccommodation ===');
+
+              await dispatch(addAccommodation({
+                trip_id: tripId,
+                name: conversationResponse.data.name || '',
+                type: conversationResponse.data.type || 'hotel',
+                check_in_date: conversationResponse.data.check_in_date || null,
+                check_out_date: conversationResponse.data.check_out_date || null,
+                address: conversationResponse.data.address || null,
+                booking_reference: conversationResponse.data.booking_reference || null,
+                contact_info: conversationResponse.data.contact_info || null,
+                cost: conversationResponse.data.cost || null,
+                currency: conversationResponse.data.currency || 'EUR',
+                documents: [],
+                notes: conversationResponse.data.notes || null,
+                coordinates: null
+              })).unwrap();
+
+              console.log('=== Accommodation saved successfully ===');
+
+              // Show success message
+              const successResponse = completeAccommodationConversation(
+                tripId,
+                tripData.currentUserId,
+                true
+              );
+
+              const successMessage: Message = {
+                role: 'assistant',
+                content: successResponse.message,
+                timestamp: new Date()
+              };
+
+              setMessages(prev => [...prev, successMessage]);
+
+              // Rimuovi il componente UI solo dopo il successo
+              setActiveUIComponent(null);
+
+          // Rigenera i suggerimenti ora che non siamo più in modalità inserimento
+          setTimeout(() => generateSuggestedQuestions(), 100);
+
+            } catch (error: any) {
+              console.error('Error saving accommodation:', error);
+
+              // Rimuovi lo stato di loading dal componente UI
+              if (activeUIComponent && activeUIComponent.component === 'data_summary') {
+                setActiveUIComponent({
+                  ...activeUIComponent,
+                  props: {
+                    ...activeUIComponent.props,
+                    loading: false
+                  }
+                });
+              }
+
+              // Show error message
+              const errorResponse = completeAccommodationConversation(
+                tripId,
+                tripData.currentUserId,
+                false,
+                error.message
+              );
+
+              const errorMessage: Message = {
+                role: 'assistant',
+                content: errorResponse.message,
+                timestamp: new Date()
+              };
+
+              setMessages(prev => [...prev, errorMessage]);
+            }
+          }
+
+        // Handle cancel action
+        if (conversationResponse.action === 'cancel') {
+          // Rimuovi il componente UI per l'azione di cancellazione
+          setActiveUIComponent(null);
+
+          // Rigenera i suggerimenti ora che non siamo più in modalità inserimento
+          setTimeout(() => generateSuggestedQuestions(), 100);
+        }
+
+          return; // Exit early, don't make API call
+        } else {
+          console.log('=== Conversation did not handle the message, proceeding with normal API call ===');
+          // La conversazione non ha gestito il messaggio, continua con l'API normale
+        }
+      } catch (error) {
+        console.error('Error in conversation handling:', error);
+        // Continue with normal API call if conversation handling fails
+      }
     }
 
     setIsLoading(true);
@@ -604,10 +839,15 @@ export default function ChatBot({
     const newState = !isMinimized;
     setIsMinimized(newState);
 
-    // Se l'utente sta aprendo la chat per la prima volta, carica il contesto
-    if (!newState && !contextLoaded) {
-      console.log('Chat aperta per la prima volta, caricamento contesto...');
-      loadContext();
+    // Se l'utente sta aprendo la chat, segna che è stata aperta almeno una volta
+    if (!newState) {
+      setHasEverOpened(true);
+
+      // Se il contesto non è ancora caricato, caricalo
+      if (!contextLoaded) {
+        console.log('Chat aperta per la prima volta, caricamento contesto...');
+        loadContext();
+      }
     }
 
     // Su mobile, quando si apre la chat, va direttamente in fullscreen
@@ -631,16 +871,27 @@ export default function ChatBot({
     setIsExpanded(!isExpanded);
     if (isMinimized) setIsMinimized(false);
 
-    // Se l'utente sta aprendo la chat per la prima volta, carica il contesto
-    if (wasMinimized && !contextLoaded) {
-      console.log('Chat aperta per la prima volta (expand), caricamento contesto...');
-      loadContext();
+    // Se l'utente sta aprendo la chat, segna che è stata aperta almeno una volta
+    if (wasMinimized) {
+      setHasEverOpened(true);
+
+      // Se il contesto non è ancora caricato, caricalo
+      if (!contextLoaded) {
+        console.log('Chat aperta per la prima volta (expand), caricamento contesto...');
+        loadContext();
+      }
     }
   };
 
   // Funzione per cancellare la conversazione
   // Genera domande suggerite dinamicamente basate sulla sezione corrente
   const generateSuggestedQuestions = () => {
+    // Non mostrare suggerimenti durante l'inserimento di dati
+    if (activeUIComponent) {
+      setSuggestedQuestions([]);
+      return;
+    }
+
     const questions: SuggestedQuestion[] = [];
     const crossSectionQuestions: SuggestedQuestion[] = [];
 
@@ -873,85 +1124,71 @@ export default function ChatBot({
 
     // Aggiungi sempre suggerimenti cross-section utili (se non siamo già in quella sezione)
 
-    // Itinerario (se non siamo nella sezione itinerary)
-    if (currentSection !== 'itinerary' && tripData?.itinerary && tripData.itinerary.length > 0) {
-      const totalActivities = tripData.itinerary.reduce((sum, day) =>
-        sum + (day.activities ? day.activities.length : 0), 0
-      );
+    // Solo suggerimenti principali e essenziali
+
+    // Alloggi (sempre utile)
+    if (currentSection !== 'accommodations') {
       crossSectionQuestions.push({
-        text: "Mostrami l'itinerario",
+        text: "Alloggi",
         action: () => {
-          const question = "Mostrami il mio itinerario completo";
+          const question = "Mostrami i miei alloggi";
           setInput(question);
           handleSendMessage(question);
         }
       });
     }
 
-    // Alloggi (se non siamo nella sezione accommodations)
-    if (currentSection !== 'accommodations' && tripData?.accommodations && tripData.accommodations.length > 0) {
+    // Trasporti (sempre utile)
+    if (currentSection !== 'transportation') {
       crossSectionQuestions.push({
-        text: "Dettagli sui miei alloggi",
+        text: "Trasporti",
         action: () => {
-          const question = "Mostrami i dettagli dei miei alloggi";
+          const question = "Mostrami i miei trasporti";
           setInput(question);
           handleSendMessage(question);
         }
       });
     }
 
-    // Trasporti (se non siamo nella sezione transportation)
-    if (currentSection !== 'transportation' && tripData?.transportation && tripData.transportation.length > 0) {
+    // Spese (sempre utile)
+    if (currentSection !== 'expenses') {
       crossSectionQuestions.push({
-        text: "Info sui miei trasporti",
+        text: "Spese",
         action: () => {
-          const question = "Mostrami le informazioni sui miei trasporti";
+          const question = "Mostrami le mie spese";
           setInput(question);
           handleSendMessage(question);
         }
       });
     }
 
-    // Budget/Spese (se non siamo nella sezione expenses)
-    if (currentSection !== 'expenses' && tripData?.expenses && tripData.expenses.length > 0) {
+    // Itinerario (sempre utile)
+    if (currentSection !== 'itinerary') {
       crossSectionQuestions.push({
-        text: "Situazione budget",
+        text: "Itinerario",
         action: () => {
-          const question = "Come va il nostro budget?";
+          const question = "Mostrami il mio itinerario";
           setInput(question);
           handleSendMessage(question);
         }
       });
     }
 
-    // Suggerimenti per attività/destinazione sempre utili
-    if (tripData?.destination) {
-      crossSectionQuestions.push({
-        text: "Cosa fare a " + tripData.destination,
-        action: () => {
-          const question = "Cosa posso fare a " + tripData.destination + "?";
-          setInput(question);
-          handleSendMessage(question);
-        }
-      });
-    }
+    // Panoramica generale (sempre utile)
+    crossSectionQuestions.push({
+      text: "Panoramica viaggio",
+      action: () => {
+        const question = "Dammi una panoramica del mio viaggio";
+        setInput(question);
+        handleSendMessage(question);
+      }
+    });
 
-    // Suggerimento generale sempre presente se non ci sono abbastanza suggerimenti specifici
-    if (currentSection === 'overview' || questions.length < 2) {
-      crossSectionQuestions.push({
-        text: "Panoramica viaggio",
-        action: () => {
-          const question = "Dammi una panoramica completa del mio viaggio";
-          setInput(question);
-          handleSendMessage(question);
-        }
-      });
-    }
-
-    // Combina suggerimenti specifici (priorità alta) con cross-section (priorità bassa)
-    // Mantieni sempre almeno 2 suggerimenti specifici se disponibili, poi aggiungi cross-section
-    const maxSpecific = Math.min(questions.length, 4);
-    const maxCrossSection = Math.max(0, 6 - maxSpecific);
+    // Combina suggerimenti specifici con quelli principali
+    // Massimo 5 suggerimenti totali per non occupare troppo spazio
+    const maxTotal = 5;
+    const maxSpecific = Math.min(questions.length, 2); // Max 2 specifici
+    const maxCrossSection = Math.min(crossSectionQuestions.length, maxTotal - maxSpecific);
 
     const finalQuestions = [
       ...questions.slice(0, maxSpecific),
@@ -966,6 +1203,12 @@ export default function ChatBot({
       // Rimuovi i messaggi dal localStorage
       localStorage.removeItem(`chat_messages_${tripId}`);
 
+      // IMPORTANTE: Reset del contesto conversazionale per gli alloggi
+      if (tripData?.currentUserId) {
+        console.log('=== Resetting conversation context ===');
+        resetConversation(tripId, tripData.currentUserId);
+      }
+
       // Reimposta i messaggi con solo il messaggio iniziale
       setMessages([{
         role: 'assistant',
@@ -974,6 +1217,10 @@ export default function ChatBot({
 
       // Ricarica il contesto
       setContextLoaded(false);
+      setHasEverOpened(false);
+
+      // Pulisci i componenti UI attivi
+      setActiveUIComponent(null);
 
       // Rigenera le domande suggerite
       generateSuggestedQuestions();
@@ -992,7 +1239,7 @@ export default function ChatBot({
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-400 rounded-full border-2 border-purple-600 animate-pulse"></div>
         </div>
         <span className="sm:inline hidden font-medium text-sm">
-          {contextLoaded ? 'AI Assistant' : 'AI Assistant (Loading...)'}
+          {!hasEverOpened ? 'AI Assistant' : (contextLoaded ? 'AI Assistant' : 'AI Assistant (Loading...)')}
         </span>
       </button>
     );
@@ -1114,6 +1361,17 @@ export default function ChatBot({
                     tripData={tripData}
                     tripId={tripId}
                   />
+
+                  {/* Componente UI conversazionale se attivo per questo messaggio */}
+                  {activeUIComponent && activeUIComponent.messageIndex === index && (
+                    <div className="mt-3">
+                      <ConversationUIHandler
+                        uiComponent={activeUIComponent.component}
+                        uiProps={activeUIComponent.props}
+                        onUserAction={handleUIAction}
+                      />
+                    </div>
+                  )}
                 </div>
                 {message.timestamp && (
                   <span className="text-xs text-slate-500 px-2">
