@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import ImageModal from '@/components/ui/ImageModal';
 // Import icons from lucide-react
 import {
   Send as SendIcon,
@@ -66,6 +67,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
   const [isParticipant, setIsParticipant] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; alt: string } | null>(null);
 
   // Fetch messages and set up real-time subscription
   useEffect(() => {
@@ -635,15 +637,27 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
                     {message.attachment_url && (
                       <div className="mt-2">
                         {message.attachment_type?.startsWith('image/') ? (
-                          <div className="relative">
+                          <div
+                            className="relative group cursor-pointer"
+                            onClick={() => {
+                              setSelectedImage({
+                                url: message.attachment_url,
+                                alt: `Image shared by ${message.users.full_name}`
+                              });
+                            }}
+                          >
                             <img
                               src={message.attachment_url}
                               alt="Attachment"
-                              className="max-w-full rounded-md max-h-48 object-contain cursor-pointer"
-                              onClick={() => window.open(message.attachment_url, '_blank')}
+                              className="max-w-full rounded-xl max-h-48 object-contain transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                             />
-                            <div className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-2 py-0.5 rounded">
-                              Clicca per visualizzare
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
+                              <div className="glass-card px-3 py-1.5 rounded-lg">
+                                <span className="text-white text-sm font-medium">Click to view</span>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                              🔍 Click to enlarge
                             </div>
                           </div>
                         ) : message.attachment_type?.startsWith('video/') ? (
@@ -784,6 +798,14 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
           </button>
         </div>
       </div>
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        imageUrl={selectedImage?.url || ''}
+        imageAlt={selectedImage?.alt || 'Chat Image'}
+      />
     </div>
   );
 }

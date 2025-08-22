@@ -8,12 +8,14 @@ import { useAuth } from '@/lib/auth'; // Import useAuth
 import { supabase } from '@/lib/supabase'; // Keep for resetPassword
 import RateLimitInfo from '@/components/ui/RateLimitInfo';
 import { useAutoAuthCleanup } from '@/hooks/useAuthCleanup';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Home } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
   const { signIn, user } = useAuth(); // Get signIn and user from auth context
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -167,124 +169,201 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 md:p-8">
-      <div className="w-full max-w-md p-6 sm:p-8 space-y-6 bg-card rounded-lg shadow-md border border-border">
-        <div className="text-center">
-          <div className="flex justify-center mb-4">
-            <Image
-              src="/images/logo-voyage_smart.png"
-              alt="Voyage Smart Logo"
-              width={240}
-              height={70}
-              className="h-16 w-auto"
-              priority
-            />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Login to your account</h1>
-          <p className="mt-2 text-muted-foreground">Sign in to continue planning your trips</p>
-        </div>
+    <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
+      {/* Back to Home Button */}
+      <Link
+        href="/"
+        className="fixed top-6 left-6 z-20 glass-card rounded-full p-3 hover:scale-110 transition-all duration-300 group hover:shadow-lg hover:shadow-primary/20"
+        title="Back to Home"
+      >
+        <Home className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
+      </Link>
 
-        {success && (
-          <div className="bg-primary/10 border-l-4 border-primary p-4 text-primary mb-4">
-            <p>{success}</p>
-          </div>
-        )}
+      {/* Animated Background with Glass Orbs */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+        <div className="glass-grid-pattern absolute inset-0"></div>
 
-        {error && (
-          <div className="bg-destructive/10 border-l-4 border-destructive p-4 text-destructive mb-4">
-            <p>{error}</p>
-            {(error.includes('Too many login attempts') || error.includes('rate limit')) && (
-              <button
-                onClick={() => setShowRateLimitInfo(true)}
-                className="mt-2 text-sm underline hover:no-underline"
-              >
-                Learn more about rate limiting
-              </button>
-            )}
-          </div>
-        )}
+        {/* Floating Glass Orbs */}
+        <div className="glass-orb glass-orb-primary absolute top-20 left-20 w-32 h-32 glass-orb-float"></div>
+        <div className="glass-orb glass-orb-secondary absolute bottom-20 right-20 w-40 h-40 glass-orb-float" style={{ animationDelay: '-4s' }}></div>
+        <div className="glass-orb glass-orb-primary absolute top-1/2 left-10 w-24 h-24 glass-orb-float" style={{ animationDelay: '-2s' }}></div>
+        <div className="glass-orb glass-orb-secondary absolute bottom-1/3 right-10 w-28 h-28 glass-orb-float" style={{ animationDelay: '-6s' }}></div>
+      </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground">
-              Email address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-input bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="you@example.com"
-            />
+      {/* Main Login Card */}
+      <div className="relative z-10 w-full max-w-md mx-4">
+        <div className="glass-card rounded-3xl p-8 space-y-6 animate-glass-fade-in shadow-2xl">
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="glass-card rounded-2xl p-4 inline-block">
+                <Image
+                  src="/images/logo-voyage_smart.png"
+                  alt="Voyage Smart Logo"
+                  width={180}
+                  height={52}
+                  className="h-12 w-auto"
+                  priority
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold gradient-text-primary">Welcome Back</h1>
+              <p className="text-muted-foreground">Sign in to continue your journey</p>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-input bg-background text-foreground rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="••••••••"
-            />
-          </div>
+          {/* Success Message */}
+          {success && (
+            <div className="glass-card rounded-xl p-4 bg-emerald-500/10 border-emerald-500/20 animate-glass-slide-up">
+              <p className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">{success}</p>
+            </div>
+          )}
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
+          {/* Error Message */}
+          {error && (
+            <div className="glass-card rounded-xl p-4 bg-red-500/10 border-red-500/20 animate-glass-slide-up">
+              <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
+              {(error.includes('Too many login attempts') || error.includes('rate limit')) && (
+                <button
+                  onClick={() => setShowRateLimitInfo(true)}
+                  className="mt-2 text-sm text-red-500 hover:text-red-600 underline hover:no-underline transition-colors"
+                >
+                  Learn more about rate limiting
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Rate Limit Info */}
+          {showRateLimitInfo && (
+            <div className="animate-glass-slide-up">
+              <RateLimitInfo />
+            </div>
+          )}
+
+          {/* Login Form */}
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-foreground">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="glass-card w-full pl-10 pr-4 py-3 rounded-xl border-0 bg-black/10 dark:bg-white/5 backdrop-blur-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-black/15 dark:focus:bg-white/10 transition-all duration-300"
+                  placeholder="Enter your email"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-foreground">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="glass-card w-full pl-10 pr-12 py-3 rounded-xl border-0 bg-black/10 dark:bg-white/5 backdrop-blur-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-black/15 dark:focus:bg-white/10 transition-all duration-300"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Forgot Password */}
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={handleResetPassword}
-                className="text-primary hover:text-primary/90 font-medium transition-colors"
+                className="text-sm text-primary hover:text-primary/80 font-medium transition-colors hover:underline"
               >
-                Forgot your password?
+                Forgot password?
               </button>
             </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading || cooldownTime > 0}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-colors"
-            >
-              {loading ? 'Signing in...' :
-               cooldownTime > 0 ? `Wait ${cooldownTime}s` :
-               'Sign in'}
-            </button>
-          </div>
-        </form>
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading || cooldownTime > 0}
+                className="glass-button-primary w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Signing in...
+                  </>
+                ) : cooldownTime > 0 ? (
+                  `Wait ${cooldownTime}s`
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight className="h-5 w-5" />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
 
-        <div className="mt-4">
-          <div className="relative">
+          {/* Divider */}
+          <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
+              <div className="w-full border-t border-black/20 dark:border-white/10"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-muted-foreground">Don't have an account?</span>
+              <span className="px-4 glass-card rounded-full text-muted-foreground bg-black/10 dark:bg-white/5">
+                New to VoyageSmart?
+              </span>
             </div>
           </div>
 
-          <div className="mt-6">
+          {/* Register Link */}
+          <Link
+            href={(() => {
+              const returnUrl = searchParams.get('returnUrl');
+              const redirect = searchParams.get('redirect');
+              const redirectParam = returnUrl || redirect;
+              return redirectParam
+                ? `/register?returnUrl=${encodeURIComponent(redirectParam)}`
+                : '/register';
+            })()}
+            className="glass-button w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-semibold text-foreground transition-all duration-300 hover:scale-[1.02] hover:bg-black/15 dark:hover:bg-white/10"
+          >
+            Create Account
+          </Link>
+
+          {/* Back to Home Link */}
+          <div className="text-center mt-4">
             <Link
-              href={(() => {
-                const returnUrl = searchParams.get('returnUrl');
-                const redirect = searchParams.get('redirect');
-                const redirectParam = returnUrl || redirect;
-                return redirectParam
-                  ? `/register?returnUrl=${encodeURIComponent(redirectParam)}`
-                  : '/register';
-              })()}
-              className="w-full flex justify-center py-2 px-4 border border-input rounded-md shadow-sm text-sm font-medium text-foreground bg-secondary hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+              href="/"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors duration-300 underline hover:no-underline"
             >
-              Create an account
+              ← Back to VoyageSmart
             </Link>
           </div>
         </div>
