@@ -143,6 +143,74 @@ export function ConfirmationButtons({
   );
 }
 
+interface CancelInsertionButtonProps {
+  onCancel: () => void;
+}
+
+export function CancelInsertionButton({ onCancel }: CancelInsertionButtonProps) {
+  const handleCancel = () => {
+    // Feedback visivo immediato
+    console.log('=== Cancel button clicked - immediate action ===');
+    onCancel();
+  };
+
+  return (
+    <div className="bg-slate-700/30 rounded-lg p-3 my-2 border border-slate-600/30">
+      <Button
+        onClick={handleCancel}
+        variant="outline"
+        className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-500 min-h-[40px] transition-all duration-200"
+      >
+        <X className="h-4 w-4 mr-2" />
+        Annulla inserimento
+      </Button>
+    </div>
+  );
+}
+
+interface FieldWithCancelProps {
+  mainComponent: string;
+  mainProps: any;
+  onCancel: () => void;
+  onAction?: (action: string, data?: any) => void;
+}
+
+export function FieldWithCancel({ mainComponent, mainProps, onCancel, onAction }: FieldWithCancelProps) {
+  const renderMainComponent = () => {
+    switch (mainComponent) {
+      case 'date_selector':
+        return <DateSelector {...mainProps} onSelect={(date) => onAction?.('selected', date)} />;
+      case 'type_selector':
+        return <AccommodationTypeSelector onSelect={(type) => onAction?.('selected', type)} />;
+      case 'transportation_type_selector':
+        return <TransportationTypeSelector onSelect={(type) => onAction?.('selected', type)} />;
+      case 'currency_selector':
+        return <CurrencySelector onSelect={(currency) => onAction?.('selected', currency)} />;
+      case 'text_input':
+        return (
+          <div className="bg-slate-700/50 rounded-lg p-4 my-3 border border-slate-600/50">
+            <p className="text-slate-300 text-sm mb-3">{mainProps.placeholder}</p>
+            <p className="text-slate-400 text-xs">Scrivi la tua risposta nel campo di testo qui sotto.</p>
+          </div>
+        );
+      default:
+        console.log('=== FieldWithCancel: Unknown component ===', mainComponent);
+        return (
+          <div className="bg-red-900/20 rounded-lg p-4 my-3 border border-red-500/50">
+            <p className="text-red-400 text-sm">Componente non riconosciuto: {mainComponent}</p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div>
+      {renderMainComponent()}
+      <CancelInsertionButton onCancel={onCancel} />
+    </div>
+  );
+}
+
 interface CurrencySelectorProps {
   onSelect: (currency: string) => void;
 }
@@ -197,6 +265,173 @@ export function AccommodationTypeSelector({ onSelect }: { onSelect: (type: strin
   ];
 
   return <OptionSelector title="Tipo di Alloggio" options={types} onSelect={onSelect} />;
+}
+
+export function TransportationTypeSelector({ onSelect }: { onSelect: (type: string) => void }) {
+  const types = [
+    { value: 'flight', label: 'Volo', icon: '✈️', description: 'Aereo' },
+    { value: 'train', label: 'Treno', icon: '🚄', description: 'Ferrovia' },
+    { value: 'bus', label: 'Autobus', icon: '🚌', description: 'Pullman' },
+    { value: 'car', label: 'Auto', icon: '🚗', description: 'Macchina' },
+    { value: 'other', label: 'Altro', icon: '🚚', description: 'Altro mezzo' }
+  ];
+
+  return (
+    <div className="bg-slate-700/50 rounded-lg p-4 my-3 border border-slate-600/50">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-sm font-medium text-slate-200">Tipo di Trasporto</span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2">
+        {types.map((type) => (
+          <Button
+            key={type.value}
+            onClick={() => onSelect(type.value)}
+            variant="outline"
+            className="h-auto p-3 flex items-center gap-3 bg-slate-800/50 border-slate-600 hover:bg-slate-700 hover:border-slate-500 text-left justify-start"
+          >
+            <span className="text-xl">{type.icon}</span>
+            <div>
+              <div className="text-sm font-medium text-white">{type.label}</div>
+              <div className="text-xs text-slate-400">{type.description}</div>
+            </div>
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface TransportationSummaryProps {
+  data: Record<string, any>;
+  onContinue?: () => void;
+  onConfirm?: () => void;
+  onCancel: () => void;
+  isPartial?: boolean;
+  loading?: boolean;
+}
+
+export function TransportationSummary({
+  data,
+  onContinue,
+  onConfirm,
+  onCancel,
+  isPartial = false,
+  loading = false
+}: TransportationSummaryProps) {
+  const formatDate = (dateStr: string) => {
+    try {
+      return format(new Date(dateStr), 'dd MMMM yyyy', { locale: it });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    const types: Record<string, string> = {
+      'flight': '✈️ Volo',
+      'train': '🚄 Treno',
+      'bus': '🚌 Autobus',
+      'car': '🚗 Auto',
+      'other': '🚚 Altro'
+    };
+    return types[type] || type;
+  };
+
+  return (
+    <div className="bg-slate-700/50 rounded-lg p-4 my-3 border border-slate-600/50 max-w-full">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-white mb-3">
+          {isPartial ? '📋 Dati Interpretati' : '📋 Riepilogo Trasporto'}
+        </h3>
+
+        <div className="space-y-2 text-sm">
+          {data.type && (
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span className="text-slate-400 font-medium">Tipo:</span>
+              <span className="text-white font-medium">{getTypeLabel(data.type)}</span>
+            </div>
+          )}
+          {data.name && (
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span className="text-slate-400 font-medium">Nome:</span>
+              <span className="text-white font-medium break-words">{data.name}</span>
+            </div>
+          )}
+          {data.departure_location && (
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span className="text-slate-400 font-medium">Partenza:</span>
+              <span className="text-white font-medium">{data.departure_location}</span>
+            </div>
+          )}
+          {data.arrival_location && (
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span className="text-slate-400 font-medium">Arrivo:</span>
+              <span className="text-white font-medium">{data.arrival_location}</span>
+            </div>
+          )}
+          {data.departure_date && (
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span className="text-slate-400 font-medium">Data:</span>
+              <span className="text-white font-medium">{formatDate(data.departure_date)}</span>
+            </div>
+          )}
+          {data.departure_time && (
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span className="text-slate-400 font-medium">Orario partenza:</span>
+              <span className="text-white font-medium">{data.departure_time}</span>
+            </div>
+          )}
+          {data.arrival_time && (
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span className="text-slate-400 font-medium">Orario arrivo:</span>
+              <span className="text-white font-medium">{data.arrival_time}</span>
+            </div>
+          )}
+          {data.cost && (
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
+              <span className="text-slate-400 font-medium">Costo:</span>
+              <span className="text-white font-medium">{data.cost} {data.currency || 'EUR'}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-slate-700/50 rounded-lg p-4 my-3 border border-slate-600/50">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {isPartial && onContinue && (
+            <Button
+              onClick={onContinue}
+              disabled={loading}
+              className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white min-h-[44px]"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              {loading ? 'Continuando...' : 'Continua con questi dati'}
+            </Button>
+          )}
+          {!isPartial && onConfirm && (
+            <Button
+              onClick={onConfirm}
+              disabled={loading}
+              className="w-full sm:flex-1 bg-green-600 hover:bg-green-700 text-white min-h-[44px]"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              {loading ? 'Salvando...' : 'Conferma e Salva'}
+            </Button>
+          )}
+          <Button
+            onClick={onCancel}
+            disabled={loading}
+            variant="outline"
+            className="w-full sm:flex-1 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-500 min-h-[44px]"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Annulla
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 interface DataSummaryProps {

@@ -178,8 +178,9 @@ export function handleAccommodationConversation(
   }
 
   if (message === 'CANCEL_ACCOMMODATION') {
-    console.log('=== CANCEL_ACCOMMODATION received ===');
-    // Annulla l'operazione
+    console.log('=== CANCEL_ACCOMMODATION received (should not happen with immediate cancellation) ===');
+    // Questo non dovrebbe più essere raggiunto con l'annullamento immediato
+    // Ma lo lasciamo come fallback di sicurezza
     resetConversation(tripId, userId);
     return {
       message: 'Operazione annullata. L\'alloggio non è stato salvato. Posso aiutarti con qualcos\'altro?',
@@ -464,8 +465,11 @@ function getFieldPromptWithUI(field: AccommodationField, error?: string): Conver
       return {
         message,
         shouldContinue: true,
-        uiComponent: 'date_selector',
-        uiProps: { label: 'Data Check-in' }
+        uiComponent: 'field_with_cancel',
+        uiProps: {
+          mainComponent: 'date_selector',
+          mainProps: { label: 'Data Check-in' }
+        }
       };
 
     case 'check_out_date':
@@ -473,8 +477,11 @@ function getFieldPromptWithUI(field: AccommodationField, error?: string): Conver
       return {
         message,
         shouldContinue: true,
-        uiComponent: 'date_selector',
-        uiProps: { label: 'Data Check-out' }
+        uiComponent: 'field_with_cancel',
+        uiProps: {
+          mainComponent: 'date_selector',
+          mainProps: { label: 'Data Check-out' }
+        }
       };
 
     case 'type':
@@ -482,7 +489,11 @@ function getFieldPromptWithUI(field: AccommodationField, error?: string): Conver
       return {
         message,
         shouldContinue: true,
-        uiComponent: 'type_selector'
+        uiComponent: 'field_with_cancel',
+        uiProps: {
+          mainComponent: 'type_selector',
+          mainProps: {}
+        }
       };
 
     case 'currency':
@@ -490,14 +501,23 @@ function getFieldPromptWithUI(field: AccommodationField, error?: string): Conver
       return {
         message,
         shouldContinue: true,
-        uiComponent: 'currency_selector'
+        uiComponent: 'field_with_cancel',
+        uiProps: {
+          mainComponent: 'currency_selector',
+          mainProps: {}
+        }
       };
 
     default:
       message += config.question;
       return {
         message,
-        shouldContinue: true
+        shouldContinue: true,
+        uiComponent: 'field_with_cancel',
+        uiProps: {
+          mainComponent: 'text_input',
+          mainProps: { placeholder: config.question }
+        }
       };
   }
 }

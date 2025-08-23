@@ -6,10 +6,12 @@ import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2, He
 import FormattedAIResponse from './FormattedAIResponse';
 import { useAIProvider } from '@/hooks/useAIProvider';
 import { handleAccommodationConversation, completeAccommodationConversation } from '@/lib/services/aiConversationService';
+import { handleTransportationConversation, completeTransportationConversation } from '@/lib/services/transportationConversationService';
 import { resetConversation } from '@/lib/services/conversationStateService';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/lib/store';
 import { addAccommodation } from '@/lib/features/accommodationSlice';
+import { addTransportation } from '@/lib/features/transportationSlice';
 import ConversationUIHandler from './ConversationUIHandler';
 import '@/styles/ai-assistant.css';
 
@@ -385,12 +387,43 @@ export default function ChatBot({
   const handleUIAction = async (action: string, value?: any) => {
     console.log('=== UI Action ===', action, value);
 
-    // Per le azioni di conferma/cancellazione, gestisci direttamente senza rimuovere il componente UI
-    if (action === 'confirmed' || action === 'cancelled') {
-      // Non rimuovere il componente UI ancora, lo faremo dopo il salvataggio
+    // Gestione IMMEDIATA dell'annullamento
+    if (action === 'cancelled') {
+      console.log('=== IMMEDIATE CANCELLATION ===');
 
-      // Simula l'invio di un messaggio basato sull'azione
-      const messageToSend = action === 'confirmed' ? 'CONFIRM_SAVE_ACCOMMODATION' : 'CANCEL_ACCOMMODATION';
+      // Reset immediato del contesto conversazionale
+      if (tripData?.currentUserId) {
+        console.log('=== Resetting conversation context immediately ===');
+        resetConversation(tripId, tripData.currentUserId);
+      }
+
+      // Rimuovi immediatamente il componente UI
+      setActiveUIComponent(null);
+
+      // Aggiungi messaggio di conferma annullamento
+      const cancelMessage: Message = {
+        role: 'assistant',
+        content: 'Operazione annullata. Posso aiutarti con qualcos\'altro?',
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, cancelMessage]);
+
+      // Rigenera i suggerimenti
+      setTimeout(() => generateSuggestedQuestions(), 100);
+
+      return;
+    }
+
+    // Per l'azione di conferma, usa il flusso normale
+    if (action === 'confirmed') {
+      // Determina il tipo di conferma basandosi sul componente UI attivo
+      let messageToSend = 'CONFIRM_SAVE_ACCOMMODATION'; // Default
+
+      if (activeUIComponent?.component === 'transportation_final_summary') {
+        messageToSend = 'CONFIRM_SAVE_TRANSPORTATION';
+      }
+
       console.log('=== Sending special message ===', messageToSend);
 
       // Invia il messaggio speciale per il salvataggio
@@ -417,6 +450,14 @@ export default function ChatBot({
         console.log('=== Currency selected from UI ===', value);
         // Assicurati che il messaggio sia in uppercase per la valuta
         messageToSend = value.toUpperCase();
+        break;
+      case 'transportation_type_selected':
+        console.log('=== Transportation type selected from UI ===', value);
+        messageToSend = value.toLowerCase();
+        break;
+      case 'continue_with_partial_data':
+        console.log('=== User confirmed partial data ===');
+        messageToSend = 'CONTINUE_WITH_PARTIAL_DATA';
         break;
       default:
         messageToSend = value || action;
@@ -482,14 +523,38 @@ export default function ChatBot({
         console.log('Trip ID:', tripId);
         console.log('User ID:', tripData.currentUserId);
 
-        const conversationResponse = handleAccommodationConversation(
+        // Prova prima con gli accommodations
+        console.log('=== Trying accommodation conversation ===');
+        const accommodationResponse = handleAccommodationConversation(
           messageToSend,
           tripId,
           tripData.currentUserId
         );
-        console.log('=== Conversation response received ===', conversationResponse);
+        console.log('=== Accommodation response received ===', accommodationResponse);
 
-        // Se la conversazione ha gestito il messaggio (ha un messaggio o shouldContinue è true)
+        let conversationResponse = accommodationResponse;
+
+        // Se gli accommodations non hanno gestito il messaggio o hanno restituito un errore, prova con i trasporti
+        const isAccommodationError = accommodationResponse.message?.includes('Stato conversazionale non riconosciuto') ||
+                                    accommodationResponse.message?.includes('non riconosciuto') ||
+                                    (!accommodationResponse.message && !accommodationResponse.shouldContinue && !accommodationResponse.action);
+
+        if (isAccommodationError) {
+          console.log('=== Trying transportation conversation ===');
+          const transportationResponse = handleTransportationConversation(
+            messageToSend,
+            tripId,
+            tripData.currentUserId
+          );
+          console.log('=== Transportation response received ===', transportationResponse);
+
+          // Se i trasporti hanno gestito il messaggio, usa la loro risposta
+          if (transportationResponse.message || transportationResponse.shouldContinue || transportationResponse.action) {
+            conversationResponse = transportationResponse;
+          }
+        }
+
+        // Se una delle conversazioni ha gestito il messaggio
         if (conversationResponse.message || conversationResponse.shouldContinue || conversationResponse.action) {
           console.log('=== Conversation handled the message ===');
 
@@ -598,6 +663,95 @@ export default function ChatBot({
 
               // Show error message
               const errorResponse = completeAccommodationConversation(
+                tripId,
+                tripData.currentUserId,
+                false,
+                error.message
+              );
+
+              const errorMessage: Message = {
+                role: 'assistant',
+                content: errorResponse.message,
+                timestamp: new Date()
+              };
+
+              setMessages(prev => [...prev, errorMessage]);
+            }
+          }
+
+          // If we need to save transportation, do it now
+          if (conversationResponse.action === 'save_transportation' && conversationResponse.data) {
+            console.log('=== SAVE TRANSPORTATION ACTION TRIGGERED ===');
+            console.log('Conversation response:', conversationResponse);
+            console.log('Data to save:', conversationResponse.data);
+
+            // Aggiorna il componente UI per mostrare lo stato di caricamento
+            if (activeUIComponent && activeUIComponent.component === 'transportation_final_summary') {
+              setActiveUIComponent({
+                ...activeUIComponent,
+                props: {
+                  ...activeUIComponent.props,
+                  loading: true
+                }
+              });
+            }
+
+            try {
+              console.log('=== Dispatching addTransportation ===');
+
+              await dispatch(addTransportation({
+                trip_id: tripId,
+                type: conversationResponse.data.type || 'other',
+                provider: conversationResponse.data.provider || null,
+                booking_reference: conversationResponse.data.booking_reference || null,
+                departure_location: conversationResponse.data.departure_location || '',
+                arrival_location: conversationResponse.data.arrival_location || '',
+                departure_time: conversationResponse.data.departure_time || null,
+                arrival_time: conversationResponse.data.arrival_time || null,
+                cost: conversationResponse.data.cost || null,
+                currency: conversationResponse.data.currency || 'EUR',
+                notes: conversationResponse.data.notes || null
+              })).unwrap();
+
+              console.log('=== Transportation saved successfully ===');
+
+              // Show success message using the complete function (which also resets context)
+              const successResponse = completeTransportationConversation(
+                tripId,
+                tripData.currentUserId,
+                true
+              );
+
+              const successMessage: Message = {
+                role: 'assistant',
+                content: successResponse.message,
+                timestamp: new Date()
+              };
+
+              setMessages(prev => [...prev, successMessage]);
+
+              // Rimuovi il componente UI
+              setActiveUIComponent(null);
+
+              // Rigenera i suggerimenti ora che non siamo più in modalità inserimento
+              setTimeout(() => generateSuggestedQuestions(), 100);
+
+            } catch (error: any) {
+              console.error('Error saving transportation:', error);
+
+              // Reset loading state
+              if (activeUIComponent && activeUIComponent.component === 'transportation_final_summary') {
+                setActiveUIComponent({
+                  ...activeUIComponent,
+                  props: {
+                    ...activeUIComponent.props,
+                    loading: false
+                  }
+                });
+              }
+
+              // Show error message using the complete function (which also resets context)
+              const errorResponse = completeTransportationConversation(
                 tripId,
                 tripData.currentUserId,
                 false,

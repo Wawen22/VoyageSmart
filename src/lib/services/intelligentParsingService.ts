@@ -378,6 +378,15 @@ export function intelligentParse(input: string, fieldType: string): {
         suggestion: date ? `Interpretato come: ${format(new Date(date), 'dd MMMM yyyy', { locale: it })}` : undefined
       };
 
+    case 'datetime':
+      const datetime = parseNaturalDateTime(cleanInput);
+      return {
+        success: !!datetime,
+        value: datetime,
+        confidence: datetime ? 0.9 : 0,
+        suggestion: datetime ? `Interpretato come: ${format(new Date(datetime), 'dd MMMM yyyy HH:mm', { locale: it })}` : undefined
+      };
+
     case 'accommodation_type':
       console.log('=== Parsing accommodation type ===');
       console.log('Clean input:', cleanInput);
@@ -388,6 +397,33 @@ export function intelligentParse(input: string, fieldType: string): {
         value: type,
         confidence: type ? 0.8 : 0,
         suggestion: type ? `Interpretato come: ${type}` : undefined
+      };
+
+    case 'transportation_type':
+      const transportType = parseTransportationType(cleanInput);
+      return {
+        success: !!transportType,
+        value: transportType,
+        confidence: transportType ? 0.8 : 0,
+        suggestion: transportType ? `Interpretato come: ${transportType}` : undefined
+      };
+
+    case 'time':
+      const time = parseTime(cleanInput);
+      return {
+        success: !!time,
+        value: time,
+        confidence: time ? 0.9 : 0,
+        suggestion: time ? `Interpretato come: ${time}` : undefined
+      };
+
+    case 'location':
+      const location = parseLocation(cleanInput);
+      return {
+        success: !!location,
+        value: location,
+        confidence: location ? 0.7 : 0,
+        suggestion: location ? `Interpretato come: ${location}` : undefined
       };
 
     case 'currency':
@@ -450,4 +486,316 @@ export function intelligentParse(input: string, fieldType: string): {
         confidence: 1.0
       };
   }
+}
+
+/**
+ * Parsing per data e ora naturale (es: "domani alle 14:30", "15 gennaio ore 9:00")
+ */
+export function parseNaturalDateTime(input: string): string | null {
+  const cleanInput = input.toLowerCase().trim();
+  console.log('=== parseNaturalDateTime ===');
+  console.log('Input:', input);
+
+  // Pattern per data + ora (es: "domani alle 14:30", "15 gennaio ore 9:00")
+  const dateTimePatterns = [
+    // "domani alle 14:30"
+    /^(domani|oggi|dopodomani)\s+alle?\s+(\d{1,2})[:\.](\d{2})$/i,
+    // "15 gennaio alle 14:30"
+    /^(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+alle?\s+(\d{1,2})[:\.](\d{2})$/i,
+    // "2024-01-15 14:30"
+    /^(\d{4}-\d{2}-\d{2})\s+(\d{1,2})[:\.](\d{2})$/i,
+    // "15/01/2024 14:30"
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2})[:\.](\d{2})$/i
+  ];
+
+  for (const pattern of dateTimePatterns) {
+    const match = cleanInput.match(pattern);
+    if (match) {
+      console.log('DateTime pattern matched:', match);
+
+      // Prova a parsare la data
+      let dateStr = '';
+      let timeStr = '';
+
+      if (match[1] === 'oggi' || match[1] === 'domani' || match[1] === 'dopodomani') {
+        // Gestisci parole relative
+        const today = new Date();
+        if (match[1] === 'domani') {
+          today.setDate(today.getDate() + 1);
+        } else if (match[1] === 'dopodomani') {
+          today.setDate(today.getDate() + 2);
+        }
+        dateStr = today.toISOString().split('T')[0];
+        timeStr = `${match[2].padStart(2, '0')}:${match[3].padStart(2, '0')}`;
+      } else {
+        // Altri pattern - usa il parsing esistente per la data e aggiungi l'ora
+        const datePart = match[0].replace(/\s+alle?\s+\d{1,2}[:\.]?\d{2}$/i, '');
+        const parsedDate = parseNaturalDate(datePart);
+        if (parsedDate) {
+          dateStr = parsedDate.split('T')[0];
+          const timeMatch = match[0].match(/(\d{1,2})[:\.](\d{2})$/);
+          if (timeMatch) {
+            timeStr = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2].padStart(2, '0')}`;
+          }
+        }
+      }
+
+      if (dateStr && timeStr) {
+        const result = `${dateStr}T${timeStr}:00.000Z`;
+        console.log('Parsed datetime:', result);
+        return result;
+      }
+    }
+  }
+
+  // Fallback: prova solo la data se non c'è ora
+  const dateOnly = parseNaturalDate(cleanInput);
+  if (dateOnly) {
+    console.log('Fallback to date only:', dateOnly);
+    return dateOnly;
+  }
+
+  console.log('No datetime match found');
+  return null;
+}
+
+/**
+ * Parsing per tipo di trasporto
+ */
+export function parseTransportationType(input: string): string | null {
+  const cleanInput = input.toLowerCase().trim();
+  console.log('=== parseTransportationType ===');
+  console.log('Input:', input);
+  console.log('Clean input:', cleanInput);
+
+  // Prima controlla se è un valore diretto valido
+  const validTypes = ['flight', 'train', 'bus', 'car', 'other'];
+  console.log('Valid types:', validTypes);
+  console.log('Checking if cleanInput is in validTypes:', validTypes.includes(cleanInput));
+
+  if (validTypes.includes(cleanInput)) {
+    console.log(`✅ Direct match found! Returning: ${cleanInput}`);
+    return cleanInput;
+  }
+
+  const transportTypes = {
+    'flight': ['volo', 'aereo', 'flight', 'plane'],
+    'train': ['treno', 'train', 'ferrovia', 'trenitalia', 'italo'],
+    'bus': ['autobus', 'bus', 'pullman', 'corriera'],
+    'car': ['macchina', 'auto', 'automobile', 'car', 'veicolo', 'privata'],
+    'other': ['altro', 'other']
+  };
+
+  // Cerca corrispondenze esatte o parziali
+  for (const [type, keywords] of Object.entries(transportTypes)) {
+    for (const keyword of keywords) {
+      console.log(`Checking if "${cleanInput}" includes "${keyword}"`);
+      if (cleanInput.includes(keyword)) {
+        console.log(`Match found! Returning: ${type}`);
+        return type;
+      }
+    }
+  }
+
+  console.log('No match found, returning null');
+  return null;
+}
+
+/**
+ * Parsing per orario
+ */
+export function parseTime(input: string): string | null {
+  const cleanInput = input.toLowerCase().trim();
+
+  // Pattern per orari: 20:30, 20.30, 8:30 PM, ore 20, alle 20:30
+  const timePatterns = [
+    /(\d{1,2})[:\.](\d{2})/,           // 20:30, 20.30
+    /ore\s+(\d{1,2})[:\.]?(\d{2})?/,  // ore 20:30, ore 20
+    /alle\s+(\d{1,2})[:\.]?(\d{2})?/, // alle 20:30, alle 20
+    /(\d{1,2})\s*[:\.]?\s*(\d{2})?\s*(am|pm)/i // 8:30 PM, 8 PM
+  ];
+
+  for (const pattern of timePatterns) {
+    const match = cleanInput.match(pattern);
+    if (match) {
+      let hours = parseInt(match[1]);
+      let minutes = match[2] ? parseInt(match[2]) : 0;
+
+      // Gestione AM/PM
+      if (match[3]) {
+        const ampm = match[3].toLowerCase();
+        if (ampm === 'pm' && hours < 12) hours += 12;
+        if (ampm === 'am' && hours === 12) hours = 0;
+      }
+
+      // Validazione
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Parsing per località
+ */
+export function parseLocation(input: string): string | null {
+  const cleanInput = input.trim();
+
+  // Rimuovi preposizioni comuni
+  const cleanedLocation = cleanInput
+    .replace(/^(da|a|per|verso|in|di|del|della|dello|dei|degli|delle)\s+/i, '')
+    .replace(/\s+(da|a|per|verso|in|di|del|della|dello|dei|degli|delle)$/i, '');
+
+  // Se rimane qualcosa di sensato, restituiscilo
+  if (cleanedLocation.length > 1) {
+    // Capitalizza la prima lettera
+    return cleanedLocation.charAt(0).toUpperCase() + cleanedLocation.slice(1).toLowerCase();
+  }
+
+  return null;
+}
+
+/**
+ * Parsing multi-campo per trasporti - interpreta una frase completa
+ */
+export function parseTransportationMultiField(input: string): Partial<any> {
+  const cleanInput = input.toLowerCase().trim();
+  console.log('=== parseTransportationMultiField ===');
+  console.log('Input:', input);
+
+  const result: any = {};
+
+  // 1. Tipo di trasporto
+  const type = parseTransportationType(cleanInput);
+  if (type) {
+    result.type = type;
+    console.log('Parsed type:', type);
+  }
+
+  // 2. Località di partenza (da, parte da, partenza da)
+  const departurePatterns = [
+    /(?:da|parte da|partenza da|partendo da)\s+([^,\s]+(?:\s+[^,\s]+)*?)(?:\s+(?:alle|a|verso|per|arriva|arrivo|il|del|\d))/i,
+    /(?:da|parte da|partenza da|partendo da)\s+([^,]+?)(?:\s*,|\s*$)/i
+  ];
+
+  for (const pattern of departurePatterns) {
+    const match = cleanInput.match(pattern);
+    if (match) {
+      const location = parseLocation(match[1]);
+      if (location) {
+        result.departure_location = location;
+        console.log('Parsed departure:', location);
+        break;
+      }
+    }
+  }
+
+  // 3. Località di arrivo (a, arriva a, arrivo a, per)
+  const arrivalPatterns = [
+    /(?:arriva a|arrivo a|verso|per|a)\s+([^,\s]+(?:\s+[^,\s]+)*?)(?:\s+(?:alle|a|il|del|\d))/i,
+    /(?:arriva a|arrivo a|verso|per|a)\s+([^,]+?)(?:\s*,|\s*$)/i
+  ];
+
+  for (const pattern of arrivalPatterns) {
+    const match = cleanInput.match(pattern);
+    if (match) {
+      const location = parseLocation(match[1]);
+      if (location) {
+        result.arrival_location = location;
+        console.log('Parsed arrival:', location);
+        break;
+      }
+    }
+  }
+
+  // 4. Orario di partenza (alle X, parte alle X)
+  const departureTimePatterns = [
+    /(?:parte|partenza)\s+alle\s+(\d{1,2}[:\.]?\d{0,2})/i,
+    /alle\s+(\d{1,2}[:\.]?\d{0,2})(?:\s+(?:e|,))/i,
+    /alle\s+(\d{1,2}[:\.]?\d{0,2})(?:\s*$)/i
+  ];
+
+  for (const pattern of departureTimePatterns) {
+    const match = cleanInput.match(pattern);
+    if (match) {
+      const time = parseTime(match[1]);
+      if (time) {
+        result.departure_time = time;
+        console.log('Parsed departure time:', time);
+        break;
+      }
+    }
+  }
+
+  // 5. Orario di arrivo (arriva alle X)
+  const arrivalTimePatterns = [
+    /(?:arriva|arrivo)\s+alle\s+(\d{1,2}[:\.]?\d{0,2})/i,
+    /alle\s+(\d{1,2}[:\.]?\d{0,2})(?:\s+(?:del|il))/i
+  ];
+
+  for (const pattern of arrivalTimePatterns) {
+    const match = cleanInput.match(pattern);
+    if (match) {
+      const time = parseTime(match[1]);
+      if (time) {
+        result.arrival_time = time;
+        console.log('Parsed arrival time:', time);
+        break;
+      }
+    }
+  }
+
+  // 6. Data (del 25 aprile, il 25 aprile, 25/04/2025)
+  const datePatterns = [
+    /(?:del|il)\s+(\d{1,2}\s+\w+)/i,
+    /(?:del|il)\s+(\d{1,2}[\/\-]\d{1,2}[\/\-]?\d{0,4})/i,
+    /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/i
+  ];
+
+  for (const pattern of datePatterns) {
+    const match = cleanInput.match(pattern);
+    if (match) {
+      const date = parseNaturalDate(match[1]);
+      if (date) {
+        result.departure_date = date;
+        result.arrival_date = date; // Assumiamo stesso giorno se non specificato diversamente
+        console.log('Parsed date:', date);
+        break;
+      }
+    }
+  }
+
+  // 7. Costo (costa X euro, X euro)
+  const costPatterns = [
+    /(?:costa|costo|prezzo)\s+(\d+(?:[,\.]\d{2})?)\s*(euro|€|dollar|\$)/i,
+    /(\d+(?:[,\.]\d{2})?)\s*(euro|€|dollar|\$)/i
+  ];
+
+  for (const pattern of costPatterns) {
+    const match = cleanInput.match(pattern);
+    if (match) {
+      const cost = parseFloat(match[1].replace(',', '.'));
+      const currency = match[2].toLowerCase();
+
+      if (!isNaN(cost)) {
+        result.cost = cost;
+
+        // Mappa valuta
+        if (currency.includes('euro') || currency.includes('€')) {
+          result.currency = 'EUR';
+        } else if (currency.includes('dollar') || currency.includes('$')) {
+          result.currency = 'USD';
+        }
+
+        console.log('Parsed cost:', cost, result.currency);
+        break;
+      }
+    }
+  }
+
+  console.log('=== Multi-field parsing result ===', result);
+  return result;
 }

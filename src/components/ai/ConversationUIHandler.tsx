@@ -5,12 +5,15 @@
 
 'use client';
 
-import { 
-  DateSelector, 
-  AccommodationTypeSelector, 
-  CurrencySelector, 
-  ConfirmationButtons, 
-  DataSummary 
+import {
+  DateSelector,
+  AccommodationTypeSelector,
+  CurrencySelector,
+  ConfirmationButtons,
+  DataSummary,
+  FieldWithCancel,
+  TransportationTypeSelector,
+  TransportationSummary
 } from './ConversationComponents';
 
 interface ConversationUIHandlerProps {
@@ -53,6 +56,37 @@ export default function ConversationUIHandler({
         />
       );
 
+    case 'field_with_cancel':
+      return (
+        <FieldWithCancel
+          mainComponent={uiProps?.mainComponent || 'text_input'}
+          mainProps={uiProps?.mainProps || {}}
+          onCancel={() => onUserAction('cancelled')}
+          onAction={(action, data) => {
+            // Mappa le azioni del componente principale alle azioni del chatbot
+            if (action === 'selected') {
+              const componentType = uiProps?.mainComponent;
+              switch (componentType) {
+                case 'date_selector':
+                  onUserAction('date_selected', data);
+                  break;
+                case 'type_selector':
+                  onUserAction('type_selected', data);
+                  break;
+                case 'transportation_type_selector':
+                  onUserAction('transportation_type_selected', data);
+                  break;
+                case 'currency_selector':
+                  onUserAction('currency_selected', data);
+                  break;
+                default:
+                  onUserAction('text_input', data);
+              }
+            }
+          }}
+        />
+      );
+
     case 'confirmation_buttons':
       return (
         <ConfirmationButtons
@@ -67,6 +101,34 @@ export default function ConversationUIHandler({
     case 'data_summary':
       return (
         <DataSummary
+          data={uiProps?.data || {}}
+          onConfirm={() => onUserAction('confirmed')}
+          onCancel={() => onUserAction('cancelled')}
+          loading={uiProps?.loading}
+        />
+      );
+
+    case 'transportation_type_selector':
+      return (
+        <TransportationTypeSelector
+          onSelect={(type) => onUserAction('transportation_type_selected', type)}
+        />
+      );
+
+    case 'transportation_summary_with_continue':
+      return (
+        <TransportationSummary
+          data={uiProps?.data || {}}
+          onContinue={() => onUserAction('continue_with_partial_data')}
+          onCancel={() => onUserAction('cancelled')}
+          isPartial={uiProps?.isPartial}
+          loading={uiProps?.loading}
+        />
+      );
+
+    case 'transportation_final_summary':
+      return (
+        <TransportationSummary
           data={uiProps?.data || {}}
           onConfirm={() => onUserAction('confirmed')}
           onCancel={() => onUserAction('cancelled')}

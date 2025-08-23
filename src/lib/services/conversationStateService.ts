@@ -3,11 +3,14 @@
  * Gestisce gli stati conversazionali per la raccolta guidata di dati
  */
 
-export type ConversationState = 
+export type ConversationState =
   | 'idle'
   | 'collecting_accommodation'
   | 'confirming_accommodation'
-  | 'saving_accommodation';
+  | 'saving_accommodation'
+  | 'collecting_transportation'
+  | 'confirming_transportation'
+  | 'saving_transportation';
 
 export type AccommodationField = 
   | 'name'
@@ -34,12 +37,37 @@ export interface AccommodationData {
   notes?: string;
 }
 
+export type TransportationField =
+  | 'type'
+  | 'provider'                      // Sostituisce 'name' - corrisponde al DB
+  | 'booking_reference'             // Nuovo campo per riferimento prenotazione
+  | 'departure_location'
+  | 'arrival_location'
+  | 'departure_time'                // Timestamp completo (data + ora)
+  | 'arrival_time'                  // Timestamp completo (data + ora)
+  | 'cost'
+  | 'currency'
+  | 'notes';
+
+export interface TransportationData {
+  type?: 'flight' | 'train' | 'bus' | 'car' | 'other';
+  provider?: string;                // Nome provider (es: "Ryanair", "Trenitalia")
+  booking_reference?: string;       // Codice prenotazione (es: "FR1234")
+  departure_location?: string;
+  arrival_location?: string;
+  departure_time?: string;          // ISO timestamp completo
+  arrival_time?: string;            // ISO timestamp completo
+  cost?: number;
+  currency?: string;
+  notes?: string;
+}
+
 export interface ConversationContext {
   state: ConversationState;
-  currentField?: AccommodationField;
-  data: AccommodationData;
+  currentField?: AccommodationField | TransportationField;
+  data: AccommodationData | TransportationData;
   tripId: string;
-  completedFields: AccommodationField[];
+  completedFields: (AccommodationField | TransportationField)[];
   lastQuestion?: string;
   retryCount: number;
 }
@@ -74,23 +102,36 @@ export function getConversationContext(tripId: string, userId: string): Conversa
 }
 
 /**
+ * Crea un nuovo contesto conversazionale
+ */
+export function createConversationContext(
+  tripId: string,
+  userId: string,
+  context: ConversationContext
+): ConversationContext {
+  const contextKey = `${tripId}-${userId}`;
+  conversationStates.set(contextKey, context);
+  return context;
+}
+
+/**
  * Aggiorna il contesto conversazionale
  */
 export function updateConversationContext(
-  tripId: string, 
-  userId: string, 
+  tripId: string,
+  userId: string,
   updates: Partial<ConversationContext>
 ): ConversationContext {
   const contextKey = `${tripId}-${userId}`;
   const currentContext = conversationStates.get(contextKey);
-  
+
   if (!currentContext) {
     throw new Error('Conversation context not found');
   }
-  
+
   const updatedContext = { ...currentContext, ...updates };
   conversationStates.set(contextKey, updatedContext);
-  
+
   return updatedContext;
 }
 
