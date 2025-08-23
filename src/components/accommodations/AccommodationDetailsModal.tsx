@@ -288,20 +288,22 @@ export default function AccommodationDetailsModal({
             )}
           </div>
           
-          <DialogFooter className="relative z-10 pt-6 border-t border-white/10">
+          <DialogFooter className="relative z-10 pt-6 border-t border-white/10 modal-footer-mobile">
             <div className="flex flex-col sm:flex-row sm:justify-between w-full gap-3">
+              {/* Delete button - Mobile: compact width, Desktop: left aligned */}
               {canEdit && (
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={loading}
-                  className="glass-button inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                  className="glass-button inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 disabled:opacity-50 w-fit sm:w-auto"
                 >
                   <TrashIcon className="h-4 w-4 mr-2" />
                   Delete
                 </button>
               )}
 
+              {/* Action buttons - Mobile: full width row, Desktop: right aligned */}
               <div className="flex space-x-3 sm:ml-auto">
                 {canEdit && (
                   <button

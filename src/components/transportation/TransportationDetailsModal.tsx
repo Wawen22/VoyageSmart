@@ -336,7 +336,7 @@ export default function TransportationDetailsModal({
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={loading}
-                  className="glass-button inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                  className="glass-button inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 disabled:opacity-50 w-fit sm:w-auto"
                 >
                   <TrashIcon className="h-4 w-4 mr-2" />
                   Delete

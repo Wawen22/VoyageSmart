@@ -60,7 +60,7 @@ function TransportationCard({
 
   return (
     <div
-      className="glass-card rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-500 md:hover:scale-[1.02] hover:-translate-y-1 transportation-card-mobile w-full max-w-full"
+      className="glass-card rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-500 md:hover:scale-[1.02] hover:-translate-y-1 transportation-card-mobile w-full max-w-full box-border"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -121,25 +121,25 @@ function TransportationCard({
         </div>
 
         {/* Travel Information Section */}
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
             {/* Departure Info */}
-            <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
+            <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 w-full min-w-0">
               <h4 className="text-xs uppercase text-muted-foreground font-semibold mb-3 flex items-center">
-                <div className="p-1 rounded-lg bg-green-500/20 mr-2">
+                <div className="p-1 rounded-lg bg-green-500/20 mr-2 flex-shrink-0">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 </div>
                 Departure
               </h4>
 
               <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1 rounded-lg bg-blue-500/20">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <div className="p-1 rounded-lg bg-blue-500/20 flex-shrink-0">
                     <CalendarIcon className="h-3 w-3 text-blue-500" />
                   </div>
                   {transportation.departure_time ? (
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{format(parseISO(transportation.departure_time), 'MMM d, yyyy')}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">{format(parseISO(transportation.departure_time), 'MMM d, yyyy')}</p>
                       <p className="text-xs text-muted-foreground">{format(parseISO(transportation.departure_time), 'HH:mm')}</p>
                     </div>
                   ) : (
@@ -147,12 +147,12 @@ function TransportationCard({
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <div className="p-1 rounded-lg bg-purple-500/20">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <div className="p-1 rounded-lg bg-purple-500/20 flex-shrink-0">
                     <MapPinIcon className="h-3 w-3 text-purple-500" />
                   </div>
                   {transportation.departure_location ? (
-                    <p className="text-sm font-medium text-foreground truncate">{transportation.departure_location}</p>
+                    <p className="text-sm font-medium text-foreground truncate flex-1 min-w-0">{transportation.departure_location}</p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Not specified</p>
                   )}
@@ -161,22 +161,22 @@ function TransportationCard({
             </div>
 
             {/* Arrival Info */}
-            <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
+            <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10 w-full min-w-0">
               <h4 className="text-xs uppercase text-muted-foreground font-semibold mb-3 flex items-center">
-                <div className="p-1 rounded-lg bg-red-500/20 mr-2">
+                <div className="p-1 rounded-lg bg-red-500/20 mr-2 flex-shrink-0">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                 </div>
                 Arrival
               </h4>
 
               <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1 rounded-lg bg-blue-500/20">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <div className="p-1 rounded-lg bg-blue-500/20 flex-shrink-0">
                     <CalendarIcon className="h-3 w-3 text-blue-500" />
                   </div>
                   {transportation.arrival_time ? (
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{format(parseISO(transportation.arrival_time), 'MMM d, yyyy')}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">{format(parseISO(transportation.arrival_time), 'MMM d, yyyy')}</p>
                       <p className="text-xs text-muted-foreground">{format(parseISO(transportation.arrival_time), 'HH:mm')}</p>
                     </div>
                   ) : (
@@ -184,12 +184,12 @@ function TransportationCard({
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <div className="p-1 rounded-lg bg-purple-500/20">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <div className="p-1 rounded-lg bg-purple-500/20 flex-shrink-0">
                     <MapPinIcon className="h-3 w-3 text-purple-500" />
                   </div>
                   {transportation.arrival_location ? (
-                    <p className="text-sm font-medium text-foreground truncate">{transportation.arrival_location}</p>
+                    <p className="text-sm font-medium text-foreground truncate flex-1 min-w-0">{transportation.arrival_location}</p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Not specified</p>
                   )}

@@ -244,7 +244,7 @@ export default function TransportationPage() {
             <BackButton
               href={`/trips/${id}`}
               label="Back to Trip"
-              theme="orange"
+              theme="sky"
             />
           </div>
         </div>
@@ -340,7 +340,7 @@ export default function TransportationPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 transportation-section-mobile">
+      <main className="w-full py-6 px-4 transportation-section-mobile">
         {/* Free plan limitation warning - Modernized */}
         {subscription?.tier === 'free' && transportations.length >= 4 && (
           <div className="mb-6 glass-card rounded-2xl p-4 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 animate-glass-fade-in">
@@ -487,11 +487,29 @@ export default function TransportationPage() {
               </div>
             ) : (
               <div className="animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transportation-grid-mobile">
+                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {transportations.map((transportation, index) => (
                     <div
                       key={transportation.id}
                       className="animate-stagger-in"
+                      style={{ animationDelay: `${index * 100 + 400}ms` }}
+                    >
+                      <TransportationCard
+                        transportation={transportation}
+                        onEdit={canEdit ? handleEditTransportation : undefined}
+                        onView={handleViewTransportation}
+                        canEdit={canEdit}
+                        getIcon={getTransportationIcon}
+                      />
+                    </div>
+                  ))}
+                </div>
+                {/* Mobile Layout - Flexbox */}
+                <div className="md:hidden transportation-grid-mobile">
+                  {transportations.map((transportation, index) => (
+                    <div
+                      key={transportation.id}
+                      className="animate-stagger-in w-full"
                       style={{ animationDelay: `${index * 100 + 400}ms` }}
                     >
                       <TransportationCard
@@ -562,7 +580,8 @@ export default function TransportationPage() {
             isOpen={isDetailsModalOpen}
             onClose={handleCloseDetailsModal}
             transportation={currentTransportation}
-            onEdit={canEdit ? handleEditFromDetails : undefined}
+            onEdit={handleEditFromDetails}
+            canEdit={canEdit}
             getIcon={getTransportationIcon}
           />
         )}

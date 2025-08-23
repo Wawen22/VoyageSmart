@@ -334,7 +334,7 @@ export default function AccommodationsPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 accommodations-section-mobile">
+      <main className="w-full py-6 px-4 accommodations-section-mobile">
         {/* Free plan limitation warning - Modernized */}
         {subscription?.tier === 'free' && accommodations.length >= 4 && (
           <div className="mb-6 glass-card rounded-2xl p-4 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 animate-glass-fade-in">
@@ -480,11 +480,28 @@ export default function AccommodationsPage() {
           <>
             {viewMode === 'list' && (
               <div className="animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 accommodations-grid-mobile">
+                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   {accommodations.map((accommodation, index) => (
                     <div
                       key={accommodation.id}
                       className="animate-stagger-in"
+                      style={{ animationDelay: `${index * 100 + 400}ms` }}
+                    >
+                      <AccommodationCard
+                        accommodation={accommodation}
+                        onView={handleViewAccommodation}
+                        onEdit={handleEditAccommodation}
+                        canEdit={canEdit}
+                      />
+                    </div>
+                  ))}
+                </div>
+                {/* Mobile Layout - Flexbox */}
+                <div className="md:hidden accommodations-grid-mobile">
+                  {accommodations.map((accommodation, index) => (
+                    <div
+                      key={accommodation.id}
+                      className="animate-stagger-in w-full"
                       style={{ animationDelay: `${index * 100 + 400}ms` }}
                     >
                       <AccommodationCard
