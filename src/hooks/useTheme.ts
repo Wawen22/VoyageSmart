@@ -138,7 +138,9 @@ export function useTheme() {
   const [currentTheme, setCurrentTheme] = useState<ThemeVariant>('default');
 
   useEffect(() => {
-    // Load theme from localStorage
+    // Load theme from localStorage (hydration-safe)
+    if (typeof window === 'undefined') return;
+
     const savedTheme = localStorage.getItem('dashboard-theme') as ThemeVariant;
     if (savedTheme && themes[savedTheme]) {
       setCurrentTheme(savedTheme);
@@ -147,6 +149,8 @@ export function useTheme() {
   }, []);
 
   const applyTheme = (theme: ThemeVariant) => {
+    if (typeof window === 'undefined') return;
+
     const themeConfig = themes[theme];
     const root = document.documentElement;
 
@@ -158,7 +162,7 @@ export function useTheme() {
 
     // Apply gradients as data attributes for CSS access
     root.setAttribute('data-theme', theme);
-    
+
     // Store in localStorage
     localStorage.setItem('dashboard-theme', theme);
   };

@@ -14,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import PremiumIndicator from '@/components/subscription/PremiumIndicator';
 import { usePremiumFeature } from '@/hooks/usePremiumFeature';
+import { createConsistentDate, isDateInPast, isDateInFuture, getDaysUntilDate, isDateRangeActive } from '@/lib/date-utils';
 
 type Trip = {
   id: string;
@@ -57,23 +58,11 @@ export default function TripCard({ trip }: TripCardProps) {
   };
 
   const isUpcoming = () => {
-    if (!trip.start_date) return false;
-    try {
-      const startDate = parseISO(trip.start_date);
-      return isValid(startDate) && startDate > new Date();
-    } catch (error) {
-      return false;
-    }
+    return isDateInFuture(trip.start_date);
   };
 
   const isPast = () => {
-    if (!trip.end_date) return false;
-    try {
-      const endDate = parseISO(trip.end_date);
-      return isValid(endDate) && endDate < new Date();
-    } catch (error) {
-      return false;
-    }
+    return isDateInPast(trip.end_date);
   };
 
   const getStatusColor = () => {
@@ -83,36 +72,14 @@ export default function TripCard({ trip }: TripCardProps) {
   };
 
   const getDaysUntil = () => {
-    if (!trip.start_date) return null;
-    try {
-      const startDate = parseISO(trip.start_date);
-      if (!isValid(startDate)) return null;
-
-      const today = new Date();
-      const diffTime = startDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays < 0) return null;
-      return diffDays;
-    } catch (error) {
-      return null;
-    }
+    return getDaysUntilDate(trip.start_date);
   };
 
   const daysUntil = getDaysUntil();
 
   // Function to determine if a trip is in progress (between start and end dates)
   const isInProgress = () => {
-    if (!trip.start_date || !trip.end_date) return false;
-    try {
-      const startDate = parseISO(trip.start_date);
-      const endDate = parseISO(trip.end_date);
-      const today = new Date();
-      return isValid(startDate) && isValid(endDate) &&
-             startDate <= today && endDate >= today;
-    } catch (error) {
-      return false;
-    }
+    return isDateRangeActive(trip.start_date, trip.end_date);
   };
 
   // Get trip status for styling

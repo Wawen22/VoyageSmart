@@ -54,7 +54,9 @@ function OnboardingModalContent({ isOpen, onClose }: { isOpen: boolean; onClose:
 
   const handleClose = () => {
     onClose();
-    sessionStorage.setItem('hasSeenOnboardingThisSession', 'true');
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('hasSeenOnboardingThisSession', 'true');
+    }
   };
 
   const handleUpgrade = (plan: 'premium' | 'ai') => {
@@ -211,8 +213,10 @@ export default function OnboardingModal() {
   const { user } = useAuth();
   const { subscription } = useSubscription();
 
-  // Check if this is the first time in this session
+  // Check if this is the first time in this session (hydration-safe)
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const hasSeenOnboardingThisSession = sessionStorage.getItem('hasSeenOnboardingThisSession');
 
     if (user && subscription && subscription.tier === 'free' && !hasSeenOnboardingThisSession) {
@@ -227,7 +231,9 @@ export default function OnboardingModal() {
 
   const handleClose = () => {
     setIsOpen(false);
-    sessionStorage.setItem('hasSeenOnboardingThisSession', 'true');
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('hasSeenOnboardingThisSession', 'true');
+    }
   };
 
   return <OnboardingModalContent isOpen={isOpen} onClose={handleClose} />;

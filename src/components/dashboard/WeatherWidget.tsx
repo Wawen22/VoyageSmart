@@ -30,6 +30,7 @@ import {
   getWeatherIconUrl,
   WeatherData as OpenWeatherData
 } from '@/lib/services/weatherService';
+import ClientOnly from '@/components/ui/ClientOnly';
 
 interface WeatherData {
   location: string;
@@ -331,8 +332,10 @@ export default function WeatherWidget() {
     return `Your Location (${Math.abs(lat).toFixed(2)}°${latDirection}, ${Math.abs(lon).toFixed(2)}°${lonDirection})`;
   };
 
-  // Load saved location from localStorage
+  // Load saved location from localStorage (hydration-safe)
   const loadSavedLocation = () => {
+    if (typeof window === 'undefined') return null;
+
     try {
       const saved = localStorage.getItem('weather-location');
       if (saved) {
@@ -351,8 +354,10 @@ export default function WeatherWidget() {
     return null;
   };
 
-  // Save location to localStorage
+  // Save location to localStorage (hydration-safe)
   const saveLocation = (locationData: any) => {
+    if (typeof window === 'undefined') return;
+
     try {
       localStorage.setItem('weather-location', JSON.stringify(locationData));
     } catch (error) {
@@ -604,11 +609,11 @@ export default function WeatherWidget() {
     };
   };
 
-  // Get user's current location
+  // Get user's current location (hydration-safe)
   const getCurrentLocation = () => {
     setLocation(prev => ({ ...prev, isLoading: true, error: null }));
 
-    if (!navigator.geolocation) {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
       setLocation(prev => ({
         ...prev,
         isLoading: false,
@@ -1302,8 +1307,10 @@ export function CompactWeatherWidget() {
     locationType: 'gps'
   });
 
-  // Load saved location from localStorage
+  // Load saved location from localStorage (hydration-safe)
   const loadSavedLocation = () => {
+    if (typeof window === 'undefined') return null;
+
     try {
       const saved = localStorage.getItem('weather-location');
       return saved ? JSON.parse(saved) : null;
@@ -1312,8 +1319,10 @@ export function CompactWeatherWidget() {
     }
   };
 
-  // Save location to localStorage
+  // Save location to localStorage (hydration-safe)
   const saveLocation = (locationData: any) => {
+    if (typeof window === 'undefined') return;
+
     try {
       localStorage.setItem('weather-location', JSON.stringify(locationData));
     } catch (error) {
@@ -1321,11 +1330,11 @@ export function CompactWeatherWidget() {
     }
   };
 
-  // Get user's current location
+  // Get user's current location (hydration-safe)
   const getCurrentLocation = () => {
     setLocation(prev => ({ ...prev, isLoading: true, error: null }));
 
-    if (!navigator.geolocation) {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
       setLocation(prev => ({
         ...prev,
         isLoading: false,

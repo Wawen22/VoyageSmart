@@ -14,6 +14,7 @@ import {
   TrophyIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getDeterministicAnimationValues } from '@/lib/date-utils';
 
 interface InteractiveStatsSectionProps {
   stats: {
@@ -138,21 +139,26 @@ export default function InteractiveStatsSection({ stats }: InteractiveStatsSecti
             )}>
               {/* Animated particles */}
               <div className="absolute inset-0 overflow-hidden">
-                {[...Array(stat.particles)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "absolute w-1 h-1 bg-white rounded-full opacity-40 animate-float",
-                      isHovered && "opacity-80"
-                    )}
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 3}s`,
-                      animationDuration: `${2 + Math.random() * 2}s`
-                    }}
-                  />
-                ))}
+                {[...Array(stat.particles)].map((_, i) => {
+                  // Use deterministic values based on index to prevent hydration issues
+                  const animationValues = getDeterministicAnimationValues(i);
+
+                  return (
+                    <div
+                      key={i}
+                      className={cn(
+                        "absolute w-1 h-1 bg-white rounded-full opacity-40 animate-float",
+                        isHovered && "opacity-80"
+                      )}
+                      style={{
+                        left: `${animationValues.left}%`,
+                        top: `${animationValues.top}%`,
+                        animationDelay: `${animationValues.delay}s`,
+                        animationDuration: `${animationValues.duration}s`
+                      }}
+                    />
+                  );
+                })}
               </div>
 
               {/* Icon with emoji */}

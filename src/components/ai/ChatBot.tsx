@@ -385,11 +385,8 @@ export default function ChatBot({
 
   // Gestisce le azioni dell'utente sui componenti UI conversazionali
   const handleUIAction = async (action: string, value?: any) => {
-    console.log('=== UI Action ===', action, value);
-
     // Gestione IMMEDIATA dell'annullamento
     if (action === 'cancelled') {
-      console.log('=== IMMEDIATE CANCELLATION ===');
 
       // Reset immediato del contesto conversazionale
       if (tripData?.currentUserId) {

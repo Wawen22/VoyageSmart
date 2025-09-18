@@ -149,8 +149,7 @@ interface CancelInsertionButtonProps {
 
 export function CancelInsertionButton({ onCancel }: CancelInsertionButtonProps) {
   const handleCancel = () => {
-    // Feedback visivo immediato
-    console.log('=== Cancel button clicked - immediate action ===');
+    // Immediate visual feedback
     onCancel();
   };
 
@@ -194,7 +193,6 @@ export function FieldWithCancel({ mainComponent, mainProps, onCancel, onAction }
           </div>
         );
       default:
-        console.log('=== FieldWithCancel: Unknown component ===', mainComponent);
         return (
           <div className="bg-red-900/20 rounded-lg p-4 my-3 border border-red-500/50">
             <p className="text-red-400 text-sm">Componente non riconosciuto: {mainComponent}</p>

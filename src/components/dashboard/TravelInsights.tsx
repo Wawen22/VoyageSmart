@@ -13,6 +13,7 @@ import {
   PieChartIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { createConsistentDate } from '@/lib/date-utils';
 
 interface Trip {
   id: string;
@@ -46,7 +47,8 @@ export default function TravelInsights({ trips }: TravelInsightsProps) {
   }, [trips]);
 
   const calculateInsights = () => {
-    const now = new Date();
+    // Use a consistent date for SSR/hydration
+    const now = createConsistentDate();
     
     // Total budget
     const totalBudget = trips.reduce((sum, trip) => sum + (trip.budget_total || 0), 0);

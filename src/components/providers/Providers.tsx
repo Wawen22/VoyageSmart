@@ -9,7 +9,12 @@ import { SubscriptionProvider } from './SubscriptionProvider';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      suppressHydrationWarning
+    >
       <ReduxProvider>
         <AuthProvider>
           <SubscriptionProvider>

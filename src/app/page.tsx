@@ -79,6 +79,8 @@ export default function Home() {
   }, [user, router]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
 
@@ -124,21 +126,29 @@ export default function Home() {
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const openMediaPopup = (src: string, alt: string, title: string, type: 'image' | 'video' = 'image') => {
     setSelectedMedia({ src, alt, title, type });
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    if (typeof window !== 'undefined') {
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
   };
 
   const closeMediaPopup = () => {
     setSelectedMedia(null);
-    document.body.style.overflow = 'unset'; // Restore scrolling
+    if (typeof window !== 'undefined') {
+      document.body.style.overflow = 'unset'; // Restore scrolling
+    }
   };
 
-  // Close popup on Escape key
+  // Close popup on Escape key (hydration-safe)
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && selectedMedia) {
         closeMediaPopup();

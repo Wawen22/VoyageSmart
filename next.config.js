@@ -7,7 +7,7 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true'
 const nextConfig = {
   reactStrictMode: true, // Re-enabled for production
 
-  // Disable ESLint and TypeScript checking during build for now
+  // Temporarily disable for gradual fix - will re-enable after addressing issues
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -26,7 +26,9 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'ijtfwzxwthunsujobvsk.supabase.co',
+        hostname: process.env.NEXT_PUBLIC_SUPABASE_URL
+          ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+          : 'ijtfwzxwthunsujobvsk.supabase.co', // fallback for development
       },
     ],
     formats: ['image/webp', 'image/avif'],

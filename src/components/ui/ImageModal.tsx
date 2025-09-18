@@ -41,8 +41,10 @@ export default function ImageModal({
     }
   }, [isOpen]);
 
-  // Handle escape key
+  // Handle escape key (hydration-safe)
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -73,6 +75,8 @@ export default function ImageModal({
   };
 
   const handleDownload = async () => {
+    if (typeof window === 'undefined') return;
+
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();

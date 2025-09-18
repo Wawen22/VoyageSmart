@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { seededRandom } from '@/lib/date-utils';
 
 interface Particle {
   id: number;
@@ -17,8 +18,15 @@ interface Particle {
 export default function AnimatedBackground() {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     const colors = [
       'rgba(59, 130, 246, 0.3)',   // blue
       'rgba(147, 51, 234, 0.3)',   // purple
@@ -29,21 +37,31 @@ export default function AnimatedBackground() {
 
     const newParticles: Particle[] = [];
     for (let i = 0; i < 50; i++) {
+      // Use deterministic values based on particle index to prevent hydration mismatches
+      const seed1 = seededRandom(i * 17);
+      const seed2 = seededRandom(i * 23);
+      const seed3 = seededRandom(i * 31);
+      const seed4 = seededRandom(i * 37);
+      const seed5 = seededRandom(i * 41);
+      const seed6 = seededRandom(i * 43);
+
       newParticles.push({
         id: i,
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        size: Math.random() * 4 + 1,
-        speedX: (Math.random() - 0.5) * 0.5,
-        speedY: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
-        color: colors[Math.floor(Math.random() * colors.length)]
+        x: seed1 * window.innerWidth,
+        y: seed2 * window.innerHeight,
+        size: seed3 * 4 + 1,
+        speedX: (seed4 - 0.5) * 0.5,
+        speedY: (seed5 - 0.5) * 0.5,
+        opacity: seed6 * 0.5 + 0.1,
+        color: colors[Math.floor(seed1 * colors.length)]
       });
     }
     setParticles(newParticles);
-  }, []);
+  }, [isMounted]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
@@ -53,8 +71,10 @@ export default function AnimatedBackground() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const animateParticles = () => {
-      setParticles(prevParticles => 
+      setParticles(prevParticles =>
         prevParticles.map(particle => {
           let newX = particle.x + particle.speedX;
           let newY = particle.y + particle.speedY;

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { createConsistentDate } from '@/lib/date-utils';
 
 type Trip = {
   id: string;
@@ -48,11 +49,12 @@ export default function ModernTripCard({ trip, viewMode = 'grid', index = 0 }: M
 
   const getStatus = () => {
     if (!trip.start_date || !trip.end_date) return { text: 'Planning', color: 'blue', icon: ClockIcon };
-    
-    const now = new Date();
+
+    // Use a consistent date for SSR/hydration
+    const now = createConsistentDate();
     const start = parseISO(trip.start_date);
     const end = parseISO(trip.end_date);
-    
+
     if (now < start) return { text: 'Upcoming', color: 'emerald', icon: CalendarIcon };
     if (now >= start && now <= end) return { text: 'Active', color: 'orange', icon: StarIcon };
     return { text: 'Completed', color: 'purple', icon: CameraIcon };

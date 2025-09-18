@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import WeatherWidget, { CompactWeatherWidget } from './WeatherWidget';
+import { getTimeOfDay } from '@/lib/date-utils';
 import CompactTopDestinations from './CompactTopDestinations';
 import SwipeableStats from './SwipeableStats';
 
@@ -64,10 +65,8 @@ export default function InteractiveDashboardHeader({
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening'>('morning');
 
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setTimeOfDay('morning');
-    else if (hour < 18) setTimeOfDay('afternoon');
-    else setTimeOfDay('evening');
+    // Use the utility function for consistent time of day calculation
+    setTimeOfDay(getTimeOfDay());
   }, []);
 
   const getGreeting = () => {

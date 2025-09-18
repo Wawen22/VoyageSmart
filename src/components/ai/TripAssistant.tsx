@@ -123,8 +123,7 @@ export default function TripAssistant({ tripId, tripData }: TripAssistantProps) 
     );
   }
 
-  // Versione semplificata per debug
-  console.log('Rendering TripAssistant with data:', tripData);
+  // Production-ready component
 
   return (
     <div className="fixed bottom-16 right-4 bg-blue-500 text-white p-4 rounded-lg z-50">

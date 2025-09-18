@@ -21,7 +21,7 @@ export default function WeatherApiTest() {
       const lon = 12.4964;
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
       
-      console.log('Testing API with URL:', url);
+      // Testing weather API
       
       const response = await fetch(url);
       const data = await response.json();
@@ -32,7 +32,6 @@ export default function WeatherApiTest() {
         setError(`Error: ${response.status} ${response.statusText} - ${data.message || 'Unknown error'}`);
       }
     } catch (err) {
-      console.error('Error testing API:', err);
       setError(`Error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
