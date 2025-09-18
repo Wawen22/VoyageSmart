@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 
 export default function ConfirmEmail() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function ConfirmEmail() {
         });
 
         if (error) {
-          console.error('Error confirming email:', error);
+          logger.error('Error confirming email', { error: error.message });
           setStatus('error');
           setError(error.message);
           return;
@@ -43,7 +44,7 @@ export default function ConfirmEmail() {
           router.push('/login?confirmed=true');
         }, 3000);
       } catch (err) {
-        console.error('Error confirming email:', err);
+        logger.error('Error confirming email', { error: err });
         setStatus('error');
         setError('An unexpected error occurred');
       }

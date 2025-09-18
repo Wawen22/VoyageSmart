@@ -3,7 +3,7 @@ import { aiAnalytics } from '@/lib/services/aiAnalyticsService';
 import { getQueueStats } from '@/lib/services/aiQueueService';
 import { logger } from '@/lib/logger';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // TODO: Add admin authentication check here
     // For now, we'll just log the request
@@ -92,7 +92,7 @@ function calculateHealthScore(metrics: any, errorAnalysis: any): number {
 /**
  * Generate recommendations based on metrics
  */
-function generateRecommendations(metrics: any, errorAnalysis: any, performanceAnalysis: any): string[] {
+function generateRecommendations(metrics: any, errorAnalysis: any, _performanceAnalysis: any): string[] {
   const recommendations: string[] = [];
 
   // Error rate recommendations
@@ -116,7 +116,7 @@ function generateRecommendations(metrics: any, errorAnalysis: any, performanceAn
   }
 
   // Rate limiting recommendations
-  const rateLimitErrors = errorAnalysis.topErrors.find(e => e.type === 'rate_limit');
+  const rateLimitErrors = errorAnalysis.topErrors.find((e: any) => e.type === 'rate_limit');
   if (rateLimitErrors && rateLimitErrors.count > 5) {
     recommendations.push('Frequent rate limiting. Consider implementing more aggressive request throttling.');
   }

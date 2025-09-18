@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { createClientSupabase } from '@/lib/supabase-client';
+import { logger } from '@/lib/logger';
 
 interface SessionState {
   session: Session | null;
@@ -44,15 +45,15 @@ export function useSession() {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error getting initial session:', error);
+          logger.error('Error getting initial session', { error: error.message });
           updateSession(null, error);
           return;
         }
 
-        console.log('Initial session loaded:', session ? 'Found' : 'None');
+        logger.debug('Initial session loaded', { hasSession: !!session });
         updateSession(session);
       } catch (error) {
-        console.error('Error in getInitialSession:', error);
+        logger.error('Error in getInitialSession', { error: error instanceof Error ? error.message : String(error) });
         updateSession(null, error as Error);
       }
     };
@@ -60,24 +61,24 @@ export function useSession() {
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session ? 'Session present' : 'No session');
-        
+        logger.debug('Auth state change', { event, hasSession: !!session });
+
         // Handle different auth events
         switch (event) {
           case 'SIGNED_IN':
-            console.log('User signed in');
+            logger.info('User signed in', { userId: session?.user?.id });
             updateSession(session);
             break;
           case 'SIGNED_OUT':
-            console.log('User signed out');
+            logger.info('User signed out');
             updateSession(null);
             break;
           case 'TOKEN_REFRESHED':
-            console.log('Token refreshed');
+            logger.debug('Token refreshed', { userId: session?.user?.id });
             updateSession(session);
             break;
           case 'USER_UPDATED':
-            console.log('User updated');
+            logger.debug('User updated', { userId: session?.user?.id });
             updateSession(session);
             break;
           default:
@@ -104,7 +105,7 @@ export function useSession() {
       const { data: { session }, error } = await supabase.auth.refreshSession();
       
       if (error) {
-        console.error('Error refreshing session:', error);
+        logger.error('Error refreshing session', { error: error.message });
         setState(prev => ({ ...prev, loading: false, error }));
         return { session: null, error };
       }
@@ -118,7 +119,7 @@ export function useSession() {
 
       return { session, error: null };
     } catch (error) {
-      console.error('Error in refreshSession:', error);
+      logger.error('Error in refreshSession', { error: error instanceof Error ? error.message : String(error) });
       const err = error as Error;
       setState(prev => ({ ...prev, loading: false, error: err }));
       return { session: null, error: err };

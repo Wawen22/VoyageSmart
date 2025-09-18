@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Commentiamo temporaneamente la verifica dell'autenticazione per debug
     // Se non c'è una sessione, procediamo comunque ma lo logghiamo
     if (!session) {
-      console.log('Attenzione: Utente non autenticato, ma procediamo comunque per debug');
+      logger.warn('User not authenticated, proceeding for debug purposes');
       // Continuiamo l'esecuzione invece di restituire un errore
       // return NextResponse.json(
       //   { error: 'Autenticazione richiesta' },
@@ -46,36 +47,39 @@ export async function POST(request: NextRequest) {
         .eq('user_id', session.user.id)
         .maybeSingle();
 
-      const { data: tripOwner, error: tripOwnerError } = await supabaseAdmin
+      const { data: tripOwner } = await supabaseAdmin
         .from('trips')
         .select('owner_id')
         .eq('id', tripId)
         .single();
 
       if ((tripAccessError || !tripAccess) && (!tripOwner || tripOwner.owner_id !== session.user.id)) {
-        console.log('Attenzione: Utente non ha accesso al viaggio, ma procediamo comunque per debug');
+        logger.warn('User does not have trip access, proceeding for debug', {
+          userId: session.user.id,
+          tripId
+        });
         // return NextResponse.json(
         //   { error: 'Non hai accesso a questo viaggio' },
         //   { status: 403 }
         // );
       }
     } else {
-      console.log('Saltando la verifica di accesso al viaggio perché l\'utente non è autenticato');
+      logger.debug('Skipping trip access verification - user not authenticated');
     }
 
     // Salva le attività nel database
-    console.log('Salvando attività nel database:', activities.length);
+    logger.debug('Saving activities to database', { activitiesCount: activities.length });
 
     try {
       // Utilizziamo il client admin creato in precedenza per il bypass delle politiche RLS
-      console.log('Utilizzando supabaseAdmin per il salvataggio');
+      logger.debug('Using supabaseAdmin for saving activities');
 
       // Salva ogni attività singolarmente per gestire meglio gli errori
       const savedActivities = [];
       const errors = [];
 
       for (const activity of activities) {
-        console.log('Salvando attività:', activity.name);
+        logger.debug('Saving activity', { activityName: activity.name });
 
         const { data, error } = await supabaseAdmin
           .from('activities')
@@ -84,16 +88,22 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (error) {
-          console.error('Errore nel salvare attività:', activity.name, error);
+          logger.error('Error saving activity', {
+            activityName: activity.name,
+            error: error.message
+          });
           errors.push({ activity: activity.name, error: error.message });
         } else if (data) {
-          console.log('Attività salvata con successo:', data.name);
+          logger.debug('Activity saved successfully', { activityName: data.name });
           savedActivities.push(data);
         }
       }
 
       if (errors.length > 0) {
-        console.error(`${errors.length} attività non sono state salvate:`, errors);
+        logger.error('Some activities failed to save', {
+          errorCount: errors.length,
+          errors: errors.map(e => e.activity)
+        });
 
         if (savedActivities.length === 0) {
           // Se nessuna attività è stata salvata, restituisci un errore
@@ -104,18 +114,21 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      console.log('Attività salvate con successo:', savedActivities.length);
+      logger.info('Activities saved successfully', {
+        savedCount: savedActivities.length,
+        errorCount: errors.length
+      });
       return NextResponse.json({
         success: true,
         activities: savedActivities,
         errors: errors.length > 0 ? errors : undefined,
       });
     } catch (dbError) {
-      console.error('Errore durante il salvataggio delle attività:', dbError);
+      logger.error('Database error during activity saving', { error: dbError });
       throw dbError;
     }
   } catch (error: any) {
-    console.error('Error saving activities:', error);
+    logger.error('Error saving activities', { error: error.message });
     return NextResponse.json(
       {
         error: 'Failed to save activities',

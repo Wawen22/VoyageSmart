@@ -24,7 +24,7 @@ function initSupabaseAdmin() {
 // PATCH: Aggiorna un utente
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verifica il token di amministrazione
@@ -35,7 +35,8 @@ export async function PATCH(
       );
     }
 
-    const userId = params.id;
+    const resolvedParams = await params;
+    const userId = resolvedParams.id;
     const body = await request.json();
     const { role, subscription } = body;
 
@@ -217,7 +218,7 @@ export async function PATCH(
 // DELETE: Elimina un utente
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verifica il token di amministrazione
@@ -228,7 +229,8 @@ export async function DELETE(
       );
     }
 
-    const userId = params.id;
+    const resolvedParams = await params;
+    const userId = resolvedParams.id;
 
     console.log('Deleting user:', userId);
 

@@ -53,6 +53,10 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
           },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
           // Headers for better session management
           {
             key: 'Cache-Control',

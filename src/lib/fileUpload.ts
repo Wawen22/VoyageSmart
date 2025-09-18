@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from './logger';
 
 /**
  * Upload a file to Supabase Storage
@@ -14,7 +15,7 @@ export async function uploadFile(
   path: string
 ): Promise<{ url: string; name: string; type: string }> {
   try {
-    console.log('Attempting to upload file:', file.name, 'to bucket:', bucket, 'path:', path);
+    logger.debug('Attempting file upload', { fileName: file.name, bucket, path, fileSize: file.size });
 
     // Create a unique file name to prevent collisions
     const fileExt = file.name.split('.').pop();
@@ -31,8 +32,7 @@ export async function uploadFile(
       actualBucket = 'trip-documents';
     }
 
-    console.log('Using bucket:', actualBucket, 'for upload');
-    console.log('File path for upload:', filePath);
+    logger.debug('File upload configuration', { actualBucket, filePath });
 
     // Upload the file to Supabase Storage
     const { data, error } = await supabase.storage
@@ -43,10 +43,10 @@ export async function uploadFile(
       });
 
     if (error) {
-      console.error('Supabase storage upload error:', error);
+      logger.error('Supabase storage upload error', { error: error.message, fileName: file.name, bucket: actualBucket });
 
       // If we get an error, return a mock URL to prevent UI from breaking
-      console.log('Falling back to mock URL due to upload error');
+      logger.warn('Falling back to mock URL due to upload error', { fileName: file.name });
       return {
         url: `https://example.com/mock-file-url/${encodeURIComponent(file.name)}`,
         name: file.name,
@@ -59,7 +59,7 @@ export async function uploadFile(
       .from(actualBucket)
       .getPublicUrl(filePath);
 
-    console.log('File uploaded successfully, public URL:', urlData.publicUrl);
+    logger.info('File uploaded successfully', { fileName: file.name, publicUrl: urlData.publicUrl });
 
     return {
       url: urlData.publicUrl,
@@ -67,7 +67,7 @@ export async function uploadFile(
       type: file.type,
     };
   } catch (error) {
-    console.error('Error uploading file:', error);
+    logger.error('Error uploading file', { error: error instanceof Error ? error.message : String(error), fileName: file.name });
     // In case of error, return a fallback response to prevent UI from getting stuck
     return {
       url: `https://example.com/mock-file-url-error/${encodeURIComponent(file.name)}`,
@@ -108,27 +108,27 @@ export async function deleteFile(url: string, bucket: string): Promise<void> {
       const bucketIndex = pathParts.indexOf(actualBucket);
 
       if (bucketIndex === -1) {
-        console.error('Could not find bucket name in URL path:', url);
+        logger.error('Could not find bucket name in URL path', { url });
         return;
       }
 
       const filePath = pathParts.slice(bucketIndex + 1).join('/');
-      console.log('Extracted file path for deletion:', filePath);
+      logger.debug('Extracted file path for deletion', { filePath, bucket: actualBucket });
 
       // Delete the file from Supabase Storage
       const { error } = await supabase.storage.from(actualBucket).remove([filePath]);
 
       if (error) {
-        console.error('Supabase storage delete error:', error);
+        logger.error('Supabase storage delete error', { error: error.message, filePath, bucket: actualBucket });
         return; // Don't throw, just log and continue
       }
 
-      console.log('File deleted successfully');
+      logger.info('File deleted successfully', { filePath, bucket: actualBucket });
     } catch (parseError) {
-      console.error('Error parsing URL for deletion:', parseError);
+      logger.error('Error parsing URL for deletion', { error: parseError instanceof Error ? parseError.message : String(parseError), url });
     }
   } catch (error) {
-    console.error('Error deleting file:', error);
+    logger.error('Error deleting file', { error: error instanceof Error ? error.message : String(error), url });
     // We'll suppress the error here to prevent UI issues
   }
 }

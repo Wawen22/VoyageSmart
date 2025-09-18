@@ -408,14 +408,15 @@ export async function POST(request: NextRequest) {
     const requestData = await request.json();
     const { message: requestMessage, tripId: requestTripId, tripName, tripData, isInitialMessage, currentSection, aiProvider } = requestData;
 
-    console.log('=== AI Chat Request ===');
-    console.log('Provider requested:', aiProvider);
-    console.log('Default provider from env:', process.env.NEXT_PUBLIC_AI_DEFAULT_PROVIDER);
-    console.log('User message:', requestMessage);
+    logger.debug('AI Chat Request', {
+      provider: aiProvider,
+      defaultProvider: process.env.NEXT_PUBLIC_AI_DEFAULT_PROVIDER,
+      messageLength: requestMessage?.length || 0
+    });
 
     // Analizza il messaggio per determinare quale contesto è necessario
     const contextNeeds = analyzeMessageContext(requestMessage);
-    console.log('Context analysis:', contextNeeds);
+    logger.debug('Context analysis completed', { contextNeeds });
 
     // Assign to outer scope variables
     tripId = requestTripId;
@@ -428,13 +429,14 @@ export async function POST(request: NextRequest) {
       isInitialMessage
     });
 
-    console.log('=== API Chat chiamata ===');
-    console.log('Message:', message);
-    console.log('Trip ID:', tripId);
-    console.log('Trip Name:', tripName);
-    console.log('Trip Data passati direttamente:', tripData);
-    console.log('È il messaggio iniziale?', isInitialMessage);
-    console.log('Sezione corrente:', currentSection);
+    logger.apiRequest('AI Chat API called', {
+      tripId,
+      tripName,
+      hasDirectTripData: !!tripData,
+      isInitialMessage,
+      currentSection,
+      messageLength: message?.length || 0
+    });
 
     // Validazione input con schema Zod
     const validation = validateInput(aiChatSchema, {
@@ -489,7 +491,7 @@ export async function POST(request: NextRequest) {
 
     // Se abbiamo i dati del viaggio passati direttamente, li utilizziamo
     if (tripData) {
-      console.log('Utilizzo i dati del viaggio passati direttamente');
+      logger.debug('Using direct trip data');
 
       // Crea un contesto con i dati passati direttamente
       tripContext = {
@@ -563,16 +565,16 @@ export async function POST(request: NextRequest) {
         expenses: Array.isArray(tripData.expenses) ? tripData.expenses : []
       };
 
-      console.log('Contesto creato dai dati passati direttamente:', JSON.stringify(tripContext).substring(0, 200) + '...');
+      logger.debug('Trip context created from direct data');
     } else {
       // Altrimenti, prova a recuperare il contesto dal database
-      console.log('Recupero contesto completo per il viaggio:', tripId);
+      logger.debug('Fetching trip context from database', { tripId });
 
       try {
         tripContext = await getSelectiveTripContext(tripId, contextNeeds);
-        console.log('Contesto selettivo recuperato con successo:', JSON.stringify(tripContext).substring(0, 200) + '...');
+        logger.debug('Trip context retrieved successfully');
       } catch (contextError) {
-        console.error('Errore nel recupero del contesto:', contextError);
+        logger.error('Error retrieving trip context', { error: contextError, tripId });
         // Crea un contesto minimo in caso di errore
         tripContext = {
           trip: {
@@ -590,40 +592,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Log del contesto finale
-    console.log('Contesto finale utilizzato:', {
+    logger.debug('Final trip context prepared', {
       tripName: tripContext.trip?.name,
       destination: tripContext.trip?.destination,
-      startDate: tripContext.trip?.startDate,
-      endDate: tripContext.trip?.endDate,
-      budget: tripContext.trip?.budgetTotal,
-      currency: tripContext.trip?.currency,
       participantsCount: tripContext.participants?.length || 0,
-      participants: tripContext.participants?.map((p: any) => p.name || p.full_name || p.email || 'Partecipante'),
       accommodationsCount: tripContext.accommodations?.length || 0,
       transportationCount: tripContext.transportation?.length || 0,
       itineraryDaysCount: tripContext.itinerary?.length || 0,
-      expensesCount: Array.isArray(tripContext.expenses) ? tripContext.expenses.length : 0,
-      totalExpenseAmount: Array.isArray(tripContext.expenses) ? tripContext.expenses.reduce((sum, e) => sum + e.amount, 0) : 0,
-      itinerarySample: tripContext.itinerary && tripContext.itinerary.length > 0
-        ? {
-            dayDate: tripContext.itinerary[0].day_date,
-            activitiesCount: tripContext.itinerary[0].activities?.length || 0,
-            activitySample: tripContext.itinerary[0].activities && tripContext.itinerary[0].activities.length > 0
-              ? {
-                  name: tripContext.itinerary[0].activities[0].name,
-                  location: tripContext.itinerary[0].activities[0].location
-                }
-              : 'No activities'
-          }
-        : 'No itinerary days',
-      expenseSample: Array.isArray(tripContext.expenses) && tripContext.expenses.length > 0
-        ? {
-            description: tripContext.expenses[0].description,
-            amount: tripContext.expenses[0].amount,
-            category: tripContext.expenses[0].category,
-            paidBy: tripContext.expenses[0].paid_by_name
-          }
-        : 'No expenses'
+      expensesCount: Array.isArray(tripContext.expenses) ? tripContext.expenses.length : 0
     });
 
     // Prepara il prompt con il contesto del viaggio
@@ -709,16 +685,14 @@ FORMATTAZIONE DELLE RISPOSTE:
 - Mantieni paragrafi brevi e ben separati per facilitare la lettura
 `;
 
-    console.log('Preparazione prompt con contesto:', {
+    logger.debug('Preparing prompt with context', {
       tripName: tripContext.trip?.name,
       destination: tripContext.trip?.destination,
       hasParticipants: tripContext.participants?.length > 0,
       hasAccommodations: tripContext.accommodations?.length > 0,
       hasTransportation: tripContext.transportation?.length > 0,
       hasItinerary: tripContext.itinerary?.length > 0,
-      hasExpenses: Array.isArray(tripContext.expenses) && tripContext.expenses.length > 0,
-      expensesCount: Array.isArray(tripContext.expenses) ? tripContext.expenses.length : 0,
-      hasBudget: !!tripContext.trip?.budgetTotal
+      hasExpenses: Array.isArray(tripContext.expenses) && tripContext.expenses.length > 0
     });
 
     // Lightweight relevance checks to avoid sending heavy sections unnecessarily
@@ -777,13 +751,9 @@ ${tripContext.transportation.map((t: any) => {
     // Aggiungi itinerario (dettagli completi solo quando rilevante)
     if (tripContext.itinerary && tripContext.itinerary.length > 0) {
       // Log itinerary data for debugging
-      console.log('Itinerary data in prompt:', {
-        daysCount: tripContext.itinerary.length,
-        sampleDay: tripContext.itinerary.length > 0 ? JSON.stringify(tripContext.itinerary[0]).substring(0, 200) : null
+      logger.debug('Including itinerary in prompt', {
+        daysCount: tripContext.itinerary.length
       });
-
-      // Stampa l'itinerario completo per debug
-      console.log('Itinerario completo:', JSON.stringify(tripContext.itinerary));
 
       try {
         // Conta le attività totali
@@ -799,14 +769,9 @@ ${tripContext.transportation.map((t: any) => {
           promptText += `\nITINERARIO DEL VIAGGIO: ${tripContext.itinerary.length} giorni pianificati, ${totalActivities} attività in totale. (Dettagli su richiesta)\n`;
         } else {
           // Log dettagliato dell'itinerario per debug
-          console.log('Dettaglio itinerario per prompt:');
-          tripContext.itinerary.forEach((day: any, idx: number) => {
-            console.log(`Giorno ${idx + 1} (${day.day_date}): ${day.activities?.length || 0} attività`);
-            if (day.activities && day.activities.length > 0) {
-              day.activities.forEach((act: any, actIdx: number) => {
-                console.log(`  - Attività ${actIdx + 1}: ${act.name} a ${act.location || 'N/A'}`);
-              });
-            }
+          logger.debug('Including detailed itinerary in prompt', {
+            totalDays: tripContext.itinerary.length,
+            totalActivities
           });
 
           if (totalActivities > 0) {
@@ -857,7 +822,7 @@ Questo viaggio ha ${tripContext.itinerary.length} giorni pianificati con un tota
 
                       promptText += `  - Attività ${actIndex + 1}: ${name}${locationInfo}${timeInfo}${notesInfo}\n`;
                     } catch (activityError) {
-                      console.error('Errore nella formattazione dell\'attività:', activityError);
+                      logger.error('Error formatting activity', { error: activityError });
                       promptText += `  - Attività ${actIndex + 1}: Dettagli non disponibili\n`;
                     }
                   });
@@ -872,7 +837,7 @@ Questo viaggio ha ${tripContext.itinerary.length} giorni pianificati con un tota
 
                 promptText += `\n`;
               } catch (dayError) {
-                console.error('Errore nella formattazione del giorno:', dayError);
+                logger.error('Error formatting day', { error: dayError });
                 promptText += `GIORNO ${index + 1}: Dettagli non disponibili\n\n`;
               }
             });
@@ -884,7 +849,7 @@ Ci sono ${tripContext.itinerary.length} giorni pianificati ma nessuna attività 
           }
         }
       } catch (itineraryError) {
-        console.error('Errore nella formattazione dell\'itinerario:', itineraryError);
+        logger.error('Error formatting itinerary', { error: itineraryError });
         promptText += `
 ITINERARIO DEL VIAGGIO:
 Informazioni disponibili ma non formattabili correttamente.
@@ -1074,18 +1039,18 @@ L'utente ha pagato ${userExpenses.length} spese per un totale di ${userTotalSpen
       }
 
       // Aggiungi informazioni sui saldi e pagamenti da saldare
-      console.log('=== CHECKING BALANCES IN CONTEXT ===');
-      console.log('tripContext.balances exists:', !!tripContext.balances);
-      console.log('tripContext.balances length:', tripContext.balances?.length || 0);
-      console.log('tripContext.settlements exists:', !!tripContext.settlements);
-      console.log('tripContext.settlements length:', tripContext.settlements?.length || 0);
+      logger.debug('Checking balances in context', {
+        hasBalances: !!tripContext.balances,
+        balancesCount: tripContext.balances?.length || 0,
+        hasSettlements: !!tripContext.settlements,
+        settlementsCount: tripContext.settlements?.length || 0
+      });
 
       if (tripContext.balances && tripContext.balances.length > 0) {
         const debtors = tripContext.balances.filter((b: any) => b.balance < 0);
         const creditors = tripContext.balances.filter((b: any) => b.balance > 0);
 
-        console.log('Debtors found:', debtors.length);
-        console.log('Creditors found:', creditors.length);
+        logger.debug('Balance analysis', { debtorsCount: debtors.length, creditorsCount: creditors.length });
 
         promptText += `
 
@@ -1111,7 +1076,7 @@ SALDI E PAGAMENTI DA SALDARE:`;
 
         // Aggiungi dettagli sui pagamenti specifici da fare
         if (tripContext.settlements && tripContext.settlements.length > 0) {
-          console.log('Adding settlements to prompt:', tripContext.settlements.length);
+          logger.debug('Adding settlements to prompt', { settlementsCount: tripContext.settlements.length });
           promptText += `
 
 PAGAMENTI SPECIFICI DA EFFETTUARE:`;
@@ -1128,7 +1093,7 @@ SUGGERIMENTI PER I SALDI:
 - Proponi metodi di pagamento (bonifico, contanti, app di pagamento)
 - Ricorda che i saldi si aggiornano automaticamente quando vengono registrati i pagamenti`;
         } else {
-          console.log('No settlements found, adding fallback message');
+          logger.debug('No settlements found, adding fallback message');
           promptText += `
 
 NOTA SUI SALDI:
@@ -1137,7 +1102,7 @@ NOTA SUI SALDI:
 - Se ci sono spese registrate, i saldi vengono calcolati automaticamente`;
         }
       } else {
-        console.log('No balances found in context');
+        logger.debug('No balances found in context');
         promptText += `
 
 INFORMAZIONI SUI SALDI:
@@ -1429,9 +1394,10 @@ Domanda dell'utente: ${message}`;
     });
 
     // Usa il sistema di queue per gestire la richiesta
-    console.log('=== Calling AI Queue ===');
-    console.log('Prompt length:', promptText.length);
-    console.log('Provider to use:', aiProvider || 'default from config');
+    logger.debug('Calling AI Queue', {
+      promptLength: promptText.length,
+      provider: aiProvider || 'default from config'
+    });
 
     const responseText = await queueAIRequest(promptText, {
       timeout: 30000, // 30 secondi
@@ -1448,8 +1414,7 @@ Domanda dell'utente: ${message}`;
       }
     });
 
-    console.log('=== AI Response Received ===');
-    console.log('Response length:', responseText?.length || 0);
+    logger.debug('AI Response received', { responseLength: responseText?.length || 0 });
 
     // Applica l'enhancement automatico per aggiungere componenti visuali
     let enhancedResponse = enhanceResponseWithVisualComponents(responseText, message, tripContext);
@@ -1459,18 +1424,13 @@ Domanda dell'utente: ${message}`;
       try {
         const contextAnalysis = analyzeContextualActions(message, tripId, currentSection, tripContext);
 
-        console.log('=== Contextual Analysis ===');
-        console.log('Message:', message);
-        console.log('Current section:', currentSection);
-
-        if (contextAnalysis && typeof contextAnalysis === 'object') {
-          console.log('Confidence:', contextAnalysis.confidence);
-          console.log('Categories:', contextAnalysis.categories);
-          console.log('Actions count:', contextAnalysis.suggestedActions?.length || 0);
-          console.log('Reasoning:', contextAnalysis.reasoning);
-        } else {
-          console.log('Invalid contextAnalysis result:', contextAnalysis);
-        }
+        logger.debug('Contextual analysis completed', {
+          messageLength: message?.length || 0,
+          currentSection,
+          hasValidAnalysis: !!(contextAnalysis && typeof contextAnalysis === 'object'),
+          confidence: contextAnalysis?.confidence,
+          actionsCount: contextAnalysis?.suggestedActions?.length || 0
+        });
 
         // Se abbiamo azioni suggerite con alta confidenza, aggiungile alla risposta
         if (contextAnalysis &&
@@ -1482,24 +1442,16 @@ Domanda dell'utente: ${message}`;
           const actionsMarkup = formatActionsForResponse(contextAnalysis.suggestedActions);
           enhancedResponse += `\n\n${actionsMarkup}`;
 
-          console.log('=== Contextual Actions Added ===');
-          console.log('Actions markup:', actionsMarkup);
+          logger.debug('Contextual actions added to response');
         } else {
-          console.log('=== No Contextual Actions Added ===');
-          if (!contextAnalysis) {
-            console.log('Reason: contextAnalysis is null/undefined');
-          } else if (typeof contextAnalysis.confidence !== 'number') {
-            console.log('Reason: invalid confidence value');
-          } else if (contextAnalysis.confidence <= 0.3) {
-            console.log('Reason: confidence too low:', contextAnalysis.confidence);
-          } else if (!Array.isArray(contextAnalysis.suggestedActions)) {
-            console.log('Reason: suggestedActions is not an array');
-          } else {
-            console.log('Reason: no actions available');
-          }
+          logger.debug('No contextual actions added', {
+            hasAnalysis: !!contextAnalysis,
+            confidence: contextAnalysis?.confidence,
+            hasActions: Array.isArray(contextAnalysis?.suggestedActions)
+          });
         }
       } catch (contextError) {
-        console.error('Error analyzing contextual actions:', contextError);
+        logger.error('Error analyzing contextual actions', { error: contextError });
       }
     }
 

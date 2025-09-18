@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { withAuth } from '@/app/api/middleware';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   return withAuth(request, async (req, user) => {
     try {
-      console.log('Cleanup API - Processing request for user:', user.id);
+      logger.info('Admin cleanup test subscriptions request', { userId: user.id });
       const supabase = createRouteHandlerClient({ cookies });
 
       // Verifica che l'utente sia admin
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
         .or('stripe_subscription_id.like.%test%,stripe_customer_id.like.%test%');
 
       if (findError) {
-        console.error('Cleanup API - Error finding test subscriptions:', findError);
+        logger.error('Error finding test subscriptions', { error: findError });
         return NextResponse.json(
           { error: 'Error finding test subscriptions', details: findError.message },
           { status: 500 }
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      console.log(`Cleanup API - Found ${testSubscriptions.length} test subscriptions to clean up`);
+      logger.info('Found test subscriptions to clean up', { count: testSubscriptions.length });
 
       // Aggiorna tutte le subscription di test al piano free
       const { error: updateError } = await supabase
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
         .or('stripe_subscription_id.like.%test%,stripe_customer_id.like.%test%');
 
       if (updateError) {
-        console.error('Cleanup API - Error updating test subscriptions:', updateError);
+        logger.error('Error updating test subscriptions', { error: updateError });
         return NextResponse.json(
           { error: 'Error updating test subscriptions', details: updateError.message },
           { status: 500 }
@@ -95,10 +96,10 @@ export async function POST(request: NextRequest) {
         .insert(historyEntries);
 
       if (historyError) {
-        console.error('Cleanup API - Error recording cleanup in history:', historyError);
+        logger.error('Error recording cleanup in history', { error: historyError });
         // Non blocchiamo il processo se fallisce la registrazione nella cronologia
       } else {
-        console.log('Cleanup API - Cleanup events recorded in history');
+        logger.info('Cleanup events recorded in history');
       }
 
       return NextResponse.json({
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (error: any) {
-      console.error('Cleanup API - Unexpected error:', error);
+      logger.error('Unexpected error in cleanup API', { error: error.message });
       return NextResponse.json(
         {
           error: 'Error cleaning up test subscriptions',

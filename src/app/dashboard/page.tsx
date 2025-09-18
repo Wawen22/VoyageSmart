@@ -20,6 +20,7 @@ import SwipeableStats from '@/components/dashboard/SwipeableStats';
 import { useAnimationOptimization, useOptimizedLoading } from '@/hooks/usePerformance';
 import { useDashboardShortcuts } from '@/components/ui/KeyboardShortcutsHelp';
 import TripsMapView from '@/components/dashboard/TripsMapView';
+import { logger } from '@/lib/logger';
 
 
 type Trip = {
@@ -122,11 +123,11 @@ export default function Dashboard() {
         startLoading();
 
         if (!user) {
-          console.log('Dashboard - User not loaded yet, waiting...');
+          logger.debug('Dashboard user not loaded yet, waiting');
           return;
         }
 
-        console.log('Dashboard - Fetching trips for user:', user.id);
+        logger.debug('Dashboard fetching trips', { userId: user.id });
 
         try {
           // Fetch all trips the user has access to (RLS will handle permissions)
@@ -136,11 +137,14 @@ export default function Dashboard() {
             .order('created_at', { ascending: false });
 
           if (error) {
-            console.error('Dashboard - Error fetching trips:', error);
+            logger.error('Dashboard error fetching trips', { error: error.message, userId: user.id });
             throw error;
           }
 
-          console.log('Dashboard - Trips fetched successfully:', data?.length || 0);
+          logger.info('Dashboard trips fetched successfully', {
+            tripCount: data?.length || 0,
+            userId: user.id
+          });
           setTrips(data || []);
           setTripCount(data?.length || 0);
 
@@ -154,10 +158,13 @@ export default function Dashboard() {
           });
           setAvailableYears(Array.from(years).sort((a, b) => b - a));
         } catch (fetchError) {
-          console.error('Dashboard - Error in fetch operation:', fetchError);
+          logger.error('Dashboard error in fetch operation', {
+            error: fetchError,
+            userId: user.id
+          });
 
           // Fallback approach if the first method fails
-          console.log('Dashboard - Trying fallback approach...');
+          logger.debug('Dashboard trying fallback approach');
           try {
             // First get trips where user is owner
             const { data: ownerTrips, error: ownerError } = await supabase
@@ -166,12 +173,18 @@ export default function Dashboard() {
               .eq('owner_id', user.id);
 
             if (ownerError) {
-              console.error('Dashboard - Fallback approach also failed:', ownerError);
+              logger.error('Dashboard fallback approach failed', {
+                error: ownerError.message,
+                userId: user.id
+              });
               setError('Could not load your trips. Please try again later.');
               return;
             }
 
-            console.log('Dashboard - Owner trips fetched:', ownerTrips?.length || 0);
+            logger.info('Dashboard owner trips fetched', {
+              tripCount: ownerTrips?.length || 0,
+              userId: user.id
+            });
             setTrips(ownerTrips || []);
 
             // Calculate available years
@@ -184,7 +197,10 @@ export default function Dashboard() {
             });
             setAvailableYears(Array.from(years).sort((a, b) => b - a));
           } catch (fallbackError) {
-            console.error('Dashboard - Fallback approach also failed:', fallbackError);
+            logger.error('Dashboard fallback approach completely failed', {
+              error: fallbackError,
+              userId: user.id
+            });
             setError('Could not load your trips. Please try again later.');
           }
         }
@@ -203,7 +219,7 @@ export default function Dashboard() {
 
     setIsRefreshing(true);
     try {
-      console.log('Dashboard - Refreshing trips...');
+      logger.debug('Dashboard refreshing trips');
 
       const { data, error } = await supabase
         .from('trips')
@@ -211,11 +227,13 @@ export default function Dashboard() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Dashboard - Error refreshing trips:', error);
+        logger.error('Dashboard error refreshing trips', { error: error.message });
         throw error;
       }
 
-      console.log('Dashboard - Trips refreshed successfully:', data?.length || 0);
+      logger.info('Dashboard trips refreshed successfully', {
+        tripCount: data?.length || 0
+      });
       setTrips(data || []);
       setTripCount(data?.length || 0);
       setError(null);
@@ -230,7 +248,7 @@ export default function Dashboard() {
       });
       setAvailableYears(Array.from(years).sort((a, b) => b - a));
     } catch (refreshError) {
-      console.error('Dashboard - Error during refresh:', refreshError);
+      logger.error('Dashboard error during refresh', { error: refreshError });
       setError('Could not refresh trips. Please try again.');
     } finally {
       setIsRefreshing(false);

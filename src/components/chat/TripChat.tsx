@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
-import { formatDistanceToNow } from 'date-fns';
 import ImageModal from '@/components/ui/ImageModal';
 // Import icons from lucide-react
 import {
@@ -18,42 +17,17 @@ import {
   Image as ImageIcon,
   File as FileIcon,
   X as XIcon,
-  FileText as FileTextIcon,
-  FileImage as FileImageIcon,
-  FileType as FilePdfIcon,
-  Archive as FileArchiveIcon,
-  Video as FileVideoIcon,
-  Music as FileAudioIcon,
   MessageCircle as MessageCircleIcon
 } from 'lucide-react';
 import LoginPrompt from '@/components/auth/LoginPrompt';
-import { v4 as uuidv4 } from 'uuid';
+import { logger } from '@/lib/logger';
+// Import extracted modules
+import { ChatMessage, TripChatProps, MAX_FILE_SIZE, MAX_FILE_SIZE_LABEL } from './types';
+import { validateFileSize, uploadFileToStorage, handleFileSelection } from './fileHandling';
+import { formatTimestamp, getInitials, messageExists } from './messageUtils';
+import { getFileIcon } from './FileIcon';
 
-// Costante per la dimensione massima del file (5MB)
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-const MAX_FILE_SIZE_LABEL = '5MB';
 
-interface ChatMessage {
-  id: string;
-  trip_id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-  updated_at: string | null;
-  is_system_message: boolean;
-  attachment_url: string | null;
-  attachment_type: string | null;
-  users: {
-    id: string;
-    full_name: string;
-    avatar_url: string | null;
-  };
-}
-
-interface TripChatProps {
-  tripId: string;
-  tripName: string;
-}
 
 export default function TripChat({ tripId, tripName }: TripChatProps) {
   const { user } = useAuth();
@@ -146,7 +120,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
             });
         }
       } catch (error) {
-        console.error('Error fetching messages:', error);
+        logger.error('Error fetching chat messages', { error: error instanceof Error ? error.message : String(error), tripId });
         toast({
           title: 'Error',
           description: 'Failed to load chat messages. Please try again.',
@@ -169,15 +143,15 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         filter: `trip_id=eq.${tripId}`
       }, async (payload) => {
         // Check if we already have this message in our state (to avoid duplicates)
-        const messageExists = messages.some(msg => msg.id === payload.new.id);
-        if (messageExists) {
-          console.log('Message already exists in state, skipping:', payload.new.id);
+        const msgExists = messageExists(messages, payload.new.id);
+        if (msgExists) {
+          logger.debug('Message already exists in state, skipping', { messageId: payload.new.id, tripId });
           return;
         }
 
         // Only fetch and add messages from other users (our own messages are added directly in handleSendMessage)
         if (payload.new.user_id !== user.id) {
-          console.log('Received new message from another user:', payload.new.id);
+          logger.debug('Received new message from another user', { messageId: payload.new.id, tripId });
 
           // Fetch the complete message with user data
           const { data, error } = await supabase
@@ -194,7 +168,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
             .single();
 
           if (error) {
-            console.error('Error fetching new message:', error);
+            logger.error('Error fetching new message', { error: error.message, messageId: payload.new.id, tripId });
             return;
           }
 
@@ -278,7 +252,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
           });
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending chat message', { error: error instanceof Error ? error.message : String(error), tripId });
       toast({
         title: 'Error',
         description: 'Failed to send message. Please try again.',
@@ -289,41 +263,22 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
     }
   };
 
-  // Format the timestamp
-  const formatTimestamp = (timestamp: string) => {
-    return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-  };
 
-  // Get the user's initials for the avatar fallback
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase();
-  };
 
   // Handle file selection
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
 
-      // Verifica della dimensione del file
-      if (file.size > MAX_FILE_SIZE) {
-        toast({
-          title: "File troppo grande",
-          description: `La dimensione massima consentita è ${MAX_FILE_SIZE_LABEL}. Il file selezionato è ${(file.size / (1024 * 1024)).toFixed(2)}MB.`,
-          variant: "destructive",
-        });
-
+      // Use extracted validation function
+      if (handleFileSelection(file)) {
+        setSelectedFile(file);
+      } else {
         // Reset dell'input file
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
-        return;
       }
-
-      setSelectedFile(file);
     }
   };
 
@@ -340,76 +295,9 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
     fileInputRef.current?.click();
   };
 
-  // Get file icon based on file type
-  const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) return <FileImageIcon className="h-4 w-4" />;
-    if (fileType.startsWith('video/')) return <FileVideoIcon className="h-4 w-4" />;
-    if (fileType.startsWith('audio/')) return <FileAudioIcon className="h-4 w-4" />;
-    if (fileType === 'application/pdf') return <FilePdfIcon className="h-4 w-4" />;
-    if (fileType.includes('zip') || fileType.includes('compressed')) return <FileArchiveIcon className="h-4 w-4" />;
-    if (fileType.includes('text') || fileType.includes('document')) return <FileTextIcon className="h-4 w-4" />;
-    return <FileIcon className="h-4 w-4" />;
-  };
 
-  // Upload file to Supabase storage
-  const uploadFileToStorage = async (file: File): Promise<{ url: string; type: string } | null> => {
-    try {
-      // Verifica della dimensione del file (doppio controllo)
-      if (file.size > MAX_FILE_SIZE) {
-        toast({
-          title: "File troppo grande",
-          description: `La dimensione massima consentita è ${MAX_FILE_SIZE_LABEL}.`,
-          variant: "destructive",
-        });
-        return null;
-      }
 
-      setUploadingFile(true);
 
-      // Create a unique file name
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = `${tripId}/${fileName}`;
-
-      // Upload to trip-media bucket (we'll use this for chat attachments too)
-      const { data, error } = await supabase.storage
-        .from('trip-media')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (error) {
-        console.error('Error uploading file:', error);
-        toast({
-          title: 'Upload failed',
-          description: 'Failed to upload file. Please try again.',
-          variant: 'destructive',
-        });
-        return null;
-      }
-
-      // Get the public URL
-      const { data: urlData } = supabase.storage
-        .from('trip-media')
-        .getPublicUrl(filePath);
-
-      return {
-        url: urlData.publicUrl,
-        type: file.type,
-      };
-    } catch (error) {
-      console.error('Error in file upload:', error);
-      toast({
-        title: 'Upload failed',
-        description: 'An unexpected error occurred. Please try again.',
-        variant: 'destructive',
-      });
-      return null;
-    } finally {
-      setUploadingFile(false);
-    }
-  };
 
   // Send a message with attachment
   const handleSendMessageWithAttachment = async () => {
@@ -419,7 +307,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
       setSending(true);
 
       // Upload the file first
-      const uploadResult = await uploadFileToStorage(selectedFile);
+      const uploadResult = await uploadFileToStorage(selectedFile, tripId, setUploadingFile);
 
       if (!uploadResult) {
         throw new Error('File upload failed');
@@ -476,7 +364,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
           });
       }
     } catch (error) {
-      console.error('Error sending message with attachment:', error);
+      logger.error('Error sending message with attachment', { error: error instanceof Error ? error.message : String(error), tripId });
       toast({
         title: 'Error',
         description: 'Failed to send message with attachment. Please try again.',

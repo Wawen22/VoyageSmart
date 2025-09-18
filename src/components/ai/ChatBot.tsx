@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
+import { Send, Bot, User, X, Minimize2, Maximize2, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
 import FormattedAIResponse from './FormattedAIResponse';
 import { useAIProvider } from '@/hooks/useAIProvider';
 import { handleAccommodationConversation, completeAccommodationConversation } from '@/lib/services/aiConversationService';
@@ -13,64 +13,18 @@ import { AppDispatch } from '@/lib/store';
 import { addAccommodation } from '@/lib/features/accommodationSlice';
 import { addTransportation } from '@/lib/features/transportationSlice';
 import ConversationUIHandler from './ConversationUIHandler';
+import { logger } from '@/lib/logger';
+import MinimizedButton from './MinimizedButton';
+import { Message, SuggestedQuestion, TripData, ChatBotProps } from './types';
+import { getRandomGreeting, getCurrentSection } from './utils';
+import { generateSuggestedQuestions } from './suggestedQuestions';
 import '@/styles/ai-assistant.css';
-
-type Message = {
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp?: Date;
-};
-
-// Suggested questions that will appear after AI responses
-interface SuggestedQuestion {
-  text: string;
-  action: () => void;
-}
-
-interface TripData {
-  id: string;
-  name: string;
-  description?: string;
-  destination?: string;
-  destinations?: string[]; // Array di destinazioni
-  startDate?: string;
-  endDate?: string;
-  budget?: number;
-  currency?: string;
-  participants?: any[]; // Array di partecipanti
-  isPrivate?: boolean;
-  createdAt?: string;
-  owner?: string;
-  accommodations?: any[]; // Array di alloggi
-  transportation?: any[]; // Array di trasporti
-  activities?: any[]; // Array di attività
-  itinerary?: any[]; // Array di giorni dell'itinerario con attività
-  expenses?: any[]; // Array di spese
-  currentUserId?: string; // ID dell'utente corrente
-}
-
-// Funzione per generare un saluto casuale
-const getRandomGreeting = () => {
-  const greetings = [
-    "Benvenuto! Sono il tuo assistente di viaggio",
-    "Salve! Sono qui per aiutarti con il tuo viaggio",
-    "Buongiorno! Sono il tuo assistente personale",
-    "Bentornato! Sono pronto ad assisterti",
-    "A tua disposizione! Sono l'assistente di viaggio",
-    "Felice di aiutarti! Sono il tuo assistente"
-  ];
-  return greetings[Math.floor(Math.random() * greetings.length)];
-};
 
 export default function ChatBot({
   tripId,
   tripName,
   tripData
-}: {
-  tripId: string;
-  tripName: string;
-  tripData?: TripData
-}) {
+}: ChatBotProps) {
   // Rileva la pagina corrente
   const pathname = usePathname();
 
@@ -80,18 +34,7 @@ export default function ChatBot({
   // Redux dispatch per le azioni
   const dispatch = useDispatch<AppDispatch>();
 
-  // Determina la sezione corrente basata sull'URL
-  const getCurrentSection = () => {
-    if (pathname.includes('/expenses')) return 'expenses';
-    if (pathname.includes('/itinerary')) return 'itinerary';
-    if (pathname.includes('/accommodations')) return 'accommodations';
-    if (pathname.includes('/transportation')) return 'transportation';
-    if (pathname.includes('/documents')) return 'documents';
-    if (pathname.includes('/media')) return 'media';
-    return 'overview'; // Default per la pagina principale del viaggio
-  };
-
-  const currentSection = getCurrentSection();
+  const currentSection = getCurrentSection(pathname);
 
   // Stato per tracciare se il contesto è stato caricato
   const [contextLoaded, setContextLoaded] = useState(false);
@@ -100,8 +43,7 @@ export default function ChatBot({
   const [rateLimitError, setRateLimitError] = useState(false);
 
   // Debug info
-  console.log('ChatBot inizializzato con Trip ID:', tripId, 'Trip Name:', tripName);
-  console.log('Trip Data passati direttamente:', tripData);
+  logger.debug('ChatBot initialized', { tripId, tripName, hasTripData: !!tripData });
 
   // Carica i messaggi dal localStorage o inizializza con un messaggio di default
   const [messages, setMessages] = useState<Message[]>(() => {
@@ -111,10 +53,10 @@ export default function ChatBot({
       if (savedMessages) {
         try {
           const parsedMessages = JSON.parse(savedMessages);
-          console.log('Messaggi caricati dal localStorage:', parsedMessages.length);
+          logger.debug('Messages loaded from localStorage', { count: parsedMessages.length, tripId });
           return parsedMessages;
         } catch (error) {
-          console.error('Errore nel parsing dei messaggi salvati:', error);
+          logger.error('Error parsing saved messages', { error: error instanceof Error ? error.message : String(error), tripId });
         }
       }
     }
@@ -152,19 +94,19 @@ export default function ChatBot({
     try {
       // Controlla se il contesto è già stato caricato
       if (contextLoaded) {
-        console.log('Contesto già caricato, skip');
+        logger.debug('Context already loaded, skipping', { tripId });
         return;
       }
 
       // Controlla se è già in corso un caricamento
       if (isLoadingContext) {
-        console.log('Caricamento contesto già in corso, skip');
+        logger.debug('Context loading already in progress, skipping', { tripId });
         return;
       }
 
       // Controlla se abbiamo già dei messaggi salvati (più di uno significa che c'è stata interazione)
       if (messages.length > 1) {
-        console.log('Conversazione esistente trovata, non ricarico il contesto');
+        logger.debug('Existing conversation found, not reloading context', { tripId, messageCount: messages.length });
         setContextLoaded(true);
         return;
       }
@@ -173,7 +115,7 @@ export default function ChatBot({
 
         // Se abbiamo i dati del viaggio passati direttamente, li utilizziamo
         if (tripData) {
-          console.log('Utilizzo i dati del viaggio passati direttamente');
+          logger.debug('Using trip data passed directly', { tripId });
 
           // Invia un messaggio di sistema per caricare il contesto con i dati passati direttamente
           const response = await fetch('/api/ai/chat', {
@@ -200,10 +142,10 @@ export default function ChatBot({
             setContextLoaded(true);
             setRetryCount(0); // Reset retry count on success
           } else {
-            console.error('Errore nel caricamento del contesto:', response.status);
+            logger.error('Error loading context', { status: response.status, tripId });
 
             if (response.status === 429) {
-              console.warn('Rate limit raggiunto durante il caricamento del contesto.');
+              logger.warn('Rate limit reached during context loading', { tripId });
 
               if (retryCount < maxRetries) {
                 // Calcola il delay con backoff esponenziale: 2^retry * 5 secondi
@@ -234,9 +176,9 @@ export default function ChatBot({
 
             try {
               const errorData = await response.json();
-              console.error('Dettagli errore:', errorData);
+              logger.error('API error details', { errorData });
             } catch (e) {
-              console.error('Impossibile leggere i dettagli dell\'errore');
+              logger.error('Unable to read error details', { error: e });
             }
             // Aggiorna il messaggio iniziale senza contesto
             setMessages([{
@@ -246,7 +188,7 @@ export default function ChatBot({
           }
         } else {
           // Fallback al metodo originale se non abbiamo i dati del viaggio
-          console.log('Nessun dato di viaggio passato direttamente, utilizzo il metodo originale');
+          logger.debug('No direct trip data, using original method');
 
           const response = await fetch('/api/ai/chat', {
             method: 'POST',
@@ -271,12 +213,12 @@ export default function ChatBot({
             setContextLoaded(true);
             setRetryCount(0); // Reset retry count on success
           } else {
-            console.error('Errore nel caricamento del contesto (fallback):', response.status);
+            logger.error('Error loading context (fallback)', { status: response.status });
             try {
               const errorData = await response.json();
-              console.error('Dettagli errore (fallback):', errorData);
+              logger.error('Fallback error details', { errorData });
             } catch (e) {
-              console.error('Impossibile leggere i dettagli dell\'errore (fallback)');
+              logger.error('Unable to read fallback error details', { error: e });
             }
             // Aggiorna il messaggio iniziale senza contesto
             setMessages([{
@@ -286,7 +228,7 @@ export default function ChatBot({
           }
         }
     } catch (error) {
-      console.error('Errore nel caricamento del contesto:', error);
+      logger.error('Error loading context', { error });
       // Aggiorna il messaggio iniziale senza contesto
       setMessages([{
         role: 'assistant',
@@ -349,11 +291,11 @@ export default function ChatBot({
 
           if (validEntries.length > 0) {
             clientCacheRef.current = new Map(validEntries);
-            console.log('Cache AI caricata dal localStorage:', validEntries.length, 'voci');
+            logger.debug('AI cache loaded from localStorage', { entriesCount: validEntries.length });
           }
         }
       } catch (error) {
-        console.warn('Errore nel caricamento della cache AI:', error);
+        logger.warn('Error loading AI cache', { error });
       }
     }
   }, [tripId]);
@@ -361,7 +303,7 @@ export default function ChatBot({
   // Reset del contesto conversazionale quando il componente si monta
   useEffect(() => {
     if (tripData?.currentUserId) {
-      console.log('=== Component mounted, resetting any residual conversation context ===');
+      logger.debug('Component mounted, resetting conversation context');
       resetConversation(tripId, tripData.currentUserId);
     }
   }, [tripId, tripData?.currentUserId]);
@@ -390,7 +332,7 @@ export default function ChatBot({
 
       // Reset immediato del contesto conversazionale
       if (tripData?.currentUserId) {
-        console.log('=== Resetting conversation context immediately ===');
+        logger.debug('Resetting conversation context immediately');
         resetConversation(tripId, tripData.currentUserId);
       }
 
@@ -421,7 +363,7 @@ export default function ChatBot({
         messageToSend = 'CONFIRM_SAVE_TRANSPORTATION';
       }
 
-      console.log('=== Sending special message ===', messageToSend);
+      logger.debug('Sending special message', { messageType: messageToSend });
 
       // Invia il messaggio speciale per il salvataggio
       await handleSendMessage(messageToSend);
@@ -439,28 +381,28 @@ export default function ChatBot({
         messageToSend = value;
         break;
       case 'type_selected':
-        console.log('=== Type selected from UI ===', value);
+        logger.debug('Type selected from UI', { value });
         // Assicurati che il messaggio sia in lowercase per il parsing
         messageToSend = value.toLowerCase();
         break;
       case 'currency_selected':
-        console.log('=== Currency selected from UI ===', value);
+        logger.debug('Currency selected from UI', { value });
         // Assicurati che il messaggio sia in uppercase per la valuta
         messageToSend = value.toUpperCase();
         break;
       case 'transportation_type_selected':
-        console.log('=== Transportation type selected from UI ===', value);
+        logger.debug('Transportation type selected from UI', { value });
         messageToSend = value.toLowerCase();
         break;
       case 'continue_with_partial_data':
-        console.log('=== User confirmed partial data ===');
+        logger.debug('User confirmed partial data');
         messageToSend = 'CONTINUE_WITH_PARTIAL_DATA';
         break;
       default:
         messageToSend = value || action;
     }
 
-    console.log('=== Final message to send ===', messageToSend);
+    logger.debug('Final message to send', { message: messageToSend });
 
     // Invia il messaggio simulato
     if (messageToSend) {
@@ -474,13 +416,13 @@ export default function ChatBot({
 
     // Prevent new messages if rate limit is active
     if (rateLimitError) {
-      console.log('Rate limit attivo, messaggio bloccato');
+      logger.debug('Rate limit active, message blocked');
       return;
     }
 
     // Prevent new messages if circuit breaker is active
     if (circuitBreakerActive) {
-      console.log('Circuit breaker attivo, messaggio bloccato');
+      logger.debug('Circuit breaker active, message blocked');
       return;
     }
 
@@ -488,7 +430,9 @@ export default function ChatBot({
     const now = Date.now();
     const timeSinceLastSend = now - lastSendRef.current;
     if (timeSinceLastSend < 2000) {
-      console.log('Messaggio inviato troppo rapidamente, attendi', Math.ceil((2000 - timeSinceLastSend) / 1000), 'secondi');
+      logger.debug('Message sent too quickly', {
+        waitSeconds: Math.ceil((2000 - timeSinceLastSend) / 1000)
+      });
       return;
     }
 
@@ -515,19 +459,21 @@ export default function ChatBot({
     // Check for active conversation first (before making API call)
     if (tripData?.currentUserId) {
       try {
-        console.log('=== Checking for active conversation ===');
-        console.log('Message:', messageToSend);
-        console.log('Trip ID:', tripId);
-        console.log('User ID:', tripData.currentUserId);
+        logger.debug('Checking for active conversation', {
+          tripId,
+          userId: tripData.currentUserId,
+          messageLength: messageToSend?.length || 0
+        });
 
         // Prova prima con gli accommodations
-        console.log('=== Trying accommodation conversation ===');
         const accommodationResponse = handleAccommodationConversation(
           messageToSend,
           tripId,
           tripData.currentUserId
         );
-        console.log('=== Accommodation response received ===', accommodationResponse);
+        logger.debug('Accommodation conversation response', {
+          hasResponse: !!accommodationResponse
+        });
 
         let conversationResponse = accommodationResponse;
 
@@ -537,13 +483,14 @@ export default function ChatBot({
                                     (!accommodationResponse.message && !accommodationResponse.shouldContinue && !accommodationResponse.action);
 
         if (isAccommodationError) {
-          console.log('=== Trying transportation conversation ===');
           const transportationResponse = handleTransportationConversation(
             messageToSend,
             tripId,
             tripData.currentUserId
           );
-          console.log('=== Transportation response received ===', transportationResponse);
+          logger.debug('Transportation conversation response', {
+            hasResponse: !!transportationResponse
+          });
 
           // Se i trasporti hanno gestito il messaggio, usa la loro risposta
           if (transportationResponse.message || transportationResponse.shouldContinue || transportationResponse.action) {
@@ -553,7 +500,11 @@ export default function ChatBot({
 
         // Se una delle conversazioni ha gestito il messaggio
         if (conversationResponse.message || conversationResponse.shouldContinue || conversationResponse.action) {
-          console.log('=== Conversation handled the message ===');
+          logger.debug('Conversation handled the message', {
+            hasMessage: !!conversationResponse.message,
+            shouldContinue: conversationResponse.shouldContinue,
+            action: conversationResponse.action
+          });
 
           // Handle conversation response (always add message if there is one)
           if (conversationResponse.message) {
@@ -587,9 +538,9 @@ export default function ChatBot({
 
           // If we need to save accommodation, do it now
           if (conversationResponse.action === 'save_accommodation' && conversationResponse.data) {
-            console.log('=== SAVE ACCOMMODATION ACTION TRIGGERED ===');
-            console.log('Conversation response:', conversationResponse);
-            console.log('Data to save:', conversationResponse.data);
+            logger.info('Save accommodation action triggered', {
+              accommodationName: conversationResponse.data.name
+            });
 
             // Aggiorna il componente UI per mostrare lo stato di caricamento
             if (activeUIComponent && activeUIComponent.component === 'data_summary') {
@@ -603,7 +554,7 @@ export default function ChatBot({
             }
 
             try {
-              console.log('=== Dispatching addAccommodation ===');
+              logger.debug('Dispatching addAccommodation action');
 
               await dispatch(addAccommodation({
                 trip_id: tripId,
@@ -621,7 +572,7 @@ export default function ChatBot({
                 coordinates: null
               })).unwrap();
 
-              console.log('=== Accommodation saved successfully ===');
+              logger.info('Accommodation saved successfully');
 
               // Show success message
               const successResponse = completeAccommodationConversation(
@@ -645,7 +596,7 @@ export default function ChatBot({
           setTimeout(() => generateSuggestedQuestions(), 100);
 
             } catch (error: any) {
-              console.error('Error saving accommodation:', error);
+              logger.error('Error saving accommodation', { error: error.message });
 
               // Rimuovi lo stato di loading dal componente UI
               if (activeUIComponent && activeUIComponent.component === 'data_summary') {
@@ -678,9 +629,9 @@ export default function ChatBot({
 
           // If we need to save transportation, do it now
           if (conversationResponse.action === 'save_transportation' && conversationResponse.data) {
-            console.log('=== SAVE TRANSPORTATION ACTION TRIGGERED ===');
-            console.log('Conversation response:', conversationResponse);
-            console.log('Data to save:', conversationResponse.data);
+            logger.info('Save transportation action triggered', {
+              transportationType: conversationResponse.data.type
+            });
 
             // Aggiorna il componente UI per mostrare lo stato di caricamento
             if (activeUIComponent && activeUIComponent.component === 'transportation_final_summary') {
@@ -694,7 +645,7 @@ export default function ChatBot({
             }
 
             try {
-              console.log('=== Dispatching addTransportation ===');
+              logger.debug('Dispatching addTransportation action');
 
               await dispatch(addTransportation({
                 trip_id: tripId,
@@ -710,7 +661,7 @@ export default function ChatBot({
                 notes: conversationResponse.data.notes || null
               })).unwrap();
 
-              console.log('=== Transportation saved successfully ===');
+              logger.info('Transportation saved successfully');
 
               // Show success message using the complete function (which also resets context)
               const successResponse = completeTransportationConversation(
@@ -734,7 +685,7 @@ export default function ChatBot({
               setTimeout(() => generateSuggestedQuestions(), 100);
 
             } catch (error: any) {
-              console.error('Error saving transportation:', error);
+              logger.error('Error saving transportation', { error: error.message });
 
               // Reset loading state
               if (activeUIComponent && activeUIComponent.component === 'transportation_final_summary') {
@@ -776,11 +727,11 @@ export default function ChatBot({
 
           return; // Exit early, don't make API call
         } else {
-          console.log('=== Conversation did not handle the message, proceeding with normal API call ===');
+          logger.debug('Conversation did not handle message, proceeding with normal API call');
           // La conversazione non ha gestito il messaggio, continua con l'API normale
         }
       } catch (error) {
-        console.error('Error in conversation handling:', error);
+        logger.error('Error in conversation handling', { error });
         // Continue with normal API call if conversation handling fails
       }
     }
@@ -803,8 +754,8 @@ export default function ChatBot({
 
     try {
       // Call API
-      console.log('Sending message to API:', {
-        message: messageToSend,
+      logger.debug('Sending message to API', {
+        messageLength: messageToSend?.length || 0,
         tripId,
         tripName,
         hasTripData: !!tripData
@@ -831,21 +782,23 @@ export default function ChatBot({
         body: JSON.stringify(apiData),
       });
 
-      console.log('API response status:', response.status);
+      logger.debug('API response received', { status: response.status });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API error response status:', response.status);
-        console.error('API error response text:', errorText);
+        logger.error('API error response', {
+          status: response.status,
+          errorText: errorText.substring(0, 200)
+        });
 
         let errorData = {};
         try {
           errorData = JSON.parse(errorText);
         } catch (e) {
-          console.error('Failed to parse error response as JSON:', e);
+          logger.error('Failed to parse error response as JSON', { error: e });
         }
 
-        console.error('API error response parsed:', errorData);
+        logger.error('API error response parsed', { errorData });
 
         if (response.status === 401) {
           throw new Error('Autenticazione richiesta. Prova ad aggiornare la pagina e accedere nuovamente.');
@@ -859,13 +812,16 @@ export default function ChatBot({
           // Attiva il circuit breaker se troppi errori consecutivi
           if (newConsecutiveErrors >= maxConsecutiveErrors) {
             setCircuitBreakerActive(true);
-            console.warn('Circuit breaker attivato dopo', newConsecutiveErrors, 'errori 429 consecutivi');
+            logger.warn('Circuit breaker activated', {
+              consecutiveErrors: newConsecutiveErrors,
+              errorType: '429'
+            });
 
             // Disattiva il circuit breaker dopo 5 minuti
             setTimeout(() => {
               setCircuitBreakerActive(false);
               setConsecutiveErrors(0);
-              console.log('Circuit breaker disattivato');
+              logger.info('Circuit breaker deactivated');
             }, 5 * 60 * 1000); // 5 minuti
           }
 
@@ -879,7 +835,7 @@ export default function ChatBot({
               serverRetryAfter = errorData.retryAfter;
             }
           } catch (e) {
-            console.warn('Impossibile leggere retryAfter, uso default');
+            logger.warn('Unable to read retryAfter, using default');
           }
 
           // Usa il maggiore tra il nostro backoff e quello suggerito dal server
@@ -913,7 +869,7 @@ export default function ChatBot({
           const cacheObject = Object.fromEntries(clientCacheRef.current);
           localStorage.setItem(`ai_cache_${tripId}`, JSON.stringify(cacheObject));
         } catch (error) {
-          console.warn('Errore nel salvataggio della cache AI:', error);
+          logger.warn('Error saving AI cache', { error });
         }
       }
 
@@ -939,7 +895,7 @@ export default function ChatBot({
         setIsTyping(false);
       }, 500); // Ritardo di 500ms per simulare la digitazione
     } catch (error: any) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message', { error: error.message });
 
       // Parse error response if available
       let errorData: any = {};
@@ -996,7 +952,7 @@ export default function ChatBot({
 
       // Se il contesto non è ancora caricato, caricalo
       if (!contextLoaded) {
-        console.log('Chat aperta per la prima volta, caricamento contesto...');
+        logger.debug('Chat opened for first time, loading context');
         loadContext();
       }
     }
@@ -1028,7 +984,7 @@ export default function ChatBot({
 
       // Se il contesto non è ancora caricato, caricalo
       if (!contextLoaded) {
-        console.log('Chat aperta per la prima volta (expand), caricamento contesto...');
+        logger.debug('Chat opened for first time (expand), loading context');
         loadContext();
       }
     }
@@ -1036,317 +992,14 @@ export default function ChatBot({
 
   // Funzione per cancellare la conversazione
   // Genera domande suggerite dinamicamente basate sulla sezione corrente
-  const generateSuggestedQuestions = () => {
+  const generateSuggestedQuestionsWrapper = () => {
     // Non mostrare suggerimenti durante l'inserimento di dati
     if (activeUIComponent) {
       setSuggestedQuestions([]);
       return;
     }
 
-    const questions: SuggestedQuestion[] = [];
-    const crossSectionQuestions: SuggestedQuestion[] = [];
-
-    // Suggerimenti specifici per sezione
-    switch (currentSection) {
-      case 'expenses':
-        // Suggerimenti specifici per la sezione spese
-        if (tripData?.expenses && tripData.expenses.length > 0) {
-          // Analizza i dati delle spese per suggerimenti intelligenti
-          const userExpenses = tripData.expenses.filter(expense =>
-            expense.paid_by === tripData.currentUserId
-          );
-
-          const unpaidExpenses = tripData.expenses.filter(expense =>
-            expense.status === 'pending' ||
-            (expense.participants && expense.participants.some((p: any) => !p.is_paid))
-          );
-
-          const hasCategories = tripData.expenses.some(expense => expense.category);
-
-          // Suggerimenti dinamici basati sui dati
-          if (userExpenses.length > 0) {
-            questions.push({
-              text: `Le mie spese (${userExpenses.length})`,
-              action: () => {
-                const question = "Mostrami solo le spese che ho pagato io";
-                setInput(question);
-                handleSendMessage(question);
-              }
-            });
-          }
-
-          if (unpaidExpenses.length > 0) {
-            questions.push({
-              text: `Spese non saldate (${unpaidExpenses.length})`,
-              action: () => {
-                const question = "Quali spese non sono ancora state saldate?";
-                setInput(question);
-                handleSendMessage(question);
-              }
-            });
-          }
-
-          if (hasCategories) {
-            questions.push({
-              text: "Analisi per categoria",
-              action: () => {
-                const question = "Analizza le spese per categoria";
-                setInput(question);
-                handleSendMessage(question);
-              }
-            });
-          }
-
-          // Suggerimento budget sempre presente se ci sono spese
-          questions.push({
-            text: "Situazione budget",
-            action: () => {
-              const question = "Come va il nostro budget?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-
-          // Se ci sono molte spese, suggerisci consigli per risparmiare
-          if (tripData.expenses.length > 5) {
-            questions.push({
-              text: "Consigli per risparmiare",
-              action: () => {
-                const question = "Hai consigli per risparmiare sui prossimi giorni?";
-                setInput(question);
-                handleSendMessage(question);
-              }
-            });
-          }
-        } else {
-          // Nessuna spesa registrata
-          questions.push({
-            text: "Come tracciare le spese",
-            action: () => {
-              const question = "Come posso iniziare a tracciare le spese del viaggio?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-
-          questions.push({
-            text: "Impostare un budget",
-            action: () => {
-              const question = "Come posso impostare un budget per il viaggio?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-        }
-        break;
-
-      case 'itinerary':
-        // Suggerimenti specifici per l'itinerario
-        if (tripData?.itinerary && tripData.itinerary.length > 0) {
-          const totalActivities = tripData.itinerary.reduce((sum, day) =>
-            sum + (day.activities ? day.activities.length : 0), 0
-          );
-
-          questions.push({
-            text: `Itinerario completo (${tripData.itinerary.length} giorni)`,
-            action: () => {
-              const question = "Mostrami il mio itinerario completo";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-
-          questions.push({
-            text: "Attività di oggi",
-            action: () => {
-              const question = "Cosa abbiamo in programma oggi?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-
-          if (totalActivities > 0) {
-            questions.push({
-              text: `Tutte le attività (${totalActivities})`,
-              action: () => {
-                const question = "Mostrami tutte le attività pianificate";
-                setInput(question);
-                handleSendMessage(question);
-              }
-            });
-          }
-
-          questions.push({
-            text: "Suggerimenti attività",
-            action: () => {
-              const question = "Hai suggerimenti per altre attività da fare?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-        } else {
-          // Nessun itinerario pianificato
-          questions.push({
-            text: "Pianificare l'itinerario",
-            action: () => {
-              const question = "Come posso pianificare il mio itinerario?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-
-          questions.push({
-            text: "Cosa fare a " + (tripData?.destination || "destinazione"),
-            action: () => {
-              const question = "Cosa posso fare a " + (tripData?.destination || "destinazione") + "?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-        }
-        break;
-
-      case 'accommodations':
-        // Suggerimenti specifici per alloggi
-        if (tripData?.accommodations && tripData.accommodations.length > 0) {
-          questions.push({
-            text: "Dettagli alloggi",
-            action: () => {
-              const question = "Mostrami i dettagli dei miei alloggi";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-
-          questions.push({
-            text: "Check-in/Check-out",
-            action: () => {
-              const question = "Quando sono i check-in e check-out?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-        }
-        break;
-
-      case 'transportation':
-        // Suggerimenti specifici per trasporti
-        if (tripData?.transportation && tripData.transportation.length > 0) {
-          questions.push({
-            text: "Info trasporti",
-            action: () => {
-              const question = "Mostrami le informazioni sui miei trasporti";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-
-          questions.push({
-            text: "Orari partenza",
-            action: () => {
-              const question = "Quali sono gli orari di partenza dei miei trasporti?";
-              setInput(question);
-              handleSendMessage(question);
-            }
-          });
-        }
-        break;
-
-      default:
-        // Suggerimenti generali per overview o altre sezioni
-        questions.push({
-          text: "Panoramica viaggio",
-          action: () => {
-            const question = "Dammi una panoramica completa del mio viaggio";
-            setInput(question);
-            handleSendMessage(question);
-          }
-        });
-
-        questions.push({
-          text: "Cosa posso fare a " + (tripData?.destination || "destinazione"),
-          action: () => {
-            const question = "Cosa posso fare a " + (tripData?.destination || "destinazione") + "?";
-            setInput(question);
-            handleSendMessage(question);
-          }
-        });
-    }
-
-    // Aggiungi sempre suggerimenti cross-section utili (se non siamo già in quella sezione)
-
-    // Solo suggerimenti principali e essenziali
-
-    // Alloggi (sempre utile)
-    if (currentSection !== 'accommodations') {
-      crossSectionQuestions.push({
-        text: "Alloggi",
-        action: () => {
-          const question = "Mostrami i miei alloggi";
-          setInput(question);
-          handleSendMessage(question);
-        }
-      });
-    }
-
-    // Trasporti (sempre utile)
-    if (currentSection !== 'transportation') {
-      crossSectionQuestions.push({
-        text: "Trasporti",
-        action: () => {
-          const question = "Mostrami i miei trasporti";
-          setInput(question);
-          handleSendMessage(question);
-        }
-      });
-    }
-
-    // Spese (sempre utile)
-    if (currentSection !== 'expenses') {
-      crossSectionQuestions.push({
-        text: "Spese",
-        action: () => {
-          const question = "Mostrami le mie spese";
-          setInput(question);
-          handleSendMessage(question);
-        }
-      });
-    }
-
-    // Itinerario (sempre utile)
-    if (currentSection !== 'itinerary') {
-      crossSectionQuestions.push({
-        text: "Itinerario",
-        action: () => {
-          const question = "Mostrami il mio itinerario";
-          setInput(question);
-          handleSendMessage(question);
-        }
-      });
-    }
-
-    // Panoramica generale (sempre utile)
-    crossSectionQuestions.push({
-      text: "Panoramica viaggio",
-      action: () => {
-        const question = "Dammi una panoramica del mio viaggio";
-        setInput(question);
-        handleSendMessage(question);
-      }
-    });
-
-    // Combina suggerimenti specifici con quelli principali
-    // Massimo 5 suggerimenti totali per non occupare troppo spazio
-    const maxTotal = 5;
-    const maxSpecific = Math.min(questions.length, 2); // Max 2 specifici
-    const maxCrossSection = Math.min(crossSectionQuestions.length, maxTotal - maxSpecific);
-
-    const finalQuestions = [
-      ...questions.slice(0, maxSpecific),
-      ...crossSectionQuestions.slice(0, maxCrossSection)
-    ];
-
-    setSuggestedQuestions(finalQuestions);
+    generateSuggestedQuestions(currentSection, tripData, setInput, handleSendMessage, setSuggestedQuestions);
   };
 
   const clearConversation = () => {
@@ -1356,7 +1009,7 @@ export default function ChatBot({
 
       // IMPORTANTE: Reset del contesto conversazionale per gli alloggi
       if (tripData?.currentUserId) {
-        console.log('=== Resetting conversation context ===');
+        logger.debug('Resetting conversation context');
         resetConversation(tripId, tripData.currentUserId);
       }
 
@@ -1374,25 +1027,17 @@ export default function ChatBot({
       setActiveUIComponent(null);
 
       // Rigenera le domande suggerite
-      generateSuggestedQuestions();
+      generateSuggestedQuestionsWrapper();
     }
   };
 
   if (isMinimized) {
     return (
-      <button
-        onClick={toggleMinimize}
-        className="fixed sm:bottom-4 bottom-[90px] sm:right-4 right-2 bg-gradient-to-br from-purple-600 to-indigo-600 text-white p-3 sm:p-4 rounded-2xl shadow-2xl z-[48] flex items-center gap-2 sm:gap-3 hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 ai-float backdrop-blur-xl border border-purple-500/20 ai-button-hover"
-        aria-label="Apri assistente AI"
-      >
-        <div className="relative">
-          <Sparkles size={20} className="sm:w-[22px] sm:h-[22px] animate-pulse" />
-          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-400 rounded-full border-2 border-purple-600 animate-pulse"></div>
-        </div>
-        <span className="sm:inline hidden font-medium text-sm">
-          {!hasEverOpened ? 'AI Assistant' : (contextLoaded ? 'AI Assistant' : 'AI Assistant (Loading...)')}
-        </span>
-      </button>
+      <MinimizedButton
+        toggleMinimize={toggleMinimize}
+        hasEverOpened={hasEverOpened}
+        contextLoaded={contextLoaded}
+      />
     );
   }
 

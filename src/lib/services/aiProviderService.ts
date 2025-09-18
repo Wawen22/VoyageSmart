@@ -332,12 +332,11 @@ class AIProviderService {
       throw new Error('OpenAI client not initialized');
     }
 
-    // Debug logging only in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('=== OpenAI Client Configuration ===');
-      console.log('Client exists:', !!this.openaiClient);
-      console.log('Azure endpoint:', process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT);
-    }
+    // Debug logging
+    logger.debug('OpenAI client configuration', {
+      clientExists: !!this.openaiClient,
+      hasAzureEndpoint: !!process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT
+    });
 
     const { model, temperature, maxTokens, history, systemPrompt } = options;
 
@@ -385,39 +384,40 @@ class AIProviderService {
       requestBody.temperature = temperature;
     }
 
-    // Debug logging only in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('=== Azure OpenAI Request ===');
-      console.log('Messages count:', requestBody.messages?.length || 0);
-      console.log('Total prompt length:', JSON.stringify(requestBody).length);
-    }
+    // Debug logging
+    logger.debug('Azure OpenAI request', {
+      messagesCount: requestBody.messages?.length || 0,
+      promptLength: JSON.stringify(requestBody).length,
+      model: requestBody.model
+    });
 
     let completion;
     try {
       completion = await this.openaiClient.chat.completions.create(requestBody);
     } catch (error: any) {
-      console.error('=== Azure OpenAI Error ===');
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
-      console.error('Error status:', error.status);
-      console.error('Error code:', error.code);
-      console.error('Full error:', JSON.stringify(error, null, 2));
+      logger.error('Azure OpenAI API error', {
+        errorType: error.constructor.name,
+        message: error.message,
+        status: error.status,
+        code: error.code
+      });
       throw new Error(`Azure OpenAI API error: ${error.message}`);
     }
 
-    console.log('=== Azure OpenAI Response ===');
-    console.log('Completion object:', JSON.stringify(completion, null, 2));
-    console.log('Choices count:', completion.choices?.length || 0);
-    console.log('First choice:', completion.choices?.[0] || 'No choices');
+    logger.debug('Azure OpenAI response received', {
+      choicesCount: completion.choices?.length || 0,
+      hasFirstChoice: !!completion.choices?.[0]
+    });
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
-      console.error('No response content from OpenAI');
-      console.error('Full completion object:', JSON.stringify(completion, null, 2));
+      logger.error('No response content from Azure OpenAI', {
+        choicesCount: completion.choices?.length || 0
+      });
       throw new Error('No response from OpenAI');
     }
 
-    console.log('Response length:', response.length);
+    logger.debug('Azure OpenAI response processed', { responseLength: response.length });
 
     return response;
   }
@@ -468,38 +468,36 @@ class AIProviderService {
       max_tokens: maxTokens,
     };
 
-    // Debug logging only in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('=== DeepSeek (OpenRouter) Request ===');
-      console.log('Model:', model);
-      console.log('Messages count:', messages.length);
-      console.log('Temperature:', temperature);
-      console.log('Max tokens:', maxTokens);
-    }
+    // Debug logging
+    logger.debug('DeepSeek OpenRouter request', {
+      model,
+      messagesCount: messages.length,
+      temperature,
+      maxTokens
+    });
 
     let completion;
     try {
       completion = await this.deepseekClient.chat.completions.create(requestBody);
     } catch (error: any) {
-      console.error('=== DeepSeek (OpenRouter) Error ===');
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
-      console.error('Error status:', error.status);
-      console.error('Error code:', error.code);
+      logger.error('DeepSeek OpenRouter API error', {
+        errorType: error.constructor.name,
+        message: error.message,
+        status: error.status,
+        code: error.code
+      });
       throw new Error(`DeepSeek API error: ${error.message}`);
     }
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
-      console.error('No response content from DeepSeek');
-      console.error('Full completion object:', JSON.stringify(completion, null, 2));
+      logger.error('No response content from DeepSeek', {
+        choicesCount: completion.choices?.length || 0
+      });
       throw new Error('No response from DeepSeek');
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('=== DeepSeek Response ===');
-      console.log('Response length:', response.length);
-    }
+    logger.debug('DeepSeek response processed', { responseLength: response.length });
 
     return response;
   }
@@ -550,38 +548,36 @@ class AIProviderService {
       max_tokens: maxTokens,
     };
 
-    // Debug logging only in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('=== Gemini OpenRouter Request ===');
-      console.log('Model:', model);
-      console.log('Messages count:', messages.length);
-      console.log('Temperature:', temperature);
-      console.log('Max tokens:', maxTokens);
-    }
+    // Debug logging
+    logger.debug('Gemini OpenRouter request', {
+      model,
+      messagesCount: messages.length,
+      temperature,
+      maxTokens
+    });
 
     let completion;
     try {
       completion = await this.geminiOpenrouterClient.chat.completions.create(requestBody);
     } catch (error: any) {
-      console.error('=== Gemini OpenRouter Error ===');
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
-      console.error('Error status:', error.status);
-      console.error('Error code:', error.code);
+      logger.error('Gemini OpenRouter API error', {
+        errorType: error.constructor.name,
+        message: error.message,
+        status: error.status,
+        code: error.code
+      });
       throw new Error(`Gemini OpenRouter API error: ${error.message}`);
     }
 
     const response = completion.choices[0]?.message?.content;
     if (!response) {
-      console.error('No response content from Gemini OpenRouter');
-      console.error('Full completion object:', JSON.stringify(completion, null, 2));
+      logger.error('No response content from Gemini OpenRouter', {
+        choicesCount: completion.choices?.length || 0
+      });
       throw new Error('No response from Gemini OpenRouter');
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log('=== Gemini OpenRouter Response ===');
-      console.log('Response length:', response.length);
-    }
+    logger.debug('Gemini OpenRouter response processed', { responseLength: response.length });
 
     return response;
   }

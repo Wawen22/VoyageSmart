@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import { supabase } from './supabase';
 import { getStripe } from './stripe';
+import { logger } from './logger';
 
 export type SubscriptionTier = 'free' | 'premium' | 'ai';
 
@@ -49,7 +50,7 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
   try {
     // Verifica se l'utente esiste
     if (!userId) {
-      console.error('Invalid user ID');
+      logger.error('Invalid user ID provided to getUserSubscription');
       return null;
     }
 
@@ -61,12 +62,12 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
       .maybeSingle(); // Usa maybeSingle invece di single per evitare errori se non esiste
 
     if (error) {
-      console.error('Error fetching user subscription:', error);
+      logger.error('Error fetching user subscription', { error: error.message, userId });
       return null;
     }
 
     if (!data) {
-      console.log('No subscription found for user, creating default subscription');
+      logger.info('No subscription found for user, creating default subscription', { userId });
       await createDefaultSubscription(userId);
 
       // Riprova a ottenere la sottoscrizione dopo averla creata
@@ -77,7 +78,10 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
         .maybeSingle();
 
       if (newError || !newData) {
-        console.error('Error fetching newly created subscription:', newError);
+        logger.error('Error fetching newly created subscription', {
+          error: newError?.message,
+          userId
+        });
         return null;
       }
 
@@ -95,7 +99,7 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
       currentPeriodEnd: data.current_period_end ? new Date(data.current_period_end) : undefined,
     };
   } catch (error) {
-    console.error('Error in getUserSubscription:', error);
+    logger.error('Error in getUserSubscription', { error, userId });
     return null;
   }
 }
@@ -179,13 +183,13 @@ export async function canAddAccommodation(userId: string, tripId: string, userTi
       .eq('trip_id', tripId);
 
     if (error) {
-      console.error('Error fetching accommodation count:', error);
+      logger.error('Error fetching accommodation count', { error: error.message, tripId });
       return false;
     }
 
     return (count || 0) < 5;
   } catch (error) {
-    console.error('Error in canAddAccommodation:', error);
+    logger.error('Error in canAddAccommodation', { error, tripId });
     return false;
   }
 }
@@ -205,13 +209,13 @@ export async function canAddTransportation(userId: string, tripId: string, userT
       .eq('trip_id', tripId);
 
     if (error) {
-      console.error('Error fetching transportation count:', error);
+      logger.error('Error fetching transportation count', { error: error.message, tripId });
       return false;
     }
 
     return (count || 0) < 5;
   } catch (error) {
-    console.error('Error in canAddTransportation:', error);
+    logger.error('Error in canAddTransportation', { error, tripId });
     return false;
   }
 }
@@ -231,13 +235,13 @@ export async function canAddJournalEntry(userId: string, tripId: string, userTie
       .eq('trip_id', tripId);
 
     if (error) {
-      console.error('Error fetching journal entries count:', error);
+      logger.error('Error fetching journal entries count', { error: error.message, tripId });
       return false;
     }
 
     return (count || 0) < 2;
   } catch (error) {
-    console.error('Error in canAddJournalEntry:', error);
+    logger.error('Error in canAddJournalEntry', { error, tripId });
     return false;
   }
 }
@@ -258,13 +262,13 @@ export async function canAddPhoto(userId: string, tripId: string, userTier: stri
       .eq('type', 'photo');
 
     if (error) {
-      console.error('Error fetching photos count:', error);
+      logger.error('Error fetching photos count', { error: error.message, tripId });
       return false;
     }
 
     return (count || 0) < 2;
   } catch (error) {
-    console.error('Error in canAddPhoto:', error);
+    logger.error('Error in canAddPhoto', { error, tripId });
     return false;
   }
 }
@@ -279,17 +283,20 @@ export async function createDefaultSubscription(userId: string): Promise<void> {
       .maybeSingle();
 
     if (checkError) {
-      console.error('Error checking existing subscription:', checkError);
+      logger.error('Error checking existing subscription', {
+        error: checkError.message,
+        userId
+      });
       return;
     }
 
     // If user already has a subscription, don't create a new one
     if (existingSubscription) {
-      console.log('User already has a subscription, skipping creation');
+      logger.debug('User already has a subscription, skipping creation', { userId });
       return;
     }
 
-    console.log('Creating default subscription for user:', userId);
+    logger.info('Creating default subscription for user', { userId });
 
     // Create a free subscription for the user
     const { error } = await supabase
@@ -306,14 +313,17 @@ export async function createDefaultSubscription(userId: string): Promise<void> {
     if (error) {
       // Se l'errore è di duplicazione, non è un problema
       if (error.code === '23505') {
-        console.log('Subscription already exists (concurrent creation), skipping');
+        logger.debug('Subscription already exists (concurrent creation), skipping', { userId });
         return;
       }
-      console.error('Error creating default subscription:', error);
+      logger.error('Error creating default subscription', {
+        error: error.message,
+        userId
+      });
       return;
     }
 
-    console.log('Default subscription created successfully');
+    logger.info('Default subscription created successfully', { userId });
 
     // Registra l'evento nella cronologia
     const { error: historyError } = await supabase.from('subscription_history').insert({
@@ -325,12 +335,15 @@ export async function createDefaultSubscription(userId: string): Promise<void> {
     });
 
     if (historyError) {
-      console.error('Error creating subscription history:', historyError);
+      logger.error('Error creating subscription history', {
+        error: historyError.message,
+        userId
+      });
     } else {
-      console.log('Subscription history created successfully');
+      logger.debug('Subscription history created successfully', { userId });
     }
   } catch (error) {
-    console.error('Error in createDefaultSubscription:', error);
+    logger.error('Error in createDefaultSubscription', { error, userId });
   }
 }
 
@@ -355,11 +368,11 @@ export async function initiateCheckout(tier: SubscriptionTier): Promise<string |
     const accessToken = session?.access_token;
 
     if (!accessToken) {
-      console.error('No active session or access token found');
+      logger.error('No active session or access token found for checkout');
       throw new Error('No active session found');
     }
 
-    console.log('Got access token, proceeding with checkout');
+    logger.debug('Got access token, proceeding with checkout');
 
     // Chiama l'API di checkout con il token di autorizzazione
     const response = await fetch('/api/stripe/checkout', {
@@ -383,24 +396,24 @@ export async function initiateCheckout(tier: SubscriptionTier): Promise<string |
 
     return data.url;
   } catch (error) {
-    console.error('Error initiating checkout:', error);
+    logger.error('Error initiating checkout', { error, tier });
     return null;
   }
 }
 
 export async function cancelStripeSubscription(subscriptionId: string): Promise<boolean> {
   try {
-    console.log('Client - Canceling subscription:', subscriptionId);
+    logger.info('Canceling subscription', { subscriptionId });
     // Ottieni la sessione corrente per il token di accesso
     const { data: { session } } = await supabase.auth.getSession();
     const accessToken = session?.access_token;
 
     if (!accessToken) {
-      console.error('Client - No active session found');
+      logger.error('No active session found for subscription cancellation');
       throw new Error('No active session found');
     }
 
-    console.log('Client - Got access token, proceeding with cancellation');
+    logger.debug('Got access token, proceeding with cancellation');
 
     const response = await fetch('/api/stripe/cancel', {
       method: 'POST',
@@ -412,10 +425,10 @@ export async function cancelStripeSubscription(subscriptionId: string): Promise<
     });
 
     const data = await response.json();
-    console.log('Client - Cancellation response:', data);
+    logger.debug('Cancellation response received', { data });
 
     if (!response.ok) {
-      console.error('Client - Error response from cancellation API:', data);
+      logger.error('Error response from cancellation API', { data, status: response.status });
 
       // Fornisci messaggi di errore più specifici
       let errorMessage = data.error || 'Error canceling subscription';
@@ -426,10 +439,10 @@ export async function cancelStripeSubscription(subscriptionId: string): Promise<
       throw new Error(errorMessage);
     }
 
-    console.log('Client - Subscription canceled successfully');
+    logger.info('Subscription canceled successfully', { subscriptionId });
     return true;
   } catch (error: any) {
-    console.error('Client - Error canceling subscription:', error);
+    logger.error('Error canceling subscription', { error: error.message, subscriptionId });
 
     // Se è un errore di rete, fornisci un messaggio più chiaro
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
@@ -443,17 +456,17 @@ export async function cancelStripeSubscription(subscriptionId: string): Promise<
 
 export async function downgradeToFree(): Promise<boolean> {
   try {
-    console.log('Client - Downgrading to free tier');
+    logger.info('Downgrading to free tier');
     // Ottieni la sessione corrente per il token di accesso
     const { data: { session } } = await supabase.auth.getSession();
     const accessToken = session?.access_token;
 
     if (!accessToken) {
-      console.error('Client - No active session found');
+      logger.error('No active session found for downgrade');
       throw new Error('No active session found');
     }
 
-    console.log('Client - Got access token, proceeding with downgrade');
+    logger.debug('Got access token, proceeding with downgrade');
 
     const response = await fetch('/api/stripe/downgrade', {
       method: 'POST',
@@ -464,10 +477,10 @@ export async function downgradeToFree(): Promise<boolean> {
     });
 
     const data = await response.json();
-    console.log('Client - Downgrade response:', data);
+    logger.debug('Downgrade response received', { data });
 
     if (!response.ok) {
-      console.error('Client - Error response from downgrade API:', data);
+      logger.error('Error response from downgrade API', { data, status: response.status });
 
       // Fornisci messaggi di errore più specifici
       let errorMessage = data.error || 'Error downgrading subscription';
@@ -478,10 +491,10 @@ export async function downgradeToFree(): Promise<boolean> {
       throw new Error(errorMessage);
     }
 
-    console.log('Client - Subscription downgraded successfully');
+    logger.info('Subscription downgraded successfully');
     return true;
   } catch (error: any) {
-    console.error('Client - Error downgrading subscription:', error);
+    logger.error('Error downgrading subscription', { error: error.message });
 
     // Se è un errore di rete, fornisci un messaggio più chiaro
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
@@ -502,13 +515,13 @@ export async function getSubscriptionHistory(userId: string): Promise<any[]> {
       .order('event_timestamp', { ascending: false });
 
     if (error) {
-      console.error('Error fetching subscription history:', error);
+      logger.error('Error fetching subscription history', { error: error.message, userId });
       return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error('Error in getSubscriptionHistory:', error);
+    logger.error('Error in getSubscriptionHistory', { error, userId });
     return [];
   }
 }

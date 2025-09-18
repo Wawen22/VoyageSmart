@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook personalizzato per verificare se l'utente corrente ha il ruolo di admin
@@ -32,7 +33,7 @@ export function useIsAdmin() {
           .single();
 
         if (error) {
-          console.error('Error fetching user preferences:', error);
+          logger.error('Error fetching user preferences', { error: error.message, userId: user.id });
           setError(error.message);
           setIsAdmin(false);
           return;
@@ -40,10 +41,10 @@ export function useIsAdmin() {
 
         // Check if the user has admin role in preferences
         const hasAdminRole = data?.preferences?.role === 'admin';
-        console.log(`User ${user.id} admin status:`, hasAdminRole);
+        logger.debug('User admin status checked', { userId: user.id, isAdmin: hasAdminRole });
         setIsAdmin(hasAdminRole);
       } catch (err: any) {
-        console.error('Unexpected error checking admin status:', err);
+        logger.error('Unexpected error checking admin status', { error: err.message, userId: user.id });
         setError(err.message);
         setIsAdmin(false);
       } finally {

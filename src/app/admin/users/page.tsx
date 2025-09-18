@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,13 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  ArrowLeftIcon, 
-  RefreshCcw, 
-  Search, 
-  Filter, 
-  Users, 
-  HomeIcon, 
+import {
+  RefreshCcw,
+  Search,
+  Filter,
+  Users,
+  HomeIcon,
   UsersIcon,
   MoreHorizontal,
   Edit,
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { AdminProtected } from '@/components/auth/AdminProtected';
+import { logger } from '@/lib/logger';
 import PageLayout from '@/components/layout/PageLayout';
 import {
   Table,
@@ -103,7 +104,7 @@ export default function UserManagement() {
   const [showBulkActions, setShowBulkActions] = useState(false);
 
   // Fetch users
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -132,7 +133,7 @@ export default function UserManagement() {
       setUsers(data.users);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      logger.error('Error fetching users', { error: error instanceof Error ? error.message : String(error) });
       toast({
         title: 'Error',
         description: 'Failed to fetch users',
@@ -141,11 +142,11 @@ export default function UserManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, search, tierFilter, statusFilter, roleFilter]);
 
   useEffect(() => {
     fetchUsers();
-  }, [pagination.page, search, tierFilter, statusFilter, roleFilter]);
+  }, [fetchUsers]);
 
   // Handle search with debounce
   useEffect(() => {
@@ -446,7 +447,7 @@ export default function UserManagement() {
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                                   {user.avatar_url ? (
-                                    <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full" />
+                                    <Image src={user.avatar_url} alt="" width={32} height={32} className="w-8 h-8 rounded-full" />
                                   ) : (
                                     <span className="text-sm font-medium">
                                       {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}

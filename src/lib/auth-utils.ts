@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { logger } from './logger';
 
 /**
  * Sign up a new user
@@ -16,7 +17,7 @@ export async function signUpUser(email: string, password: string, fullName: stri
   });
 
   if (error) {
-    console.error('Sign up error:', error);
+    logger.error('Sign up error', { error: error.message, email });
     throw error;
   }
 
@@ -36,7 +37,7 @@ export async function signInUser(email: string, password: string) {
   });
 
   if (error) {
-    console.error('Sign in error:', error);
+    logger.error('Sign in error', { error: error.message, email });
     throw error;
   }
 
@@ -49,10 +50,10 @@ export async function signInUser(email: string, password: string) {
         .eq('id', data.user.id);
 
       if (updateError) {
-        console.error('Error updating last login:', updateError);
+        logger.error('Error updating last login', { error: updateError.message, userId: data.user.id });
       }
     } catch (err) {
-      console.error('Error in last login update:', err);
+      logger.error('Error in last login update', { error: err instanceof Error ? err.message : String(err) });
     }
   }
 
@@ -66,7 +67,7 @@ export async function signOutUser() {
   const { error } = await supabase.auth.signOut();
   
   if (error) {
-    console.error('Sign out error:', error);
+    logger.error('Sign out error', { error: error.message });
     throw error;
   }
   
@@ -80,7 +81,7 @@ export async function getCurrentSession() {
   const { data, error } = await supabase.auth.getSession();
   
   if (error) {
-    console.error('Get session error:', error);
+    logger.error('Get session error', { error: error.message });
     throw error;
   }
   
@@ -94,7 +95,7 @@ export async function getCurrentUser() {
   const { data, error } = await supabase.auth.getUser();
   
   if (error) {
-    console.error('Get user error:', error);
+    logger.error('Get user error', { error: error.message });
     throw error;
   }
   
@@ -112,7 +113,7 @@ export async function getUserProfile(userId: string) {
     .single();
   
   if (error) {
-    console.error('Get user profile error:', error);
+    logger.error('Get user profile error', { error: error.message, userId });
     return null;
   }
   
@@ -128,7 +129,7 @@ export async function resetPassword(email: string) {
   });
   
   if (error) {
-    console.error('Reset password error:', error);
+    logger.error('Reset password error', { error: error.message, email });
     throw error;
   }
   

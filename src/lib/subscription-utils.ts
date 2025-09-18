@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { logger } from './logger';
 
 /**
  * Verifica e aggiorna le sottoscrizioni scadute
@@ -42,7 +43,7 @@ export async function checkExpiredSubscriptions() {
         throw new Error(`Error updating subscription for user ${subscription.user_id}: ${updateError.message}`);
       }
       
-      console.log(`Updated subscription for user ${subscription.user_id} to free`);
+      logger.info('Updated subscription to free', { userId: subscription.user_id });
       
       // Registra l'evento nella cronologia
       const { error: historyError } = await supabase.from('subscription_history').insert({
@@ -61,16 +62,16 @@ export async function checkExpiredSubscriptions() {
       });
       
       if (historyError) {
-        console.error(`Error creating history for user ${subscription.user_id}:`, historyError);
+        logger.error('Error creating subscription history', { userId: subscription.user_id, error: historyError.message });
       } else {
-        console.log(`Created history entry for user ${subscription.user_id}`);
+        logger.debug('Created subscription history entry', { userId: subscription.user_id });
       }
     }
     
-    console.log('Finished checking expired subscriptions');
+    logger.info('Finished checking expired subscriptions', { expiredCount: expiredSubscriptions.length });
     return expiredSubscriptions.length;
   } catch (error) {
-    console.error('Error in checkExpiredSubscriptions:', error);
+    logger.error('Error in checkExpiredSubscriptions', { error: error instanceof Error ? error.message : String(error) });
     return 0;
   }
 }
@@ -82,7 +83,7 @@ export async function checkExpiredSubscriptions() {
  */
 export async function checkUserSubscription(userId: string) {
   try {
-    console.log(`Checking subscription for user ${userId}...`);
+    logger.debug('Checking user subscription', { userId });
     
     const now = new Date().toISOString();
     
@@ -94,12 +95,12 @@ export async function checkUserSubscription(userId: string) {
       .single();
     
     if (findError) {
-      console.error(`Error finding subscription for user ${userId}:`, findError);
+      logger.error('Error finding user subscription', { userId, error: findError.message });
       return false;
     }
-    
+
     if (!subscription) {
-      console.log(`No subscription found for user ${userId}`);
+      logger.debug('No subscription found for user', { userId });
       return false;
     }
     
@@ -128,8 +129,8 @@ export async function checkUserSubscription(userId: string) {
       throw new Error(`Error updating subscription for user ${userId}: ${updateError.message}`);
     }
     
-    console.log(`Updated subscription for user ${userId} to free`);
-    
+    logger.info('Updated user subscription to free', { userId });
+
     // Registra l'evento nella cronologia
     const { error: historyError } = await supabase.from('subscription_history').insert({
       user_id: userId,
@@ -145,16 +146,16 @@ export async function checkUserSubscription(userId: string) {
         reason: 'user_login_check'
       },
     });
-    
+
     if (historyError) {
-      console.error(`Error creating history for user ${userId}:`, historyError);
+      logger.error('Error creating user subscription history', { userId, error: historyError.message });
     } else {
-      console.log(`Created history entry for user ${userId}`);
+      logger.debug('Created user subscription history entry', { userId });
     }
-    
+
     return true;
   } catch (error) {
-    console.error(`Error in checkUserSubscription for user ${userId}:`, error);
+    logger.error('Error in checkUserSubscription', { userId, error: error instanceof Error ? error.message : String(error) });
     return false;
   }
 }

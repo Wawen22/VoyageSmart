@@ -174,7 +174,7 @@ export async function DELETE(request: NextRequest) {
     const supabase = initSupabase();
 
     // Elimina il codice promo utilizzando la funzione SQL personalizzata
-    const { data: deleteResult, error: deleteError } = await supabase
+    const { error: deleteError } = await supabase
       .rpc('delete_promo_code', {
         p_id: id
       });

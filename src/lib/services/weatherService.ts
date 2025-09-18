@@ -1,9 +1,11 @@
 // Weather API service for OpenWeatherMap
 // Documentation: https://openweathermap.org/api
 
+import { logger } from '@/lib/logger';
+
 // Utilizziamo la chiave API dall'ambiente
 const WEATHER_API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
-console.log('Weather API Key:', WEATHER_API_KEY ? 'Configurata' : 'Non configurata'); // Per debug
+logger.debug('Weather API Key configured', { configured: !!WEATHER_API_KEY });
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 export interface WeatherData {
@@ -97,7 +99,11 @@ export async function getCurrentWeatherByCoords(lat: number, lon: number, units:
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching weather data:', error);
+    logger.error('Error fetching weather data', {
+      error: error instanceof Error ? error.message : String(error),
+      lat,
+      lon
+    });
     throw error;
   }
 }
@@ -121,7 +127,10 @@ export async function getCurrentWeatherByCity(city: string, units: 'metric' | 'i
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching weather data:', error);
+    logger.error('Error fetching weather data by city', {
+      error: error instanceof Error ? error.message : String(error),
+      city
+    });
     throw error;
   }
 }
@@ -145,7 +154,11 @@ export async function getForecastByCoords(lat: number, lon: number, units: 'metr
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching forecast data:', error);
+    logger.error('Error fetching forecast data by coordinates', {
+      error: error instanceof Error ? error.message : String(error),
+      lat,
+      lon
+    });
     throw error;
   }
 }
@@ -169,7 +182,10 @@ export async function getForecastByCity(city: string, units: 'metric' | 'imperia
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching forecast data:', error);
+    logger.error('Error fetching forecast data by city', {
+      error: error instanceof Error ? error.message : String(error),
+      city
+    });
     throw error;
   }
 }

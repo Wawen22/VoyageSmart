@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AIProvider } from '@/lib/services/aiProviderService';
+import { logger } from '@/lib/logger';
 
 interface UseAIProviderReturn {
   currentProvider: AIProvider;
@@ -42,7 +43,7 @@ export function useAIProvider(): UseAIProviderReturn {
         throw new Error(data.error || 'Failed to load providers');
       }
     } catch (err: any) {
-      console.error('Error loading AI providers:', err);
+      logger.error('Error loading AI providers', { error: err.message });
       setError(err.message);
       
       // Fallback to default values
@@ -61,7 +62,7 @@ export function useAIProvider(): UseAIProviderReturn {
       try {
         localStorage.setItem('voyagesmart_ai_provider', provider);
       } catch (err) {
-        console.warn('Failed to store provider preference:', err);
+        logger.warn('Failed to store provider preference', { error: err instanceof Error ? err.message : String(err) });
       }
     }
   };
@@ -74,7 +75,7 @@ export function useAIProvider(): UseAIProviderReturn {
         setCurrentProvider(stored);
       }
     } catch (err) {
-      console.warn('Failed to load provider preference:', err);
+      logger.warn('Failed to load provider preference', { error: err instanceof Error ? err.message : String(err) });
     }
   }, [availableProviders]);
 

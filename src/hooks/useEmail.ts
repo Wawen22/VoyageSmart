@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@/lib/logger';
 
 interface EmailHookState {
   sending: boolean;
@@ -64,14 +65,14 @@ export function useEmail() {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Email API error:', data);
+        logger.error('Email API error', { error: data, status: response.status, statusText: response.statusText });
         throw new Error(data.error || `Failed to send invitation email: ${response.status} ${response.statusText}`);
       }
 
       // Check if there's a warning (for development mode)
       if (data.warning) {
-        console.warn('Email warning:', data.warning);
-        console.info('Mock email data:', data.mockData);
+        logger.warn('Email warning', { warning: data.warning });
+        logger.debug('Mock email data', { mockData: data.mockData });
       }
 
       setState({ sending: false, error: null, success: true });
@@ -102,14 +103,14 @@ export function useEmail() {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Email API error:', data);
+        logger.error('Email API error', { error: data, status: response.status, statusText: response.statusText });
         throw new Error(data.error || `Failed to send trip updated email: ${response.status} ${response.statusText}`);
       }
 
       // Check if there's a warning (for development mode)
       if (data.warning) {
-        console.warn('Email warning:', data.warning);
-        console.info('Mock email data:', data.mockData);
+        logger.warn('Email warning', { warning: data.warning });
+        logger.debug('Mock email data', { mockData: data.mockData });
       }
 
       setState({ sending: false, error: null, success: true });
@@ -140,14 +141,14 @@ export function useEmail() {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error('Email API error:', data);
+        logger.error('Email API error', { error: data, status: response.status, statusText: response.statusText });
         throw new Error(data.error || `Failed to send new activity email: ${response.status} ${response.statusText}`);
       }
 
       // Check if there's a warning (for development mode)
       if (data.warning) {
-        console.warn('Email warning:', data.warning);
-        console.info('Mock email data:', data.mockData);
+        logger.warn('Email warning', { warning: data.warning });
+        logger.debug('Mock email data', { mockData: data.mockData });
       }
 
       setState({ sending: false, error: null, success: true });

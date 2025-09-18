@@ -6,10 +6,10 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import RippleButton from '@/components/ui/RippleButton';
-import AnimatedList from '@/components/ui/AnimatedList';
-import ParallaxSection from '@/components/ui/ParallaxSection';
+
 import Accordion from '@/components/ui/Accordion';
 import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +17,7 @@ import {
   MapPinIcon,
   CalendarIcon,
   UsersIcon,
-  PlaneTakeoffIcon,
   DollarSignIcon,
-  BuildingIcon,
-  MessageCircleIcon,
   CheckIcon,
   XIcon,
   ArrowRightIcon,
@@ -28,14 +25,9 @@ import {
   ShieldIcon,
   StarIcon,
   HelpCircleIcon,
-  ChevronDownIcon,
-  MousePointerIcon,
   PhoneIcon,
   RocketIcon,
   SparklesIcon,
-  CloudIcon,
-  Sun,
-  Thermometer,
   BookOpenIcon,
   ImageIcon,
   PlayIcon,
@@ -44,8 +36,6 @@ import {
   HeartIcon,
   AwardIcon,
   ChevronUpIcon,
-  NavigationIcon,
-  CircleIcon,
   HomeIcon
 } from 'lucide-react';
 
@@ -166,7 +156,7 @@ export default function Home() {
       try {
         await upgradeSubscription(plan);
       } catch (error) {
-        console.error('Error upgrading subscription:', error);
+        logger.error('Error upgrading subscription', { error: error instanceof Error ? error.message : String(error) });
       }
     } else {
       router.push('/register');

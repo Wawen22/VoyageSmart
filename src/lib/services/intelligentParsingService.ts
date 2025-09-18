@@ -5,6 +5,7 @@
 
 import { parse, format, isValid } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { logger } from '@/lib/logger';
 
 /**
  * Interpreta una data scritta in linguaggio naturale
@@ -118,17 +119,13 @@ export function parseNaturalDate(input: string): string | null {
  */
 export function parseAccommodationType(input: string): string | null {
   const cleanInput = input.toLowerCase().trim();
-  console.log('=== parseAccommodationType ===');
-  console.log('Input:', input);
-  console.log('Clean input:', cleanInput);
+  logger.debug('Parsing accommodation type', { input, cleanInput });
 
   // Prima controlla se è un valore diretto valido
   const validTypes = ['hotel', 'apartment', 'hostel', 'house', 'villa', 'resort', 'camping', 'other'];
-  console.log('Valid types:', validTypes);
-  console.log('Checking if cleanInput is in validTypes:', validTypes.includes(cleanInput));
 
   if (validTypes.includes(cleanInput)) {
-    console.log(`✅ Direct match found! Returning: ${cleanInput}`);
+    logger.debug('Direct accommodation type match found', { type: cleanInput });
     return cleanInput;
   }
 
@@ -146,15 +143,14 @@ export function parseAccommodationType(input: string): string | null {
   // Cerca corrispondenze esatte o parziali
   for (const [type, keywords] of Object.entries(typeMap)) {
     for (const keyword of keywords) {
-      console.log(`Checking if "${cleanInput}" includes "${keyword}"`);
       if (cleanInput.includes(keyword)) {
-        console.log(`Match found! Returning: ${type}`);
+        logger.debug('Accommodation type keyword match found', { type, keyword });
         return type;
       }
     }
   }
 
-  console.log('No match found, returning null');
+  logger.debug('No accommodation type match found', { input });
   return null;
 }
 
@@ -163,19 +159,14 @@ export function parseAccommodationType(input: string): string | null {
  */
 export function parseCurrency(input: string): string | null {
   const cleanInput = input.toLowerCase().trim();
-  console.log('=== parseCurrency ===');
-  console.log('Input:', input);
-  console.log('Clean input:', cleanInput);
+  logger.debug('Parsing currency', { input, cleanInput });
 
   // Prima controlla se è un codice valuta diretto
   const validCurrencies = ['EUR', 'USD', 'GBP', 'CHF', 'JPY', 'CAD'];
   const upperInput = cleanInput.toUpperCase();
-  console.log('Upper input:', upperInput);
-  console.log('Valid currencies:', validCurrencies);
-  console.log('Is valid currency:', validCurrencies.includes(upperInput));
 
   if (validCurrencies.includes(upperInput)) {
-    console.log(`✅ Direct currency match found! Returning: ${upperInput}`);
+    logger.debug('Direct currency match found', { currency: upperInput });
     return upperInput;
   }
 
@@ -190,15 +181,14 @@ export function parseCurrency(input: string): string | null {
 
   for (const [currency, keywords] of Object.entries(currencyMap)) {
     for (const keyword of keywords) {
-      console.log(`Checking if "${cleanInput}" includes "${keyword}"`);
       if (cleanInput.includes(keyword)) {
-        console.log(`Currency match found! Returning: ${currency}`);
+        logger.debug('Currency keyword match found', { currency, keyword });
         return currency;
       }
     }
   }
 
-  console.log('No currency match found, returning null');
+  logger.debug('No currency match found', { input });
   return null;
 }
 
@@ -224,8 +214,7 @@ export function parseCostWithCurrency(input: string): {
   currency: string | null;
 } {
   const cleanInput = input.trim();
-  console.log('=== parseCostWithCurrency ===');
-  console.log('Input:', cleanInput);
+  logger.debug('Parsing cost with currency', { input: cleanInput });
 
   // Pattern per riconoscere numero + valuta
   const patterns = [
@@ -254,7 +243,7 @@ export function parseCostWithCurrency(input: string): {
       } else {
         // Solo numero
         cost = parseFloat(match[1].replace(',', '.'));
-        console.log('Only number found:', cost);
+        logger.debug('Number only found', { cost });
         return { cost, currency: null };
       }
 
@@ -268,7 +257,7 @@ export function parseCostWithCurrency(input: string): {
       };
 
       const currency = currencyMap[currencyText] || null;
-      console.log('Parsed cost:', cost, 'currency:', currency);
+      logger.debug('Cost and currency parsed', { cost, currency });
 
       if (!isNaN(cost) && cost >= 0) {
         return { cost, currency };
@@ -276,7 +265,7 @@ export function parseCostWithCurrency(input: string): {
     }
   }
 
-  console.log('No cost/currency pattern matched');
+  logger.debug('No cost/currency pattern matched', { input });
   return { cost: null, currency: null };
 }
 
@@ -388,10 +377,8 @@ export function intelligentParse(input: string, fieldType: string): {
       };
 
     case 'accommodation_type':
-      console.log('=== Parsing accommodation type ===');
-      console.log('Clean input:', cleanInput);
       const type = parseAccommodationType(cleanInput);
-      console.log('Parsed type:', type);
+      logger.debug('Accommodation type parsing result', { type, success: !!type });
       return {
         success: !!type,
         value: type,
@@ -493,8 +480,7 @@ export function intelligentParse(input: string, fieldType: string): {
  */
 export function parseNaturalDateTime(input: string): string | null {
   const cleanInput = input.toLowerCase().trim();
-  console.log('=== parseNaturalDateTime ===');
-  console.log('Input:', input);
+  logger.debug('Parsing natural datetime', { input });
 
   // Pattern per data + ora (es: "domani alle 14:30", "15 gennaio ore 9:00")
   const dateTimePatterns = [
@@ -511,7 +497,7 @@ export function parseNaturalDateTime(input: string): string | null {
   for (const pattern of dateTimePatterns) {
     const match = cleanInput.match(pattern);
     if (match) {
-      console.log('DateTime pattern matched:', match);
+      logger.debug('DateTime pattern matched', { pattern: pattern.toString(), match });
 
       // Prova a parsare la data
       let dateStr = '';
@@ -542,7 +528,7 @@ export function parseNaturalDateTime(input: string): string | null {
 
       if (dateStr && timeStr) {
         const result = `${dateStr}T${timeStr}:00.000Z`;
-        console.log('Parsed datetime:', result);
+        logger.debug('Datetime parsed successfully', { result });
         return result;
       }
     }
@@ -551,11 +537,11 @@ export function parseNaturalDateTime(input: string): string | null {
   // Fallback: prova solo la data se non c'è ora
   const dateOnly = parseNaturalDate(cleanInput);
   if (dateOnly) {
-    console.log('Fallback to date only:', dateOnly);
+    logger.debug('Fallback to date only', { dateOnly });
     return dateOnly;
   }
 
-  console.log('No datetime match found');
+  logger.debug('No datetime match found', { input });
   return null;
 }
 
@@ -564,17 +550,13 @@ export function parseNaturalDateTime(input: string): string | null {
  */
 export function parseTransportationType(input: string): string | null {
   const cleanInput = input.toLowerCase().trim();
-  console.log('=== parseTransportationType ===');
-  console.log('Input:', input);
-  console.log('Clean input:', cleanInput);
+  logger.debug('Parsing transportation type', { input, cleanInput });
 
   // Prima controlla se è un valore diretto valido
   const validTypes = ['flight', 'train', 'bus', 'car', 'other'];
-  console.log('Valid types:', validTypes);
-  console.log('Checking if cleanInput is in validTypes:', validTypes.includes(cleanInput));
 
   if (validTypes.includes(cleanInput)) {
-    console.log(`✅ Direct match found! Returning: ${cleanInput}`);
+    logger.debug('Direct transportation type match found', { type: cleanInput });
     return cleanInput;
   }
 
@@ -589,15 +571,14 @@ export function parseTransportationType(input: string): string | null {
   // Cerca corrispondenze esatte o parziali
   for (const [type, keywords] of Object.entries(transportTypes)) {
     for (const keyword of keywords) {
-      console.log(`Checking if "${cleanInput}" includes "${keyword}"`);
       if (cleanInput.includes(keyword)) {
-        console.log(`Match found! Returning: ${type}`);
+        logger.debug('Transportation type keyword match found', { type, keyword });
         return type;
       }
     }
   }
 
-  console.log('No match found, returning null');
+  logger.debug('No transportation type match found', { input });
   return null;
 }
 
@@ -663,8 +644,7 @@ export function parseLocation(input: string): string | null {
  */
 export function parseTransportationMultiField(input: string): Partial<any> {
   const cleanInput = input.toLowerCase().trim();
-  console.log('=== parseTransportationMultiField ===');
-  console.log('Input:', input);
+  logger.debug('Parsing transportation multi-field', { input });
 
   const result: any = {};
 
@@ -672,7 +652,7 @@ export function parseTransportationMultiField(input: string): Partial<any> {
   const type = parseTransportationType(cleanInput);
   if (type) {
     result.type = type;
-    console.log('Parsed type:', type);
+    logger.debug('Transportation type parsed', { type });
   }
 
   // 2. Località di partenza (da, parte da, partenza da)
@@ -687,7 +667,7 @@ export function parseTransportationMultiField(input: string): Partial<any> {
       const location = parseLocation(match[1]);
       if (location) {
         result.departure_location = location;
-        console.log('Parsed departure:', location);
+        logger.debug('Departure location parsed', { location });
         break;
       }
     }
@@ -705,7 +685,7 @@ export function parseTransportationMultiField(input: string): Partial<any> {
       const location = parseLocation(match[1]);
       if (location) {
         result.arrival_location = location;
-        console.log('Parsed arrival:', location);
+        logger.debug('Arrival location parsed', { location });
         break;
       }
     }
@@ -724,7 +704,7 @@ export function parseTransportationMultiField(input: string): Partial<any> {
       const time = parseTime(match[1]);
       if (time) {
         result.departure_time = time;
-        console.log('Parsed departure time:', time);
+        logger.debug('Departure time parsed', { time });
         break;
       }
     }
@@ -742,7 +722,7 @@ export function parseTransportationMultiField(input: string): Partial<any> {
       const time = parseTime(match[1]);
       if (time) {
         result.arrival_time = time;
-        console.log('Parsed arrival time:', time);
+        logger.debug('Arrival time parsed', { time });
         break;
       }
     }
@@ -762,7 +742,7 @@ export function parseTransportationMultiField(input: string): Partial<any> {
       if (date) {
         result.departure_date = date;
         result.arrival_date = date; // Assumiamo stesso giorno se non specificato diversamente
-        console.log('Parsed date:', date);
+        logger.debug('Date parsed', { date });
         break;
       }
     }
@@ -790,12 +770,12 @@ export function parseTransportationMultiField(input: string): Partial<any> {
           result.currency = 'USD';
         }
 
-        console.log('Parsed cost:', cost, result.currency);
+        logger.debug('Cost parsed', { cost, currency: result.currency });
         break;
       }
     }
   }
 
-  console.log('=== Multi-field parsing result ===', result);
+  logger.debug('Multi-field parsing completed', { result });
   return result;
 }

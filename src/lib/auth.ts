@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { logger } from './logger';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -85,7 +86,7 @@ export async function signUp(email: string, password: string, fullName: string) 
     });
 
     if (error) {
-      console.error('Supabase Auth signup error:', error);
+      logger.error('Supabase Auth signup error', { error: error.message, email });
       throw error;
     }
 
@@ -93,10 +94,10 @@ export async function signUp(email: string, password: string, fullName: string) 
       throw new Error('User registration failed');
     }
 
-    console.log('User registered successfully:', data.user);
+    logger.info('User registered successfully', { userId: data.user.id, email: data.user.email });
     return data.user;
   } catch (error) {
-    console.error('Signup process error:', error);
+    logger.error('Signup process error', { error: error instanceof Error ? error.message : String(error), email });
     throw error;
   }
 }
@@ -110,7 +111,7 @@ async function _signIn(email: string, password: string) {
     });
 
     if (error) {
-      console.error('Sign in error:', error);
+      logger.error('Sign in error', { error: error.message, email });
 
       // Handle rate limit errors specifically
       if (error.message?.includes('rate limit') || error.message?.includes('too many requests')) {
@@ -125,10 +126,10 @@ async function _signIn(email: string, password: string) {
       throw error;
     }
 
-    console.log('Sign in successful:', data);
+    logger.info('Sign in successful', { userId: data.user?.id, email: data.user?.email });
     return data;
   } catch (error: any) {
-    console.error('Sign in process error:', error);
+    logger.error('Sign in process error', { error: error.message, email });
     throw error;
   }
 }
@@ -138,20 +139,20 @@ export const signIn = debounceAuth(_signIn);
 
 export async function signOut() {
   try {
-    console.log('auth.ts - Executing signOut function');
+    logger.debug('Executing signOut function');
 
     // Use 'global' scope to sign out from all sessions
     const { error } = await supabase.auth.signOut({ scope: 'global' });
 
     if (error) {
-      console.error('auth.ts - Error during signOut:', error);
+      logger.error('Error during signOut', { error: error.message });
       throw error;
     }
 
-    console.log('auth.ts - SignOut successful');
+    logger.info('SignOut successful');
     return true;
   } catch (err) {
-    console.error('auth.ts - Unexpected error during signOut:', err);
+    logger.error('Unexpected error during signOut', { error: err instanceof Error ? err.message : String(err) });
     throw err;
   }
 }

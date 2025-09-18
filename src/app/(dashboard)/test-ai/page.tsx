@@ -31,7 +31,6 @@ import { useAIProvider } from '@/hooks/useAIProvider';
 export default function TestAIPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
-  const { currentProvider } = useAIProvider();
 
   // Statistiche mock per la dashboard
   const stats = [
@@ -228,7 +227,7 @@ function OverviewTab() {
             Provider AI Attualmente Attivo
           </CardTitle>
           <CardDescription className="text-gray-300">
-            Il provider AI configurato e utilizzato dall'applicazione
+            Il provider AI configurato e utilizzato dall&apos;applicazione
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -241,7 +240,7 @@ function OverviewTab() {
                 {activeProviderInfo.name}
               </h3>
               <p className="text-sm text-cyan-300">
-                🔧 Configurato in: <code className="bg-gray-800 px-2 py-1 rounded text-xs">NEXT_PUBLIC_AI_DEFAULT_PROVIDER="{currentProvider}"</code>
+                🔧 Configurato in: <code className="bg-gray-800 px-2 py-1 rounded text-xs">NEXT_PUBLIC_AI_DEFAULT_PROVIDER=&quot;{currentProvider}&quot;</code>
               </p>
             </div>
             <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30 px-4 py-2">
@@ -339,7 +338,7 @@ function OverviewTab() {
               <strong className="text-cyan-400">🎯 Scopo:</strong> Testare e confrontare le prestazioni dei diversi provider AI
             </div>
             <div>
-              <strong className="text-cyan-400">⚡ Velocità:</strong> Monitorare i tempi di risposta per ottimizzare l'esperienza utente
+              <strong className="text-cyan-400">⚡ Velocità:</strong> Monitorare i tempi di risposta per ottimizzare l&apos;esperienza utente
             </div>
             <div>
               <strong className="text-cyan-400">🔧 Configurazione:</strong> Gestire le impostazioni e le chiavi API in modo sicuro
@@ -430,7 +429,7 @@ function ConfigTab() {
             Configurazione Provider AI
           </CardTitle>
           <CardDescription className="text-gray-300">
-            Gestisci le impostazioni e seleziona il provider AI predefinito per l'applicazione
+            Gestisci le impostazioni e seleziona il provider AI predefinito per l&apos;applicazione
           </CardDescription>
         </CardHeader>
       </Card>
@@ -474,7 +473,7 @@ function ConfigTab() {
               <div>• <strong className="text-green-400">Sicurezza:</strong> Non condividere mai le chiavi API</div>
               <div>• <strong className="text-green-400">Backup:</strong> Mantieni copie sicure delle configurazioni</div>
               <div>• <strong className="text-green-400">Rotazione:</strong> Rinnova periodicamente le chiavi API</div>
-              <div>• <strong className="text-green-400">Monitoraggio:</strong> Controlla regolarmente l'utilizzo delle API</div>
+              <div>• <strong className="text-green-400">Monitoraggio:</strong> Controlla regolarmente l&apos;utilizzo delle API</div>
               <div>• <strong className="text-green-400">Testing:</strong> Testa sempre dopo modifiche alle configurazioni</div>
             </div>
           </CardContent>
@@ -486,7 +485,7 @@ function ConfigTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-200">
             <Cpu className="h-5 w-5" />
-            Variabili d'Ambiente Richieste
+            Variabili d&apos;Ambiente Richieste
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -552,7 +551,7 @@ function DebugTab() {
               <div><strong className="text-orange-400">🌐 Problemi di rete:</strong> Controlla la connessione internet e i firewall</div>
               <div><strong className="text-orange-400">⏱️ Timeout:</strong> Alcuni provider potrebbero essere temporaneamente lenti</div>
               <div><strong className="text-orange-400">💰 Quota esaurita:</strong> Verifica i limiti di utilizzo delle API</div>
-              <div><strong className="text-orange-400">🔧 Configurazione:</strong> Assicurati che tutte le variabili d'ambiente siano impostate</div>
+              <div><strong className="text-orange-400">🔧 Configurazione:</strong> Assicurati che tutte le variabili d&apos;ambiente siano impostate</div>
             </div>
           </CardContent>
         </Card>

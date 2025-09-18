@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { clearAuthCache, hasStaleAuthData } from '@/lib/cache-utils';
+import { logger } from '@/lib/logger';
 
 /**
  * Hook to handle authentication cleanup and cache management
@@ -12,12 +13,12 @@ export function useAuthCleanup() {
   const clearStaleAuth = async () => {
     try {
       if (hasStaleAuthData()) {
-        console.log('useAuthCleanup: Clearing stale auth data...');
+        logger.debug('Clearing stale auth data');
         await clearAuthCache();
-        console.log('useAuthCleanup: Stale auth data cleared');
+        logger.debug('Stale auth data cleared');
       }
     } catch (error) {
-      console.error('useAuthCleanup: Error clearing stale auth data:', error);
+      logger.error('Error clearing stale auth data', { error: error instanceof Error ? error.message : String(error) });
     }
   };
 
@@ -26,11 +27,11 @@ export function useAuthCleanup() {
    */
   const forceCleanAuth = async () => {
     try {
-      console.log('useAuthCleanup: Force clearing all auth data...');
+      logger.debug('Force clearing all auth data');
       await clearAuthCache();
-      console.log('useAuthCleanup: All auth data cleared');
+      logger.debug('All auth data cleared');
     } catch (error) {
-      console.error('useAuthCleanup: Error force clearing auth data:', error);
+      logger.error('Error force clearing auth data', { error: error instanceof Error ? error.message : String(error) });
     }
   };
 

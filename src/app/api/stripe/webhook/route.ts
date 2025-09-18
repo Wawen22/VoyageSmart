@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { logger } from '@/lib/logger';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,7 +10,8 @@ function logWebhookEvent(message: string, data?: any) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${message}${data ? ': ' + JSON.stringify(data, null, 2) : ''}`;
 
-  console.log(logMessage);
+  // Use proper logger service instead of console.log
+  logger.info(`[STRIPE_WEBHOOK] ${message}`, data);
 
   // Salva anche su file per debugging (solo in ambiente di sviluppo)
   if (process.env.NODE_ENV === 'development') {
@@ -22,7 +24,7 @@ function logWebhookEvent(message: string, data?: any) {
       const logFile = path.join(logDir, 'stripe-webhook.log');
       fs.appendFileSync(logFile, logMessage + '\n');
     } catch (error) {
-      console.error('Error writing to log file:', error);
+      logger.error('Error writing to log file', { error: error.message });
     }
   }
 }
