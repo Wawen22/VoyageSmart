@@ -666,8 +666,8 @@ export default function TripDetails() {
           </div>
         </div>
 
-        {/* Trip Actions - Modernized */}
-        <div className="mt-8 lg:mt-12 animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
+        {/* Trip Actions - Modernized - Hidden on Mobile */}
+        <div className="hidden md:block mt-8 lg:mt-12 animate-glass-fade-in" style={{ animationDelay: '300ms' }}>
           {/* Section Header */}
           <div className="relative mb-6 lg:mb-8 trip-actions-section-mobile">
             <div className="glass-card rounded-2xl p-4 md:p-6 border-0">

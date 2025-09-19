@@ -335,7 +335,7 @@ export default function AccommodationsPage() {
         </div>
       </header>
 
-      <main className="w-full py-6 px-4 accommodations-section-mobile">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 accommodations-section-mobile">
         {/* Free plan limitation warning - Modernized */}
         {subscription?.tier === 'free' && accommodations.length >= 4 && (
           <div className="mb-6 glass-card rounded-2xl p-4 border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/5 animate-glass-fade-in">

@@ -2,7 +2,20 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Send, Bot, User, X, Minimize2, Maximize2, Loader2, Trash2, HelpCircle, MessageSquare } from 'lucide-react';
+import {
+  Send,
+  Bot,
+  User,
+  X,
+  Minimize2,
+  Maximize2,
+  Loader2,
+  Trash2,
+  HelpCircle,
+  MessageSquare,
+  SparklesIcon,
+  Star
+} from 'lucide-react';
 import FormattedAIResponse from './FormattedAIResponse';
 import { useAIProvider } from '@/hooks/useAIProvider';
 import { handleAccommodationConversation, completeAccommodationConversation } from '@/lib/services/aiConversationService';
@@ -1063,7 +1076,7 @@ export default function ChatBot({
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="bg-gradient-to-br from-purple-500 to-blue-600 p-2 rounded-xl shadow-lg">
-              <Sparkles className="text-white" size={20} />
+              <Star className="text-white" size={20} />
             </div>
             {/* Online indicator */}
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-slate-800 online-indicator"></div>

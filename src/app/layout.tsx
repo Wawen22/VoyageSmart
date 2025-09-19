@@ -5,6 +5,7 @@ import '@/styles/map.css';
 import '@/styles/modal-responsive.css';
 import '@/styles/dashboard-mobile.css';
 import '@/styles/glassmorphism.css';
+import '@/styles/persistent-trip-actions.css';
 import { Providers } from '@/components/providers/Providers';
 import Navbar from '@/components/layout/Navbar';
 import MobileNavbar from '@/components/layout/MobileNavbar';

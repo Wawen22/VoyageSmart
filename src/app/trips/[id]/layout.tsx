@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import ChatBot from '@/components/ai/ChatBot';
+import PersistentTripActions from '@/components/trips/PersistentTripActions';
 
 export default function TripLayout({
   children,
@@ -18,6 +19,8 @@ export default function TripLayout({
   const [trip, setTrip] = useState<any>(null);
   const [participants, setParticipants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [accommodationCount, setAccommodationCount] = useState<number>(0);
+  const [transportationCount, setTransportationCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -147,7 +150,9 @@ export default function TripLayout({
           expenses: processedExpenses
         };
 
-
+        // Set counts for persistent actions
+        setAccommodationCount((accommodationsData || []).length);
+        setTransportationCount((transportationData || []).length);
 
         setTrip(tripWithDetails);
 
@@ -185,6 +190,16 @@ export default function TripLayout({
   return (
     <>
       {children}
+
+      {/* Persistent Trip Actions - Desktop Only */}
+      {!loading && trip && (
+        <PersistentTripActions
+          tripId={id as string}
+          accommodationCount={accommodationCount}
+          transportationCount={transportationCount}
+          participantsCount={participants.length}
+        />
+      )}
 
       {/* AI Assistant - Visible on all trip pages only for AI subscribers */}
       {!loading && trip && hasAIAccess && (
