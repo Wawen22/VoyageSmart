@@ -18,6 +18,7 @@ import {
   ACCOMMODATION_FIELDS_CONFIG
 } from './conversationStateService';
 import { intelligentParse } from './intelligentParsingService';
+import { logger } from '../logger';
 
 export interface ConversationResponse {
   message: string;
@@ -59,11 +60,12 @@ export function detectAccommodationRequest(message: string): boolean {
 
   // Log solo se il risultato è true per evitare spam
   if (result) {
-    console.log('=== detectAccommodationRequest - TRIGGERED ===');
-    console.log('Message:', message);
-    console.log('Has add trigger:', hasAddTrigger);
-    console.log('Has accommodation word:', hasAccommodationWord);
-    console.log('Result:', result);
+    logger.debug('detectAccommodationRequest triggered', {
+      message,
+      hasAddTrigger,
+      hasAccommodationWord,
+      result
+    });
   }
 
   return result;
@@ -78,12 +80,11 @@ export function handleAccommodationConversation(
   userId: string
 ): ConversationResponse {
 
-  console.log('=== handleAccommodationConversation called ===');
-  console.log('Message:', message);
+  logger.debug('handleAccommodationConversation called', { message, tripId, userId });
 
   // PRIORITÀ MASSIMA: Gestisci CONFIRM_SAVE_ACCOMMODATION prima di tutto
   if (message === 'CONFIRM_SAVE_ACCOMMODATION') {
-    console.log('🚨 CONFIRM_SAVE_ACCOMMODATION detected - processing immediately');
+    logger.info('CONFIRM_SAVE_ACCOMMODATION detected - processing immediately', { tripId, userId });
     const context = getConversationContext(tripId, userId);
     if (context) {
       return {
@@ -97,11 +98,11 @@ export function handleAccommodationConversation(
 
   // Ottieni il contesto conversazionale corrente
   let context = getConversationContext(tripId, userId);
-  console.log('=== Current conversation context ===', context);
+  logger.debug('Current conversation context', { context, tripId, userId });
   
   // Se non c'è contesto e il messaggio richiede un accommodation, inizia la raccolta
   if (!context && detectAccommodationRequest(message)) {
-    console.log('=== Starting new accommodation collection ===');
+    logger.info('Starting new accommodation collection', { tripId, userId });
     context = startAccommodationCollection(tripId, userId);
 
     // Ottieni il prompt con UI appropriata per il primo campo
@@ -118,8 +119,11 @@ export function handleAccommodationConversation(
   
   // Se non c'è contesto attivo, non gestire (restituisci risposta vuota per permettere API normale)
   if (!context || context.state === 'idle') {
-    console.log('=== No active context, not handling - returning empty response ===');
-    console.log('Context:', context);
+    logger.debug('No active context, not handling - returning empty response', {
+      context,
+      tripId,
+      userId
+    });
     return {
       message: '',
       shouldContinue: false,
@@ -128,10 +132,13 @@ export function handleAccommodationConversation(
     };
   }
 
-  console.log('=== Active context found, processing message ===');
-  console.log('Context state:', context.state);
-  console.log('Current field:', context.currentField);
-  console.log('Message to process:', message);
+  logger.debug('Active context found, processing message', {
+    contextState: context.state,
+    currentField: context.currentField,
+    message,
+    tripId,
+    userId
+  });
   
   // Gestisci i comandi speciali
   if (message.toLowerCase().trim() === 'annulla' || message.toLowerCase().trim() === 'cancel') {
@@ -155,11 +162,14 @@ export function handleAccommodationConversation(
 
   // Gestisci messaggi speciali per il salvataggio (PRIMA di tutto)
   if (message === 'CONFIRM_SAVE_ACCOMMODATION') {
-    console.log('=== CONFIRM_SAVE_ACCOMMODATION received ===');
-    console.log('Context:', context);
+    logger.info('CONFIRM_SAVE_ACCOMMODATION received', {
+      context: context ? 'exists' : 'missing',
+      tripId,
+      userId
+    });
 
     if (context) {
-      console.log('=== Proceeding with direct save ===');
+      logger.info('Proceeding with direct save', { tripId, userId });
       // Salva direttamente senza ulteriori conferme, indipendentemente dallo stato
       const updatedContext = updateConversationContext(tripId, userId, {
         state: 'saving_accommodation'
@@ -173,12 +183,15 @@ export function handleAccommodationConversation(
         data: context.data
       };
     } else {
-      console.log('=== No context found for CONFIRM_SAVE_ACCOMMODATION ===');
+      logger.warn('No context found for CONFIRM_SAVE_ACCOMMODATION', { tripId, userId });
     }
   }
 
   if (message === 'CANCEL_ACCOMMODATION') {
-    console.log('=== CANCEL_ACCOMMODATION received (should not happen with immediate cancellation) ===');
+    logger.warn('CANCEL_ACCOMMODATION received (should not happen with immediate cancellation)', {
+      tripId,
+      userId
+    });
     // Questo non dovrebbe più essere raggiunto con l'annullamento immediato
     // Ma lo lasciamo come fallback di sicurezza
     resetConversation(tripId, userId);
@@ -216,24 +229,38 @@ function handleDataCollection(
   
   // Usa il parsing intelligente per interpretare la risposta
   const fieldType = getFieldType(context.currentField);
-  console.log('=== Data Collection Debug ===');
-  console.log('Current field:', context.currentField);
-  console.log('Field type:', fieldType);
-  console.log('User message:', message);
+  logger.debug('Data Collection Debug', {
+    currentField: context.currentField,
+    fieldType,
+    userMessage: message,
+    tripId,
+    userId
+  });
 
   const parseResult = intelligentParse(message, fieldType);
-  console.log('Parse result:', parseResult);
-  console.log('Parse success:', parseResult.success);
-  console.log('Parse value:', parseResult.value);
+  logger.debug('Parse result', {
+    parseResult,
+    success: parseResult.success,
+    value: parseResult.value,
+    fieldType,
+    message
+  });
 
   if (!parseResult.success) {
-    console.log('=== Intelligent parsing failed, trying traditional method ===');
+    logger.debug('Intelligent parsing failed, trying traditional method', {
+      fieldType,
+      message
+    });
     // Se il parsing intelligente fallisce, prova il metodo tradizionale
     const traditionalResult = processFieldResponse(context.currentField, message);
-    console.log('Traditional result:', traditionalResult);
+    logger.debug('Traditional result', { traditionalResult });
 
     if (!traditionalResult.isValid) {
-      console.log('=== Traditional parsing also failed ===');
+      logger.warn('Traditional parsing also failed', {
+        fieldType,
+        message,
+        retryCount: context.retryCount
+      });
       // Incrementa il contatore di retry
       const newRetryCount = context.retryCount + 1;
 
@@ -253,12 +280,15 @@ function handleDataCollection(
       return getFieldPromptWithUI(context.currentField, traditionalResult.error);
     }
 
-    console.log('=== Traditional parsing succeeded, using traditional result ===');
+    logger.debug('Traditional parsing succeeded, using traditional result', {
+      traditionalResult,
+      fieldType
+    });
     // Usa il risultato tradizionale se il parsing intelligente fallisce ma quello tradizionale funziona
     parseResult.value = traditionalResult.value;
     parseResult.success = true;
   } else {
-    console.log('=== Intelligent parsing succeeded ===');
+    logger.debug('Intelligent parsing succeeded', { parseResult, fieldType });
   }
   
   // Salva il valore nel contesto
@@ -336,21 +366,24 @@ function handleConfirmation(
   context: ConversationContext
 ): ConversationResponse {
 
-  console.log('=== handleConfirmation ===');
-  console.log('Message:', message);
-  console.log('Context state:', context.state);
+  logger.debug('handleConfirmation', {
+    message,
+    contextState: context.state,
+    tripId,
+    userId
+  });
 
   const lowerMessage = message.toLowerCase().trim();
-  console.log('Lower message:', lowerMessage);
+  logger.debug('Processing confirmation message', { lowerMessage });
 
   // Risposte positive
   const positiveResponses = ['sì', 'si', 'yes', 'ok', 'okay', 'conferma', 'salva', 'va bene', 'perfetto'];
   // Risposte negative
   const negativeResponses = ['no', 'annulla', 'cancel', 'non salvare'];
 
-  console.log('Checking positive responses...');
+  logger.debug('Checking positive responses', { lowerMessage });
   if (positiveResponses.some(response => lowerMessage.includes(response))) {
-    console.log('=== Positive response detected ===');
+    logger.info('Positive response detected', { lowerMessage, tripId, userId });
     // Conferma positiva - procedi al salvataggio
     const updatedContext = updateConversationContext(tripId, userId, {
       state: 'saving_accommodation'

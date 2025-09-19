@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { NavbarLogo } from '@/components/ui/OptimizedLogo';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
@@ -70,14 +70,7 @@ export default function Navbar() {
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-                <Image
-                  src="/images/logo-voyage_smart.png"
-                  alt="Voyage Smart Logo"
-                  width={200}
-                  height={60}
-                  className="h-12 w-auto"
-                  priority
-                />
+                <NavbarLogo />
                 <span className="sr-only">Voyage Smart</span>
               </Link>
             </div>
@@ -200,14 +193,7 @@ export default function Navbar() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-                <Image
-                  src="/images/logo-voyage_smart.png"
-                  alt="Voyage Smart Logo"
-                  width={200}
-                  height={60}
-                  className="h-12 w-auto"
-                  priority
-                />
+                <NavbarLogo />
                 <span className="sr-only">Voyage Smart</span>
               </Link>
             </div>

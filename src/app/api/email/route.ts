@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sendInvitationEmail, sendTripUpdatedEmail, sendNewActivityEmail } from '@/lib/email';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
       logger.error('Email sending failed', {
         error: result.error,
         emailType: type,
-        recipient: to
+        recipient: data.to
       });
 
       // Check if we're in development mode

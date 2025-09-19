@@ -3,6 +3,8 @@
  * Gestisce gli stati conversazionali per la raccolta guidata di dati
  */
 
+import { logger } from '../logger';
+
 export type ConversationState =
   | 'idle'
   | 'collecting_accommodation'
@@ -176,18 +178,17 @@ export const ACCOMMODATION_FIELDS_CONFIG: Record<AccommodationField, {
     validation: (value) => {
       const validTypes = ['hotel', 'apartment', 'hostel', 'house', 'villa', 'resort', 'camping', 'other'];
       const isValid = validTypes.includes(value.toLowerCase());
-      console.log('=== Type validation ===');
-      console.log('Value:', value);
-      console.log('Lowercase:', value.toLowerCase());
-      console.log('Valid types:', validTypes);
-      console.log('Is valid:', isValid);
+      logger.debug('Type validation', {
+        value,
+        lowercase: value.toLowerCase(),
+        validTypes,
+        isValid
+      });
       return isValid;
     },
     parser: (value) => {
       const parsed = value.toLowerCase();
-      console.log('=== Type parser ===');
-      console.log('Input:', value);
-      console.log('Parsed:', parsed);
+      logger.debug('Type parser', { input: value, parsed });
       return parsed;
     }
   },
@@ -238,16 +239,12 @@ export const ACCOMMODATION_FIELDS_CONFIG: Record<AccommodationField, {
     required: false,
     question: 'In che valuta? (EUR, USD, GBP, etc. - default: EUR)',
     validation: (value) => {
-      console.log('=== Currency validation ===');
-      console.log('Value:', value);
-      console.log('Always returning true (currency is optional)');
+      logger.debug('Currency validation', { value, alwaysValid: true });
       return true; // Always valid, will default to EUR
     },
     parser: (value) => {
       const parsed = value.trim().toUpperCase() || 'EUR';
-      console.log('=== Currency parser ===');
-      console.log('Input:', value);
-      console.log('Parsed:', parsed);
+      logger.debug('Currency parser', { input: value, parsed });
       return parsed;
     }
   },
@@ -279,20 +276,21 @@ export function processFieldResponse(
 ): { isValid: boolean; value: any; error?: string } {
   const config = ACCOMMODATION_FIELDS_CONFIG[field];
 
-  console.log('=== processFieldResponse ===');
-  console.log('Field:', field);
-  console.log('Response:', response);
-  console.log('Config:', config);
+  logger.debug('processFieldResponse', {
+    field,
+    response: response.substring(0, 100),
+    required: config.required
+  });
 
   // Se il campo è opzionale e la risposta è vuota, è valido
   if (!config.required && !response.trim()) {
-    console.log('Field is optional and response is empty, returning valid');
+    logger.debug('Field is optional and response is empty, returning valid', { field });
     return { isValid: true, value: null };
   }
 
   // Se il campo è obbligatorio e la risposta è vuota, non è valido
   if (config.required && !response.trim()) {
-    console.log('Field is required but response is empty, returning invalid');
+    logger.debug('Field is required but response is empty, returning invalid', { field });
     return {
       isValid: false,
       value: null,
@@ -302,7 +300,7 @@ export function processFieldResponse(
 
   // Valida la risposta
   if (config.validation && !config.validation(response)) {
-    console.log('Validation failed for response:', response);
+    logger.debug('Validation failed for response', { field, response });
     return {
       isValid: false,
       value: null,
@@ -312,7 +310,7 @@ export function processFieldResponse(
 
   // Processa il valore se c'è un parser
   const value = config.parser ? config.parser(response) : response.trim() || null;
-  console.log('Processed value:', value);
+  logger.debug('Processed value', { field, value });
 
   return { isValid: true, value };
 }

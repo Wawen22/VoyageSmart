@@ -972,7 +972,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
 
         if (existingActivity) {
           // Aggiorna l'orario dell'attività esistente mantenendo il fuso orario locale
-          const dayDate = existingActivity.day_date || dayDate;
+          const activityDayDate = existingActivity.day_date || dayDate;
 
           // Calcola la durata dell'attività prima di modificare l'orario
           const currentStartTime = new Date(existingActivity.start_time);
@@ -980,7 +980,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
           const duration = currentEndTime.getTime() - currentStartTime.getTime();
 
           // Crea il nuovo orario di inizio in formato ISO locale
-          const newStartTime = `${dayDate}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00.000`;
+          const newStartTime = `${activityDayDate}T${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00.000`;
           existingActivity.start_time = newStartTime;
 
           // Calcola il nuovo orario di fine aggiungendo la durata
@@ -989,7 +989,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
           const endDate = new Date(endTimeMs);
           const endHours = endDate.getHours();
           const endMinutes = endDate.getMinutes();
-          const newEndTime = `${dayDate}T${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}:00.000`;
+          const newEndTime = `${activityDayDate}T${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}:00.000`;
           existingActivity.end_time = newEndTime;
 
           console.log(`Aggiornato orario per ${activityType} alle ${time}`);

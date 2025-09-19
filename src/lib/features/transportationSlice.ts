@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '@/lib/supabase';
+import { logger } from '../logger';
 
 export type TransportationStop = {
   id: string;
@@ -80,7 +81,10 @@ export const fetchTransportations = createAsyncThunk(
         .order('departure_time', { ascending: true });
 
       if (transportationsError) {
-        console.error('Error fetching transportations:', transportationsError);
+        logger.error('Error fetching transportations', {
+          error: transportationsError.message,
+          tripId
+        });
         throw transportationsError;
       }
 
@@ -93,7 +97,10 @@ export const fetchTransportations = createAsyncThunk(
           try {
             transportation.departure_coordinates = JSON.parse(item.departure_coordinates_json);
           } catch (e) {
-            console.error('Error parsing departure coordinates JSON:', e);
+            logger.error('Error parsing departure coordinates JSON', {
+              error: e.message,
+              transportationId: item.id
+            });
           }
         }
 
@@ -102,7 +109,10 @@ export const fetchTransportations = createAsyncThunk(
           try {
             transportation.arrival_coordinates = JSON.parse(item.arrival_coordinates_json);
           } catch (e) {
-            console.error('Error parsing arrival coordinates JSON:', e);
+            logger.error('Error parsing arrival coordinates JSON', {
+              error: e.message,
+              transportationId: item.id
+            });
           }
         }
 
@@ -119,7 +129,10 @@ export const fetchTransportations = createAsyncThunk(
             .order('arrival_time', { ascending: true });
 
           if (stopsError) {
-            console.error('Error fetching stops:', stopsError);
+            logger.error('Error fetching stops', {
+              error: stopsError.message,
+              transportationId: transportation.id
+            });
             return transportation;
           }
 
@@ -131,7 +144,10 @@ export const fetchTransportations = createAsyncThunk(
               try {
                 processedStop.coordinates = JSON.parse(stop.coordinates_json);
               } catch (e) {
-                console.error('Error parsing stop coordinates JSON:', e);
+                logger.error('Error parsing stop coordinates JSON', {
+                  error: e.message,
+                  stopId: stop.id
+                });
               }
             }
 
@@ -191,7 +207,10 @@ export const addTransportation = createAsyncThunk(
         .single();
 
       if (error) {
-        console.error('Error adding transportation:', error);
+        logger.error('Error adding transportation', {
+          error: error.message,
+          tripId: dataToInsert.trip_id
+        });
         throw error;
       }
 
@@ -213,7 +232,10 @@ export const addTransportation = createAsyncThunk(
           .select();
 
         if (stopsError) {
-          console.error('Error adding transportation stops:', stopsError);
+          logger.error('Error adding transportation stops', {
+            error: stopsError.message,
+            transportationId: data.id
+          });
           // We'll continue even if stops insertion fails
         } else {
           stopsData = insertedStops;
@@ -227,7 +249,10 @@ export const addTransportation = createAsyncThunk(
         try {
           result.departure_coordinates = JSON.parse(data.departure_coordinates_json);
         } catch (e) {
-          console.error('Error parsing departure coordinates JSON:', e);
+          logger.error('Error parsing departure coordinates JSON', {
+            error: e.message,
+            transportationId: data.id
+          });
         }
       }
 
@@ -235,7 +260,10 @@ export const addTransportation = createAsyncThunk(
         try {
           result.arrival_coordinates = JSON.parse(data.arrival_coordinates_json);
         } catch (e) {
-          console.error('Error parsing arrival coordinates JSON:', e);
+          logger.error('Error parsing arrival coordinates JSON', {
+            error: e.message,
+            transportationId: data.id
+          });
         }
       }
 
@@ -247,7 +275,10 @@ export const addTransportation = createAsyncThunk(
           try {
             processedStop.coordinates = JSON.parse(stop.coordinates_json);
           } catch (e) {
-            console.error('Error parsing stop coordinates JSON:', e);
+            logger.error('Error parsing stop coordinates JSON', {
+              error: e.message,
+              stopId: stop.id
+            });
           }
         }
 
@@ -301,7 +332,10 @@ export const updateTransportation = createAsyncThunk(
         .single();
 
       if (error) {
-        console.error('Error updating transportation:', error);
+        logger.error('Error updating transportation', {
+          error: error.message,
+          transportationId: id
+        });
         throw error;
       }
 
@@ -315,7 +349,10 @@ export const updateTransportation = createAsyncThunk(
           .eq('transportation_id', id);
 
         if (deleteError) {
-          console.error('Error deleting transportation stops:', deleteError);
+          logger.error('Error deleting transportation stops', {
+            error: deleteError.message,
+            transportationId: id
+          });
           // Continue even if deletion fails
         }
 
@@ -336,7 +373,10 @@ export const updateTransportation = createAsyncThunk(
             .select();
 
           if (stopsError) {
-            console.error('Error adding transportation stops:', stopsError);
+            logger.error('Error adding transportation stops', {
+              error: stopsError.message,
+              transportationId: data.id
+            });
             // Continue even if insertion fails
           } else {
             stopsData = insertedStops;
@@ -351,7 +391,10 @@ export const updateTransportation = createAsyncThunk(
         try {
           result.departure_coordinates = JSON.parse(data.departure_coordinates_json);
         } catch (e) {
-          console.error('Error parsing departure coordinates JSON:', e);
+          logger.error('Error parsing departure coordinates JSON', {
+            error: e.message,
+            transportationId: data.id
+          });
         }
       }
 
@@ -359,7 +402,10 @@ export const updateTransportation = createAsyncThunk(
         try {
           result.arrival_coordinates = JSON.parse(data.arrival_coordinates_json);
         } catch (e) {
-          console.error('Error parsing arrival coordinates JSON:', e);
+          logger.error('Error parsing arrival coordinates JSON', {
+            error: e.message,
+            transportationId: data.id
+          });
         }
       }
 
@@ -371,7 +417,10 @@ export const updateTransportation = createAsyncThunk(
           try {
             processedStop.coordinates = JSON.parse(stop.coordinates_json);
           } catch (e) {
-            console.error('Error parsing stop coordinates JSON:', e);
+            logger.error('Error parsing stop coordinates JSON', {
+              error: e.message,
+              stopId: stop.id
+            });
           }
         }
 
@@ -402,7 +451,10 @@ export const deleteTransportation = createAsyncThunk(
         .eq('id', id);
 
       if (error) {
-        console.error('Error deleting transportation:', error);
+        logger.error('Error deleting transportation', {
+          error: error.message,
+          transportationId: id
+        });
         throw error;
       }
 

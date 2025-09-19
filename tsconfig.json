@@ -4,7 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": false, // Temporarily disabled - will enable gradually
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",

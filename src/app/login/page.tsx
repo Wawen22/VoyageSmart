@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { NavbarLogo } from '@/components/ui/OptimizedLogo';
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth'; // Import useAuth
@@ -88,6 +88,7 @@ export default function Login() {
 
       return () => clearInterval(timer);
     }
+    return undefined;
   }, [cooldownTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -197,14 +198,7 @@ export default function Login() {
           <div className="text-center space-y-4">
             <div className="flex justify-center">
               <div className="glass-card rounded-2xl p-4 inline-block">
-                <Image
-                  src="/images/logo-voyage_smart.png"
-                  alt="Voyage Smart Logo"
-                  width={180}
-                  height={52}
-                  className="h-12 w-auto"
-                  priority
-                />
+                <NavbarLogo className="h-12 w-auto" />
               </div>
             </div>
             <div className="space-y-2">
@@ -238,7 +232,10 @@ export default function Login() {
           {/* Rate Limit Info */}
           {showRateLimitInfo && (
             <div className="animate-glass-slide-up">
-              <RateLimitInfo />
+              <RateLimitInfo
+                isVisible={showRateLimitInfo}
+                onClose={() => setShowRateLimitInfo(false)}
+              />
             </div>
           )}
 

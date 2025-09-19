@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { NavbarLogo, HeroLogo, FooterLogo } from '@/components/ui/OptimizedLogo';
+import { FeatureScreenshot } from '@/components/ui/OptimizedScreenshot';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
@@ -69,7 +71,7 @@ export default function Home() {
   }, [user, router]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return undefined;
 
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -137,7 +139,7 @@ export default function Home() {
 
   // Close popup on Escape key (hydration-safe)
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return undefined;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && selectedMedia) {
@@ -302,14 +304,7 @@ export default function Home() {
             <div className="flex items-center">
               <div className="relative group">
                 <div className="absolute inset-0 bg-primary/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
-                <Image
-                  src="/images/logo-voyage_smart.png"
-                  alt="Voyage Smart Logo"
-                  width={200}
-                  height={50}
-                  className="h-12 w-auto relative z-10 transition-transform duration-300 group-hover:scale-105"
-                  priority
-                />
+                <NavbarLogo className="relative z-10 transition-transform duration-300 group-hover:scale-105" />
               </div>
             </div>
             <div className="hidden md:flex space-x-8">
@@ -433,24 +428,7 @@ export default function Home() {
 
                 {/* Logo Container */}
                 <div className="relative bg-gradient-to-br from-background/90 to-background/70 backdrop-blur-xl rounded-3xl p-8 lg:p-6 xl:p-8 border border-primary/20 shadow-2xl hover:shadow-primary/20 transition-all duration-500 group-hover:scale-105">
-                  <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-auto max-w-[400px] md:max-w-[500px] lg:max-w-[400px] xl:max-w-[500px] object-contain"
-                    poster="/images/logo-voyage_smart.png"
-                  >
-                    <source src="/images/animated_logo-voyage_smart.mp4" type="video/mp4" />
-                    <Image
-                      src="/images/animated_logo-voyage_smart.gif"
-                      alt="VoyageSmart - Your AI Travel Companion"
-                      width={500}
-                      height={150}
-                      className="w-full h-auto"
-                      priority
-                    />
-                  </video>
+                  <HeroLogo className="w-full h-auto max-w-[400px] md:max-w-[500px] lg:max-w-[400px] xl:max-w-[500px] object-contain" />
 
                   {/* Floating Indicators */}
                   <div className="absolute -top-3 -right-3 w-6 h-6 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-ping"></div>
@@ -534,12 +512,10 @@ export default function Home() {
                     onClick={() => openMediaPopup(feature.image, feature.title, feature.title, 'image')}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10 rounded-xl"></div>
-                    <Image
+                    <FeatureScreenshot
                       src={feature.image}
                       alt={feature.title}
-                      width={400}
-                      height={200}
-                      className="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-105 rounded-xl"
+                      className="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     {/* Play Button Overlay */}
                     <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -1234,13 +1210,7 @@ export default function Home() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-2xl filter blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                   <div className="relative bg-gradient-to-br from-background/80 to-background/60 backdrop-blur-sm rounded-2xl p-4 md:p-6 border border-primary/20 shadow-lg">
-                    <Image
-                      src="/images/logo-voyage_smart.png"
-                      alt="Voyage Smart Logo"
-                      width={240}
-                      height={60}
-                      className="h-12 md:h-16 w-auto relative z-10 group-hover:scale-105 transition-transform duration-300"
-                    />
+                    <FooterLogo className="h-12 md:h-16 w-auto relative z-10 group-hover:scale-105 transition-transform duration-300" />
                   </div>
                 </div>
               </div>

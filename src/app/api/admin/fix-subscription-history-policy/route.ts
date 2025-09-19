@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { withAuth } from '@/app/api/middleware';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   return withAuth(request, async (req, user) => {
     try {
-      console.log('Fix Policy API - Processing request for user:', user.id);
+      logger.info('Fix Policy API - Processing request', { userId: user.id });
       
       // Usa il client Supabase con service_role per eseguire operazioni admin
       const supabaseAdmin = createClient(
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log('Fix Policy API - Admin verified, applying policy fix');
+      logger.info('Fix Policy API - Admin verified, applying policy fix', { userId: user.id });
 
       // Esegui la migrazione SQL
       const migrationSQL = `
@@ -51,7 +52,10 @@ export async function POST(request: NextRequest) {
       });
 
       if (sqlError) {
-        console.error('Fix Policy API - Error executing SQL migration:', sqlError);
+        logger.error('Fix Policy API - Error executing SQL migration', {
+          error: sqlError.message,
+          userId: user.id
+        });
         
         // Se la funzione exec_sql non esiste, proviamo con query dirette
         try {
@@ -74,9 +78,14 @@ export async function POST(request: NextRequest) {
             sql: 'ALTER TABLE public.subscription_history ENABLE ROW LEVEL SECURITY;' 
           });
           
-          console.log('Fix Policy API - Migration applied successfully using individual queries');
+          logger.info('Fix Policy API - Migration applied successfully using individual queries', {
+            userId: user.id
+          });
         } catch (individualError: any) {
-          console.error('Fix Policy API - Error with individual queries:', individualError);
+          logger.error('Fix Policy API - Error with individual queries', {
+            error: individualError.message,
+            userId: user.id
+          });
           return NextResponse.json(
             { 
               error: 'Error applying migration', 
@@ -87,7 +96,7 @@ export async function POST(request: NextRequest) {
           );
         }
       } else {
-        console.log('Fix Policy API - Migration applied successfully');
+        logger.info('Fix Policy API - Migration applied successfully', { userId: user.id });
       }
 
       // Testa che la policy funzioni creando un record di test
@@ -110,7 +119,10 @@ export async function POST(request: NextRequest) {
           .insert(testRecord);
 
         if (testError) {
-          console.error('Fix Policy API - Test insert failed:', testError);
+          logger.error('Fix Policy API - Test insert failed', {
+            error: testError.message,
+            userId: user.id
+          });
           return NextResponse.json(
             { 
               success: true, 
@@ -120,7 +132,7 @@ export async function POST(request: NextRequest) {
             }
           );
         } else {
-          console.log('Fix Policy API - Test insert successful');
+          logger.info('Fix Policy API - Test insert successful', { userId: user.id });
           
           // Rimuovi il record di test
           await supabaseAdmin
@@ -130,7 +142,10 @@ export async function POST(request: NextRequest) {
             .eq('event_type', 'policy_test');
         }
       } catch (testError: any) {
-        console.error('Fix Policy API - Test error:', testError);
+        logger.error('Fix Policy API - Test error', {
+          error: testError.message,
+          userId: user.id
+        });
       }
 
       return NextResponse.json({
@@ -141,7 +156,11 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (error: any) {
-      console.error('Fix Policy API - Unexpected error:', error);
+      logger.error('Fix Policy API - Unexpected error', {
+        error: error.message,
+        stack: error.stack,
+        userId: user.id
+      });
       return NextResponse.json(
         {
           error: 'Error fixing subscription history policy',

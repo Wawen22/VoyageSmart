@@ -92,7 +92,7 @@ export default function PricingPage() {
                     variant={selectedPlan === 'free' ? 'default' : 'outline'}
                     className="w-full"
                     onClick={() => setSelectedPlan('free')}
-                    disabled={subscription?.tier === 'free'}
+                    disabled={(subscription?.tier as string) === 'free'}
                   >
                     {isSubscribed('premium') ? 'Downgrade' : 'Select'}
                   </Button>

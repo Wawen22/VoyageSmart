@@ -10,11 +10,13 @@ import { supabase } from '@/lib/supabase';
 import { format, parseISO, isValid, addDays } from 'date-fns';
 import { CalendarIcon, BookOpenIcon, ImageIcon, ClockIcon, BookIcon, PlusIcon, ListIcon, Sparkles, LockIcon, InfoIcon } from 'lucide-react';
 import { it } from 'date-fns/locale';
-import DaySchedule from '@/components/itinerary/DaySchedule';
+// Lazy load DaySchedule for better performance
+const DaySchedule = lazy(() => import('@/components/itinerary/DaySchedule'));
 import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import ItineraryWizard from '@/components/ai/ItineraryWizard';
+// Lazy load ItineraryWizard for better performance
+const ItineraryWizard = lazy(() => import('@/components/ai/ItineraryWizard'));
 import AIUpgradePrompt from '@/components/subscription/AIUpgradePrompt';
 import { LazyItineraryMapView } from '@/components/LazyComponents';
 import { useDispatch, useSelector } from 'react-redux';
@@ -1515,7 +1517,15 @@ export default function TripItinerary() {
       {/* AI Wizard or Upgrade Prompt */}
       {showWizard && (
         hasAIAccess ? (
-          <ItineraryWizard
+          <Suspense fallback={
+            <div className="fixed inset-4 bg-background border border-border rounded-lg shadow-xl z-[99] flex items-center justify-center">
+              <div className="text-center">
+                <Sparkles className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                <p className="text-sm text-muted-foreground">Caricamento AI Wizard...</p>
+              </div>
+            </div>
+          }>
+            <ItineraryWizard
             tripId={id as string}
             tripData={trip}
             itineraryDays={itineraryDays}
@@ -1551,6 +1561,7 @@ export default function TripItinerary() {
               setShowWizard(false);
             }}
           />
+          </Suspense>
         ) : (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-card rounded-lg shadow-lg max-w-md w-full">

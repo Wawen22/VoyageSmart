@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AuthContext, User, signIn, signOut, signUp, resetPassword, updateProfile } from '@/lib/auth';
 import { clearAllCache, hardNavigate } from '@/lib/cache-utils';
 import { createClientSupabase } from '@/lib/supabase-client';
+import { logger } from '@/lib/logger';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter(); // Initialize useRouter
@@ -26,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
-          console.error('Session error in checkSession:', sessionError);
+          logger.error('Session error in checkSession', { error: sessionError.message });
           setUser(null);
           setError(sessionError);
           setLoading(false);
@@ -35,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.user) {
           // Get user profile from the users table with retry logic
-          console.log('Fetching user profile for ID:', session.user.id);
+          logger.debug('Fetching user profile', { userId: session.user.id });
 
           let profile = null;
           let profileError = null;
@@ -54,7 +55,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             profileError = error;
-            console.warn(`Profile fetch attempt ${attempt} failed:`, error);
+            logger.warn('Profile fetch attempt failed', {
+              attempt,
+              error: error.message,
+              userId: session.user.id
+            });
 
             if (attempt < 2) {
               // Wait before retry (increased delay to reduce rate limiting)
@@ -63,7 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
 
           if (profileError) {
-            console.error('Error fetching user profile after retries:', profileError);
+            logger.error('Error fetching user profile after retries', {
+              error: profileError.message,
+              userId: session.user.id
+            });
           }
 
           const finalUser = profile || {
@@ -73,13 +81,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
 
           setUser(finalUser);
-          console.log('AuthProvider checkSession - User state SET:', finalUser);
+          logger.debug('AuthProvider checkSession - User state SET', {
+            userId: finalUser.id,
+            hasProfile: !!profile
+          });
         } else {
           setUser(null);
-          console.log('AuthProvider checkSession - User state SET to null');
+          logger.debug('AuthProvider checkSession - User state SET to null');
         }
       } catch (error) {
-        console.error('Error checking session:', error);
+        logger.error('Error checking session', { error: error.message });
         setError(error as Error);
         setUser(null);
       } finally {
@@ -91,12 +102,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change event:', event, 'Session:', !!session);
+      logger.debug('Auth state change event', { event, hasSession: !!session });
 
       try {
         if (session?.user) {
           // Get user profile from the users table with retry logic
-          console.log('Auth state change - Fetching user profile for ID:', session.user.id);
+          logger.debug('Auth state change - Fetching user profile', { userId: session.user.id });
 
           let profile = null;
           let profileError = null;
@@ -115,7 +126,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             profileError = error;
-            console.warn(`Auth change profile fetch attempt ${attempt} failed:`, error);
+            logger.warn('Auth change profile fetch attempt failed', {
+              attempt,
+              error: error.message,
+              userId: session.user.id
+            });
 
             if (attempt < 2) {
               await new Promise(resolve => setTimeout(resolve, 500));
@@ -123,7 +138,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
 
           if (profileError) {
-            console.error('Error fetching user profile on auth change:', profileError);
+            logger.error('Error fetching user profile on auth change', {
+              error: profileError.message,
+              userId: session.user.id
+            });
           }
 
           const finalUser = profile || {
@@ -133,13 +151,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
 
           setUser(finalUser);
-          console.log('AuthProvider onAuthStateChange - User state SET:', finalUser);
+          logger.debug('AuthProvider onAuthStateChange - User state SET', {
+            userId: finalUser.id,
+            hasProfile: !!profile
+          });
         } else {
           setUser(null);
-          console.log('AuthProvider onAuthStateChange - User state SET to null');
+          logger.debug('AuthProvider onAuthStateChange - User state SET to null');
         }
       } catch (error) {
-        console.error('Error in auth state change handler:', error);
+        logger.error('Error in auth state change handler', { error: error.message });
         setError(error as Error);
       } finally {
         setLoading(false);
@@ -167,11 +188,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       const data = await signIn(email, password);
-      console.log('AuthProvider - Sign in successful:', data);
+      logger.info('AuthProvider - Sign in successful', { userId: data?.user?.id });
 
       // Update the user state immediately
       if (data?.user) {
-        console.log('Sign in - Fetching user profile for ID:', data.user.id);
+        logger.debug('Sign in - Fetching user profile', { userId: data.user.id });
 
         try {
           // First try to get the user profile
@@ -185,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (profileError) {
             // Only attempt to create profile if it wasn't found (PGRST116)
             if (profileError.code === 'PGRST116') {
-              console.log('User profile not found, attempting to create...');
+              logger.info('User profile not found, attempting to create', { userId: data.user.id });
               const { error: insertError } = await supabase
                 .from('users')
                 .insert([
@@ -199,14 +220,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 ]);
 
               if (insertError) {
-                console.error('Error creating user profile:', insertError);
+                logger.error('Error creating user profile', {
+                  error: insertError.message,
+                  userId: data.user.id
+                });
                 // Set user state with basic info even if profile creation fails
                 setUser({
                   id: data.user.id,
                   email: data.user.email || '',
                 });
               } else {
-                console.log('User profile created successfully');
+                logger.info('User profile created successfully', { userId: data.user.id });
                 // Set user state with the info used for creation
                 setUser({
                   id: data.user.id,
@@ -216,7 +240,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             } else {
               // Log other types of profile fetch errors
-              console.error('Error fetching user profile after sign in (not PGRST116):', profileError);
+              logger.error('Error fetching user profile after sign in (not PGRST116)', {
+                error: profileError.message,
+                userId: data.user.id
+              });
               // Set user state with basic info
               setUser({
                 id: data.user.id,
@@ -234,7 +261,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 {
           */
         } catch (err) {
-          console.error('Unexpected error during profile handling in signIn:', err);
+          logger.error('Unexpected error during profile handling in signIn', {
+            error: err.message,
+            userId: data.user.id
+          });
 
           // Fallback to basic user info
           setUser({
@@ -244,12 +274,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Let the middleware handle the redirect based on the URL parameters
-        console.log('Login successful, letting middleware handle redirect');
+        logger.info('Login successful, letting middleware handle redirect');
       }
 
       // No return needed here, the function updates state internally
     } catch (error) {
-      console.error('AuthProvider - Sign in error:', error);
+      logger.error('AuthProvider - Sign in error', { error: error.message });
       setError(error as Error);
       throw error;
     } finally {
@@ -260,25 +290,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleSignOut = async () => {
     try {
       setLoading(true);
-      console.log('AuthProvider - Signing out...');
+      logger.info('AuthProvider - Signing out');
 
       // First set user to null to update UI immediately
       setUser(null);
 
       // Clear all cached data BEFORE calling signOut
-      console.log('AuthProvider - Clearing all cached data...');
+      logger.debug('AuthProvider - Clearing all cached data');
       await clearAllCache();
 
       // Then call the actual signOut function
       await signOut();
 
-      console.log('AuthProvider - Sign out successful, redirecting to login page');
+      logger.info('AuthProvider - Sign out successful, redirecting to login page');
 
       // Force a hard navigation to clear any remaining state
       hardNavigate('/login');
 
     } catch (error) {
-      console.error('AuthProvider - Sign out error:', error);
+      logger.error('AuthProvider - Sign out error', { error: error.message });
       setError(error as Error);
 
       // Even if there's an error, we should still try to redirect with hard refresh
@@ -321,14 +351,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.prefetch('/dashboard');
         router.prefetch('/trips/new');
       } catch (error) {
-        console.error('Error prefetching routes:', error);
+        logger.error('Error prefetching routes', { error: error.message });
       }
     }
   }, [user, loading, router]);
 
   // Only log in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('AuthProvider RENDERING - Providing context value:', { user, loading });
+    logger.debug('AuthProvider RENDERING - Providing context value', {
+      hasUser: !!user,
+      loading
+    });
   }
 
   return (

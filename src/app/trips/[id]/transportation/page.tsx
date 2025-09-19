@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
@@ -30,8 +30,9 @@ import {
 } from 'lucide-react';
 import TransportationCard from '@/components/transportation/TransportationCard';
 import TransportationSkeleton from '@/components/transportation/TransportationSkeleton';
-import TransportationModal from '@/components/transportation/TransportationModal';
-import TransportationDetailsModal from '@/components/transportation/TransportationDetailsModal';
+// Lazy load heavy modal components for better performance
+const TransportationModal = lazy(() => import('@/components/transportation/TransportationModal'));
+const TransportationDetailsModal = lazy(() => import('@/components/transportation/TransportationDetailsModal'));
 import { LazyTransportationMap } from '@/components/LazyComponents';
 import TransportationCounterWidget from '@/components/ui/TransportationCounterWidget';
 

@@ -13,6 +13,7 @@ import {
   resetConversation
 } from './conversationStateService';
 import { parseTransportationMultiField, intelligentParse } from './intelligentParsingService';
+import { logger } from '../logger';
 
 export interface ConversationResponse {
   message: string;
@@ -52,13 +53,17 @@ export function detectTransportationRequest(message: string): boolean {
 
   const result = (hasAddTrigger && hasTransportationWord) || hasSpecificPhrase;
 
-  console.log('=== detectTransportationRequest ===');
-  console.log('Message:', message);
-  console.log('Lower message:', lowerMessage);
-  console.log('Has add trigger:', hasAddTrigger, addTriggers.filter(t => lowerMessage.includes(t)));
-  console.log('Has transportation word:', hasTransportationWord, transportationWords.filter(w => lowerMessage.includes(w)));
-  console.log('Has specific phrase:', hasSpecificPhrase, specificPhrases.filter(p => lowerMessage.includes(p)));
-  console.log('Result:', result);
+  logger.debug('detectTransportationRequest', {
+    message,
+    lowerMessage,
+    hasAddTrigger,
+    hasTransportationWord,
+    hasSpecificPhrase,
+    result,
+    matchedTriggers: addTriggers.filter(t => lowerMessage.includes(t)),
+    matchedWords: transportationWords.filter(w => lowerMessage.includes(w)),
+    matchedPhrases: specificPhrases.filter(p => lowerMessage.includes(p))
+  });
 
   return result;
 }
@@ -89,12 +94,11 @@ export function handleTransportationConversation(
   userId: string
 ): ConversationResponse {
   
-  console.log('=== handleTransportationConversation called ===');
-  console.log('Message:', message);
+  logger.debug('handleTransportationConversation called', { message, tripId, userId });
   
   // PRIORITÀ MASSIMA: Gestisci CONFIRM_SAVE_TRANSPORTATION prima di tutto
   if (message === 'CONFIRM_SAVE_TRANSPORTATION') {
-    console.log('🚨 CONFIRM_SAVE_TRANSPORTATION detected - processing immediately');
+    logger.info('CONFIRM_SAVE_TRANSPORTATION detected - processing immediately', { tripId, userId });
     const context = getConversationContext(tripId, userId);
     if (context) {
       return {

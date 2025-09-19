@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
@@ -26,8 +26,9 @@ import {
 } from 'lucide-react';
 import AccommodationCard from '@/components/accommodations/AccommodationCard';
 import AccommodationSkeleton from '@/components/accommodations/AccommodationSkeleton';
-import AccommodationModal from '@/components/accommodations/AccommodationModal';
-import AccommodationDetailsModal from '@/components/accommodations/AccommodationDetailsModal';
+// Lazy load heavy modal components for better performance
+const AccommodationModal = lazy(() => import('@/components/accommodations/AccommodationModal'));
+const AccommodationDetailsModal = lazy(() => import('@/components/accommodations/AccommodationDetailsModal'));
 import { LazyMapView, LazyAccommodationsMapView } from '@/components/LazyComponents';
 import UpgradePrompt from '@/components/subscription/UpgradePrompt';
 import AccommodationCounterWidget from '@/components/ui/AccommodationCounterWidget';
@@ -584,26 +585,35 @@ export default function AccommodationsPage() {
         )}
       </main>
 
-      <AccommodationModal
-        tripId={id as string}
-        isOpen={isAddModalOpen}
-        onClose={handleCloseAddModal}
-      />
+      {/* Modals with Suspense for better performance */}
+      <Suspense fallback={null}>
+        {isAddModalOpen && (
+          <AccommodationModal
+            tripId={id as string}
+            isOpen={isAddModalOpen}
+            onClose={handleCloseAddModal}
+          />
+        )}
 
-      <AccommodationModal
-        tripId={id as string}
-        accommodation={currentAccommodation}
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-      />
+        {isEditModalOpen && currentAccommodation && (
+          <AccommodationModal
+            tripId={id as string}
+            accommodation={currentAccommodation}
+            isOpen={isEditModalOpen}
+            onClose={handleCloseEditModal}
+          />
+        )}
 
-      <AccommodationDetailsModal
-        accommodation={currentAccommodation}
-        isOpen={isDetailsModalOpen}
-        onClose={handleCloseDetailsModal}
-        onEdit={handleEditFromDetails}
-        canEdit={canEdit}
-      />
+        {isDetailsModalOpen && currentAccommodation && (
+          <AccommodationDetailsModal
+            accommodation={currentAccommodation}
+            isOpen={isDetailsModalOpen}
+            onClose={handleCloseDetailsModal}
+            onEdit={handleEditFromDetails}
+            canEdit={canEdit}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

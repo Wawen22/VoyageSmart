@@ -9,20 +9,8 @@ const requiredEnvVars = [
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
 ] as const;
 
-const optionalEnvVars = [
-  'SUPABASE_SERVICE_ROLE_KEY',
-  'NEXT_PUBLIC_GEMINI_API_KEY',
-  'NEXT_PUBLIC_OPENAI_API_KEY',
-  'NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT',
-  'NEXT_PUBLIC_AZURE_OPENAI_API_VERSION',
-  'NEXT_PUBLIC_AZURE_OPENAI_DEPLOYMENT_NAME',
-  'STRIPE_SECRET_KEY',
-  'STRIPE_PUBLISHABLE_KEY',
-  'STRIPE_WEBHOOK_SECRET',
-  'RESEND_API_KEY',
-  'CRON_API_KEY',
-  'MAPBOX_ACCESS_TOKEN',
-] as const;
+// Optional environment variables for reference
+// These are validated individually where needed
 
 // Validate required environment variables
 function validateEnvironment() {
@@ -169,20 +157,19 @@ export const config = {
       credentials: true,
     },
 
-    // Content Security Policy
+    // Content Security Policy - Secure configuration
     csp: {
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
-        "'unsafe-inline'",
-        "'unsafe-eval'",
+        "'strict-dynamic'",
         'https://js.stripe.com',
         'https://api.mapbox.com',
       ],
       styleSrc: [
         "'self'",
-        "'unsafe-inline'",
         'https://api.mapbox.com',
+        'https://fonts.googleapis.com',
       ],
       imgSrc: [
         "'self'",

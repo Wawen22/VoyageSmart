@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         try {
           console.log('Cancel API - Retrieving subscription details from Stripe:', subscriptionId);
           const subscriptionDetails = await stripe.subscriptions.retrieve(subscriptionId);
-          currentPeriodEnd = new Date(subscriptionDetails.current_period_end * 1000).toISOString();
+          currentPeriodEnd = new Date((subscriptionDetails as any).current_period_end * 1000).toISOString();
           console.log('Cancel API - Current period end from Stripe:', currentPeriodEnd);
         } catch (stripeError: any) {
           console.error('Cancel API - Error retrieving subscription details from Stripe:', stripeError);

@@ -429,7 +429,7 @@ export async function POST(request: NextRequest) {
       isInitialMessage
     });
 
-    logger.apiRequest('AI Chat API called', {
+    logger.info('AI Chat API called', {
       tripId,
       tripName,
       hasDirectTripData: !!tripData,
@@ -445,12 +445,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!validation.success) {
+      const errors = 'errors' in validation ? validation.errors : ['Validation failed'];
       logger.warn('AI Chat validation failed', {
-        errors: validation.errors,
+        errors,
         tripId
       });
       return NextResponse.json(
-        { error: 'Invalid input', details: validation.errors },
+        { error: 'Invalid input', details: errors },
         { status: 400 }
       );
     }

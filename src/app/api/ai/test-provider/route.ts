@@ -3,9 +3,11 @@ import { aiProviderService, AIProvider } from '@/lib/services/aiProviderService'
 import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
+  let provider: string | undefined;
+
   try {
     const body = await request.json();
-    const { provider } = body;
+    provider = body.provider;
 
     // Validate provider
     if (!provider || !['gemini', 'openai', 'deepseek', 'gemini-openrouter'].includes(provider)) {
@@ -35,7 +37,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     logger.error('Failed to test AI provider', {
       error: error.message,
-      provider: body?.provider
+      provider
     });
 
     return NextResponse.json(

@@ -362,7 +362,7 @@ export default function Dashboard() {
           viewMode={viewMode}
           setViewMode={setViewMode}
           tripCount={tripCount || 0}
-          userName={user?.user_metadata?.full_name?.split(' ')[0] || 'Explorer'}
+          userName={(user as any)?.user_metadata?.full_name?.split(' ')[0] || 'Explorer'}
           stats={stats}
           selectedYear={selectedYear}
           setSelectedYear={setSelectedYear}

@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, ArrowRight, Calendar, Check, Edit, Trash, Map } from 'lucide-react';
+import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Calendar, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FormattedAIResponse from './FormattedAIResponse';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 import ActivityPreviewCard from './ActivityPreviewCard';
 import ActivityTimeline from './ActivityTimeline';
 import { LazyActivityMapView } from '@/components/LazyComponents';
@@ -81,10 +82,10 @@ export default function ItineraryWizard({
   // Verifica se la chiave API di Gemini è configurata
   useEffect(() => {
     const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    console.log('Chiave API Gemini configurata:', geminiApiKey ? 'Sì' : 'No');
+    logger.debug('Chiave API Gemini configurata', { configured: !!geminiApiKey });
 
     if (!geminiApiKey) {
-      console.warn('Chiave API Gemini non configurata - alcune funzionalità potrebbero non funzionare');
+      logger.warn('Chiave API Gemini non configurata - alcune funzionalità potrebbero non funzionare');
     }
   }, []);
 
@@ -98,11 +99,11 @@ export default function ItineraryWizard({
 
   // Verifica che i dati del viaggio siano disponibili
   useEffect(() => {
-    console.log('Dati viaggio disponibili:', tripData ? 'Sì' : 'No');
-    console.log('Giorni itinerario disponibili:', itineraryDays?.length || 0);
-    if (tripData) {
-      console.log('Destinazione:', tripData.destination);
-    }
+    logger.debug('Dati viaggio disponibili', {
+      hasTripData: !!tripData,
+      itineraryDaysCount: itineraryDays?.length || 0,
+      destination: tripData?.destination
+    });
   }, [tripData, itineraryDays]);
 
   // Stato dei messaggi
@@ -201,7 +202,7 @@ export default function ItineraryWizard({
       // Gestisci la risposta in base allo stato attuale del wizard
       await processUserInput(messageToSend);
     } catch (error: any) {
-      console.error('Error processing message:', error);
+      logger.error('Error processing message', { error: error.message });
 
       // Messaggio di errore
       setMessages(prev => [...prev, {
@@ -531,8 +532,10 @@ export default function ItineraryWizard({
         wizardState.selectedDays.includes(day.id)
       );
 
-      console.log('Generazione attività per giorni:', selectedDaysData.length);
-      console.log('Preferenze:', wizardState.preferences);
+      logger.debug('Generazione attività per giorni', {
+        daysCount: selectedDaysData.length,
+        preferences: wizardState.preferences
+      });
 
       const requestData = {
         tripId,
@@ -541,7 +544,11 @@ export default function ItineraryWizard({
         days: selectedDaysData,
       };
 
-      console.log('Dati richiesta API:', JSON.stringify(requestData).substring(0, 200) + '...');
+      logger.debug('Dati richiesta API', {
+        tripId: requestData.tripId,
+        daysCount: requestData.days.length,
+        hasPreferences: Object.keys(requestData.preferences).length > 0
+      });
 
       // Chiama l'API per generare le attività
       const response = await fetch('/api/ai/generate-activities', {
@@ -552,24 +559,29 @@ export default function ItineraryWizard({
         body: JSON.stringify(requestData),
       });
 
-      console.log('Risposta API ricevuta, status:', response.status);
+      logger.debug('Risposta API ricevuta', { status: response.status });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Errore API (text):', errorText);
+        logger.error('Errore API', { errorText, status: response.status });
 
         try {
           const errorData = JSON.parse(errorText);
-          console.error('Errore API (parsed):', errorData);
+          logger.error('Errore API parsed', { errorData });
         } catch (e) {
-          console.error('Impossibile analizzare la risposta di errore come JSON');
+          logger.error('Impossibile analizzare la risposta di errore come JSON', {
+            parseError: e.message
+          });
         }
 
         throw new Error(`Failed to generate activities: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log('Dati risposta API:', data);
+      logger.debug('Dati risposta API', {
+        activitiesCount: data.activities?.length || 0,
+        hasActivities: !!data.activities
+      });
 
       // Salva le attività generate
       setWizardState(prev => ({
@@ -612,7 +624,7 @@ export default function ItineraryWizard({
         }, 300);
       }, 300);
     } catch (error) {
-      console.error('Error generating activities:', error);
+      logger.error('Error generating activities', { error: error.message });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: `Mi dispiace, si è verificato un errore durante la generazione delle attività. Riprova più tardi.`,
@@ -673,7 +685,10 @@ export default function ItineraryWizard({
 
   // Funzione per aggiornare le coordinate di un'attività
   const handleUpdateCoordinates = (activity: GeneratedActivity, coordinates: { x: number; y: number }) => {
-    console.log(`Aggiornamento coordinate per "${activity.name}":`, coordinates);
+    logger.debug('Aggiornamento coordinate attività', {
+      activityName: activity.name,
+      coordinates
+    });
 
     // Aggiorna le coordinate dell'attività
     setWizardState(prev => ({
@@ -718,14 +733,14 @@ export default function ItineraryWizard({
         return activityData;
       });
 
-      console.log('Salvando attività:', activitiesToSave.length);
+      logger.info('Salvando attività', { count: activitiesToSave.length });
 
       // Salva le attività una per una direttamente con Supabase
       const savedActivities = [];
       const errors = [];
 
       for (const activity of activitiesToSave) {
-        console.log('Salvando attività:', activity.name);
+        logger.debug('Salvando attività', { activityName: activity.name });
 
         try {
           // Usa lo stesso approccio di handleSaveActivity
@@ -735,20 +750,28 @@ export default function ItineraryWizard({
             .select();
 
           if (error) {
-            console.error('Errore nel salvare attività:', activity.name, error);
+            logger.error('Errore nel salvare attività', {
+              activityName: activity.name,
+              error: error.message
+            });
             errors.push({ activity: activity.name, error: error.message });
           } else if (data && data.length > 0) {
-            console.log('Attività salvata con successo:', data[0].name);
+            logger.info('Attività salvata con successo', { activityName: data[0].name });
             savedActivities.push(data[0]);
           }
         } catch (activityError) {
-          console.error('Eccezione nel salvare attività:', activity.name, activityError);
+          logger.error('Eccezione nel salvare attività', {
+            activityName: activity.name,
+            error: activityError.message
+          });
           errors.push({ activity: activity.name, error: activityError.message });
         }
       }
 
-      console.log('Attività salvate:', savedActivities.length);
-      console.log('Errori:', errors.length);
+      logger.info('Risultato salvataggio attività', {
+        savedCount: savedActivities.length,
+        errorsCount: errors.length
+      });
 
       // Prepara i dati di risposta in un formato simile a quello dell'API
       const data = {
@@ -759,7 +782,10 @@ export default function ItineraryWizard({
 
       // Verifica se ci sono stati errori parziali
       if (data.errors && data.errors.length > 0) {
-        console.warn('Alcune attività non sono state salvate:', data.errors);
+        logger.warn('Alcune attività non sono state salvate', {
+          errorsCount: data.errors.length,
+          errors: data.errors
+        });
 
         // Aggiorna lo stato del wizard
         setWizardState(prev => ({
@@ -794,7 +820,7 @@ export default function ItineraryWizard({
         onActivitiesGenerated(data.activities);
       }
     } catch (error) {
-      console.error('Error saving activities:', error);
+      logger.error('Error saving activities', { error: error.message });
 
       // Estrai il messaggio di errore se disponibile
       let errorMessage = 'Mi dispiace, si è verificato un errore durante il salvataggio delle attività.';

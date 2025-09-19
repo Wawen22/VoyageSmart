@@ -1,4 +1,6 @@
 // Server-side version - no client component imports
+import { logger } from '../logger';
+
 export interface ContextualAction {
   id: string;
   type: 'link' | 'action';
@@ -198,14 +200,15 @@ const OVERVIEW_KEYWORDS = [
  */
 export function analyzeMessageContext(message: string, tripId: string, currentSection?: string, tripData?: any): ContextAnalysis {
   try {
-    console.log('=== analyzeMessageContext called ===');
-    console.log('Message:', message);
-    console.log('TripId:', tripId);
-    console.log('CurrentSection:', currentSection);
+    logger.debug('analyzeMessageContext called', {
+      message: message.substring(0, 100),
+      tripId,
+      currentSection
+    });
 
     // Validate inputs
     if (!message || typeof message !== 'string') {
-      console.log('Invalid message input');
+      logger.warn('Invalid message input', { message });
       return {
         categories: [],
         confidence: 0,
@@ -215,7 +218,7 @@ export function analyzeMessageContext(message: string, tripId: string, currentSe
     }
 
     if (!tripId || typeof tripId !== 'string') {
-      console.log('Invalid tripId input');
+      logger.warn('Invalid tripId input', { tripId });
       return {
         categories: [],
         confidence: 0,
@@ -231,42 +234,42 @@ export function analyzeMessageContext(message: string, tripId: string, currentSe
 
   // Check for balance-related content first (more specific)
   const balanceMatches = BALANCE_KEYWORDS.filter(keyword => lowerMessage.includes(keyword));
-  console.log('Balance matches:', balanceMatches);
+  logger.debug('Balance matches found', { matches: balanceMatches });
   if (balanceMatches.length > 0) {
     categories.push('balances');
-    console.log('Creating balance actions for tripId:', tripId);
+    logger.debug('Creating balance actions', { tripId });
     try {
       // Create balance actions using server-side function
       const balanceActions = createBalancesActionsServer(tripId);
-      console.log('Created balance actions:', balanceActions);
+      logger.debug('Created balance actions', { actionsCount: balanceActions?.length });
       if (Array.isArray(balanceActions)) {
         suggestedActions.push(...balanceActions);
       } else {
-        console.log('createBalancesActionsServer did not return an array');
+        logger.warn('createBalancesActionsServer did not return an array', { balanceActions });
       }
     } catch (actionError) {
-      console.error('Error creating balance actions:', actionError);
+      logger.error('Error creating balance actions', { error: actionError.message, tripId });
     }
     totalConfidence += Math.min(balanceMatches.length * 0.3, 1.0); // Higher confidence for balance-specific queries
   }
 
   // Check for general expense-related content
   const expenseMatches = EXPENSE_KEYWORDS.filter(keyword => lowerMessage.includes(keyword));
-  console.log('Expense matches:', expenseMatches);
+  logger.debug('Expense matches found', { matches: expenseMatches });
   if (expenseMatches.length > 0 && balanceMatches.length === 0) { // Only if no balance matches
     categories.push('expenses');
-    console.log('Creating expense actions for tripId:', tripId);
+    logger.debug('Creating expense actions', { tripId });
     try {
       // Use server-side expense actions
       const expenseActions = createExpensesActionsServer(tripId);
-      console.log('Created expense actions:', expenseActions);
+      logger.debug('Created expense actions', { actionsCount: expenseActions?.length });
       if (Array.isArray(expenseActions)) {
         suggestedActions.push(...expenseActions);
       } else {
-        console.log('createExpensesActionsServer did not return an array');
+        logger.warn('createExpensesActionsServer did not return an array', { expenseActions });
       }
     } catch (actionError) {
-      console.error('Error creating expense actions:', actionError);
+      logger.error('Error creating expense actions', { error: actionError.message, tripId });
     }
     totalConfidence += Math.min(expenseMatches.length * 0.2, 1.0);
   }
@@ -281,7 +284,7 @@ export function analyzeMessageContext(message: string, tripId: string, currentSe
         suggestedActions.push(...itineraryActions);
       }
     } catch (actionError) {
-      console.error('Error creating itinerary actions:', actionError);
+      logger.error('Error creating itinerary actions', { error: actionError.message, tripId });
     }
     totalConfidence += Math.min(itineraryMatches.length * 0.2, 1.0);
   }
@@ -296,7 +299,7 @@ export function analyzeMessageContext(message: string, tripId: string, currentSe
         suggestedActions.push(...accommodationActions);
       }
     } catch (actionError) {
-      console.error('Error creating accommodation actions:', actionError);
+      logger.error('Error creating accommodation actions', { error: actionError.message, tripId });
     }
     totalConfidence += Math.min(accommodationMatches.length * 0.2, 1.0);
   }
@@ -311,7 +314,7 @@ export function analyzeMessageContext(message: string, tripId: string, currentSe
         suggestedActions.push(...transportationActions);
       }
     } catch (actionError) {
-      console.error('Error creating transportation actions:', actionError);
+      logger.error('Error creating transportation actions', { error: actionError.message, tripId });
     }
     totalConfidence += Math.min(transportationMatches.length * 0.2, 1.0);
   }
@@ -326,7 +329,7 @@ export function analyzeMessageContext(message: string, tripId: string, currentSe
         suggestedActions.push(...overviewActions);
       }
     } catch (actionError) {
-      console.error('Error creating overview actions:', actionError);
+      logger.error('Error creating overview actions', { error: actionError.message, tripId });
     }
     totalConfidence += Math.min(overviewMatches.length * 0.15, 0.5);
   }
@@ -350,12 +353,15 @@ export function analyzeMessageContext(message: string, tripId: string, currentSe
     reasoning
   };
 
-  console.log('=== analyzeMessageContext result ===');
-  console.log('Result:', result);
+  logger.debug('analyzeMessageContext result', {
+    categories: result.categories,
+    confidence: result.confidence,
+    actionsCount: result.suggestedActions.length
+  });
 
   return result;
   } catch (error) {
-    console.error('Error in analyzeMessageContext:', error);
+    logger.error('Error in analyzeMessageContext', { error: error.message, tripId });
     // Return a safe default object
     return {
       categories: [],
