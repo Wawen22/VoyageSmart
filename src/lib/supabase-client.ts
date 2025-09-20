@@ -42,8 +42,6 @@ export const createServerSupabase = async () => {
   const { cookies } = await import('next/headers');
 
   return createServerComponentClient({
-    supabaseUrl,
-    supabaseKey: supabaseAnonKey,
     cookies,
   });
 };

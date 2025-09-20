@@ -263,7 +263,12 @@ class Logger {
 
   // Get stored errors for debugging
   getStoredErrors(): LogEntry[] {
-    return this.getStoredErrors();
+    try {
+      const stored = localStorage.getItem('app-errors');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   }
 
   // Clear stored errors

@@ -41,8 +41,6 @@ export async function middleware(req: NextRequest) {
     const supabase = createMiddlewareClient({
       req,
       res,
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     });
 
     // Always refresh session to ensure we have the latest state
