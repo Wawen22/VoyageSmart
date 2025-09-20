@@ -67,7 +67,7 @@ export default function DaySchedule({
   onMoveActivity,
   onViewActivityDetails
 }: DayScheduleProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [selectionMode, setSelectionMode] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

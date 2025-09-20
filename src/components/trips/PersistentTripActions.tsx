@@ -32,9 +32,8 @@ export default function PersistentTripActions({
 }: PersistentTripActionsProps) {
   const pathname = usePathname();
 
-  // Start expanded on main trip page, collapsed on other pages
-  const isMainTripPage = pathname === `/trips/${tripId}`;
-  const [isCollapsed, setIsCollapsed] = useState(!isMainTripPage);
+  // Start collapsed by default on all pages
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const { subscription } = useSubscription();
 
   // Hide on mobile and show only on desktop
@@ -53,11 +52,7 @@ export default function PersistentTripActions({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Update collapsed state when pathname changes
-  useEffect(() => {
-    const isMainPage = pathname === `/trips/${tripId}`;
-    setIsCollapsed(!isMainPage);
-  }, [pathname, tripId]);
+  // Keep collapsed by default on all pages (removed automatic expansion logic)
 
   // Don't render on mobile
   if (isMobile) return null;
