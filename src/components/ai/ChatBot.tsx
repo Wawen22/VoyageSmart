@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   Send,
@@ -313,6 +313,8 @@ export default function ChatBot({
     }
   }, [tripId]);
 
+
+
   // Reset del contesto conversazionale quando il componente si monta
   useEffect(() => {
     if (tripData?.currentUserId) {
@@ -324,9 +326,14 @@ export default function ChatBot({
   // Genera domande suggerite quando il contesto è caricato E la chat è aperta
   useEffect(() => {
     if (contextLoaded && tripData && !isMinimized) {
-      generateSuggestedQuestions();
+      // Non mostrare suggerimenti durante l'inserimento di dati
+      if (activeUIComponent) {
+        setSuggestedQuestions([]);
+        return;
+      }
+      generateSuggestedQuestions(currentSection, tripData, setInput, handleSendMessage, setSuggestedQuestions);
     }
-  }, [contextLoaded, tripData, isMinimized]);
+  }, [contextLoaded, tripData, isMinimized, currentSection, activeUIComponent]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -362,7 +369,7 @@ export default function ChatBot({
       setMessages(prev => [...prev, cancelMessage]);
 
       // Rigenera i suggerimenti
-      setTimeout(() => generateSuggestedQuestions(), 100);
+      setTimeout(() => generateSuggestedQuestionsWrapper(), 100);
 
       return;
     }
@@ -606,7 +613,7 @@ export default function ChatBot({
               setActiveUIComponent(null);
 
           // Rigenera i suggerimenti ora che non siamo più in modalità inserimento
-          setTimeout(() => generateSuggestedQuestions(), 100);
+          setTimeout(() => generateSuggestedQuestionsWrapper(), 100);
 
             } catch (error: any) {
               logger.error('Error saving accommodation', { error: error.message });
@@ -695,7 +702,7 @@ export default function ChatBot({
               setActiveUIComponent(null);
 
               // Rigenera i suggerimenti ora che non siamo più in modalità inserimento
-              setTimeout(() => generateSuggestedQuestions(), 100);
+              setTimeout(() => generateSuggestedQuestionsWrapper(), 100);
 
             } catch (error: any) {
               logger.error('Error saving transportation', { error: error.message });
@@ -735,7 +742,7 @@ export default function ChatBot({
           setActiveUIComponent(null);
 
           // Rigenera i suggerimenti ora che non siamo più in modalità inserimento
-          setTimeout(() => generateSuggestedQuestions(), 100);
+          setTimeout(() => generateSuggestedQuestionsWrapper(), 100);
         }
 
           return; // Exit early, don't make API call
@@ -758,7 +765,7 @@ export default function ChatBot({
     if (cached && (now - cached.ts) < 10 * 60 * 1000) {
       setTimeout(() => {
         setMessages(prev => [...prev, { role: 'assistant', content: cached.text, timestamp: new Date() }]);
-        generateSuggestedQuestions();
+        generateSuggestedQuestionsWrapper();
         setIsTyping(false);
         setIsLoading(false);
       }, 200);
@@ -903,7 +910,7 @@ export default function ChatBot({
         setConsecutiveErrors(0);
 
         // Genera nuove domande suggerite dopo ogni risposta
-        generateSuggestedQuestions();
+        generateSuggestedQuestionsWrapper();
 
         setIsTyping(false);
       }, 500); // Ritardo di 500ms per simulare la digitazione
@@ -1003,9 +1010,8 @@ export default function ChatBot({
     }
   };
 
-  // Funzione per cancellare la conversazione
   // Genera domande suggerite dinamicamente basate sulla sezione corrente
-  const generateSuggestedQuestionsWrapper = () => {
+  const generateSuggestedQuestionsWrapper = useCallback(() => {
     // Non mostrare suggerimenti durante l'inserimento di dati
     if (activeUIComponent) {
       setSuggestedQuestions([]);
@@ -1013,8 +1019,9 @@ export default function ChatBot({
     }
 
     generateSuggestedQuestions(currentSection, tripData, setInput, handleSendMessage, setSuggestedQuestions);
-  };
+  }, [currentSection, tripData, setInput, handleSendMessage, activeUIComponent]);
 
+  // Funzione per cancellare la conversazione
   const clearConversation = () => {
     if (window.confirm('Sei sicuro di voler cancellare questa conversazione?')) {
       // Rimuovi i messaggi dal localStorage
