@@ -97,7 +97,76 @@ npm run build
 npm start
 ```
 
-## 📄 License
+## � Deployment Workflow
+
+VoyageSmart utilizza un flusso di lavoro Git-based per il deployment automatico su Vercel con due ambienti principali:
+
+### 📋 Branch Strategy
+
+- **`main`** → **Production** (https://voyage-smart.app)
+- **`app-optimization`** → **Preview** (ambiente di staging)
+
+### 🔄 Flusso di Lavoro Consigliato
+
+#### 1. **Sviluppo Locale**
+```bash
+# Avvia il server di sviluppo
+npm run dev
+
+# L'app sarà disponibile su http://localhost:3002
+```
+
+#### 2. **Testing su Preview (Staging)**
+```bash
+# Committa le modifiche
+git add .
+git commit -m "Descrizione delle modifiche"
+
+# Push su app-optimization per il deploy di preview
+git push origin app-optimization
+```
+✅ **Risultato**: Deploy automatico su ambiente Preview per testing
+
+#### 3. **Deploy in Production**
+```bash
+# Passa al branch main
+git checkout main
+
+# Merge delle modifiche da app-optimization
+git merge app-optimization
+
+# Push su main per il deploy in produzione
+git push origin main
+```
+✅ **Risultato**: Deploy automatico su ambiente Production
+
+### 🔧 Comandi Vercel CLI (Opzionali)
+
+```bash
+# Deploy manuale su preview
+vercel
+
+# Deploy manuale su production
+vercel --prod
+
+# Visualizza i deployment
+vercel ls
+```
+
+### 📊 Monitoraggio
+
+- **Dashboard Vercel**: [vercel.com/dashboard](https://vercel.com/dashboard)
+- **Logs Production**: Accessibili tramite Vercel dashboard
+- **Logs Preview**: Disponibili per ogni deployment di preview
+
+### ⚠️ Note Importanti
+
+- **Sempre testare su Preview** prima di fare il merge su main
+- **Le variabili d'ambiente** sono configurate separatamente per ogni ambiente
+- **I deployment sono automatici** ad ogni push sui branch configurati
+- **Rollback disponibile** tramite dashboard Vercel in caso di problemi
+
+## �📄 License
 
 This project is private and proprietary. All rights reserved.
 
