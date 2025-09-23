@@ -11,6 +11,7 @@ import Navbar from '@/components/layout/Navbar';
 import MobileNavbar from '@/components/layout/MobileNavbar';
 import OnboardingModal, { OnboardingModalProvider } from '@/components/subscription/OnboardingModal';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'Voyage Smart - Travel Planning Made Easy',
   description: 'Plan your trips, manage expenses, and collaborate with friends all in one place.',
+  manifest: '/manifest.json',
   icons: {
     icon: '/images/logo-voyage_smart.png',
     apple: '/images/logo-voyage_smart.png',
@@ -55,6 +57,7 @@ export default function RootLayout({
               </div>
               <MobileNavbar />
               <OnboardingModal />
+              <ServiceWorkerRegistration />
             </OnboardingModalProvider>
           </Providers>
         </ErrorBoundary>

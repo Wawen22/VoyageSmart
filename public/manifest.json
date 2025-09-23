@@ -1,0 +1,72 @@
+{
+  "name": "VoyageSmart - Travel Planning Made Easy",
+  "short_name": "VoyageSmart",
+  "description": "Plan your trips, manage expenses, and collaborate with friends all in one place.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["travel", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "/images/logo-voyage_smart.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo-voyage_smart.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/app-screenshot-1.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/images/app-screenshot-2.jpg",
+      "sizes": "750x1334",
+      "type": "image/jpeg",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Go to your travel dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/images/logo-voyage_smart.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "New Trip",
+      "short_name": "New Trip",
+      "description": "Create a new trip",
+      "url": "/trips/new",
+      "icons": [
+        {
+          "src": "/images/logo-voyage_smart.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}
