@@ -338,7 +338,7 @@ export default function Dashboard() {
       {/* Pull to Refresh Wrapper */}
       <PullToRefresh onRefresh={handleRefresh} disabled={loading || isRefreshing}>
         {/* Main Content */}
-        <main className="relative z-10 max-w-7xl mx-auto px-6 py-8 lg:px-8" role="main" id="main-content">
+        <main className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8" role="main" id="main-content">
         {/* Error Message */}
         {error && (
           <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-700 dark:text-red-400 animate-fade-in-up">

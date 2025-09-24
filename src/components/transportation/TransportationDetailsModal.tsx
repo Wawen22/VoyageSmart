@@ -98,7 +98,7 @@ export default function TransportationDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto glass-card border-sky-500/20">
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto  border-sky-500/20">
           {/* Modern Background Elements */}
           <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-cyan-500/5 opacity-50 rounded-2xl"></div>
           <div className="absolute -top-12 -right-12 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl opacity-50"></div>

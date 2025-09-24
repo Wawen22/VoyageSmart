@@ -15,7 +15,8 @@ import {
   GlobeIcon,
   RocketIcon,
   PlaneIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  BarChart3Icon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,7 +24,7 @@ import { cn } from '@/lib/utils';
 import WeatherWidget, { CompactWeatherWidget } from './WeatherWidget';
 import { getTimeOfDay } from '@/lib/date-utils';
 import CompactTopDestinations from './CompactTopDestinations';
-import SwipeableStats from './SwipeableStats';
+import AdvancedMetricsModal from './AdvancedMetricsModal';
 
 interface InteractiveDashboardHeaderProps {
   searchTerm: string;
@@ -164,9 +165,34 @@ export default function InteractiveDashboardHeader({
           </div>
         </div>
 
-        {/* Mobile Quick Stats - Before Weather Widget */}
-        <div className="lg:hidden mb-4">
-          <SwipeableStats trips={trips} showAnalyticsButton={true} />
+        {/* Mobile Analytics Button - Clean and Minimal */}
+        <div className="lg:hidden mb-4 flex justify-center">
+          <AdvancedMetricsModal
+            trips={trips}
+            trigger={
+              <button className="group relative bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl overflow-hidden mobile-touch-optimized mobile-analytics-button">
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+
+                <div className="relative flex items-center gap-3">
+                  <div className="relative">
+                    <BarChart3Icon className="h-5 w-5 transition-all duration-300 group-hover:animate-bounce" />
+                    <div className="absolute inset-0 bg-white/30 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"></div>
+                  </div>
+
+                  <span className="relative font-semibold">
+                    📊 View Analytics
+                    <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <SparklesIcon className="h-3 w-3 text-yellow-300 animate-pulse" />
+                    </div>
+                  </span>
+                </div>
+
+                {/* Enhanced glow effect */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/30 to-indigo-600/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+              </button>
+            }
+          />
         </div>
 
         {/* Desktop Search Bar */}

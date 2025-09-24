@@ -1472,9 +1472,9 @@ export default function Home() {
               </h3>
               <button
                 onClick={closeMediaPopup}
-                className="p-2 hover:bg-muted/50 rounded-xl transition-colors duration-200 group"
+                className="group rounded-xl p-2.5 bg-background/80 backdrop-blur-sm border border-border/50 shadow-lg transition-all duration-300 hover:scale-110 hover:rotate-90 hover:bg-destructive/10 hover:border-destructive/30"
               >
-                <XIcon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
+                <XIcon className="h-5 w-5 text-muted-foreground group-hover:text-destructive transition-colors duration-300" />
               </button>
             </div>
 

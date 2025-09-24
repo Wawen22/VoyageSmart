@@ -406,7 +406,7 @@ export default function TransportationPage() {
 
         {/* View Mode Tabs - Modernized */}
         <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'map')} className="mb-8">
-          <div className="glass-card rounded-2xl p-4 animate-glass-fade-in transportation-view-mobile" style={{ animationDelay: '200ms' }}>
+          <div className="mb-6 glass-card rounded-2xl p-4 animate-glass-fade-in transportation-view-mobile" style={{ animationDelay: '200ms' }}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold text-foreground mb-1">View Options</h3>

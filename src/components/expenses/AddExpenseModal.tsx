@@ -141,7 +141,7 @@ export default function AddExpenseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto glass-card border-amber-500/20 expense-modal-mobile">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto  border-amber-500/20 expense-modal-mobile">
         {/* Modern Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5 opacity-50 rounded-2xl"></div>
         <div className="absolute -top-12 -right-12 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl opacity-50"></div>

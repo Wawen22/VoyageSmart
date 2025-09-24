@@ -104,7 +104,7 @@ export default function TripChatPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative overflow-hidden mb-6">
+      <header className="relative overflow-hidden mb-6 md:mb-6 mb-3">
         {/* Modern Glassmorphism Background - Violet/Pink Theme */}
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-background/95 to-pink-500/10 backdrop-blur-xl"></div>
 
@@ -115,12 +115,13 @@ export default function TripChatPage() {
           <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-pink-500/20 rounded-full blur-2xl animate-pulse glass-orb-float" style={{ animationDelay: '2s' }}></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-start mb-4">
+        <div className="relative z-10 max-w-7xl mx-auto py-2 md:py-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-start md:mb-4">
             <BackButton href={`/trips/${id}`} label="Back to Trip" theme="violet" />
           </div>
 
-          <div className="flex flex-col space-y-3">
+          {/* Hide Group Chat title section on mobile, show only on desktop */}
+          <div className="hidden md:flex flex-col space-y-3">
             <div className="flex items-center space-x-3">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20">
                 <MessageCircleIcon className="h-6 w-6 text-violet-500" />
@@ -142,8 +143,8 @@ export default function TripChatPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-        <div className="glass-card rounded-2xl overflow-hidden animate-glass-fade-in h-[calc(100vh-200px)]">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 md:pb-6 pb-0">
+        <div className="glass-card rounded-2xl overflow-hidden animate-glass-fade-in h-[calc(100vh-200px)] md:h-[calc(100vh-200px)] h-[calc(100vh-120px)]">
           <TripChat tripId={id as string} tripName={trip.name} />
         </div>
       </main>

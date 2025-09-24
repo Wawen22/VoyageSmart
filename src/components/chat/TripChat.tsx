@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import ImageModal from '@/components/ui/ImageModal';
 // Import icons from lucide-react
 import {
@@ -421,7 +422,8 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-full chat-mobile">
+    <TooltipProvider>
+      <div className="flex flex-col h-full chat-mobile relative">
       {/* Chat header - Modernized */}
       <div className="relative p-4 border-b border-white/10 bg-gradient-to-r from-violet-500/5 to-pink-500/5 backdrop-blur-sm">
         <div className="flex justify-between items-center">
@@ -439,22 +441,28 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
             {/* Participants Avatars */}
             <div className="flex -space-x-2">
               {participants.slice(0, 3).map((participant, index) => (
-                <div
-                  key={participant.id}
-                  className="relative group"
-                  style={{ zIndex: 10 - index }}
-                >
-                  <Avatar className="h-9 w-9 border-2 border-white/20 backdrop-blur-sm transition-all duration-300 group-hover:scale-110">
-                    {participant.users.avatar_url ? (
-                      <AvatarImage src={participant.users.avatar_url} alt={participant.users.full_name} />
-                    ) : (
-                      <AvatarFallback className="bg-gradient-to-br from-violet-500/20 to-pink-500/20 text-violet-600 font-medium">
-                        {getInitials(participant.users.full_name)}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white/20"></div>
-                </div>
+                <Tooltip key={participant.id}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="relative group cursor-pointer"
+                      style={{ zIndex: 10 - index }}
+                    >
+                      <Avatar className="h-9 w-9 border-2 border-white/20 backdrop-blur-sm transition-all duration-300 group-hover:scale-110">
+                        {participant.users.avatar_url ? (
+                          <AvatarImage src={participant.users.avatar_url} alt={participant.users.full_name} />
+                        ) : (
+                          <AvatarFallback className="bg-gradient-to-br from-violet-500/20 to-pink-500/20 text-violet-600 font-medium">
+                            {getInitials(participant.users.full_name)}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white/20"></div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="z-[9999]">
+                    <p className="text-sm font-medium">{participant.users.full_name}</p>
+                  </TooltipContent>
+                </Tooltip>
               ))}
               {participants.length > 3 && (
                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm flex items-center justify-center text-xs font-medium border-2 border-white/20 text-violet-600">
@@ -466,8 +474,8 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         </div>
       </div>
 
-      {/* Messages container - Modernized */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-violet-500/5">
+      {/* Messages container - Modernized with mobile padding for fixed input */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-violet-500/5 md:pb-4 pb-32">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="p-6 rounded-3xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 mb-6">
@@ -584,8 +592,8 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message input - Modernized */}
-      <div className="p-4 border-t border-white/10 bg-gradient-to-r from-violet-500/5 to-pink-500/5 backdrop-blur-sm">
+      {/* Message input - Modernized with mobile sticky positioning */}
+      <div className="p-4 border-t border-white/10 bg-gradient-to-r from-violet-500/5 to-pink-500/5 backdrop-blur-sm md:relative md:bottom-auto fixed bottom-0 left-0 right-0 z-50 md:z-auto">
         {/* File preview if a file is selected */}
         {selectedFile && (
           <div className="mb-4 p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-white/20">
@@ -695,5 +703,6 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         imageAlt={selectedImage?.alt || 'Chat Image'}
       />
     </div>
+    </TooltipProvider>
   );
 }

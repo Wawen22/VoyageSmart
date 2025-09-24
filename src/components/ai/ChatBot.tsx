@@ -1133,11 +1133,11 @@ export default function ChatBot({
           )}
           <button
             onClick={toggleMinimize}
-            className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400 hover:text-white transition-colors"
+            className="group rounded-xl p-2 bg-slate-800/60 backdrop-blur-sm border border-slate-600/30 shadow-lg transition-all duration-300 hover:scale-110 hover:rotate-90 hover:bg-destructive/10 hover:border-destructive/30"
             title={isMobile ? "Chiudi" : "Minimizza"}
             aria-label={isMobile ? "Chiudi finestra" : "Minimizza finestra"}
           >
-            <X size={16} />
+            <X size={16} className="text-slate-400 group-hover:text-destructive transition-colors duration-300" />
           </button>
         </div>
       </div>

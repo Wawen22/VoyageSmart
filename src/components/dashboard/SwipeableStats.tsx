@@ -213,10 +213,10 @@ export default function SwipeableStats({ trips, className, showAnalyticsButton =
   };
 
   return (
-    <div className={cn("lg:hidden swipeable-stats-mobile bg-gradient-to-r from-blue-50/40 to-purple-50/40 dark:from-blue-950/15 dark:to-purple-950/15 rounded-xl border border-border/40 shadow-sm", className)}>
-      <div className="mb-3 px-4 pt-4">
+    <div className={cn("lg:hidden swipeable-stats-mobile bg-gradient-to-r from-blue-50/40 to-purple-50/40 dark:from-blue-950/15 dark:to-purple-950/15 rounded-lg border border-border/40 shadow-sm", className)}>
+      <div className="mb-2 px-3 pt-3">
         <div className="flex items-center justify-between stats-header-mobile">
-          <h3 className="text-sm font-medium text-muted-foreground">Quick Stats</h3>
+          <h3 className="text-xs font-medium text-muted-foreground">Quick Stats</h3>
           {showAnalyticsButton && (
             <MobileAnalyticsButton trips={trips} />
           )}
@@ -245,23 +245,23 @@ export default function SwipeableStats({ trips, className, showAnalyticsButton =
             return (
               <div
                 key={stat.id}
-                className="flex-shrink-0 px-2"
+                className="flex-shrink-0 px-1.5"
                 style={{ width: `${100 / cardsPerView}%` }}
               >
                 <div className={cn(
-                  "bg-card rounded-xl p-3 border border-border/50 h-20 transition-all duration-200 stat-card mobile-touch-optimized",
+                  "bg-card rounded-lg p-2 border border-border/50 h-16 transition-all duration-200 stat-card mobile-touch-optimized",
                   "hover:shadow-md hover:scale-[1.02]",
                   stat.bgColor
                 )}>
-                  <div className="flex items-center gap-2 h-full">
+                  <div className="flex items-center gap-1.5 h-full">
                     <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                      "w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0",
                       "bg-background/50"
                     )}>
-                      <Icon className={cn("h-4 w-4", stat.color)} />
+                      <Icon className={cn("h-3 w-3", stat.color)} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className={cn("text-lg font-bold truncate", stat.textColor)}>
+                      <p className={cn("text-base font-bold truncate", stat.textColor)}>
                         {stat.value}
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
@@ -277,7 +277,7 @@ export default function SwipeableStats({ trips, className, showAnalyticsButton =
       </div>
 
       {/* Dots indicator */}
-      <div className="flex justify-center gap-1 mt-3 pb-4">
+      <div className="flex justify-center gap-1 mt-2 pb-3">
         {Array.from({ length: maxIndex + 1 }).map((_, index) => (
           <button
             key={index}

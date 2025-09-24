@@ -155,10 +155,10 @@ export default function ImageModal({
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="glass-button p-2 rounded-lg hover:scale-110 transition-all duration-300 hover:bg-red-500/20"
+              className="group rounded-xl p-2.5 bg-black/60 backdrop-blur-sm border border-white/20 shadow-lg transition-all duration-300 hover:scale-110 hover:rotate-90 hover:bg-destructive/20 hover:border-destructive/40"
               title="Close"
             >
-              <X className="h-4 w-4 text-white" />
+              <X className="h-4 w-4 text-white group-hover:text-red-300 transition-colors duration-300" />
             </button>
           </div>
         </div>

@@ -1,0 +1,23 @@
+/* Enhanced Close Button Styles for VoyageSmart */
+
+/*
+ * NOTE: This file contains utility styles for enhanced close buttons.
+ * The main styling is now applied directly via Tailwind classes in components
+ * to avoid CSS positioning conflicts. This file provides additional
+ * enhancements and fallbacks.
+ */
+
+/*
+ * Enhanced close button styles are now applied directly via Tailwind classes
+ * in the component files for better maintainability and to avoid CSS conflicts.
+ *
+ * Key features implemented via Tailwind:
+ * - Glassmorphism effects with backdrop-blur-sm
+ * - Hover animations with scale and rotation
+ * - Destructive color theme on hover
+ * - Touch-friendly sizing
+ * - Accessibility features (focus rings, screen reader support)
+ * - Mobile optimizations
+ *
+ * This approach ensures proper positioning and avoids CSS specificity conflicts.
+ */
