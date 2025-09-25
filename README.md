@@ -160,46 +160,142 @@ Scadenza: Qualsiasi data futura (es. 12/25)
 CVC: Qualsiasi 3 cifre (es. 123)
 ```
 
-### 🔄 **Workflow di Testing**
+### 🔄 **Workflow di Testing Completo**
 
-#### 1. **Test Locale (Sandbox)**
+#### 1. **Setup Test Locale (Sandbox)**
+
+##### **Passo 1: Configura ambiente locale**
 ```bash
-# Configura ambiente test
+# Copia il template di test
 cp .env.test .env.local
 
-# Avvia sviluppo locale
-npm run dev
-
-# Testa pagamenti con carte di test
-# URL: http://localhost:3000
+# Aggiungi URL locale per testing
+echo "NEXT_PUBLIC_APP_URL=http://localhost:3000" >> .env.local
 ```
 
-#### 2. **Test Preview (Sandbox)**
+##### **Passo 2: Configura Supabase per test locale**
+1. Vai su **Supabase Dashboard** → Il tuo progetto → **Authentication** → **URL Configuration**
+2. **Aggiungi** (non sostituire) questi Redirect URLs:
+   - `http://localhost:3000/auth/callback`
+   - `http://localhost:3000/confirm-email`
+   - `http://localhost:3000/login`
+3. **Mantieni** Site URL su `https://www.voyage-smart.app`
+
+##### **Passo 3: Avvia e testa**
 ```bash
+# Avvia server di sviluppo
+npm run dev
+
+# Apri browser su http://localhost:3000
+```
+
+#### 2. **Test Completo del Flusso**
+
+##### **Test Autenticazione:**
+1. **Registrazione**:
+   - Vai su http://localhost:3000
+   - Clicca "Sign Up" e registra nuovo account
+   - Controlla email di conferma
+   - Clicca link nella email → deve reindirizzare a localhost:3000
+   - Verifica login automatico
+
+2. **Login/Logout**:
+   - Fai logout
+   - Prova login con credenziali
+   - Testa "Password dimenticata"
+
+##### **Test Pagamenti Stripe (Sandbox):**
+1. **Accedi alla sezione abbonamenti**
+2. **Seleziona piano Premium o AI**
+3. **Usa carte di test**:
+   - ✅ **Successo**: `4242 4242 4242 4242`
+   - ❌ **Fallimento**: `4000 0000 0000 0002`
+   - ⚠️ **3D Secure**: `4000 0025 0000 3155`
+   - **Scadenza**: Qualsiasi data futura (es. 12/25)
+   - **CVC**: Qualsiasi 3 cifre (es. 123)
+
+4. **Verifica flusso completo**:
+   - Checkout → Pagamento → Redirect → Attivazione piano
+
+##### **Test Funzionalità App:**
+1. **Crea nuovo viaggio**
+2. **Aggiungi attività**
+3. **Testa AI Assistant** (se hai piano AI)
+4. **Gestisci spese**
+5. **Invita partecipanti**
+
+#### 3. **Test Preview (Staging)**
+```bash
+# Committa modifiche
+git add .
+git commit -m "feat: nuove funzionalità"
+
 # Push su branch di staging
 git push origin app-optimization
 
-# Testa su ambiente preview con Stripe test
-# URL: preview-url.vercel.app
+# Testa su ambiente preview
+# URL: https://preview-url.vercel.app
 ```
 
-#### 3. **Deploy Production (Live)**
+#### 4. **Deploy Production (Live)**
 ```bash
-# Solo dopo aver testato tutto in sandbox
+# Solo dopo aver testato tutto in sandbox e preview
 git checkout main
 git merge app-optimization
 git push origin main
 
-# Deploy automatico su produzione con Stripe live
-# URL: https://voyage-smart.app
+# Deploy automatico su produzione
+# URL: https://www.voyage-smart.app
 ```
 
-### ⚠️ **Importante**
+#### 5. **Ripristino Ambiente Locale**
+
+Dopo i test, ripristina per produzione:
+```bash
+# Ripristina URL di produzione
+sed -i 's|NEXT_PUBLIC_APP_URL=http://localhost:3000|NEXT_PUBLIC_APP_URL=https://www.voyage-smart.app|' .env.local
+
+# Oppure ricopia il file originale
+# (assicurati di avere un backup del .env.local di produzione)
+```
+
+### ⚠️ **Note Importanti**
 
 - **MAI testare pagamenti reali** in ambiente di sviluppo
 - **Sempre usare Stripe Test** per sviluppo e testing
 - **Stripe Live** solo per clienti reali in produzione
 - **Webhook separati** per test e produzione
+- **Supabase Redirect URLs** devono includere sia localhost che produzione
+- **Testare sempre il flusso completo** prima del deploy in produzione
+
+### 🚨 **Checklist Pre-Deploy**
+
+Prima di fare deploy in produzione, verifica:
+
+- [ ] ✅ Test autenticazione completo (registrazione, login, email)
+- [ ] ✅ Test pagamenti Stripe con carte di test
+- [ ] ✅ Test funzionalità principali dell'app
+- [ ] ✅ Test su ambiente preview/staging
+- [ ] ✅ Variabili d'ambiente configurate su Vercel
+- [ ] ✅ Supabase URL Configuration aggiornata
+- [ ] ✅ Webhook Stripe configurati per produzione
+- [ ] ✅ Nessun errore nei log di sviluppo
+
+### 🔧 **Script Utili**
+
+Aggiungi questi script al `package.json` per facilitare il testing:
+
+```json
+{
+  "scripts": {
+    "dev:local": "NEXT_PUBLIC_APP_URL=http://localhost:3000 npm run dev",
+    "dev:prod": "NEXT_PUBLIC_APP_URL=https://www.voyage-smart.app npm run dev",
+    "test:stripe": "echo 'Usa carte di test: 4242 4242 4242 4242'",
+    "deploy:preview": "git push origin app-optimization",
+    "deploy:prod": "git checkout main && git merge app-optimization && git push origin main"
+  }
+}
+```
 
 ## 🚀 Deployment Workflow
 

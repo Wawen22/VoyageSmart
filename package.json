@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3002",
+    "dev:local": "NEXT_PUBLIC_APP_URL=http://localhost:3002 next dev --port 3002",
+    "dev:prod": "NEXT_PUBLIC_APP_URL=https://www.voyage-smart.app next dev --port 3002",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -13,6 +15,9 @@
     "test:ci": "jest --ci --coverage --watchAll=false",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:stripe": "echo 'Usa carte di test Stripe: 4242 4242 4242 4242 (successo), 4000 0000 0000 0002 (fallimento)'",
+    "deploy:preview": "git push origin app-optimization",
+    "deploy:prod": "git checkout main && git merge app-optimization && git push origin main",
     "test:e2e:headed": "playwright test --headed",
     "test:all": "npm run test && npm run test:e2e",
     "type-check": "tsc --noEmit",
