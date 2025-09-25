@@ -8,11 +8,8 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
  * Use this in client components and browser-side code
  */
 export const createClientSupabase = () => {
-  // Create a singleton instance to prevent multiple clients
-  if (typeof window !== 'undefined' && (window as any).__supabaseClient) {
-    return (window as any).__supabaseClient;
-  }
-
+  // Don't use singleton to prevent session caching issues between users
+  // Each call creates a fresh client that reads current session from localStorage
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       storage: typeof window !== 'undefined' ? window.localStorage : undefined,
@@ -22,11 +19,6 @@ export const createClientSupabase = () => {
       flowType: 'pkce'
     }
   });
-
-  // Store as singleton
-  if (typeof window !== 'undefined') {
-    (window as any).__supabaseClient = client;
-  }
 
   return client;
 };

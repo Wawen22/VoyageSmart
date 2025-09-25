@@ -79,7 +79,8 @@ export default function TransportationPage() {
       try {
         if (!user) return;
 
-        const cacheKey = `trip_details_${id}`;
+        // Generate user-specific cache key to prevent data leakage between accounts
+        const cacheKey = `${user.id}:trip_details_${id}`;
         const cachedData = sessionStorage.getItem(cacheKey);
         
         if (cachedData) {

@@ -3,7 +3,11 @@
 import { ReactNode, useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext, User, signIn, signOut, signUp, resetPassword, updateProfile } from '@/lib/auth';
-import { clearAllCache, hardNavigate } from '@/lib/cache-utils';
+import { clearAllCache, clearUserSpecificCache, hardNavigate } from '@/lib/cache-utils';
+import { tripCache, userCache } from '@/lib/services/cacheService';
+import { clearUserCache as clearTransportationCache } from '@/lib/features/transportationSlice';
+import { clearUserCache as clearAccommodationCache } from '@/lib/features/accommodationSlice';
+import { clearUserCache as clearItineraryCache } from '@/lib/features/itinerarySlice';
 import { createClientSupabase } from '@/lib/supabase-client';
 import { logger } from '@/lib/logger';
 
@@ -106,6 +110,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         if (session?.user) {
+          // Clear user-specific cache when switching to a different user
+          const currentUserId = user?.id;
+          const newUserId = session.user.id;
+
+          if (currentUserId && currentUserId !== newUserId) {
+            logger.debug('User changed, clearing user-specific cache', {
+              oldUserId: currentUserId,
+              newUserId
+            });
+            clearUserSpecificCache(currentUserId);
+            tripCache.clearUserCache(currentUserId);
+            userCache.clearUserCache(currentUserId);
+            // Clear Redux caches
+            clearTransportationCache(currentUserId);
+            clearAccommodationCache(currentUserId);
+            clearItineraryCache(currentUserId);
+          }
           // Get user profile from the users table with retry logic
           logger.debug('Auth state change - Fetching user profile', { userId: session.user.id });
 
@@ -156,6 +177,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             hasProfile: !!profile
           });
         } else {
+          // Clear user-specific cache when signing out
+          if (user?.id) {
+            logger.debug('User signing out, clearing user-specific cache', { userId: user.id });
+            clearUserSpecificCache(user.id);
+            tripCache.clearUserCache(user.id);
+            userCache.clearUserCache(user.id);
+            // Clear Redux caches
+            clearTransportationCache(user.id);
+            clearAccommodationCache(user.id);
+            clearItineraryCache(user.id);
+          }
           setUser(null);
           logger.debug('AuthProvider onAuthStateChange - User state SET to null');
         }

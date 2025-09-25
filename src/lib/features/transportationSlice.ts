@@ -54,19 +54,46 @@ const initialState: TransportationState = {
   currentTransportation: null,
 };
 
-// Cache for transportations data to prevent redundant fetches
+// Cache for transportations data to prevent redundant fetches (user-specific)
 const transportationsCache: Record<string, { timestamp: number, data: Transportation[] }> = {};
 
 // Cache expiration time (5 minutes)
 const CACHE_EXPIRATION = 5 * 60 * 1000;
+
+// Helper function to generate user-specific cache key
+const generateCacheKey = (userId: string, tripId: string): string => {
+  return `${userId}:${tripId}`;
+};
+
+// Helper function to clear user-specific cache entries
+export const clearUserCache = (userId?: string): void => {
+  if (!userId) return;
+
+  const keysToDelete = Object.keys(transportationsCache).filter(key =>
+    key.startsWith(`${userId}:`)
+  );
+
+  keysToDelete.forEach(key => {
+    delete transportationsCache[key];
+  });
+
+  console.log(`Cleared ${keysToDelete.length} transportation cache entries for user ${userId}`);
+};
 
 // Fetch transportations for a trip
 export const fetchTransportations = createAsyncThunk(
   'transportations/fetchTransportations',
   async (tripId: string, { rejectWithValue }) => {
     try {
-      // Check if we have cached data that's still valid
-      const cachedData = transportationsCache[tripId];
+      // Get current user ID for cache key
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return rejectWithValue('User not authenticated');
+      }
+
+      // Check if we have cached data that's still valid (user-specific)
+      const cacheKey = generateCacheKey(user.id, tripId);
+      const cachedData = transportationsCache[cacheKey];
       const now = Date.now();
 
       if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRATION)) {
@@ -163,8 +190,8 @@ export const fetchTransportations = createAsyncThunk(
 
       const result = transportationsWithStops || [];
 
-      // Cache the result
-      transportationsCache[tripId] = {
+      // Cache the result with user-specific key
+      transportationsCache[cacheKey] = {
         timestamp: now,
         data: result
       };

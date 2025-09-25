@@ -204,6 +204,13 @@ class CacheService {
     }
   }
 
+  /**
+   * Clear all cache entries for a specific user
+   */
+  clearUserCache(userId: string): void {
+    this.invalidatePattern(`${userId}:`);
+  }
+
   private setMemoryCache<T>(key: string, item: CacheItem<T>): void {
     // Implement LRU eviction if cache is full
     if (this.memoryCache.size >= this.config.maxSize) {

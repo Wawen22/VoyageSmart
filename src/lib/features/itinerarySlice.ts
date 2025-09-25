@@ -45,19 +45,46 @@ const initialState: ItineraryState = {
   error: null,
 };
 
-// Cache for itinerary data to prevent redundant fetches
+// Cache for itinerary data to prevent redundant fetches (user-specific)
 const itineraryCache: Record<string, { timestamp: number, data: { days: ItineraryDay[], activities: Activity[] } }> = {};
 
 // Cache expiration time (5 minutes)
 const CACHE_EXPIRATION = 5 * 60 * 1000;
+
+// Helper function to generate user-specific cache key
+const generateCacheKey = (userId: string, tripId: string): string => {
+  return `${userId}:${tripId}`;
+};
+
+// Helper function to clear user-specific cache entries
+export const clearUserCache = (userId?: string): void => {
+  if (!userId) return;
+
+  const keysToDelete = Object.keys(itineraryCache).filter(key =>
+    key.startsWith(`${userId}:`)
+  );
+
+  keysToDelete.forEach(key => {
+    delete itineraryCache[key];
+  });
+
+  console.log(`Cleared ${keysToDelete.length} itinerary cache entries for user ${userId}`);
+};
 
 // Async thunk for fetching trip itinerary
 export const fetchTripItinerary = createAsyncThunk(
   'itinerary/fetchTripItinerary',
   async (tripId: string, { rejectWithValue, getState }) => {
     try {
-      // Check if we have cached data that's still valid
-      const cachedData = itineraryCache[tripId];
+      // Get current user ID for cache key
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return rejectWithValue('User not authenticated');
+      }
+
+      // Check if we have cached data that's still valid (user-specific)
+      const cacheKey = generateCacheKey(user.id, tripId);
+      const cachedData = itineraryCache[cacheKey];
       const now = Date.now();
 
       if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRATION)) {
@@ -88,8 +115,8 @@ export const fetchTripItinerary = createAsyncThunk(
         activities: activitiesResponse.data || [],
       };
 
-      // Cache the result
-      itineraryCache[tripId] = {
+      // Cache the result with user-specific key
+      itineraryCache[cacheKey] = {
         timestamp: now,
         data: result
       };

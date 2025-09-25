@@ -185,7 +185,9 @@ SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.trip_participants
-    WHERE trip_id = trip_uuid AND user_id = user_uuid
+    WHERE trip_id = trip_uuid
+      AND user_id = user_uuid
+      AND invitation_status = 'accepted'
   );
 $$;
 

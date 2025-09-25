@@ -1,10 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClientSupabase } from '@/lib/supabase-client';
 import { logger } from '@/lib/logger';
 
-// Crea una nuova istanza di Supabase per assicurarci che funzioni correttamente
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use the same Supabase client as the AuthProvider to ensure proper session sharing
+const supabase = createClientSupabase();
 
 // Cache per il contesto dei viaggi
 const tripContextCache = new Map<string, { data: any; expiry: number }>();
@@ -71,8 +69,14 @@ export async function getSelectiveTripContext(
     throw new Error('Trip ID is required');
   }
 
-  // Check cache first (with context needs as part of cache key)
-  const cacheKey = `${tripId}:${JSON.stringify(contextNeeds)}`;
+  // Get current user ID for user-specific caching
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id;
+
+  // Check cache first (with context needs and user ID as part of cache key)
+  const cacheKey = userId
+    ? `${userId}:${tripId}:${JSON.stringify(contextNeeds)}`
+    : `${tripId}:${JSON.stringify(contextNeeds)}`;
   const cached = getCachedTripContext(cacheKey);
   if (cached) {
     return cached;

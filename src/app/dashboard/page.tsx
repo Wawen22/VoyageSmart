@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
-import { supabase } from '@/lib/supabase';
 import InteractiveDashboardHeader from '@/components/dashboard/InteractiveDashboardHeader';
 import InteractiveTripCard from '@/components/dashboard/InteractiveTripCard';
 import InteractiveEmptyState from '@/components/dashboard/InteractiveEmptyState';
@@ -33,8 +32,8 @@ type Trip = {
   created_at: string;
 };
 
-export default function Dashboard() {
-  const { user } = useAuth();
+export default function Dashboard() { // RLS enabled test
+  const { user, supabase } = useAuth();
   const { subscription, canCreateTrip } = useSubscription();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,92 +117,72 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchTrips = async () => {
+      // Simple check: if no user, don't load
+      if (!user || !supabase) {
+        logger.debug('Dashboard user or supabase not available yet');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
+        setError(null);
         startLoading();
-
-        if (!user) {
-          logger.debug('Dashboard user not loaded yet, waiting');
-          return;
-        }
 
         logger.debug('Dashboard fetching trips', { userId: user.id });
 
-        try {
-          // Fetch all trips the user has access to (RLS will handle permissions)
-          const { data, error } = await supabase
-            .from('trips')
-            .select('*')
-            .order('created_at', { ascending: false });
+        // Test auth context first
+        const { data: authTest, error: authTestError } = await supabase
+          .rpc('test_current_auth');
 
-          if (error) {
-            logger.error('Dashboard error fetching trips', { error: error.message, userId: user.id });
-            throw error;
-          }
-
-          logger.info('Dashboard trips fetched successfully', {
-            tripCount: data?.length || 0,
+        if (authTestError) {
+          logger.warn('Auth test failed', { error: authTestError.message });
+        } else {
+          logger.info('Auth context test', {
+            authTest: authTest?.[0],
             userId: user.id
           });
-          setTrips(data || []);
-          setTripCount(data?.length || 0);
-
-          // Calculate available years
-          const years = new Set<number>();
-          data?.forEach(trip => {
-            if (trip.start_date) {
-              const year = new Date(trip.start_date).getFullYear();
-              years.add(year);
-            }
-          });
-          setAvailableYears(Array.from(years).sort((a, b) => b - a));
-        } catch (fetchError) {
-          logger.error('Dashboard error in fetch operation', {
-            error: fetchError,
-            userId: user.id
-          });
-
-          // Fallback approach if the first method fails
-          logger.debug('Dashboard trying fallback approach');
-          try {
-            // First get trips where user is owner
-            const { data: ownerTrips, error: ownerError } = await supabase
-              .from('trips')
-              .select('*')
-              .eq('owner_id', user.id);
-
-            if (ownerError) {
-              logger.error('Dashboard fallback approach failed', {
-                error: ownerError.message,
-                userId: user.id
-              });
-              setError('Could not load your trips. Please try again later.');
-              return;
-            }
-
-            logger.info('Dashboard owner trips fetched', {
-              tripCount: ownerTrips?.length || 0,
-              userId: user.id
-            });
-            setTrips(ownerTrips || []);
-
-            // Calculate available years
-            const years = new Set<number>();
-            ownerTrips?.forEach(trip => {
-              if (trip.start_date) {
-                const year = new Date(trip.start_date).getFullYear();
-                years.add(year);
-              }
-            });
-            setAvailableYears(Array.from(years).sort((a, b) => b - a));
-          } catch (fallbackError) {
-            logger.error('Dashboard fallback approach completely failed', {
-              error: fallbackError,
-              userId: user.id
-            });
-            setError('Could not load your trips. Please try again later.');
-          }
         }
+
+        // RLS-enabled approach: Let database handle filtering
+        const { data, error } = await supabase
+          .from('trips')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          logger.error('Dashboard error fetching trips', { error: error.message, userId: user.id });
+          throw error;
+        }
+
+        logger.info('Dashboard trips loaded with RLS filtering', {
+          tripCount: data?.length || 0,
+          userId: user.id,
+          authWorking: authTest?.[0]?.has_auth || false
+        });
+
+        // Set the trips data
+        setTrips(data);
+        setTripCount(data.length);
+        setError(null);
+
+        // Calculate available years
+        const years = new Set<number>();
+        data.forEach(trip => {
+          if (trip.start_date) {
+            const year = new Date(trip.start_date).getFullYear();
+            years.add(year);
+          }
+        });
+        setAvailableYears(Array.from(years).sort((a, b) => b - a));
+      } catch (fetchError) {
+        logger.error('Dashboard error loading trips', {
+          error: fetchError instanceof Error ? fetchError.message : String(fetchError),
+          userId: user.id
+        });
+        setError('Could not load your trips. Please try again later.');
+        setTrips([]);
+        setTripCount(0);
       } finally {
         setLoading(false);
         stopLoading();
@@ -221,6 +200,7 @@ export default function Dashboard() {
     try {
       logger.debug('Dashboard refreshing trips');
 
+      // RLS-enabled refresh: Let database handle filtering
       const { data, error } = await supabase
         .from('trips')
         .select('*')
@@ -231,22 +211,24 @@ export default function Dashboard() {
         throw error;
       }
 
-      logger.info('Dashboard trips refreshed successfully', {
-        tripCount: data?.length || 0
-      });
-      setTrips(data || []);
-      setTripCount(data?.length || 0);
+      setTrips(data);
+      setTripCount(data.length);
       setError(null);
 
       // Calculate available years
       const years = new Set<number>();
-      data?.forEach(trip => {
+      data.forEach(trip => {
         if (trip.start_date) {
           const year = new Date(trip.start_date).getFullYear();
           years.add(year);
         }
       });
       setAvailableYears(Array.from(years).sort((a, b) => b - a));
+
+      logger.info('Dashboard trips refreshed successfully', {
+        tripCount: data.length,
+        userId: user.id
+      });
     } catch (refreshError) {
       logger.error('Dashboard error during refresh', { error: refreshError });
       setError('Could not refresh trips. Please try again.');
@@ -353,6 +335,12 @@ export default function Dashboard() {
       {/* Interactive Header */}
       {loading ? (
         <ModernHeaderLoadingSkeleton />
+      ) : !user ? (
+        <div className="text-center py-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            VoyageSmart Dashboard
+          </h1>
+        </div>
       ) : (
         <InteractiveDashboardHeader
           searchTerm={searchTerm}
@@ -380,6 +368,21 @@ export default function Dashboard() {
 
           {loading ? (
             <ModernLoadingSkeleton viewMode={viewMode === 'map' ? 'grid' : viewMode} count={6} />
+          ) : !user ? (
+            <div className="text-center py-12">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                Please log in to view your trips
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                You need to be authenticated to access your dashboard.
+              </p>
+              <a
+                href="/login"
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Go to Login
+              </a>
+            </div>
           ) : trips.length === 0 ? (
             <InteractiveEmptyState />
           ) : filteredTrips.length === 0 ? (

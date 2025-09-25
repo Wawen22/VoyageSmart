@@ -14,11 +14,32 @@ interface QueryOptions {
 
 class OptimizedSupabaseService {
   /**
+   * Get current user ID for cache key generation
+   */
+  private async getCurrentUserId(): Promise<string | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user?.id || null;
+    } catch (error) {
+      console.warn('Failed to get current user ID for cache:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate user-specific cache key
+   */
+  private async generateCacheKey(baseKey: string): Promise<string> {
+    const userId = await this.getCurrentUserId();
+    return userId ? `${userId}:${baseKey}` : baseKey;
+  }
+
+  /**
    * Optimized trip data fetching with caching and deduplication
    */
   async getTripDetails(tripId: string, options: QueryOptions = {}) {
     const { cache = true, cacheTTL = 5 * 60 * 1000, deduplicate = true } = options;
-    const cacheKey = `trip_details_${tripId}`;
+    const cacheKey = await this.generateCacheKey(`trip_details_${tripId}`);
     const requestKey = createSupabaseRequestKey('trips', { id: tripId });
 
     const fetchFn = async () => {
@@ -53,7 +74,7 @@ class OptimizedSupabaseService {
    */
   async getTripParticipants(tripId: string, options: QueryOptions = {}) {
     const { cache = true, cacheTTL = 5 * 60 * 1000, deduplicate = true } = options;
-    const cacheKey = `trip_participants_${tripId}`;
+    const cacheKey = await this.generateCacheKey(`trip_participants_${tripId}`);
     const requestKey = createSupabaseRequestKey(
       'trip_participants',
       { trip_id: tripId },
@@ -104,7 +125,7 @@ class OptimizedSupabaseService {
    */
   async getTripAccommodations(tripId: string, options: QueryOptions = {}) {
     const { cache = true, cacheTTL = 5 * 60 * 1000, deduplicate = true } = options;
-    const cacheKey = `trip_accommodations_${tripId}`;
+    const cacheKey = await this.generateCacheKey(`trip_accommodations_${tripId}`);
     const requestKey = createSupabaseRequestKey(
       'accommodations',
       { trip_id: tripId },
@@ -144,7 +165,7 @@ class OptimizedSupabaseService {
    */
   async getTripTransportation(tripId: string, options: QueryOptions = {}) {
     const { cache = true, cacheTTL = 5 * 60 * 1000, deduplicate = true } = options;
-    const cacheKey = `trip_transportation_${tripId}`;
+    const cacheKey = await this.generateCacheKey(`trip_transportation_${tripId}`);
     const requestKey = createSupabaseRequestKey(
       'transportation',
       { trip_id: tripId },
@@ -184,7 +205,7 @@ class OptimizedSupabaseService {
    */
   async getTripExpenses(tripId: string, options: QueryOptions = {}) {
     const { cache = true, cacheTTL = 5 * 60 * 1000, deduplicate = true } = options;
-    const cacheKey = `trip_expenses_${tripId}`;
+    const cacheKey = await this.generateCacheKey(`trip_expenses_${tripId}`);
     const requestKey = createSupabaseRequestKey(
       'expenses',
       { trip_id: tripId },
@@ -229,7 +250,7 @@ class OptimizedSupabaseService {
    */
   async getTripItinerary(tripId: string, options: QueryOptions = {}) {
     const { cache = true, cacheTTL = 5 * 60 * 1000, deduplicate = true } = options;
-    const cacheKey = `trip_itinerary_${tripId}`;
+    const cacheKey = await this.generateCacheKey(`trip_itinerary_${tripId}`);
     const requestKey = createSupabaseRequestKey('itinerary_days_activities', { trip_id: tripId });
 
     const fetchFn = async () => {

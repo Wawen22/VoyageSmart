@@ -8,15 +8,17 @@
 export function clearLocalStorage(): void {
   try {
     const localStorageKeys = Object.keys(localStorage);
-    const keysToRemove = localStorageKeys.filter(key => 
-      key.startsWith('supabase') || 
-      key.startsWith('chat_messages_') || 
+    const keysToRemove = localStorageKeys.filter(key =>
+      key.startsWith('supabase') ||
+      key.startsWith('chat_messages_') ||
       key.startsWith('weather-') ||
       key.startsWith('app-') ||
       key.includes('cache') ||
       key.includes('trip') ||
       key.includes('auth') ||
-      key.includes('session')
+      key.includes('session') ||
+      // Remove user-specific cache keys (format: userId:key)
+      /^[a-f0-9-]{36}:/.test(key)
     );
 
     keysToRemove.forEach(key => {
@@ -36,6 +38,68 @@ export function clearSessionStorage(): void {
     console.log('Cleared all sessionStorage data');
   } catch (error) {
     console.error('Error clearing sessionStorage:', error);
+  }
+}
+
+/**
+ * Clear user-specific cache data when switching accounts
+ */
+export function clearUserSpecificCache(userId?: string): void {
+  try {
+    // Clear sessionStorage (all user-specific data is stored here)
+    sessionStorage.clear();
+
+    // Clear user-specific localStorage items
+    const localStorageKeys = Object.keys(localStorage);
+    const userPattern = userId ? new RegExp(`^${userId}:`) : /^[a-f0-9-]{36}:/;
+
+    const keysToRemove = localStorageKeys.filter(key =>
+      userPattern.test(key) ||
+      key.includes('trip') ||
+      key.includes('cache')
+    );
+
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+    });
+
+    // Clear Redux caches (these are in-memory caches in the Redux slices)
+    clearReduxCaches(userId);
+
+    console.log(`Cleared ${keysToRemove.length} user-specific cache entries`);
+  } catch (error) {
+    console.warn('Error clearing user-specific cache:', error);
+  }
+}
+
+/**
+ * Clear Redux in-memory caches for a specific user
+ */
+export function clearReduxCaches(userId?: string): void {
+  try {
+    // Import the cache objects from Redux slices
+    // Note: These are imported dynamically to avoid circular dependencies
+    if (typeof window !== 'undefined') {
+      // Clear transportation cache
+      const transportationModule = require('@/lib/features/transportationSlice');
+      if (transportationModule.clearUserCache) {
+        transportationModule.clearUserCache(userId);
+      }
+
+      // Clear accommodation cache
+      const accommodationModule = require('@/lib/features/accommodationSlice');
+      if (accommodationModule.clearUserCache) {
+        accommodationModule.clearUserCache(userId);
+      }
+
+      // Clear itinerary cache
+      const itineraryModule = require('@/lib/features/itinerarySlice');
+      if (itineraryModule.clearUserCache) {
+        itineraryModule.clearUserCache(userId);
+      }
+    }
+  } catch (error) {
+    console.warn('Error clearing Redux caches:', error);
   }
 }
 

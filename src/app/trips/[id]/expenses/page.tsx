@@ -131,10 +131,10 @@ export default function ExpensesPage() {
 
         if (!user) return;
 
-        // Create cache keys for this trip
-        const tripCacheKey = `expenses_trip_${id}`;
-        const participantsCacheKey = `expenses_participants_${id}`;
-        const expensesCacheKey = `expenses_data_${id}`;
+        // Create user-specific cache keys for this trip to prevent data leakage between accounts
+        const tripCacheKey = `${user.id}:expenses_trip_${id}`;
+        const participantsCacheKey = `${user.id}:expenses_participants_${id}`;
+        const expensesCacheKey = `${user.id}:expenses_data_${id}`;
 
         // Check if we have cached data
         let cachedTrip = null;
