@@ -84,8 +84,9 @@ VoyageSmart is a full-stack travel planning platform built with Next.js and Supa
 5. **Manage expenses** by adding costs and splitting them among participants
 6. **Collaborate** by inviting friends and family to join your trip
 
-## 🧪 Development
+## 🧪 Development & Testing
 
+### Local Development
 ```bash
 # Run tests
 npm run test
@@ -97,7 +98,110 @@ npm run build
 npm start
 ```
 
-## � Deployment Workflow
+### 💳 Stripe Payment Testing
+
+VoyageSmart utilizza due ambienti Stripe separati per garantire sicurezza e flessibilità nei test:
+
+#### 🔴 **Production Environment (Live)**
+- **Ambiente**: `main` branch → https://voyage-smart.app
+- **Stripe**: Live mode con chiavi `pk_live_` e `sk_live_`
+- **Pagamenti**: Solo carte reali con addebiti effettivi
+- **Uso**: Clienti reali in produzione
+
+#### 🧪 **Testing Environment (Sandbox)**
+- **Ambiente**: Sviluppo locale e branch `app-optimization`
+- **Stripe**: Test mode con chiavi `pk_test_` e `sk_test_`
+- **Pagamenti**: Carte di test senza addebiti reali
+- **Uso**: Sviluppo e testing
+
+### 🛠️ Setup Testing Environment
+
+#### 1. **Crea file .env.test**
+```bash
+# Copia il file di esempio
+cp .env.local.example .env.test
+```
+
+#### 2. **Configura le chiavi Stripe Test**
+```bash
+# .env.test - Configurazione per testing
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_test_your_webhook_secret
+NEXT_PUBLIC_STRIPE_PREMIUM_PRICE_ID=price_your_premium_price_id
+NEXT_PUBLIC_STRIPE_AI_PRICE_ID=price_your_ai_price_id
+```
+
+#### 3. **Avvia in modalità test**
+```bash
+# Usa il file di test per lo sviluppo locale
+cp .env.test .env.local
+
+# Avvia il server di sviluppo
+npm run dev
+```
+
+### 🧪 **Carte di Test Stripe**
+
+Usa queste carte per testare diversi scenari:
+
+```bash
+# ✅ Pagamento riuscito
+4242 4242 4242 4242
+
+# ❌ Carta declinata
+4000 0000 0000 0002
+
+# ⚠️ Richiede autenticazione 3D Secure
+4000 0025 0000 3155
+
+# 💳 Altri dettagli per i test
+Scadenza: Qualsiasi data futura (es. 12/25)
+CVC: Qualsiasi 3 cifre (es. 123)
+```
+
+### 🔄 **Workflow di Testing**
+
+#### 1. **Test Locale (Sandbox)**
+```bash
+# Configura ambiente test
+cp .env.test .env.local
+
+# Avvia sviluppo locale
+npm run dev
+
+# Testa pagamenti con carte di test
+# URL: http://localhost:3000
+```
+
+#### 2. **Test Preview (Sandbox)**
+```bash
+# Push su branch di staging
+git push origin app-optimization
+
+# Testa su ambiente preview con Stripe test
+# URL: preview-url.vercel.app
+```
+
+#### 3. **Deploy Production (Live)**
+```bash
+# Solo dopo aver testato tutto in sandbox
+git checkout main
+git merge app-optimization
+git push origin main
+
+# Deploy automatico su produzione con Stripe live
+# URL: https://voyage-smart.app
+```
+
+### ⚠️ **Importante**
+
+- **MAI testare pagamenti reali** in ambiente di sviluppo
+- **Sempre usare Stripe Test** per sviluppo e testing
+- **Stripe Live** solo per clienti reali in produzione
+- **Webhook separati** per test e produzione
+
+## 🚀 Deployment Workflow
 
 VoyageSmart utilizza un flusso di lavoro Git-based per il deployment automatico su Vercel con due ambienti principali:
 
@@ -166,7 +270,7 @@ vercel ls
 - **I deployment sono automatici** ad ogni push sui branch configurati
 - **Rollback disponibile** tramite dashboard Vercel in caso di problemi
 
-## �📄 License
+## 📄 License
 
 This project is private and proprietary. All rights reserved.
 
