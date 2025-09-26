@@ -531,3 +531,88 @@
   flex-shrink: 0;
   margin-top: 0.125rem;
 }
+
+/* Mobile chat specific styles */
+@media (max-width: 768px) {
+  .chat-mobile {
+    height: 100vh !important;
+    height: 100dvh !important; /* Use dynamic viewport height for better mobile support */
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  
+  .chat-page-mobile {
+    height: 100vh !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+  
+  /* Ensure the messages container scrolls properly on mobile */
+  .chat-mobile .flex-1.overflow-y-auto {
+    flex: 1 1 0% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    /* Add padding bottom to ensure content is not hidden behind input */
+    padding-bottom: 1rem !important;
+  }
+  
+  /* Fix input area positioning on mobile */
+  .chat-mobile .flex-shrink-0:last-child {
+    position: relative !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 10 !important;
+    flex-shrink: 0 !important;
+    /* Ensure it's always visible */
+    background: hsl(var(--background)) !important;
+    border-top: 1px solid hsl(var(--border)) !important;
+  }
+  
+  /* Prevent input field from being hidden */
+  .chat-mobile textarea {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+  
+  /* Safe area padding for devices with notches */
+  .chat-page-mobile {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+  
+  /* Hide header on mobile to save space */
+  .chat-page-mobile header {
+    display: none !important;
+  }
+  
+  /* Adjust main container on mobile */
+  .chat-page-mobile main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+  
+  /* Remove rounded corners on mobile for full screen experience */
+  .chat-page-mobile .glass-card {
+    border-radius: 0 !important;
+    border: none !important;
+    height: 100% !important;
+  }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 480px) {
+  .chat-mobile {
+    font-size: 14px;
+  }
+  
+  .chat-mobile .p-4 {
+    padding: 0.75rem !important;
+  }
+  
+  .chat-mobile textarea {
+    min-height: 44px !important; /* Minimum touch target size */
+  }
+}

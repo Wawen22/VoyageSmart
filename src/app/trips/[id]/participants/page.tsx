@@ -314,7 +314,7 @@ export default function ParticipantsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background participants-section-mobile">
       <header className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto py-2 px-3 sm:px-6 lg:px-8 flex justify-between items-center">
           <BackButton href={`/trips/${tripId}`} label="Back to Trip" />
@@ -383,10 +383,11 @@ export default function ParticipantsPage() {
                   {filteredParticipants.map((participant) => (
                     <div
                       key={participant.id}
-                      className="flex items-center justify-between p-3 border border-border rounded-md"
+                      className="participant-card-mobile flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 border border-border rounded-md space-y-3 sm:space-y-0"
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
+                      {/* Main participant info */}
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
                           {participant.avatar_url ? (
                             <Image
                               src={participant.avatar_url}
@@ -400,33 +401,40 @@ export default function ParticipantsPage() {
                             </div>
                           )}
                         </div>
-                        <div>
-                          <p className="font-medium">{participant.full_name}</p>
-                          <p className="text-xs text-muted-foreground">{participant.email}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium truncate">{participant.full_name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{participant.email}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-4">
+                      {/* Actions container - stacked on mobile, inline on desktop */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 min-w-0">
                         {/* Role Manager */}
-                        <ParticipantRoleManager
-                          tripId={tripId}
-                          participantId={participant.id}
-                          userId={participant.user_id}
-                          currentRole={participant.role}
-                          onRoleChange={(newRole) => handleRoleChange(participant.id, newRole)}
-                        />
+                        <div className="flex items-center justify-between sm:justify-start">
+                          <span className="text-sm text-muted-foreground sm:hidden mr-2">Role:</span>
+                          <ParticipantRoleManager
+                            tripId={tripId}
+                            participantId={participant.id}
+                            userId={participant.user_id}
+                            currentRole={participant.role}
+                            onRoleChange={(newRole) => handleRoleChange(participant.id, newRole)}
+                          />
+                        </div>
 
                         {/* Remove Button */}
                         {(isOwner || (isAdmin && participant.role !== 'owner' && participant.user_id !== user?.id)) && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveParticipant(participant.id, participant.user_id)}
-                            disabled={removing === participant.id}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <XIcon className="h-4 w-4" />
-                          </Button>
+                          <div className="flex justify-end sm:justify-start">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveParticipant(participant.id, participant.user_id)}
+                              disabled={removing === participant.id}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto justify-center sm:justify-start"
+                            >
+                              <XIcon className="h-4 w-4 mr-2 sm:mr-0" />
+                              <span className="sm:hidden">Remove</span>
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -460,12 +468,12 @@ export default function ParticipantsPage() {
                     {filteredInvitations.map((invitation) => (
                       <div
                         key={invitation.id}
-                        className="flex items-center justify-between p-3 border border-border rounded-md"
+                        className="participant-card-mobile flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 border border-border rounded-md space-y-3 sm:space-y-0"
                       >
-                        <div>
-                          <p className="font-medium">{invitation.email}</p>
-                          <div className="flex items-center mt-1 space-x-2">
-                            <Badge variant="outline" className="text-xs capitalize">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium truncate">{invitation.email}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-center mt-1 space-y-1 sm:space-y-0 sm:space-x-2">
+                            <Badge variant="outline" className="text-xs capitalize w-fit">
                               {invitation.role}
                             </Badge>
                             <span className="text-xs text-muted-foreground">
@@ -475,14 +483,17 @@ export default function ParticipantsPage() {
                         </div>
 
                         {(isOwner || isAdmin) && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleCancelInvitation(invitation.id)}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <XIcon className="h-4 w-4" />
-                          </Button>
+                          <div className="flex justify-end sm:justify-start">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCancelInvitation(invitation.id)}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto justify-center sm:justify-start"
+                            >
+                              <XIcon className="h-4 w-4 mr-2 sm:mr-0" />
+                              <span className="sm:hidden">Cancel Invitation</span>
+                            </Button>
+                          </div>
                         )}
                       </div>
                     ))}
