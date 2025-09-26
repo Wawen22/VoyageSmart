@@ -475,7 +475,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
       </div>
 
       {/* Messages container - Modernized with mobile padding for fixed input */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-violet-500/5 pb-20 md:pb-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-violet-500/5 pb-32 md:pb-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="p-6 rounded-3xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 mb-6">
