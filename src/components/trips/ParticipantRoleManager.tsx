@@ -98,28 +98,43 @@ export default function ParticipantRoleManager({
   }
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 min-w-0">
       <Select
         value={role}
         onValueChange={handleRoleChange}
         disabled={updating || !canChangeRole}
       >
-        <SelectTrigger className="w-[130px]">
-          <SelectValue placeholder="Select role" />
+        <SelectTrigger className="w-[110px] sm:w-[130px] md:w-[140px] min-w-[90px] max-w-[160px] text-xs sm:text-sm h-8 sm:h-10">
+          <SelectValue placeholder="Role" />
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="participant">Participant</SelectItem>
-          <SelectItem value="admin">Admin</SelectItem>
-          {isOwner && <SelectItem value="owner">Owner (Transfer)</SelectItem>}
+        <SelectContent
+          align="end"
+          side="bottom"
+          className="min-w-[110px] max-w-[180px] z-[60]"
+          sideOffset={4}
+          avoidCollisions={true}
+          collisionPadding={8}
+        >
+          <SelectItem value="participant" className="text-xs sm:text-sm">
+            Participant
+          </SelectItem>
+          <SelectItem value="admin" className="text-xs sm:text-sm">
+            Admin
+          </SelectItem>
+          {isOwner && (
+            <SelectItem value="owner" className="text-xs sm:text-sm">
+              Owner (Transfer)
+            </SelectItem>
+          )}
         </SelectContent>
       </Select>
-      
+
       {updating && (
-        <LoaderIcon className="h-4 w-4 animate-spin text-muted-foreground" />
+        <LoaderIcon className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-muted-foreground flex-shrink-0" />
       )}
-      
+
       {success && !updating && (
-        <CheckIcon className="h-4 w-4 text-green-500" />
+        <CheckIcon className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
       )}
     </div>
   );

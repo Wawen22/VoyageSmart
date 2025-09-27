@@ -475,7 +475,7 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
       </div>
 
       {/* Messages container - Modernized with mobile padding for fixed input */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-violet-500/5 md:pb-4 pb-32">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-transparent to-violet-500/5 pb-32 md:pb-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="p-6 rounded-3xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 mb-6">
@@ -592,8 +592,8 @@ export default function TripChat({ tripId, tripName }: TripChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message input - Modernized with mobile sticky positioning */}
-      <div className="p-4 border-t border-white/10 bg-gradient-to-r from-violet-500/5 to-pink-500/5 backdrop-blur-sm md:relative md:bottom-auto fixed bottom-0 left-0 right-0 z-50 md:z-auto">
+      {/* Message input - Modernized with proper container positioning */}
+      <div className="flex-shrink-0 p-4 border-t border-white/10 bg-gradient-to-r from-violet-500/5 to-pink-500/5 backdrop-blur-sm">
         {/* File preview if a file is selected */}
         {selectedFile && (
           <div className="mb-4 p-3 rounded-xl bg-background/50 backdrop-blur-sm border border-white/20">

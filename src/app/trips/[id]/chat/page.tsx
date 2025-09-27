@@ -17,6 +17,34 @@ export default function TripChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [isParticipant, setIsParticipant] = useState(false);
 
+  // Prevent body scroll on mobile
+  useEffect(() => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      // Store original styles
+      const originalStyle = {
+        overflow: document.body.style.overflow,
+        height: document.body.style.height,
+        position: document.body.style.position,
+        width: document.body.style.width,
+      };
+
+      // Apply mobile chat styles
+      document.body.style.overflow = 'hidden';
+      document.body.style.height = '100vh';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+
+      // Cleanup on unmount
+      return () => {
+        document.body.style.overflow = originalStyle.overflow;
+        document.body.style.height = originalStyle.height;
+        document.body.style.position = originalStyle.position;
+        document.body.style.width = originalStyle.width;
+      };
+    }
+  }, []);
+
   useEffect(() => {
     const fetchTripAndCheckAccess = async () => {
       try {
@@ -103,8 +131,8 @@ export default function TripChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="relative overflow-hidden mb-6 md:mb-6 mb-3">
+    <div className="h-screen bg-background flex flex-col overflow-hidden chat-page-mobile">
+      <header className="relative overflow-hidden flex-shrink-0 mb-3 md:mb-6">
         {/* Modern Glassmorphism Background - Violet/Pink Theme */}
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-background/95 to-pink-500/10 backdrop-blur-xl"></div>
 
@@ -143,8 +171,8 @@ export default function TripChatPage() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 md:pb-6 pb-0">
-        <div className="glass-card rounded-2xl overflow-hidden animate-glass-fade-in h-[calc(100vh-200px)] md:h-[calc(100vh-200px)] h-[calc(100vh-120px)]">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-0 md:pb-6 min-h-0 w-full">
+        <div className="glass-card rounded-2xl overflow-hidden animate-glass-fade-in h-full">
           <TripChat tripId={id as string} tripName={trip.name} />
         </div>
       </main>
