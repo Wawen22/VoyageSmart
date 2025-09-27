@@ -1,27 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { Session } from '@supabase/supabase-js';
 
-// Function to determine if we should refresh the session
-// Only refresh if the session is close to expiration (within 30 minutes)
-function shouldRefreshSession(session: Session): boolean {
-  if (!session) return false;
 
-  // Get expiry time from session
-  const expiresAt = session.expires_at;
-  if (!expiresAt) return true; // If no expiry, refresh to be safe
-
-  // Calculate time until expiry in seconds
-  const expiryTime = expiresAt * 1000; // Convert to milliseconds
-  const currentTime = Date.now();
-  const timeUntilExpiry = expiryTime - currentTime;
-
-  // Refresh if less than 5 minutes until expiry (reduced from 30 minutes)
-  // This reduces unnecessary refresh calls that might trigger rate limits
-  const fiveMinutesInMs = 5 * 60 * 1000;
-  return timeUntilExpiry < fiveMinutesInMs;
-}
 
 export async function middleware(req: NextRequest) {
   // Create a response object that we'll modify and return
@@ -37,40 +17,16 @@ export async function middleware(req: NextRequest) {
       return res;
     }
 
-    // Create a Supabase client with proper configuration
-    const supabase = createMiddlewareClient({
-      req,
-      res,
-    });
+    // Simplified middleware - let the UnifiedSessionManager handle all session logic
+    // Just check for basic authentication state from localStorage if available
+    let isAuthenticated = false;
 
-    // Get session and attempt refresh if needed for better persistence
-    let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // Only check authentication on server-side for redirect logic
+    // The actual session management is handled by UnifiedSessionManager on client-side
+    const authCookie = req.cookies.get('sb-ijtfwzxwthunsujobvsk-auth-token');
+    isAuthenticated = !!authCookie;
 
-    // If session is close to expiration, try to refresh it proactively
-    if (session?.expires_at) {
-      const timeUntilExpiration = session.expires_at - Math.floor(Date.now() / 1000);
-      const fiveMinutes = 5 * 60; // 5 minutes in seconds
-
-      if (timeUntilExpiration < fiveMinutes && timeUntilExpiration > 0) {
-        console.log('[Middleware] Token expiring soon, attempting refresh');
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-
-        if (!refreshError && refreshData.session) {
-          session = refreshData.session;
-          console.log('[Middleware] Token refreshed successfully');
-        } else {
-          console.warn('[Middleware] Token refresh failed:', refreshError);
-        }
-      }
-    }
-
-    if (sessionError) {
-      console.error('[Middleware] Session error:', sessionError);
-    }
-
-    // Check if the user is authenticated
-    const isAuthenticated = !!session;
-    console.log('[Middleware] Path:', pathname, 'Authenticated:', isAuthenticated, 'Session ID:', session?.user?.id?.slice(0, 8) || 'none');
+    console.log('[Middleware] Path:', pathname, 'Has auth cookie:', isAuthenticated);
 
     // Define auth routes
     const isAuthRoute = pathname.startsWith('/login') ||
