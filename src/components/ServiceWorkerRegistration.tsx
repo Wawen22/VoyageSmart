@@ -47,17 +47,27 @@ export default function ServiceWorkerRegistration() {
         }
       });
 
-      // Clean up old service workers
+      // Clean up old service workers safely
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         registrations.forEach((registration) => {
           if (registration.scope.includes('chrome-extension')) {
             // Don't interfere with extension service workers
             return;
           }
-          
-          // Update our service worker if needed
-          registration.update();
+
+          // Only update if the service worker is in a valid state
+          if (registration.active && registration.active.state === 'activated') {
+            try {
+              registration.update().catch((error) => {
+                console.warn('Service Worker update failed:', error);
+              });
+            } catch (error) {
+              console.warn('Service Worker update error:', error);
+            }
+          }
         });
+      }).catch((error) => {
+        console.warn('Failed to get service worker registrations:', error);
       });
     }
   }, []);

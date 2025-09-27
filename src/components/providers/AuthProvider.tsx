@@ -11,6 +11,7 @@ import { clearUserCache as clearItineraryCache } from '@/lib/features/itineraryS
 import { createClientSupabase } from '@/lib/supabase-client';
 import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 import { useAuthMonitor } from '@/hooks/useAuthMonitor';
+import { SessionPersistence, useSessionPersistence } from '@/lib/session-persistence';
 import { logger } from '@/lib/logger';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -72,22 +73,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  // Initialize session persistence monitoring
+  useSessionPersistence();
+
   useEffect(() => {
-    // Check if there's an active session
+    // Check if there's an active session with enhanced persistence
     const checkSession = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Get the current session with proper error handling
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // First, try to get session from enhanced persistence storage
+        let session = SessionPersistence.retrieveSession();
 
-        if (sessionError) {
-          logger.error('Session error in checkSession', { error: sessionError.message });
-          updateUser(null);
-          setError(sessionError);
-          setLoading(false);
-          return;
+        if (session) {
+          logger.debug('Found valid session in persistence storage', {
+            userId: session.user?.id?.slice(0, 8),
+            expiresAt: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+          });
+        } else {
+          // If no valid session in storage, get from Supabase
+          const { data: { session: supabaseSession }, error: sessionError } = await supabase.auth.getSession();
+
+          if (sessionError) {
+            logger.error('Session error in checkSession', { error: sessionError.message });
+            updateUser(null);
+            setError(sessionError);
+            setLoading(false);
+            return;
+          }
+
+          session = supabaseSession;
+
+          // Store the session for future use
+          if (session) {
+            SessionPersistence.storeSession(session);
+          }
         }
 
         if (session?.user) {

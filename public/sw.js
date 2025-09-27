@@ -1,17 +1,14 @@
 // Service Worker for VoyageSmart
-// Handles caching with proper extension filtering
+// Handles caching with proper auth-aware strategy
 
-const CACHE_NAME = 'voyage-smart-v1';
-const STATIC_CACHE = 'voyage-smart-static-v1';
+const CACHE_NAME = 'voyage-smart-v2'; // Updated version
+const STATIC_CACHE = 'voyage-smart-static-v2';
 
-// URLs to cache
+// URLs to cache - EXCLUDE authentication-sensitive routes
 const urlsToCache = [
-  '/',
-  '/login',
-  '/register',
-  '/dashboard',
   '/images/logo-voyage_smart.png',
-  '/manifest.json'
+  '/manifest.json',
+  // DO NOT cache authentication-sensitive routes like /, /login, /register, /dashboard
 ];
 
 // Install event
@@ -63,25 +60,58 @@ function shouldCache(request) {
   if (isExtensionRequest(request)) {
     return false;
   }
-  
+
   // Don't cache non-GET requests
   if (request.method !== 'GET') {
     return false;
   }
-  
+
   // Don't cache API requests
   if (request.url.includes('/api/')) {
     return false;
   }
-  
+
+  // Don't cache authentication-related requests or pages
+  if (request.url.includes('auth') ||
+      request.url.includes('login') ||
+      request.url.includes('logout') ||
+      request.url.includes('dashboard') ||
+      request.url.includes('profile') ||
+      request.url.includes('trips')) {
+    return false;
+  }
+
+  // Don't cache dynamic content or pages with query parameters
+  if (request.url.includes('?') && !request.url.includes('_next/static')) {
+    return false;
+  }
+
   // Don't cache external requests (except for same origin)
   const url = new URL(request.url);
   const origin = new URL(self.location.origin);
   if (url.origin !== origin.origin) {
     return false;
   }
-  
-  return true;
+
+  // Don't cache HTML pages that might contain authentication state
+  if (request.url.endsWith('/') || request.url.match(/\/[^.]*$/)) {
+    return false;
+  }
+
+  // Only cache static assets
+  return request.url.includes('_next/static') ||
+         request.url.includes('/images/') ||
+         request.url.includes('/icons/') ||
+         request.url.endsWith('.png') ||
+         request.url.endsWith('.jpg') ||
+         request.url.endsWith('.jpeg') ||
+         request.url.endsWith('.svg') ||
+         request.url.endsWith('.ico') ||
+         request.url.endsWith('.webp') ||
+         request.url.endsWith('.css') ||
+         request.url.endsWith('.js') ||
+         request.url.endsWith('.woff') ||
+         request.url.endsWith('.woff2');
 }
 
 // Fetch event with extension filtering

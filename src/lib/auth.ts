@@ -5,16 +5,11 @@ import { logger } from './logger';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Create Supabase client with proper session persistence configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  }
-});
+// Import unified client instead of creating another instance
+import { createClientSupabase } from './supabase-client';
+
+// Use the unified client configuration
+export const supabase = createClientSupabase();
 
 // Debounce utility for authentication requests
 let authTimeout: NodeJS.Timeout | null = null;
