@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useState, useMemo } from 'react';
+import { ReactNode, useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext, User, signIn, signOut, signUp, resetPassword, updateProfile } from '@/lib/auth';
 import { clearAllCache, clearUserSpecificCache, hardNavigate } from '@/lib/cache-utils';
@@ -9,6 +9,8 @@ import { clearUserCache as clearTransportationCache } from '@/lib/features/trans
 import { clearUserCache as clearAccommodationCache } from '@/lib/features/accommodationSlice';
 import { clearUserCache as clearItineraryCache } from '@/lib/features/itinerarySlice';
 import { createClientSupabase } from '@/lib/supabase-client';
+import { useTokenRefresh } from '@/hooks/useTokenRefresh';
+import { useAuthMonitor } from '@/hooks/useAuthMonitor';
 import { logger } from '@/lib/logger';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -19,6 +21,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Use the proper Next.js Supabase client - memoize to prevent recreation
   const supabase = useMemo(() => createClientSupabase(), []);
+
+  // Keep track of current user ID to prevent unnecessary updates
+  const currentUserIdRef = useRef<string | null>(null);
+
+  // Stable user update function to prevent unnecessary re-renders
+  const updateUser = useCallback((newUser: User | null) => {
+    // Only update if the user ID actually changed
+    const newUserId = newUser?.id || null;
+    if (currentUserIdRef.current !== newUserId) {
+      currentUserIdRef.current = newUserId;
+      setUser(newUser);
+      logger.debug('AuthProvider user state updated', {
+        userId: newUserId?.slice(0, 8) || 'null',
+        hasProfile: !!newUser
+      });
+    }
+  }, []);
+
+  // Initialize proactive token refresh
+  const { refreshNow } = useTokenRefresh({
+    enabled: !!currentUserIdRef.current, // Use ref to avoid dependency changes
+    refreshThreshold: 300, // Refresh 5 minutes before expiration
+    onRefresh: (session) => {
+      logger.debug('Token refreshed in AuthProvider', {
+        userId: session?.user?.id?.slice(0, 8),
+        expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+      });
+      // Don't update user object on token refresh - it's the same user
+    },
+    onRefreshError: (error) => {
+      logger.error('Token refresh failed in AuthProvider', { error: error.message });
+      // Don't automatically sign out on refresh error - let user continue
+      // The next API call will handle the expired token appropriately
+    }
+  });
+
+  // Initialize authentication monitoring
+  const { getMetrics } = useAuthMonitor({
+    enableLogging: true,
+    trackSessionDuration: true,
+    onAuthIssue: (issue) => {
+      logger.warn('Authentication issue detected in AuthProvider', issue);
+
+      // Handle critical auth issues
+      if (issue.type === 'session_lost' || issue.type === 'token_expired') {
+        // Set error state to inform user
+        setError(new Error(issue.message));
+      }
+    }
+  });
 
   useEffect(() => {
     // Check if there's an active session
@@ -32,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (sessionError) {
           logger.error('Session error in checkSession', { error: sessionError.message });
-          setUser(null);
+          updateUser(null);
           setError(sessionError);
           setLoading(false);
           return;
@@ -84,19 +136,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             full_name: session.user.user_metadata?.full_name || session.user.email
           };
 
-          setUser(finalUser);
+          updateUser(finalUser);
           logger.debug('AuthProvider checkSession - User state SET', {
             userId: finalUser.id,
             hasProfile: !!profile
           });
         } else {
-          setUser(null);
+          updateUser(null);
           logger.debug('AuthProvider checkSession - User state SET to null');
         }
       } catch (error) {
         logger.error('Error checking session', { error: error.message });
         setError(error as Error);
-        setUser(null);
+        updateUser(null);
       } finally {
         setLoading(false);
       }
@@ -171,7 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             full_name: session.user.user_metadata?.full_name || session.user.email
           };
 
-          setUser(finalUser);
+          updateUser(finalUser);
           logger.debug('AuthProvider onAuthStateChange - User state SET', {
             userId: finalUser.id,
             hasProfile: !!profile
@@ -188,7 +240,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             clearAccommodationCache(user.id);
             clearItineraryCache(user.id);
           }
-          setUser(null);
+          updateUser(null);
           logger.debug('AuthProvider onAuthStateChange - User state SET to null');
         }
       } catch (error) {
@@ -257,14 +309,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   userId: data.user.id
                 });
                 // Set user state with basic info even if profile creation fails
-                setUser({
+                updateUser({
                   id: data.user.id,
                   email: data.user.email || '',
                 });
               } else {
                 logger.info('User profile created successfully', { userId: data.user.id });
                 // Set user state with the info used for creation
-                setUser({
+                updateUser({
                   id: data.user.id,
                   email: data.user.email || '',
                   full_name: data.user.user_metadata?.full_name || '',
@@ -277,14 +329,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 userId: data.user.id
               });
               // Set user state with basic info
-              setUser({
+              updateUser({
                 id: data.user.id,
                 email: data.user.email || '',
               });
             }
           } else {
             // Profile fetched successfully
-            setUser(profile);
+            updateUser(profile);
           }
           /* Original problematic insertion logic removed:
             const { error: insertError } = await supabase
@@ -299,7 +351,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
 
           // Fallback to basic user info
-          setUser({
+          updateUser({
             id: data.user.id,
             email: data.user.email || '',
           });
@@ -325,11 +377,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logger.info('AuthProvider - Signing out');
 
       // First set user to null to update UI immediately
-      setUser(null);
+      updateUser(null);
 
-      // Clear all cached data BEFORE calling signOut
+      // Clear all cached data BEFORE calling signOut (but preserve auth during transition)
       logger.debug('AuthProvider - Clearing all cached data');
-      await clearAllCache();
+      await clearAllCache(true); // Preserve auth tokens during cache clear
 
       // Then call the actual signOut function
       await signOut();
@@ -366,7 +418,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true);
       await updateProfile(data);
-      setUser(prev => prev ? { ...prev, ...data } : null);
+      if (user) {
+        updateUser({ ...user, ...data });
+      }
     } catch (error) {
       setError(error as Error);
       throw error;
@@ -377,7 +431,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Prefetch common routes when user is authenticated
   useEffect(() => {
-    if (user && !loading) {
+    if (user?.id && !loading) {
       try {
         // Manually prefetch important routes
         router.prefetch('/dashboard');
@@ -386,7 +440,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logger.error('Error prefetching routes', { error: error.message });
       }
     }
-  }, [user, loading, router]);
+  }, [user?.id, loading, router]); // Only depend on user ID
 
   // Only log in development
   if (process.env.NODE_ENV === 'development') {

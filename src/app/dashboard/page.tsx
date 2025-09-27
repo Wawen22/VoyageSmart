@@ -178,7 +178,7 @@ export default function Dashboard() { // RLS enabled test
       } catch (fetchError) {
         logger.error('Dashboard error loading trips', {
           error: fetchError instanceof Error ? fetchError.message : String(fetchError),
-          userId: user.id
+          userId: user?.id || 'unknown'
         });
         setError('Could not load your trips. Please try again later.');
         setTrips([]);
@@ -190,7 +190,7 @@ export default function Dashboard() { // RLS enabled test
     };
 
     fetchTrips();
-  }, [user]);
+  }, [user?.id, supabase]); // Only depend on user ID, not the entire user object
 
   // Pull-to-refresh function
   const handleRefresh = async () => {

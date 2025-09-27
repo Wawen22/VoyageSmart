@@ -43,9 +43,26 @@ export async function middleware(req: NextRequest) {
       res,
     });
 
-    // Always refresh session to ensure we have the latest state
-    // This is crucial for proper session persistence
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    // Get session and attempt refresh if needed for better persistence
+    let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    // If session is close to expiration, try to refresh it proactively
+    if (session?.expires_at) {
+      const timeUntilExpiration = session.expires_at - Math.floor(Date.now() / 1000);
+      const fiveMinutes = 5 * 60; // 5 minutes in seconds
+
+      if (timeUntilExpiration < fiveMinutes && timeUntilExpiration > 0) {
+        console.log('[Middleware] Token expiring soon, attempting refresh');
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+        if (!refreshError && refreshData.session) {
+          session = refreshData.session;
+          console.log('[Middleware] Token refreshed successfully');
+        } else {
+          console.warn('[Middleware] Token refresh failed:', refreshError);
+        }
+      }
+    }
 
     if (sessionError) {
       console.error('[Middleware] Session error:', sessionError);

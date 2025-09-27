@@ -1,24 +1,42 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from './logger';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Optimal auth configuration for session persistence
+const AUTH_CONFIG = {
+  storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  autoRefreshToken: true,
+  persistSession: true,
+  detectSessionInUrl: false, // Disable to prevent URL conflicts
+  flowType: 'pkce' as const,
+  // Add debug logging for auth events in development
+  debug: process.env.NODE_ENV === 'development'
+};
+
 /**
- * Client-side Supabase client with proper session management
+ * Client-side Supabase client with enhanced session management
  * Use this in client components and browser-side code
  */
 export const createClientSupabase = () => {
   // Don't use singleton to prevent session caching issues between users
   // Each call creates a fresh client that reads current session from localStorage
   const client = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: false, // Disable to prevent URL conflicts
-      flowType: 'pkce'
-    }
+    auth: AUTH_CONFIG
   });
+
+  // Add auth event logging in development
+  if (process.env.NODE_ENV === 'development') {
+    client.auth.onAuthStateChange((event, session) => {
+      logger.debug('Supabase auth state change', {
+        event,
+        hasSession: !!session,
+        userId: session?.user?.id?.slice(0, 8),
+        expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+      });
+    });
+  }
 
   return client;
 };
@@ -59,15 +77,10 @@ export const createServiceSupabase = () => {
 /**
  * Legacy client for backward compatibility
  * Gradually migrate to use the specific clients above
+ * @deprecated Use createClientSupabase() instead
  */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  }
+  auth: AUTH_CONFIG
 });
 
 // Export the client creation functions as default

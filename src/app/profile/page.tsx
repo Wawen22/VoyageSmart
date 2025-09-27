@@ -32,7 +32,7 @@ export default function Profile() {
         avatarUrl: user.avatar_url || '',
       });
     }
-  }, [user]);
+  }, [user?.id, user?.full_name, user?.avatar_url]); // Only depend on specific user properties
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

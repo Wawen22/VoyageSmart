@@ -3,23 +3,38 @@
  */
 
 /**
- * Clear all application-related data from localStorage
+ * Clear application-related data from localStorage while preserving authentication
+ * @param preserveAuth - Whether to preserve authentication tokens (default: true)
  */
-export function clearLocalStorage(): void {
+export function clearLocalStorage(preserveAuth: boolean = true): void {
   try {
     const localStorageKeys = Object.keys(localStorage);
-    const keysToRemove = localStorageKeys.filter(key =>
-      key.startsWith('supabase') ||
-      key.startsWith('chat_messages_') ||
-      key.startsWith('weather-') ||
-      key.startsWith('app-') ||
-      key.includes('cache') ||
-      key.includes('trip') ||
-      key.includes('auth') ||
-      key.includes('session') ||
-      // Remove user-specific cache keys (format: userId:key)
-      /^[a-f0-9-]{36}:/.test(key)
-    );
+
+    // Define keys to preserve for authentication
+    const authKeysToPreserve = preserveAuth ? [
+      'sb-ijtfwzxwthunsujobvsk-auth-token', // Supabase auth token
+      'supabase.auth.token', // Legacy auth token format
+    ] : [];
+
+    const keysToRemove = localStorageKeys.filter(key => {
+      // Preserve essential auth keys if requested
+      if (preserveAuth && authKeysToPreserve.some(authKey => key.includes(authKey))) {
+        return false;
+      }
+
+      // Remove application cache and non-essential data
+      return (
+        key.startsWith('chat_messages_') ||
+        key.startsWith('weather-') ||
+        key.startsWith('app-') ||
+        key.includes('cache') ||
+        key.includes('trip') ||
+        // Remove user-specific cache keys (format: userId:key)
+        /^[a-f0-9-]{36}:/.test(key) ||
+        // Remove non-auth supabase keys
+        (key.startsWith('supabase') && !authKeysToPreserve.some(authKey => key.includes(authKey)))
+      );
+    });
 
     keysToRemove.forEach(key => {
       localStorage.removeItem(key);
@@ -43,8 +58,10 @@ export function clearSessionStorage(): void {
 
 /**
  * Clear user-specific cache data when switching accounts
+ * @param userId - Specific user ID to clear cache for
+ * @param preserveAuth - Whether to preserve authentication tokens (default: true)
  */
-export function clearUserSpecificCache(userId?: string): void {
+export function clearUserSpecificCache(userId?: string, preserveAuth: boolean = true): void {
   try {
     // Clear sessionStorage (all user-specific data is stored here)
     sessionStorage.clear();
@@ -53,11 +70,24 @@ export function clearUserSpecificCache(userId?: string): void {
     const localStorageKeys = Object.keys(localStorage);
     const userPattern = userId ? new RegExp(`^${userId}:`) : /^[a-f0-9-]{36}:/;
 
-    const keysToRemove = localStorageKeys.filter(key =>
-      userPattern.test(key) ||
-      key.includes('trip') ||
-      key.includes('cache')
-    );
+    // Define auth keys to preserve
+    const authKeysToPreserve = preserveAuth ? [
+      'sb-ijtfwzxwthunsujobvsk-auth-token',
+      'supabase.auth.token',
+    ] : [];
+
+    const keysToRemove = localStorageKeys.filter(key => {
+      // Preserve auth keys if requested
+      if (preserveAuth && authKeysToPreserve.some(authKey => key.includes(authKey))) {
+        return false;
+      }
+
+      return (
+        userPattern.test(key) ||
+        key.includes('trip') ||
+        key.includes('cache')
+      );
+    });
 
     keysToRemove.forEach(key => {
       localStorage.removeItem(key);
@@ -134,14 +164,19 @@ export async function clearIndexedDB(): Promise<void> {
 
 /**
  * Clear all browser caches (localStorage, sessionStorage, IndexedDB)
+ * @param preserveAuth - Whether to preserve authentication tokens (default: false for complete reset)
  */
-export async function clearAllCache(): Promise<void> {
-  console.log('Starting complete cache clear...');
-  
-  clearLocalStorage();
+export async function clearAllCache(preserveAuth: boolean = false): Promise<void> {
+  console.log('Starting complete cache clear...', { preserveAuth });
+
+  clearLocalStorage(preserveAuth);
   clearSessionStorage();
-  await clearIndexedDB();
-  
+
+  // Only clear IndexedDB if not preserving auth
+  if (!preserveAuth) {
+    await clearIndexedDB();
+  }
+
   console.log('Complete cache clear finished');
 }
 

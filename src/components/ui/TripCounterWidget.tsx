@@ -47,7 +47,7 @@ export default function TripCounterWidget() {
     const interval = setInterval(fetchTripCounts, 30000);
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user?.id]); // Only depend on user ID
 
   // Handle info icon click
   const handleInfoClick = (e: React.MouseEvent) => {

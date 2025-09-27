@@ -129,7 +129,7 @@ export default function SubscriptionPage() {
     if (activeTab === 'history') {
       loadHistory();
     }
-  }, [user, activeTab, getSubscriptionHistory]);
+  }, [user?.id, activeTab, getSubscriptionHistory]); // Only depend on user ID
 
   if (!user) {
     return (

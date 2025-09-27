@@ -84,12 +84,12 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   // Carica la sottoscrizione all'avvio e quando l'utente cambia
   useEffect(() => {
     fetchSubscription();
-  }, [user]);
+  }, [user?.id]); // Only depend on user ID, not the entire user object
 
   // Aggiorna la sottoscrizione quando l'utente torna alla pagina
   useEffect(() => {
     const handleFocus = () => {
-      if (user) {
+      if (user?.id) {
         console.log('Window focused, refreshing subscription data');
         fetchSubscription();
       }
@@ -100,7 +100,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, [user]);
+  }, [user?.id]); // Only depend on user ID
 
   const isSubscribed = (tier: SubscriptionTier): boolean => {
     if (!subscription) return false;

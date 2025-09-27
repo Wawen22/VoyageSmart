@@ -149,7 +149,7 @@ export function useRolePermissions(tripId: string): UseRolePermissionsResult {
     };
 
     fetchUserRole();
-  }, [user, tripId]);
+  }, [user?.id, tripId]); // Only depend on user ID
 
   return {
     role,
