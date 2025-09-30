@@ -81,7 +81,11 @@ describe('ErrorBoundary', () => {
 
     it('should show error details in development mode', () => {
       const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'development'
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'development',
+        writable: true,
+        configurable: true
+      })
 
       render(
         <ErrorBoundary>
@@ -92,12 +96,20 @@ describe('ErrorBoundary', () => {
       expect(screen.getByText('Error Details (Development):')).toBeInTheDocument()
       expect(screen.getByText('Test error')).toBeInTheDocument()
 
-      process.env.NODE_ENV = originalEnv
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        writable: true,
+        configurable: true
+      })
     })
 
     it('should not show error details in production mode', () => {
       const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'production'
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        writable: true,
+        configurable: true
+      })
 
       render(
         <ErrorBoundary>
@@ -107,7 +119,11 @@ describe('ErrorBoundary', () => {
 
       expect(screen.queryByText('Error Details (Development):')).not.toBeInTheDocument()
 
-      process.env.NODE_ENV = originalEnv
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        writable: true,
+        configurable: true
+      })
     })
   })
 
@@ -188,7 +204,11 @@ describe('ErrorBoundary', () => {
   describe('Error Logging', () => {
     it('should log errors to console in development', () => {
       const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'development'
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'development',
+        writable: true,
+        configurable: true
+      })
 
       render(
         <ErrorBoundary>
@@ -204,12 +224,20 @@ describe('ErrorBoundary', () => {
         })
       )
 
-      process.env.NODE_ENV = originalEnv
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        writable: true,
+        configurable: true
+      })
     })
 
     it('should log errors for production monitoring', () => {
       const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'production'
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        writable: true,
+        configurable: true
+      })
 
       render(
         <ErrorBoundary>
@@ -225,7 +253,11 @@ describe('ErrorBoundary', () => {
         })
       )
 
-      process.env.NODE_ENV = originalEnv
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        writable: true,
+        configurable: true
+      })
     })
   })
 })

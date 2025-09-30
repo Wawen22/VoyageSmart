@@ -211,7 +211,7 @@ export default function DaySchedule({
                   </Button>
 
                   <Button
-                    variant="primary"
+                    variant="default"
                     size="sm"
                     className="h-8 text-xs"
                     onClick={() => onAddActivity(day.id)}

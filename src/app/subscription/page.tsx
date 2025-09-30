@@ -40,6 +40,21 @@ export default function SubscriptionPage() {
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Function to load subscription history
+  const loadHistory = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      const historyData = await getSubscriptionHistory();
+      setHistory(historyData);
+    } catch (error) {
+      console.error('Error loading subscription history:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Log per debug
   useEffect(() => {
     if (subscription) {
@@ -112,24 +127,10 @@ export default function SubscriptionPage() {
 
   // Carica la cronologia delle sottoscrizioni
   useEffect(() => {
-    const loadHistory = async () => {
-      if (!user) return;
-
-      try {
-        setLoading(true);
-        const historyData = await getSubscriptionHistory();
-        setHistory(historyData);
-      } catch (error) {
-        console.error('Error loading subscription history:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (activeTab === 'history') {
       loadHistory();
     }
-  }, [user?.id, activeTab, getSubscriptionHistory]); // Only depend on user ID
+  }, [user?.id, activeTab]); // Only depend on user ID
 
   if (!user) {
     return (

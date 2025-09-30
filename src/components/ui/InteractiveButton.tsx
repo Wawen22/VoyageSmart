@@ -11,7 +11,7 @@ interface InteractiveButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
   loading?: boolean;
   success?: boolean;
   error?: boolean;
-  feedbackType?: 'ripple' | 'pulse' | 'bounce' | 'glow' | 'none';
+  feedbackType?: 'ripple' | 'pulse' | 'bounce' | 'glow' | 'shake' | 'none';
   feedbackColor?: string;
   children: React.ReactNode;
   className?: string;
@@ -91,6 +91,8 @@ export default function InteractiveButton({
         return 'animate-bounce-once';
       case 'glow':
         return 'animate-card-glow';
+      case 'shake':
+        return 'animate-shake';
       default:
         return '';
     }

@@ -87,8 +87,7 @@ export default function ActivityTimeline({
     try {
       const date = new Date(dateString);
       return format(date, 'EEE d MMM', {
-        locale: it,
-        timeZone: 'Europe/Rome' // Ensure Italian timezone
+        locale: it
       });
     } catch (e) {
       return dateString;

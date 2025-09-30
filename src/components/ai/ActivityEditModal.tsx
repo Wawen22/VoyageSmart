@@ -315,9 +315,8 @@ export default function ActivityEditModal({
                 <Select
                   value={formData.currency || 'EUR'}
                   onValueChange={(value) => handleSelectChange('currency', value)}
-                  className="w-[40%]"
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-[40%]">
                     <SelectValue placeholder="Valuta" />
                   </SelectTrigger>
                   <SelectContent>

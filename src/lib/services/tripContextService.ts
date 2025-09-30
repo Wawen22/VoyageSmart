@@ -521,25 +521,37 @@ export async function getTripContext(tripId: string) {
         });
 
         // Process expenses with their participants
-        tripContext.expenses = expenses.map(expense => ({
-          id: expense.id,
-          category: expense.category,
-          amount: expense.amount,
-          currency: expense.currency,
-          date: expense.date,
-          description: expense.description,
-          paid_by: expense.paid_by,
-          paid_by_name: expense.users?.full_name || 'Sconosciuto',
-          split_type: expense.split_type,
-          status: expense.status,
-          created_at: expense.created_at,
-          participants: (participantsByExpense[expense.id] || []).map(p => ({
-            user_id: p.user_id,
-            amount: p.amount,
-            is_paid: p.is_paid,
-            full_name: p.users?.full_name || 'Sconosciuto'
-          }))
-        }));
+        tripContext.expenses = expenses.map(expense => {
+          // Handle users field which could be an object or array
+          const userFullName = Array.isArray(expense.users)
+            ? expense.users[0]?.full_name
+            : expense.users?.full_name;
+
+          return {
+            id: expense.id,
+            category: expense.category,
+            amount: expense.amount,
+            currency: expense.currency,
+            date: expense.date,
+            description: expense.description,
+            paid_by: expense.paid_by,
+            paid_by_name: userFullName || 'Sconosciuto',
+            split_type: expense.split_type,
+            status: expense.status,
+            created_at: expense.created_at,
+            participants: (participantsByExpense[expense.id] || []).map(p => {
+              const participantFullName = Array.isArray(p.users)
+                ? p.users[0]?.full_name
+                : p.users?.full_name;
+              return {
+                user_id: p.user_id,
+                amount: p.amount,
+                is_paid: p.is_paid,
+                full_name: participantFullName || 'Sconosciuto'
+              };
+            })
+          };
+        });
 
         // Calculate balances and settlements
         const { balances, settlements } = calculateExpenseBalances(tripContext.expenses, tripContext.participants);

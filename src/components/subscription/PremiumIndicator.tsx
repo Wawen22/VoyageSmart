@@ -102,7 +102,8 @@ export default function PremiumIndicator({
     if (showModal) {
       showModal();
     } else {
-      upgradeSubscription();
+      // Default to premium tier for upgrade
+      upgradeSubscription('premium');
     }
   };
 

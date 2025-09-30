@@ -9,6 +9,10 @@ logger.debug('Weather API Key configured', { configured: !!WEATHER_API_KEY });
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 export interface WeatherData {
+  coord: {
+    lon: number;
+    lat: number;
+  };
   main: {
     temp: number;
     feels_like: number;
@@ -30,6 +34,7 @@ export interface WeatherData {
   clouds: {
     all: number;
   };
+  visibility?: number;
   name: string;
   dt: number; // Time of data calculation, unix, UTC
   sys: {

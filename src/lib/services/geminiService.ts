@@ -7,7 +7,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 // Funzione per generare una risposta dal modello Gemini
 export async function generateChatResponse(
   prompt: string,
-  history: { role: 'user' | 'model', parts: string }[] = [],
+  history: { role: 'user' | 'model', parts: { text: string }[] }[] = [],
   tripContext?: any
 ) {
   try {

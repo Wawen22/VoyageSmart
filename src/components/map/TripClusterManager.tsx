@@ -40,11 +40,11 @@ export default function TripClusterManager({
       if (cluster.trips.length === 1) {
         // Single trip marker
         const trip = cluster.trips[0];
-        const marker = createSingleTripMarker(trip, mapboxgl, onTripClick);
+        const marker = createSingleTripMarker(trip, map, mapboxgl, onTripClick);
         clustersRef.current.push(marker);
       } else {
         // Cluster marker
-        const clusterMarker = createClusterMarker(cluster, mapboxgl, onClusterClick);
+        const clusterMarker = createClusterMarker(cluster, map, mapboxgl, onClusterClick);
         clustersRef.current.push(clusterMarker);
       }
     });
@@ -113,7 +113,7 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c;
 }
 
-function createSingleTripMarker(trip: Trip, mapboxgl: any, onTripClick: (trip: Trip) => void) {
+function createSingleTripMarker(trip: Trip, map: any, mapboxgl: any, onTripClick: (trip: Trip) => void) {
   const el = document.createElement('div');
   el.className = 'trip-marker';
   
@@ -137,7 +137,7 @@ function createSingleTripMarker(trip: Trip, mapboxgl: any, onTripClick: (trip: T
     .addTo(map);
 }
 
-function createClusterMarker(cluster: Cluster, mapboxgl: any, onClusterClick: (clusterId: string, coordinates: [number, number]) => void) {
+function createClusterMarker(cluster: Cluster, map: any, mapboxgl: any, onClusterClick: (clusterId: string, coordinates: [number, number]) => void) {
   const el = document.createElement('div');
   el.className = 'cluster-marker';
   

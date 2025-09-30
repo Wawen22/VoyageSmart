@@ -108,15 +108,6 @@ class Logger {
     }
   }
 
-  private getStoredErrors(): LogEntry[] {
-    try {
-      const stored = localStorage.getItem('app-errors');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  }
-
   debug(message: string, context?: Record<string, any>): void {
     if (!this.isDevelopment) return;
     

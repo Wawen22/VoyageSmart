@@ -272,7 +272,7 @@ export default function MobileCalendarView({
               </Button>
 
               <Button
-                variant="primary"
+                variant="default"
                 size="sm"
                 onClick={() => onAddActivity(selectedItineraryDay.id)}
                 className="text-xs"

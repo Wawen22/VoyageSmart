@@ -105,29 +105,31 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const isSubscribed = (tier: SubscriptionTier): boolean => {
     if (!subscription) return false;
 
+    const currentTier = subscription.tier as SubscriptionTier;
+
     // If user has premium, they have access to all tiers below it
-    if (subscription.tier === 'premium' && (tier === 'premium' || tier === 'free')) {
+    if (currentTier === 'premium' && (tier === 'premium' || tier === 'free')) {
       return true;
     }
 
     // If user has AI tier, they have access to all tiers
-    if (subscription.tier === 'ai') {
+    if (currentTier === 'ai') {
       return true;
     }
 
     // Se la sottoscrizione è stata cancellata ma è ancora nel periodo pagato
     // l'utente mantiene l'accesso al tier corrente
     if (subscription.cancelAtPeriodEnd) {
-      if (subscription.tier === 'premium' && (tier === 'premium' || tier === 'free')) {
+      if (currentTier === 'premium' && (tier === 'premium' || tier === 'free')) {
         return true;
       }
-      if (subscription.tier === 'ai') {
+      if (currentTier === 'ai') {
         return true;
       }
     }
 
     // Otherwise, check if the user's tier matches the requested tier
-    return subscription.tier === tier;
+    return currentTier === tier;
   };
 
   const canCreateTrip = async (): Promise<boolean> => {
@@ -147,15 +149,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     // Se non c'è sottoscrizione, solo accesso alle funzionalità free
     if (!subscription) return false;
 
+    const currentTier = subscription.tier as SubscriptionTier;
+
     // Per le funzionalità AI, solo gli utenti con piano AI hanno accesso
     if (feature === 'ai_assistant') {
       // Se l'utente ha il piano AI, ha accesso
-      if (subscription.tier === 'ai') {
+      if (currentTier === 'ai') {
         return true;
       }
 
       // Se la sottoscrizione AI è stata cancellata ma è ancora nel periodo pagato
-      if (subscription.cancelAtPeriodEnd && subscription.tier === 'ai') {
+      if (subscription.cancelAtPeriodEnd && currentTier === 'ai') {
         return true;
       }
 

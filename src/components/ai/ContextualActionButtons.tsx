@@ -15,7 +15,10 @@ import {
   Plus,
   BarChart3,
   Settings,
-  CheckCircle
+  CheckCircle,
+  Utensils,
+  Camera,
+  Sun
 } from 'lucide-react';
 
 export interface ContextualAction {

@@ -1,33 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { supabase } from '@/lib/supabase';
+import type { Activity, ItineraryDay } from '@/lib/types';
 
-// Types
-export type Activity = {
-  id: string;
-  trip_id: string;
-  day_id: string;
-  name: string;
-  type: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  location: string | null;
-  booking_reference: string | null;
-  priority: number;
-  cost: number | null;
-  currency: string;
-  notes: string | null;
-  status: string;
-};
-
-export type ItineraryDay = {
-  id: string;
-  trip_id: string;
-  day_date: string;
-  notes: string | null;
-  weather_forecast: any | null;
-  created_at: string;
-  updated_at: string;
-};
+// Re-export types for backward compatibility
+export type { Activity, ItineraryDay };
 
 // State interface
 interface ItineraryState {

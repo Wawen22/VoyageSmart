@@ -143,8 +143,8 @@ export default function ThemeSelector({ className = '', compact = false }: Theme
 
 // Quick theme switcher for header
 export function QuickThemeSwitch({ className = '' }: { className?: string }) {
-  const { currentTheme, changeTheme } = useTheme();
-  
+  const { currentTheme, themes, changeTheme } = useTheme();
+
   const nextTheme = (): ThemeVariant => {
     const themeKeys = Object.keys(themes) as ThemeVariant[];
     const currentIndex = themeKeys.indexOf(currentTheme);

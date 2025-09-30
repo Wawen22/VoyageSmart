@@ -31,42 +31,7 @@ import {
   WeatherData as OpenWeatherData
 } from '@/lib/services/weatherService';
 import ClientOnly from '@/components/ui/ClientOnly';
-
-interface WeatherData {
-  location: string;
-  temperature: number;
-  condition: string;
-  humidity: number;
-  windSpeed: number;
-  visibility: number;
-  icon: string;
-  coordinates?: {
-    lat: number;
-    lon: number;
-  };
-  lastUpdated: number;
-  description?: string;
-}
-
-interface LocationState {
-  hasPermission: boolean | null;
-  isLoading: boolean;
-  error: string | null;
-  coordinates: {
-    lat: number;
-    lon: number;
-  } | null;
-  selectedLocation: string | null;
-  locationType: 'gps' | 'manual';
-}
-
-interface CitySuggestion {
-  name: string;
-  country: string;
-  state?: string;
-  lat: number;
-  lon: number;
-}
+import type { WeatherData, LocationState, CitySuggestion } from '@/lib/types/weather';
 
 // Comprehensive city database for intelligent suggestions
 const CITIES_DATABASE: CitySuggestion[] = [

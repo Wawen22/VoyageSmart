@@ -452,7 +452,11 @@ export default function NewTrip() {
                       </div>
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">Destination</dt>
-                        <dd className="text-sm text-foreground">{formData.destination || 'Not specified'}</dd>
+                        <dd className="text-sm text-foreground">
+                          {formData.destinations.primary?.name ||
+                           formData.destinations.destinations[0]?.name ||
+                           'Not specified'}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">Dates</dt>

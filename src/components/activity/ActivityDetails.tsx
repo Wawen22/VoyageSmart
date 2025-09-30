@@ -54,8 +54,7 @@ export default function ActivityDetails({ activity, onEdit, onClose }: ActivityD
     try {
       const date = parseISO(dateString);
       return format(date, 'EEEE d MMMM yyyy', {
-        locale: it,
-        timeZone: 'Europe/Rome' // Ensure Italian timezone
+        locale: it
       });
     } catch (e) {
       return 'Invalid date';
@@ -66,9 +65,7 @@ export default function ActivityDetails({ activity, onEdit, onClose }: ActivityD
     if (!timeString) return '';
     try {
       const date = parseISO(timeString);
-      return format(date, 'HH:mm', {
-        timeZone: 'Europe/Rome' // Ensure Italian timezone
-      });
+      return format(date, 'HH:mm');
     } catch (e) {
       return timeString;
     }

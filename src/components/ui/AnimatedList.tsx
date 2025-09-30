@@ -103,7 +103,9 @@ export default function AnimatedList({
     <div className={className} ref={listRef}>
       {React.Children.map(children, (child, index) => (
         <div
-          ref={(el) => (itemRefs.current[index] = el)}
+          ref={(el) => {
+            itemRefs.current[index] = el;
+          }}
           className={`${getAnimationClass(visibleItems[index], index)} ${itemClassName}`}
           style={{
             transitionDelay: `${initialDelay + index * staggerDelay}ms`,

@@ -28,7 +28,8 @@ export default function MapboxWrapper({ children, fallback }: MapboxWrapperProps
       const loadMapbox = async () => {
         try {
           const mapboxModule = await import('mapbox-gl');
-          await import('mapbox-gl/dist/mapbox-gl.css');
+          // CSS is imported via global styles instead
+          // await import('mapbox-gl/dist/mapbox-gl.css');
 
           // Set the access token
           mapboxModule.default.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';

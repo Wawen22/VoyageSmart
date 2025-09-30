@@ -116,7 +116,7 @@ export default function TransportationDetailsModal({
                 </DialogTitle>
                 <div className="flex items-center space-x-2 mt-1">
                   {transportation.status && (
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusBadgeVariant(transportation.status) === 'default' ? 'bg-sky-500/20 text-sky-600 border-sky-500/30' : 'bg-green-500/20 text-green-600 border-green-500/30'}`}>
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusBadgeVariant(transportation.status) === 'success' ? 'bg-green-500/20 text-green-600 border-green-500/30' : 'bg-sky-500/20 text-sky-600 border-sky-500/30'}`}>
                       {getStatusLabel(transportation.status)}
                     </span>
                   )}
