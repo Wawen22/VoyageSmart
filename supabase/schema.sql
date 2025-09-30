@@ -240,28 +240,19 @@ CREATE POLICY "Trip owners can delete their trips"
 -- Trip participants policies
 ALTER TABLE public.trip_participants ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can view participants of trips they are involved in" ON public.trip_participants;
--- Simplified Policy: Allows viewing if user owns the trip OR is the participant being viewed.
-CREATE POLICY "Users can view participants of trips they are involved in"
-  ON public.trip_participants FOR SELECT
+DROP POLICY IF EXISTS "trip_participants_access" ON public.trip_participants;
+-- Fixed Policy: Allows ALL accepted participants to see each other and perform operations
+-- Uses SECURITY DEFINER function is_trip_participant() to avoid infinite recursion
+CREATE POLICY "trip_participants_access"
+  ON public.trip_participants FOR ALL
   USING (
-    -- User is the owner of the trip
+    -- User is the owner of the trip (can see and manage all participants)
     EXISTS (
       SELECT 1 FROM public.trips t
       WHERE t.id = public.trip_participants.trip_id AND t.owner_id = auth.uid()
     ) OR
-    -- User is the participant being viewed
-    public.trip_participants.user_id = auth.uid()
-  );
-
-DROP POLICY IF EXISTS "Trip owners can manage participants" ON public.trip_participants;
-CREATE POLICY "Trip owners can manage participants"
-  ON public.trip_participants FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.trips t
-      WHERE t.id = public.trip_participants.trip_id AND t.owner_id = auth.uid()
-    )
+    -- User is an accepted participant of the trip (uses SECURITY DEFINER function)
+    is_trip_participant(trip_participants.trip_id, auth.uid())
   );
 
 -- Apply similar RLS policies to other tables (Assuming they might also need DROP IF EXISTS)

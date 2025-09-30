@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
@@ -291,6 +291,121 @@ export default function ExpensesPage() {
     fetchTripDetails();
   }, [id, user]);
 
+  // Helper function to refresh expenses data - wrapped in useCallback for real-time subscription
+  const refreshExpenses = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      const { data: updatedExpenses, error: fetchError } = await supabase
+        .from('expenses')
+        .select(`
+          *,
+          users!inner(*),
+          expense_participants(
+            user_id,
+            amount,
+            is_paid,
+            users(*)
+          )
+        `)
+        .eq('trip_id', id)
+        .order('date', { ascending: false });
+
+      if (fetchError) throw fetchError;
+
+      // Format expenses data
+      const formattedExpenses: Expense[] = (updatedExpenses || []).map((e: any) => ({
+        id: e.id,
+        trip_id: e.trip_id,
+        category: e.category,
+        amount: e.amount,
+        currency: e.currency,
+        date: e.date,
+        description: e.description,
+        paid_by: e.paid_by,
+        split_type: e.split_type,
+        receipt_url: e.receipt_url,
+        status: e.status,
+        created_at: e.created_at,
+        updated_at: e.updated_at,
+        paid_by_name: e.users.full_name,
+        participants: (e.expense_participants || []).map((p: any) => ({
+          user_id: p.user_id,
+          amount: p.amount,
+          is_paid: p.is_paid,
+          full_name: p.users.full_name
+        }))
+      }));
+
+      setExpenses(formattedExpenses);
+
+      // Recalculate balances
+      calculateBalances(formattedExpenses, participants);
+
+      // Invalidate cache
+      try {
+        if (user) {
+          const expensesCacheKey = `${user.id}:expenses_data_${id}`;
+          sessionStorage.removeItem(expensesCacheKey);
+        }
+      } catch (e) {
+        console.error('Error invalidating cache:', e);
+      }
+
+      return formattedExpenses;
+    } catch (error) {
+      console.error('Error refreshing expenses:', error);
+      throw error;
+    }
+  }, [id, participants, user]);
+
+  // Real-time subscription for expenses - ensures all users see the same balances and settlements
+  useEffect(() => {
+    if (!user || !id) return;
+
+    console.log('[Expenses] Setting up real-time subscription for trip:', id);
+
+    // Set up real-time subscription for expenses and expense_participants
+    const expensesChannel = supabase
+      .channel(`trip-expenses-realtime-${id}`)
+      .on('postgres_changes', {
+        event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+        schema: 'public',
+        table: 'expenses',
+        filter: `trip_id=eq.${id}`
+      }, async (payload) => {
+        console.log('[Expenses] Expense change detected:', payload.eventType, payload);
+        // Refresh expenses when any change occurs
+        try {
+          await refreshExpenses();
+        } catch (error) {
+          console.error('[Expenses] Error refreshing after expense change:', error);
+        }
+      })
+      .on('postgres_changes', {
+        event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+        schema: 'public',
+        table: 'expense_participants'
+      }, async (payload) => {
+        console.log('[Expenses] Expense participant change detected:', payload.eventType, payload);
+        // Refresh expenses when participant splits change
+        try {
+          await refreshExpenses();
+        } catch (error) {
+          console.error('[Expenses] Error refreshing after participant change:', error);
+        }
+      })
+      .subscribe((status) => {
+        console.log('[Expenses] Subscription status:', status);
+      });
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('[Expenses] Cleaning up real-time subscription');
+      expensesChannel.unsubscribe();
+    };
+  }, [id, user, refreshExpenses]);
+
   const calculateBalances = (expenses: Expense[], participants: Participant[]) => {
     // Initialize balances for all participants
     const balanceMap = new Map<string, number>();
@@ -333,42 +448,57 @@ export default function ExpensesPage() {
   };
 
   const calculateSettlements = (balances: Balance[]) => {
-    // Separate positive (creditors) and negative (debtors) balances
-    const creditors = balances.filter(b => b.balance > 0).sort((a, b) => b.balance - a.balance);
-    const debtors = balances.filter(b => b.balance < 0).sort((a, b) => a.balance - b.balance);
+    // Create deep copies to avoid mutating the original balances
+    // This ensures consistent settlement calculations for all users
+    const creditors = balances
+      .filter(b => b.balance > 0)
+      .map(b => ({ ...b, balance: b.balance })) // Deep copy
+      .sort((a, b) => b.balance - a.balance);
+
+    const debtors = balances
+      .filter(b => b.balance < 0)
+      .map(b => ({ ...b, balance: Math.abs(b.balance) })) // Deep copy with absolute value
+      .sort((a, b) => b.balance - a.balance); // Sort by largest debt first
 
     const settlements: Settlement[] = [];
 
-    // Process each debtor in order
+    // Process each debtor in order (largest debts first for consistency)
     debtors.forEach(debtor => {
-      const debtorSettlements: Settlement[] = [];
-      let remainingDebt = Math.abs(debtor.balance);
+      let remainingDebt = debtor.balance;
 
       // Find all creditors this debtor needs to pay
-      while (remainingDebt > 0.01 && creditors.length > 0) {
-        const creditor = creditors[0];
-        const paymentAmount = Math.min(remainingDebt, creditor.balance);
+      for (let i = 0; i < creditors.length && remainingDebt > 0.01; i++) {
+        const creditor = creditors[i];
 
-        if (paymentAmount > 0.01) {
-          debtorSettlements.push({
-            from_id: debtor.user_id,
-            from_name: debtor.full_name,
-            to_id: creditor.user_id,
-            to_name: creditor.full_name,
-            amount: parseFloat(paymentAmount.toFixed(2)),
-          });
+        if (creditor.balance > 0.01) {
+          const paymentAmount = Math.min(remainingDebt, creditor.balance);
 
-          remainingDebt -= paymentAmount;
-          creditor.balance -= paymentAmount;
+          if (paymentAmount > 0.01) {
+            settlements.push({
+              from_id: debtor.user_id,
+              from_name: debtor.full_name,
+              to_id: creditor.user_id,
+              to_name: creditor.full_name,
+              amount: parseFloat(paymentAmount.toFixed(2)),
+            });
 
-          if (creditor.balance < 0.01) {
-            creditors.shift();
+            remainingDebt -= paymentAmount;
+            creditor.balance -= paymentAmount;
           }
         }
       }
+    });
 
-      // Add all settlements for this debtor
-      settlements.push(...debtorSettlements);
+    // Sort settlements for consistent display order across all users
+    // Sort by: 1) from_name, 2) to_name, 3) amount
+    settlements.sort((a, b) => {
+      if (a.from_name !== b.from_name) {
+        return a.from_name.localeCompare(b.from_name);
+      }
+      if (a.to_name !== b.to_name) {
+        return a.to_name.localeCompare(b.to_name);
+      }
+      return b.amount - a.amount;
     });
 
     setSettlements(settlements);
@@ -433,70 +563,6 @@ export default function ExpensesPage() {
       setError('Failed to add expense. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Helper function to refresh expenses data
-  const refreshExpenses = async () => {
-    try {
-      const { data: updatedExpenses, error: fetchError } = await supabase
-        .from('expenses')
-        .select(`
-          *,
-          users!inner(*),
-          expense_participants(
-            user_id,
-            amount,
-            is_paid,
-            users(*)
-          )
-        `)
-        .eq('trip_id', id)
-        .order('date', { ascending: false });
-
-      if (fetchError) throw fetchError;
-
-      // Format expenses data
-      const formattedExpenses: Expense[] = (updatedExpenses || []).map((e: any) => ({
-        id: e.id,
-        trip_id: e.trip_id,
-        category: e.category,
-        amount: e.amount,
-        currency: e.currency,
-        date: e.date,
-        description: e.description,
-        paid_by: e.paid_by,
-        split_type: e.split_type,
-        receipt_url: e.receipt_url,
-        status: e.status,
-        created_at: e.created_at,
-        updated_at: e.updated_at,
-        paid_by_name: e.users.full_name,
-        participants: (e.expense_participants || []).map((p: any) => ({
-          user_id: p.user_id,
-          amount: p.amount,
-          is_paid: p.is_paid,
-          full_name: p.users.full_name
-        }))
-      }));
-
-      setExpenses(formattedExpenses);
-
-      // Recalculate balances
-      calculateBalances(formattedExpenses, participants);
-
-      // Invalidate cache
-      try {
-        const expensesCacheKey = `expenses_data_${id}`;
-        sessionStorage.removeItem(expensesCacheKey);
-      } catch (e) {
-        console.error('Error invalidating cache:', e);
-      }
-
-      return formattedExpenses;
-    } catch (error) {
-      console.error('Error refreshing expenses:', error);
-      throw error;
     }
   };
 

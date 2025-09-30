@@ -9,7 +9,8 @@ import { useSubscription } from '@/lib/subscription';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 import TripCounterWidget from '@/components/ui/TripCounterWidget';
-import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon, ShieldIcon, UsersIcon, BookOpenIcon } from 'lucide-react';
+import UnreadBadge from '@/components/chat/UnreadBadge';
+import { HomeIcon, PlusCircleIcon, UserIcon, TagIcon, ShieldIcon, UsersIcon, BookOpenIcon, MessageCircleIcon } from 'lucide-react';
 
 export default function Navbar() {
   const { user, signOut } = useAuth();
@@ -18,6 +19,10 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Check if we're in a trip detail page and extract tripId
+  const isTripPage = pathname.includes('/trips/') && pathname !== '/trips/new';
+  const tripId = isTripPage ? pathname.split('/')[2] : null;
 
   // Close menu when clicking outside (hydration-safe)
   useEffect(() => {
@@ -455,6 +460,27 @@ export default function Navbar() {
                     <BookOpenIcon className="h-4 w-4" />
                     Documentation
                   </Link>
+
+                  {/* Group Chat - Only show when viewing a trip */}
+                  {tripId && (
+                    <Link
+                      href={`/trips/${tripId}/chat`}
+                      className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors relative ${
+                        pathname.includes('/chat') ? 'text-primary bg-muted' : 'text-foreground'
+                      }`}
+                      onClick={(e) => {
+                        // Allow the navigation to happen first
+                        setTimeout(() => setIsProfileMenuOpen(false), 0);
+                      }}
+                    >
+                      <MessageCircleIcon className="h-4 w-4" />
+                      <span>Group Chat</span>
+                      {/* Unread Badge */}
+                      <div className="ml-auto">
+                        <UnreadBadge tripId={tripId} />
+                      </div>
+                    </Link>
+                  )}
 
                   {isAdmin && !isAdminLoading && (
                     <Link

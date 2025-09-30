@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useSubscription } from '@/lib/subscription';
+import UnreadBadge from '@/components/chat/UnreadBadge';
 import {
   HomeIcon,
   PlusCircleIcon,
@@ -149,6 +150,10 @@ export default function MobileNavbar() {
             <MessageCircleIcon className={`h-5 w-5 transition-colors duration-300 ${
               isChatPage ? 'text-violet-500' : 'text-violet-400 group-hover:text-violet-500'
             }`} />
+            {/* Unread Badge */}
+            <div className="absolute -top-1 -right-1">
+              <UnreadBadge tripId={tripId as string} />
+            </div>
           </div>
           {isChatPage && (
             <div className="absolute -bottom-1 w-1 h-1 bg-violet-500 rounded-full animate-pulse"></div>
