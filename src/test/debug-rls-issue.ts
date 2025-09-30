@@ -114,9 +114,15 @@ export async function debugRLSIssue() {
   
   // Step 6: Recommendations
   console.log('\n--- Step 6: Recommendations ---');
-  
-  const { data: dbUid } = await supabase.rpc('test_auth_uid').catch(() => ({ data: null }));
-  
+
+  let dbUid = null;
+  try {
+    const result = await supabase.rpc('test_auth_uid');
+    dbUid = result.data;
+  } catch (error) {
+    dbUid = null;
+  }
+
   if (dbUid === null) {
     console.log('🔧 SOLUTION: Fix JWT token passing to database');
     console.log('   - Check Supabase client configuration');

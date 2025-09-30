@@ -3,7 +3,7 @@
  * This test verifies that the cache keys are user-specific and prevent data leakage
  */
 
-import { OptimizedSupabaseService } from '@/lib/services/optimizedSupabaseService';
+import OptimizedSupabaseService from '@/lib/services/optimizedSupabaseService';
 import { tripCache, userCache } from '@/lib/services/cacheService';
 import { clearUserSpecificCache } from '@/lib/cache-utils';
 

@@ -60,7 +60,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         // Imposta una sottoscrizione predefinita in memoria per evitare errori
         setSubscription({
           id: 'temp-' + Date.now(),
-          tier: 'free',
+          tier: 'free' as SubscriptionTier,
           status: 'active',
           validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         });
@@ -72,7 +72,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       // Imposta una sottoscrizione predefinita in memoria per evitare errori
       setSubscription({
         id: 'temp-' + Date.now(),
-        tier: 'free',
+        tier: 'free' as SubscriptionTier,
         status: 'active',
         validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       });
@@ -105,7 +105,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const isSubscribed = (tier: SubscriptionTier): boolean => {
     if (!subscription) return false;
 
-    const currentTier = subscription.tier as SubscriptionTier;
+    // Force TypeScript to recognize all possible tier values including 'ai'
+    const currentTier = subscription.tier as 'free' | 'premium' | 'ai';
 
     // If user has premium, they have access to all tiers below it
     if (currentTier === 'premium' && (tier === 'premium' || tier === 'free')) {
@@ -149,7 +150,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     // Se non c'è sottoscrizione, solo accesso alle funzionalità free
     if (!subscription) return false;
 
-    const currentTier = subscription.tier as SubscriptionTier;
+    // Force TypeScript to recognize all possible tier values including 'ai'
+    const currentTier = subscription.tier as 'free' | 'premium' | 'ai';
 
     // Per le funzionalità AI, solo gli utenti con piano AI hanno accesso
     if (feature === 'ai_assistant') {
