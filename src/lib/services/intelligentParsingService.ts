@@ -350,6 +350,8 @@ export function intelligentParse(input: string, fieldType: string): {
   value: any;
   confidence: number;
   suggestion?: string;
+  additionalData?: any;
+  error?: string;
 } {
   const cleanInput = input.trim();
   

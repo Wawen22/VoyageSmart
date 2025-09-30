@@ -7,6 +7,7 @@ import {
   ConversationContext,
   AccommodationData,
   AccommodationField,
+  ConversationField,
   getConversationContext,
   updateConversationContext,
   startAccommodationCollection,
@@ -24,9 +25,9 @@ export interface ConversationResponse {
   message: string;
   shouldContinue: boolean;
   context?: ConversationContext;
-  action?: 'save_accommodation' | 'cancel' | 'retry';
-  data?: AccommodationData;
-  uiComponent?: 'date_selector' | 'type_selector' | 'currency_selector' | 'confirmation_buttons' | 'data_summary';
+  action?: 'save_accommodation' | 'save_transportation' | 'cancel' | 'retry';
+  data?: AccommodationData | any;
+  uiComponent?: 'date_selector' | 'type_selector' | 'currency_selector' | 'confirmation_buttons' | 'data_summary' | 'field_with_cancel' | 'transportation_summary_with_continue' | 'transportation_final_summary';
   uiProps?: any;
 }
 
@@ -467,7 +468,7 @@ export function getConversationStatus(tripId: string, userId: string): {
 /**
  * Ottiene il tipo di campo per il parsing intelligente
  */
-function getFieldType(field: AccommodationField): string {
+function getFieldType(field: ConversationField): string {
   switch (field) {
     case 'check_in_date':
     case 'check_out_date':
@@ -480,6 +481,12 @@ function getFieldType(field: AccommodationField): string {
       return 'number';
     case 'contact_info':
       return 'contact';
+    case 'departure_time':
+    case 'arrival_time':
+      return 'datetime';
+    case 'departure_location':
+    case 'arrival_location':
+      return 'location';
     default:
       return 'text';
   }
@@ -488,7 +495,21 @@ function getFieldType(field: AccommodationField): string {
 /**
  * Genera un prompt con componenti UI appropriati per il campo
  */
-function getFieldPromptWithUI(field: AccommodationField, error?: string): ConversationResponse {
+function getFieldPromptWithUI(field: ConversationField, error?: string): ConversationResponse {
+  // Type guard to check if field is an AccommodationField
+  const isAccommodationField = (f: ConversationField): f is AccommodationField => {
+    return ['name', 'type', 'check_in_date', 'check_out_date', 'address',
+            'booking_reference', 'contact_info', 'cost', 'currency', 'notes'].includes(f);
+  };
+
+  if (!isAccommodationField(field)) {
+    // For transportation fields, return a basic prompt
+    return {
+      message: error || `Per favore, fornisci il valore per ${field}`,
+      shouldContinue: true
+    };
+  }
+
   const config = ACCOMMODATION_FIELDS_CONFIG[field];
   let message = error ? `${error}\n\n` : '';
 

@@ -58,6 +58,7 @@ type WizardState = {
     budget?: string;
     pace?: string;
     preferredTimes?: string[];
+    additionalPreferences?: string;
   };
   selectedDays: string[]; // IDs dei giorni selezionati
   generatedActivities: GeneratedActivity[];

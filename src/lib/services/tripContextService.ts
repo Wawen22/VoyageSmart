@@ -116,24 +116,26 @@ export async function getSelectiveTripContext(
     // Participants (if needed)
     if (contextNeeds.needsParticipants) {
       queries.push(
-        supabase
-          .from('trip_participants')
-          .select(`
-            *,
-            users (
-              id,
-              full_name,
-              email
-            )
-          `)
-          .eq('trip_id', tripId)
-          .then(({ data, error }) => {
-            if (error) {
-              logger.error('Error fetching participants', { tripId, error });
-              return [];
-            }
-            return data || [];
-          })
+        Promise.resolve(
+          supabase
+            .from('trip_participants')
+            .select(`
+              *,
+              users (
+                id,
+                full_name,
+                email
+              )
+            `)
+            .eq('trip_id', tripId)
+            .then(({ data, error }) => {
+              if (error) {
+                logger.error('Error fetching participants', { tripId, error });
+                return [];
+              }
+              return data || [];
+            })
+        )
       );
     } else {
       queries.push(Promise.resolve([]));
@@ -142,18 +144,20 @@ export async function getSelectiveTripContext(
     // Accommodations (if needed)
     if (contextNeeds.needsAccommodations) {
       queries.push(
-        supabase
-          .from('accommodations')
-          .select('*')
-          .eq('trip_id', tripId)
-          .order('check_in_date', { ascending: true })
-          .then(({ data, error }) => {
-            if (error) {
-              logger.error('Error fetching accommodations', { tripId, error });
-              return [];
-            }
-            return data || [];
-          })
+        Promise.resolve(
+          supabase
+            .from('accommodations')
+            .select('*')
+            .eq('trip_id', tripId)
+            .order('check_in_date', { ascending: true })
+            .then(({ data, error }) => {
+              if (error) {
+                logger.error('Error fetching accommodations', { tripId, error });
+                return [];
+              }
+              return data || [];
+            })
+        )
       );
     } else {
       queries.push(Promise.resolve([]));
@@ -162,18 +166,20 @@ export async function getSelectiveTripContext(
     // Transportation (if needed)
     if (contextNeeds.needsTransportation) {
       queries.push(
-        supabase
-          .from('transportation')
-          .select('*')
-          .eq('trip_id', tripId)
-          .order('departure_time', { ascending: true })
-          .then(({ data, error }) => {
-            if (error) {
-              logger.error('Error fetching transportation', { tripId, error });
-              return [];
-            }
-            return data || [];
-          })
+        Promise.resolve(
+          supabase
+            .from('transportation')
+            .select('*')
+            .eq('trip_id', tripId)
+            .order('departure_time', { ascending: true })
+            .then(({ data, error }) => {
+              if (error) {
+                logger.error('Error fetching transportation', { tripId, error });
+                return [];
+              }
+              return data || [];
+            })
+        )
       );
     } else {
       queries.push(Promise.resolve([]));
@@ -182,21 +188,23 @@ export async function getSelectiveTripContext(
     // Itinerary (if needed)
     if (contextNeeds.needsItinerary) {
       queries.push(
-        supabase
-          .from('itinerary_days')
-          .select(`
-            *,
-            activities (*)
-          `)
-          .eq('trip_id', tripId)
-          .order('day_date', { ascending: true })
-          .then(({ data, error }) => {
-            if (error) {
-              logger.error('Error fetching itinerary', { tripId, error });
-              return [];
-            }
-            return data || [];
-          })
+        Promise.resolve(
+          supabase
+            .from('itinerary_days')
+            .select(`
+              *,
+              activities (*)
+            `)
+            .eq('trip_id', tripId)
+            .order('day_date', { ascending: true })
+            .then(({ data, error }) => {
+              if (error) {
+                logger.error('Error fetching itinerary', { tripId, error });
+                return [];
+              }
+              return data || [];
+            })
+        )
       );
     } else {
       queries.push(Promise.resolve([]));
@@ -205,33 +213,35 @@ export async function getSelectiveTripContext(
     // Expenses (if needed)
     if (contextNeeds.needsExpenses) {
       queries.push(
-        supabase
-          .from('expenses')
-          .select(`
-            *,
-            paid_by_user:users!expenses_paid_by_fkey (
-              id,
-              full_name,
-              email
-            ),
-            expense_participants (
+        Promise.resolve(
+          supabase
+            .from('expenses')
+            .select(`
               *,
-              user:users (
+              paid_by_user:users!expenses_paid_by_fkey (
                 id,
                 full_name,
                 email
+              ),
+              expense_participants (
+                *,
+                user:users (
+                  id,
+                  full_name,
+                  email
+                )
               )
-            )
-          `)
-          .eq('trip_id', tripId)
-          .order('date', { ascending: false })
-          .then(({ data, error }) => {
-            if (error) {
-              logger.error('Error fetching expenses', { tripId, error });
-              return [];
-            }
-            return data || [];
-          })
+            `)
+            .eq('trip_id', tripId)
+            .order('date', { ascending: false })
+            .then(({ data, error }) => {
+              if (error) {
+                logger.error('Error fetching expenses', { tripId, error });
+                return [];
+              }
+              return data || [];
+            })
+        )
       );
     } else {
       queries.push(Promise.resolve([]));
@@ -523,9 +533,10 @@ export async function getTripContext(tripId: string) {
         // Process expenses with their participants
         tripContext.expenses = expenses.map(expense => {
           // Handle users field which could be an object or array
-          const userFullName = Array.isArray(expense.users)
-            ? expense.users[0]?.full_name
-            : expense.users?.full_name;
+          const expenseUsers = (expense as any).users;
+          const userFullName = Array.isArray(expenseUsers)
+            ? expenseUsers[0]?.full_name
+            : expenseUsers?.full_name;
 
           return {
             id: expense.id,

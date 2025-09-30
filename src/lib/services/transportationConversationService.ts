@@ -7,6 +7,7 @@ import {
   ConversationContext,
   TransportationData,
   TransportationField,
+  ConversationField,
   getConversationContext,
   createConversationContext,
   updateConversationContext,
@@ -15,15 +16,8 @@ import {
 import { parseTransportationMultiField, intelligentParse } from './intelligentParsingService';
 import { logger } from '../logger';
 
-export interface ConversationResponse {
-  message: string;
-  shouldContinue: boolean;
-  context?: ConversationContext;
-  uiComponent?: string;
-  uiProps?: any;
-  action?: string;
-  data?: any;
-}
+// Import unified ConversationResponse type
+import type { ConversationResponse } from './aiConversationService';
 
 /**
  * Rileva se il messaggio richiede l'aggiunta di un trasporto
@@ -202,9 +196,9 @@ export function handleTransportationConversation(
   // Se siamo in modalità conferma dei dati parziali
   if (message === 'CONTINUE_WITH_PARTIAL_DATA') {
     console.log('=== User confirmed partial data, continuing with missing fields ===');
-    
+
     // Trova il prossimo campo mancante
-    const nextField = findNextMissingField(context.data);
+    const nextField = findNextMissingField(context.data as TransportationData);
     if (nextField) {
       const updatedContext = updateConversationContext(tripId, userId, {
         currentField: nextField
@@ -247,7 +241,7 @@ export function handleTransportationConversation(
       const updatedData = {
         ...context.data,
         [context.currentField!]: parseResult.value
-      };
+      } as TransportationData;
       console.log('=== Updated data ===', updatedData);
       console.log('=== Current field was ===', context.currentField);
       console.log('=== Parse result value ===', parseResult.value);
@@ -380,7 +374,17 @@ function showFinalSummary(context: ConversationContext, tripId: string, userId: 
 /**
  * Ottiene il tipo di campo per il parsing intelligente
  */
-function getTransportationFieldType(field: TransportationField): string {
+function getTransportationFieldType(field: ConversationField): string {
+  // Type guard to check if field is a TransportationField
+  const isTransportationField = (f: ConversationField): f is TransportationField => {
+    return ['type', 'provider', 'booking_reference', 'departure_location', 'arrival_location',
+            'departure_time', 'arrival_time', 'cost', 'currency', 'notes'].includes(f);
+  };
+
+  if (!isTransportationField(field)) {
+    return 'text';
+  }
+
   const fieldTypeMap: Record<TransportationField, string> = {
     'type': 'transportation_type',
     'provider': 'text',
@@ -400,7 +404,20 @@ function getTransportationFieldType(field: TransportationField): string {
 /**
  * Genera un prompt con componenti UI appropriati per il campo trasporto
  */
-function getTransportationFieldPromptWithUI(field: TransportationField, error?: string): ConversationResponse {
+function getTransportationFieldPromptWithUI(field: ConversationField, error?: string): ConversationResponse {
+  // Type guard to check if field is a TransportationField
+  const isTransportationField = (f: ConversationField): f is TransportationField => {
+    return ['type', 'provider', 'booking_reference', 'departure_location', 'arrival_location',
+            'departure_time', 'arrival_time', 'cost', 'currency', 'notes'].includes(f);
+  };
+
+  if (!isTransportationField(field)) {
+    return {
+      message: error || `Per favore, fornisci il valore per ${field}`,
+      shouldContinue: true
+    };
+  }
+
   let message = error ? `${error}\n\n` : '';
 
   switch (field) {

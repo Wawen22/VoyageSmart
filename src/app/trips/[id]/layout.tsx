@@ -122,9 +122,10 @@ export default function TripLayout({
           // Process expenses with their participants
           processedExpenses = expensesData.map(expense => {
             // Handle users field which could be an object or array
-            const userFullName = Array.isArray(expense.users)
-              ? expense.users[0]?.full_name
-              : expense.users?.full_name;
+            const expenseUsers = (expense as any).users;
+            const userFullName = Array.isArray(expenseUsers)
+              ? expenseUsers[0]?.full_name
+              : expenseUsers?.full_name;
 
             return {
               id: expense.id,

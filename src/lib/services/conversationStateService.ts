@@ -14,7 +14,7 @@ export type ConversationState =
   | 'confirming_transportation'
   | 'saving_transportation';
 
-export type AccommodationField = 
+export type AccommodationField =
   | 'name'
   | 'type'
   | 'check_in_date'
@@ -64,12 +64,15 @@ export interface TransportationData {
   notes?: string;
 }
 
+// Unified field type for type-safe operations
+export type ConversationField = AccommodationField | TransportationField;
+
 export interface ConversationContext {
   state: ConversationState;
-  currentField?: AccommodationField | TransportationField;
+  currentField?: ConversationField;
   data: AccommodationData | TransportationData;
   tripId: string;
-  completedFields: (AccommodationField | TransportationField)[];
+  completedFields: ConversationField[];
   lastQuestion?: string;
   retryCount: number;
 }
@@ -258,12 +261,12 @@ export const ACCOMMODATION_FIELDS_CONFIG: Record<AccommodationField, {
 /**
  * Ottiene il prossimo campo da raccogliere
  */
-export function getNextField(completedFields: AccommodationField[]): AccommodationField | null {
+export function getNextField(completedFields: ConversationField[]): AccommodationField | null {
   const allFields: AccommodationField[] = [
-    'name', 'type', 'check_in_date', 'check_out_date', 'address', 
+    'name', 'type', 'check_in_date', 'check_out_date', 'address',
     'booking_reference', 'contact_info', 'cost', 'currency', 'notes'
   ];
-  
+
   return allFields.find(field => !completedFields.includes(field)) || null;
 }
 
@@ -271,9 +274,20 @@ export function getNextField(completedFields: AccommodationField[]): Accommodati
  * Valida e processa la risposta dell'utente per il campo corrente
  */
 export function processFieldResponse(
-  field: AccommodationField,
+  field: ConversationField,
   response: string
 ): { isValid: boolean; value: any; error?: string } {
+  // Type guard to check if field is an AccommodationField
+  const isAccommodationField = (f: ConversationField): f is AccommodationField => {
+    return ['name', 'type', 'check_in_date', 'check_out_date', 'address',
+            'booking_reference', 'contact_info', 'cost', 'currency', 'notes'].includes(f);
+  };
+
+  if (!isAccommodationField(field)) {
+    // For transportation fields, return a basic validation
+    return { isValid: true, value: response };
+  }
+
   const config = ACCOMMODATION_FIELDS_CONFIG[field];
 
   logger.debug('processFieldResponse', {

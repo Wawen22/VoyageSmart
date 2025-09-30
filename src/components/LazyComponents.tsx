@@ -107,7 +107,7 @@ export function createLazyComponent<T = {}>(
   ssr: boolean = false
 ) {
   return dynamic(importFn, {
-    loading: LoadingComponent,
+    loading: () => <LoadingComponent />,
     ssr,
   });
 }

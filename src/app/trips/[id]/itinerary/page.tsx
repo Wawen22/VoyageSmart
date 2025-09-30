@@ -489,7 +489,7 @@ export default function TripItinerary() {
                 activity.id === currentActivity.id ? {
                   ...data[0],
                   // Assicurati che le coordinate siano incluse nello stato
-                  coordinates: data[0].coordinates || activity.coordinates
+                  coordinates: data[0].coordinates || (activity as any).coordinates
                 } : activity
               ) || [],
             };

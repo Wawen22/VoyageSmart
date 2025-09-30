@@ -17,9 +17,8 @@ export interface AuthResult {
  */
 export async function authenticateAIRequest(request: NextRequest): Promise<AuthResult> {
   try {
-    // Get cookies with proper await
-    const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    // Get cookies with proper await - Next.js 15 requires async cookies
+    const supabase = createRouteHandlerClient({ cookies: async () => await cookies() });
 
     // First, try to get the current session
     let { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -204,9 +203,8 @@ export async function authenticateAndAuthorizeAI(request: NextRequest): Promise<
     return authResult;
   }
 
-  // Create supabase client for subscription check
-  const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  // Create supabase client for subscription check - Next.js 15 requires async cookies
+  const supabase = createRouteHandlerClient({ cookies: async () => await cookies() });
 
   // Check subscription
   const subscriptionResult = await checkAISubscription(authResult.user!.id, supabase);

@@ -62,7 +62,7 @@ type DatabaseExpense = {
 };
 
 // Types for our component state
-type Expense = Omit<DatabaseExpense, 'users' | 'expense_participants'> & {
+type ExpenseWithParticipants = Omit<DatabaseExpense, 'users' | 'expense_participants'> & {
   paid_by_name: string;
   participants: {
     user_id: string;
@@ -114,13 +114,13 @@ export default function ExpensesPage() {
   }
 
   const [trip, setTrip] = useState<Trip | null>(null);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseWithParticipants[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [balances, setBalances] = useState<Balance[]>([]);
   const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
   const [isEditExpenseModalOpen, setIsEditExpenseModalOpen] = useState(false);
-  const [currentExpense, setCurrentExpense] = useState<Expense | null>(null);
+  const [currentExpense, setCurrentExpense] = useState<ExpenseWithParticipants | null>(null);
   const [activeTab, setActiveTab] = useState('expenses');
 
   useEffect(() => {
@@ -243,7 +243,7 @@ export default function ExpensesPage() {
         if (expensesError) throw expensesError;
 
         // Format expenses data
-        const formattedExpenses: Expense[] = (expensesData || []).map((e: any) => ({
+        const formattedExpenses: ExpenseWithParticipants[] = (expensesData || []).map((e: any) => ({
           id: e.id,
           trip_id: e.trip_id,
           category: e.category,
@@ -314,7 +314,7 @@ export default function ExpensesPage() {
       if (fetchError) throw fetchError;
 
       // Format expenses data
-      const formattedExpenses: Expense[] = (updatedExpenses || []).map((e: any) => ({
+      const formattedExpenses: ExpenseWithParticipants[] = (updatedExpenses || []).map((e: any) => ({
         id: e.id,
         trip_id: e.trip_id,
         category: e.category,
@@ -406,7 +406,7 @@ export default function ExpensesPage() {
     };
   }, [id, user, refreshExpenses]);
 
-  const calculateBalances = (expenses: Expense[], participants: Participant[]) => {
+  const calculateBalances = (expenses: ExpenseWithParticipants[], participants: Participant[]) => {
     // Initialize balances for all participants
     const balanceMap = new Map<string, number>();
     participants.forEach(p => {
@@ -1030,7 +1030,7 @@ export default function ExpensesPage() {
                 currency={trip?.preferences?.currency || 'USD'}
                 onDelete={handleDeleteExpense}
                 onEdit={(expense) => {
-                  setCurrentExpense(expense);
+                  setCurrentExpense(expense as ExpenseWithParticipants);
                   setIsEditExpenseModalOpen(true);
                 }}
               />

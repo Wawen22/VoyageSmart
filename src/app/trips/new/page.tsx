@@ -453,9 +453,14 @@ export default function NewTrip() {
                       <div>
                         <dt className="text-sm font-medium text-muted-foreground">Destination</dt>
                         <dd className="text-sm text-foreground">
-                          {formData.destinations.primary?.name ||
-                           formData.destinations.destinations[0]?.name ||
-                           'Not specified'}
+                          {(() => {
+                            const primaryDest = formData.destinations.destinations.find(
+                              d => d.id === formData.destinations.primary
+                            );
+                            return primaryDest?.name ||
+                                   formData.destinations.destinations[0]?.name ||
+                                   'Not specified';
+                          })()}
                         </dd>
                       </div>
                       <div>

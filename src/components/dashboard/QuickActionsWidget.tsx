@@ -133,9 +133,10 @@ export default function QuickActionsWidget({ className, trips = [] }: QuickActio
             .map(action => {
               const Icon = action.icon;
               const isHovered = hoveredAction === action.id;
-              
-              const ActionWrapper = action.href !== '#' ? Link : 'div';
-              const wrapperProps = action.href !== '#'
+
+              const isLink = action.href !== '#';
+              const ActionWrapper = isLink ? Link : 'div';
+              const wrapperProps: any = isLink
                 ? { href: action.href }
                 : { onClick: () => action.action && handleAction(action.action) };
 

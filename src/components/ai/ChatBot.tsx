@@ -300,7 +300,7 @@ export default function ChatBot({
           const now = Date.now();
           const validEntries = Object.entries(cacheData).filter(
             ([_, value]: [string, any]) => (now - value.ts) < 60 * 60 * 1000
-          );
+          ) as [string, { text: string; ts: number }][];
 
           if (validEntries.length > 0) {
             clientCacheRef.current = new Map(validEntries);
@@ -649,8 +649,11 @@ export default function ChatBot({
 
           // If we need to save transportation, do it now
           if (conversationResponse.action === 'save_transportation' && conversationResponse.data) {
+            // Type assertion for transportation data
+            const transportData = conversationResponse.data as any;
+
             logger.info('Save transportation action triggered', {
-              transportationType: conversationResponse.data.type
+              transportationType: transportData.type
             });
 
             // Aggiorna il componente UI per mostrare lo stato di caricamento
@@ -669,16 +672,16 @@ export default function ChatBot({
 
               await dispatch(addTransportation({
                 trip_id: tripId,
-                type: conversationResponse.data.type || 'other',
-                provider: conversationResponse.data.provider || null,
-                booking_reference: conversationResponse.data.booking_reference || null,
-                departure_location: conversationResponse.data.departure_location || '',
-                arrival_location: conversationResponse.data.arrival_location || '',
-                departure_time: conversationResponse.data.departure_time || null,
-                arrival_time: conversationResponse.data.arrival_time || null,
-                cost: conversationResponse.data.cost || null,
-                currency: conversationResponse.data.currency || 'EUR',
-                notes: conversationResponse.data.notes || null
+                type: (transportData.type as 'flight' | 'train' | 'bus' | 'car' | 'ferry' | 'other') || 'other',
+                provider: transportData.provider || null,
+                booking_reference: transportData.booking_reference || null,
+                departure_location: transportData.departure_location || '',
+                arrival_location: transportData.arrival_location || '',
+                departure_time: transportData.departure_time || null,
+                arrival_time: transportData.arrival_time || null,
+                cost: transportData.cost || null,
+                currency: transportData.currency || 'EUR',
+                notes: transportData.notes || null
               })).unwrap();
 
               logger.info('Transportation saved successfully');
@@ -851,8 +854,8 @@ export default function ChatBot({
             const retryAfterHeader = response.headers.get('Retry-After');
             if (retryAfterHeader) {
               serverRetryAfter = parseInt(retryAfterHeader);
-            } else if (errorData && errorData.retryAfter) {
-              serverRetryAfter = errorData.retryAfter;
+            } else if (errorData && (errorData as any).retryAfter) {
+              serverRetryAfter = (errorData as any).retryAfter;
             }
           } catch (e) {
             logger.warn('Unable to read retryAfter, using default');
