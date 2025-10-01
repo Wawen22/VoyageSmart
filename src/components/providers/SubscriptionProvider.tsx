@@ -160,18 +160,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
     // Per le funzionalità AI, solo gli utenti con piano AI hanno accesso
     if (feature === 'ai_assistant') {
-      // Se l'utente ha il piano AI, ha accesso
-      if (currentTier === 'ai') {
-        return true;
-      }
-
-      // Se la sottoscrizione AI è stata cancellata ma è ancora nel periodo pagato
-      if (subscription.cancelAtPeriodEnd && currentTier === 'ai') {
-        return true;
-      }
-
-      // Altrimenti, nessun accesso alle funzionalità AI
-      return false;
+      // Se l'utente ha il piano AI, ha accesso (anche se cancellato ma ancora valido)
+      return currentTier === 'ai';
     }
 
     // Accommodations e Transportation sono ora FREE per tutti
