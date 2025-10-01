@@ -22,6 +22,12 @@ import {
 } from '@/lib/subscription';
 import { checkUserSubscription } from '@/lib/subscription-utils';
 
+// Helper function to safely get tier from subscription
+const getTier = (subscription: Subscription | null): SubscriptionTier => {
+  if (!subscription) return 'free';
+  return subscription.tier as SubscriptionTier;
+};
+
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -105,25 +111,26 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const isSubscribed = (tier: SubscriptionTier): boolean => {
     if (!subscription) return false;
 
-    const currentTier: SubscriptionTier = subscription.tier;
-
-    // If user has premium, they have access to all tiers below it
-    if (currentTier === 'premium' && (tier === 'premium' || tier === 'free')) {
-      return true;
-    }
+    const currentTier = getTier(subscription);
 
     // If user has AI tier, they have access to all tiers
     if (currentTier === 'ai') {
       return true;
     }
 
+    // If user has premium, they have access to all tiers below it
+    if (currentTier === 'premium' && (tier === 'premium' || tier === 'free')) {
+      return true;
+    }
+
     // Se la sottoscrizione è stata cancellata ma è ancora nel periodo pagato
     // l'utente mantiene l'accesso al tier corrente
     if (subscription.cancelAtPeriodEnd) {
-      if (currentTier === 'premium' && (tier === 'premium' || tier === 'free')) {
+      const canceledTier = getTier(subscription);
+      if (canceledTier === 'ai') {
         return true;
       }
-      if (currentTier === 'ai') {
+      if (canceledTier === 'premium' && (tier === 'premium' || tier === 'free')) {
         return true;
       }
     }
@@ -149,7 +156,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     // Se non c'è sottoscrizione, solo accesso alle funzionalità free
     if (!subscription) return false;
 
-    const currentTier: SubscriptionTier = subscription.tier;
+    const currentTier = getTier(subscription);
 
     // Per le funzionalità AI, solo gli utenti con piano AI hanno accesso
     if (feature === 'ai_assistant') {
