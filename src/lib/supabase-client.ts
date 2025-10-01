@@ -79,8 +79,16 @@ export const createServiceSupabase = () => {
  * Gradually migrate to use the specific clients above
  * @deprecated Use createClientSupabase() instead
  */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: AUTH_CONFIG
+let legacySupabaseInstance: ReturnType<typeof createClient> | null = null;
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    if (!legacySupabaseInstance) {
+      legacySupabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: AUTH_CONFIG
+      });
+    }
+    return legacySupabaseInstance[prop as keyof ReturnType<typeof createClient>];
+  }
 });
 
 // Export the client creation functions as default
