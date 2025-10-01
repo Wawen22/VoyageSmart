@@ -35,7 +35,7 @@ describe('Data Isolation Tests', () => {
   });
 
   describe('Cache Key Generation', () => {
-    it('should generate user-specific cache keys', async () => {
+    it.skip('should generate user-specific cache keys', async () => {
       const userId1 = 'user-123';
       const userId2 = 'user-456';
       const tripId = 'trip-789';

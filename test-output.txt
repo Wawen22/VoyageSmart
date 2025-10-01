@@ -1,0 +1,144 @@
+npm verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+npm info using npm@10.9.2
+npm info using node@v22.14.0
+npm verbose title npm test
+npm verbose argv "test" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:C:\Users\r.nebili\AppData\Local\npm-cache\_logs\2025-10-01T15_22_21_797Z-
+npm verbose logfile C:\Users\r.nebili\AppData\Local\npm-cache\_logs\2025-10-01T15_22_21_797Z-debug-0.log
+
+> voyage-smart@0.1.0 test
+> jest
+
+PASS src/lib/__tests__/utils.test.ts
+FAIL src/test/data-isolation.test.ts
+  ÔùÅ Console
+
+    console.warn
+      Failed to get current user ID for cache: TypeError: Cannot destructure property 'data' of '(intermediate value)' as it is undefined.
+          at OptimizedSupabaseService.getCurrentUserId (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\lib\services\optimizedSupabaseService.ts:21:21)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at OptimizedSupabaseService.generateCacheKey (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\lib\services\optimizedSupabaseService.ts:33:20)
+          at Object.<anonymous> (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\test\data-isolation.test.ts:49:20)
+
+      22 |       return user?.id || null;
+      23 |     } catch (error) {
+    > 24 |       console.warn('Failed to get current user ID for cache:', error);
+         |               ^
+      25 |       return null;
+      26 |     }
+      27 |   }
+
+      at OptimizedSupabaseService.warn [as getCurrentUserId] (src/lib/services/optimizedSupabaseService.ts:24:15)
+      at OptimizedSupabaseService.generateCacheKey (src/lib/services/optimizedSupabaseService.ts:33:20)
+      at Object.<anonymous> (src/test/data-isolation.test.ts:49:20)
+
+    console.warn
+      Failed to get current user ID for cache: TypeError: Cannot destructure property 'data' of '(intermediate value)' as it is undefined.
+          at OptimizedSupabaseService.getCurrentUserId (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\lib\services\optimizedSupabaseService.ts:21:21)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at OptimizedSupabaseService.generateCacheKey (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\lib\services\optimizedSupabaseService.ts:33:20)
+          at Object.<anonymous> (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\test\data-isolation.test.ts:50:20)
+
+      22 |       return user?.id || null;
+      23 |     } catch (error) {
+    > 24 |       console.warn('Failed to get current user ID for cache:', error);
+         |               ^
+      25 |       return null;
+      26 |     }
+      27 |   }
+
+      at OptimizedSupabaseService.warn [as getCurrentUserId] (src/lib/services/optimizedSupabaseService.ts:24:15)
+      at OptimizedSupabaseService.generateCacheKey (src/lib/services/optimizedSupabaseService.ts:33:20)
+      at Object.<anonymous> (src/test/data-isolation.test.ts:50:20)
+
+    console.warn
+      Failed to get current user ID for cache: TypeError: Cannot destructure property 'data' of '(intermediate value)' as it is undefined.
+          at OptimizedSupabaseService.getCurrentUserId (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\lib\services\optimizedSupabaseService.ts:21:21)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+          at OptimizedSupabaseService.generateCacheKey (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\lib\services\optimizedSupabaseService.ts:33:20)
+          at Object.<anonymous> (C:\Progetti\NEB\MyAPPS\VoyageSmart\src\test\data-isolation.test.ts:63:19)
+
+      22 |       return user?.id || null;
+      23 |     } catch (error) {
+    > 24 |       console.warn('Failed to get current user ID for cache:', error);
+         |               ^
+      25 |       return null;
+      26 |     }
+      27 |   }
+
+      at OptimizedSupabaseService.warn [as getCurrentUserId] (src/lib/services/optimizedSupabaseService.ts:24:15)
+      at OptimizedSupabaseService.generateCacheKey (src/lib/services/optimizedSupabaseService.ts:33:20)
+      at Object.<anonymous> (src/test/data-isolation.test.ts:63:19)
+
+    console.log
+      Cleared 0 transportation cache entries for user user-123
+
+      at Object.log (src/lib/features/transportationSlice.ts:80:11)
+
+    console.log
+      Cleared 0 accommodation cache entries for user user-123
+
+      at Object.log (src/lib/features/accommodationSlice.ts:61:11)
+
+    console.log
+      Cleared 0 itinerary cache entries for user user-123
+
+      at Object.log (src/lib/features/itinerarySlice.ts:47:11)
+
+    console.log
+      Cleared 0 user-specific cache entries
+
+      at log (src/lib/cache-utils.ts:99:13)
+
+    console.log
+      Cleared 0 transportation cache entries for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0
+
+      at Object.log (src/lib/features/transportationSlice.ts:80:11)
+
+    console.log
+      Cleared 0 accommodation cache entries for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0
+
+      at Object.log (src/lib/features/accommodationSlice.ts:61:11)
+
+    console.log
+      Cleared 0 itinerary cache entries for user fa116dab-3276-4033-9ca2-4a9be5f0dfe0
+
+      at Object.log (src/lib/features/itinerarySlice.ts:47:11)
+
+    console.log
+      Cleared 0 user-specific cache entries
+
+      at log (src/lib/cache-utils.ts:99:13)
+
+  ÔùÅ Data Isolation Tests ÔÇ║ Cache Key Generation ÔÇ║ should generate user-specific cache keys
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "user-123:trip_details_trip-789"
+    Received: "trip_details_trip-789"
+
+      50 |       const key2 = await (service as any).generateCacheKey(`trip_details_${tripId}`);
+      51 |
+    > 52 |       expect(key1).toBe(`${userId1}:trip_details_${tripId}`);
+         |                    ^
+      53 |       expect(key2).toBe(`${userId2}:trip_details_${tripId}`);
+      54 |       expect(key1).not.toBe(key2);
+      55 |     });
+
+      at Object.toBe (src/test/data-isolation.test.ts:52:20)
+
+PASS src/__tests__/hooks/useTheme.test.ts
+PASS src/__tests__/components/dashboard/StatsCard.test.tsx
+PASS src/components/__tests__/ErrorBoundary.test.tsx
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 7 skipped, 56 passed, 64 total
+Snapshots:   0 total
+Time:        8.922 s
+Ran all test suites.
+npm verbose cwd C:\Progetti\NEB\MyAPPS\VoyageSmart
+npm verbose os Windows_NT 10.0.22631
+npm verbose node v22.14.0
+npm verbose npm  v10.9.2
+npm verbose exit 1
+npm verbose code 1
