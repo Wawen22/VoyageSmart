@@ -105,8 +105,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const isSubscribed = (tier: SubscriptionTier): boolean => {
     if (!subscription) return false;
 
-    // Force TypeScript to recognize all possible tier values including 'ai'
-    const currentTier = subscription.tier as 'free' | 'premium' | 'ai';
+    const currentTier: SubscriptionTier = subscription.tier;
 
     // If user has premium, they have access to all tiers below it
     if (currentTier === 'premium' && (tier === 'premium' || tier === 'free')) {
@@ -150,8 +149,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     // Se non c'è sottoscrizione, solo accesso alle funzionalità free
     if (!subscription) return false;
 
-    // Force TypeScript to recognize all possible tier values including 'ai'
-    const currentTier = subscription.tier as 'free' | 'premium' | 'ai';
+    const currentTier: SubscriptionTier = subscription.tier;
 
     // Per le funzionalità AI, solo gli utenti con piano AI hanno accesso
     if (feature === 'ai_assistant') {
@@ -176,7 +174,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
     // Journal e Photo Gallery sono ora PREMIUM
     if (feature === 'journal' || feature === 'photo_gallery') {
-      return subscription.tier === 'premium' || subscription.tier === 'ai';
+      return currentTier === 'premium' || currentTier === 'ai';
     }
 
     return false;
