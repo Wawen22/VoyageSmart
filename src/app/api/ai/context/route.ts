@@ -3,9 +3,6 @@ import { getTripContext } from '@/lib/services/tripContextService';
 import { authenticateAndAuthorizeAI } from '@/lib/ai-auth';
 import { logger } from '@/lib/logger';
 
-// Force dynamic rendering - don't pre-render this route during build
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: NextRequest) {
   try {
     // Use enhanced authentication

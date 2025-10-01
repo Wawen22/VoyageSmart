@@ -1,14 +1,8 @@
 import { createClientSupabase } from '@/lib/supabase-client';
 import { logger } from '@/lib/logger';
 
-// Lazy initialization of Supabase client to avoid build-time errors
-let supabase: ReturnType<typeof createClientSupabase> | null = null;
-const getSupabase = () => {
-  if (!supabase) {
-    supabase = createClientSupabase();
-  }
-  return supabase;
-};
+// Use the same Supabase client as the AuthProvider to ensure proper session sharing
+const supabase = createClientSupabase();
 
 // Cache per il contesto dei viaggi
 const tripContextCache = new Map<string, { data: any; expiry: number }>();
@@ -76,7 +70,7 @@ export async function getSelectiveTripContext(
   }
 
   // Get current user ID for user-specific caching
-  const { data: { user } } = await getSupabase().auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id;
 
   // Check cache first (with context needs and user ID as part of cache key)
@@ -90,7 +84,7 @@ export async function getSelectiveTripContext(
 
   try {
     // Always get basic trip info
-    const { data: trip, error: tripError } = await getSupabase()
+    const { data: trip, error: tripError } = await supabase
       .from('trips')
       .select('*')
       .eq('id', tripId)
@@ -519,7 +513,7 @@ export async function getTripContext(tripId: string) {
         const expenseIds = expenses.map(e => e.id);
 
         // Update the expense participants query with actual expense IDs
-        const { data: expenseParticipants } = await getSupabase()
+        const { data: expenseParticipants } = await supabase
           .from('expense_participants')
           .select(`
             expense_id, user_id, amount, is_paid,
