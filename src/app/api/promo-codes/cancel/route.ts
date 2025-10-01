@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 /**
  * API per cancellare un codice promozionale attivo
@@ -71,7 +74,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica se la sottoscrizione è attiva tramite promo code
+    // Verifica se la sottoscrizione Ã¨ attiva tramite promo code
     const isPromoSubscription = subscription.status === 'active' && !subscription.stripe_subscription_id;
 
     if (!isPromoSubscription) {

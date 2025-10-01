@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Stripe from 'stripe';
 import { withAuth } from '@/app/api/middleware';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 // @ts-ignore - Ignora l'errore di tipo per la versione dell'API
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -92,7 +95,7 @@ export async function POST(request: NextRequest) {
       // Determina il current_period_end
       let currentPeriodEnd;
 
-      // Se l'aggiornamento Stripe è riuscito, prova a recuperare i dettagli aggiornati
+      // Se l'aggiornamento Stripe Ã¨ riuscito, prova a recuperare i dettagli aggiornati
       if (stripeUpdateSuccessful) {
         try {
           console.log('Cancel API - Retrieving subscription details from Stripe:', subscriptionId);
@@ -108,7 +111,7 @@ export async function POST(request: NextRequest) {
           console.log('Cancel API - Using fallback current_period_end:', currentPeriodEnd);
         }
       } else {
-        // Se Stripe non è stato aggiornato (subscription di test), usa i dati dal database
+        // Se Stripe non Ã¨ stato aggiornato (subscription di test), usa i dati dal database
         if (subscriptionData.current_period_end) {
           currentPeriodEnd = new Date(subscriptionData.current_period_end).toISOString();
           console.log('Cancel API - Using current_period_end from database:', currentPeriodEnd);
@@ -197,7 +200,7 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
       console.error('Cancel API - Unexpected error:', error);
 
-      // Fornisci messaggi di errore più specifici
+      // Fornisci messaggi di errore piÃ¹ specifici
       let errorMessage = 'Error canceling subscription';
       let errorDetails = error.message;
 

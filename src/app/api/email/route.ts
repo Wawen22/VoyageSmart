@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { sendInvitationEmail, sendTripUpdatedEmail, sendNewActivityEmail } from '@/lib/email';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { logger } from '@/lib/logger';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {

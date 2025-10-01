@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { aiAnalytics } from '@/lib/services/aiAnalyticsService';
 import { getQueueStats } from '@/lib/services/aiQueueService';
 import { logger } from '@/lib/logger';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Token di amministrazione hardcoded (in un'app di produzione, usare un sistema più sicuro)
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
+
+// Token di amministrazione hardcoded (in un'app di produzione, usare un sistema piÃ¹ sicuro)
 const ADMIN_TOKEN = 'voyagesmart-admin';
 
 // Funzione per verificare il token di amministrazione
@@ -88,7 +91,7 @@ export async function POST(request: NextRequest) {
 
         for (const userId of userIds) {
           try {
-            // Verifica se l'utente ha già una sottoscrizione
+            // Verifica se l'utente ha giÃ  una sottoscrizione
             const { data: existingSubscription, error: checkError } = await supabase
               .from('user_subscriptions')
               .select('id')

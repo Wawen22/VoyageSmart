@@ -1,14 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { validateSecurity } from '@/lib/validation';
 import { logger } from '@/lib/logger';
 
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const startTime = performance.now();
 
   try {
-    // Verifica se la chiave API di Gemini è configurata
+    // Verifica se la chiave API di Gemini Ã¨ configurata
     const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (!geminiApiKey) {
@@ -19,7 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('API - Chiave API Gemini configurata: Sì');
+    console.log('API - Chiave API Gemini configurata: SÃ¬');
 
     // Ottieni i dati dalla richiesta
     const { tripId, tripData, preferences, days } = await request.json();
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Commentiamo temporaneamente la verifica dell'autenticazione per debug
-    // Se non c'è una sessione, procediamo comunque ma lo logghiamo
+    // Se non c'Ã¨ una sessione, procediamo comunque ma lo logghiamo
     if (!session) {
       console.log('Attenzione: Utente non autenticato, ma procediamo comunque per debug');
       // Continuiamo l'esecuzione invece di restituire un errore
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
       // );
     }
 
-    // Verifica che l'utente abbia accesso al viaggio (solo se l'utente è autenticato)
+    // Verifica che l'utente abbia accesso al viaggio (solo se l'utente Ã¨ autenticato)
     if (session) {
       const { data: tripAccess, error: tripAccessError } = await supabaseAdmin
         .from('trip_participants')
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
         // );
       }
     } else {
-      console.log('Saltando la verifica di accesso al viaggio perché l\'utente non è autenticato');
+      console.log('Saltando la verifica di accesso al viaggio perchÃ© l\'utente non Ã¨ autenticato');
     }
 
     // Prepara il prompt per l'AI
@@ -114,14 +117,14 @@ export async function POST(request: NextRequest) {
     // Usa il nuovo sistema AI unificato
     const { callAIAPI } = await import('@/lib/services/aiApiService');
 
-    console.log('Chiamando AI API per generazione attività...');
+    console.log('Chiamando AI API per generazione attivitÃ ...');
     console.log('Prompt length:', prompt.length);
 
     try {
-      // Usa il provider di default o Gemini per la generazione di attività
+      // Usa il provider di default o Gemini per la generazione di attivitÃ 
       const rawResponse = await callAIAPI(prompt, {
-        provider: 'gemini', // Usa Gemini per la generazione di attività per ora
-        timeout: 60000, // 60 secondi per attività complesse
+        provider: 'gemini', // Usa Gemini per la generazione di attivitÃ  per ora
+        timeout: 60000, // 60 secondi per attivitÃ  complesse
         retryConfig: {
           maxRetries: 2,
           baseDelay: 2000,
@@ -136,7 +139,7 @@ export async function POST(request: NextRequest) {
       const additionalPreferences = preferences?.additionalPreferences || '';
       const { timeConstraints } = analyzeAdditionalPreferences(additionalPreferences, tripData?.destination || '', tripData?.destinations || []);
 
-      // Analizza la risposta per estrarre le attività
+      // Analizza la risposta per estrarre le attivitÃ 
       const activities = parseActivitiesFromResponse(rawResponse, days, timeConstraints);
 
       return NextResponse.json({
@@ -233,13 +236,13 @@ ${specificRequests.map(req => `- ${req}`).join('\n')}
   let tripTypeDescription = '';
   switch (tripType) {
     case 'beach':
-      tripTypeDescription = 'Vacanza al mare con focus su relax, attività balneari, sport acquatici e vita costiera. Privilegia spiagge, stabilimenti balneari, ristoranti sul mare, attività nautiche e momenti di relax.';
+      tripTypeDescription = 'Vacanza al mare con focus su relax, attivitÃ  balneari, sport acquatici e vita costiera. Privilegia spiagge, stabilimenti balneari, ristoranti sul mare, attivitÃ  nautiche e momenti di relax.';
       break;
     case 'city':
       tripTypeDescription = 'Esplorazione urbana con focus su cultura, musei, monumenti, shopping e vita cittadina. Privilegia centri storici, musei, gallerie d\'arte, mercati locali, ristoranti tipici e vita notturna.';
       break;
     case 'adventure':
-      tripTypeDescription = 'Viaggio avventuroso con focus su sport, escursioni, attività all\'aria aperta e esperienze adrenaliniche. Privilegia trekking, sport estremi, parchi naturali e attività fisiche.';
+      tripTypeDescription = 'Viaggio avventuroso con focus su sport, escursioni, attivitÃ  all\'aria aperta e esperienze adrenaliniche. Privilegia trekking, sport estremi, parchi naturali e attivitÃ  fisiche.';
       break;
     case 'cultural':
       tripTypeDescription = 'Viaggio culturale con focus su storia, arte, tradizioni locali e patrimonio culturale. Privilegia siti UNESCO, musei, chiese storiche, tour guidati e esperienze culturali autentiche.';
@@ -248,35 +251,35 @@ ${specificRequests.map(req => `- ${req}`).join('\n')}
       tripTypeDescription = 'Viaggio gastronomico con focus su cucina locale, degustazioni, mercati e tradizioni culinarie. Privilegia ristoranti tipici, cantine, mercati locali, corsi di cucina e degustazioni.';
       break;
     case 'romantic':
-      tripTypeDescription = 'Viaggio romantico con focus su atmosfere intime, cene romantiche e esperienze di coppia. Privilegia ristoranti romantici, tramonti, spa di coppia e attività intime.';
+      tripTypeDescription = 'Viaggio romantico con focus su atmosfere intime, cene romantiche e esperienze di coppia. Privilegia ristoranti romantici, tramonti, spa di coppia e attivitÃ  intime.';
       break;
     case 'family':
-      tripTypeDescription = 'Vacanza in famiglia con focus su attività per bambini, parchi divertimento e esperienze family-friendly. Privilegia parchi, zoo, musei interattivi e attività adatte a tutte le età.';
+      tripTypeDescription = 'Vacanza in famiglia con focus su attivitÃ  per bambini, parchi divertimento e esperienze family-friendly. Privilegia parchi, zoo, musei interattivi e attivitÃ  adatte a tutte le etÃ .';
       break;
     case 'wellness':
-      tripTypeDescription = 'Viaggio benessere con focus su relax, spa, terme e attività rigeneranti. Privilegia centri benessere, terme, yoga, meditazione e attività rilassanti.';
+      tripTypeDescription = 'Viaggio benessere con focus su relax, spa, terme e attivitÃ  rigeneranti. Privilegia centri benessere, terme, yoga, meditazione e attivitÃ  rilassanti.';
       break;
     case 'business':
-      tripTypeDescription = 'Viaggio di lavoro con focus su efficienza, networking e attività professionali. Privilegia centri congressi, hotel business, ristoranti per meeting e attività di networking.';
+      tripTypeDescription = 'Viaggio di lavoro con focus su efficienza, networking e attivitÃ  professionali. Privilegia centri congressi, hotel business, ristoranti per meeting e attivitÃ  di networking.';
       break;
     default:
-      tripTypeDescription = 'Viaggio generale con un mix equilibrato di attività culturali, gastronomiche e di svago.';
+      tripTypeDescription = 'Viaggio generale con un mix equilibrato di attivitÃ  culturali, gastronomiche e di svago.';
   }
 
   // Costruisci una descrizione del ritmo del viaggio
   let paceDescription = '';
   switch (pace) {
     case 'relaxed':
-      paceDescription = 'rilassato con ampio tempo libero tra le attività';
+      paceDescription = 'rilassato con ampio tempo libero tra le attivitÃ ';
       break;
     case 'moderate':
-      paceDescription = 'moderato con un buon equilibrio tra attività e tempo libero';
+      paceDescription = 'moderato con un buon equilibrio tra attivitÃ  e tempo libero';
       break;
     case 'active':
-      paceDescription = 'attivo con molte attività durante la giornata';
+      paceDescription = 'attivo con molte attivitÃ  durante la giornata';
       break;
     case 'busy':
-      paceDescription = 'intenso con un programma fitto di attività';
+      paceDescription = 'intenso con un programma fitto di attivitÃ ';
       break;
     default:
       paceDescription = 'moderato';
@@ -292,7 +295,7 @@ ${specificRequests.map(req => `- ${req}`).join('\n')}
       'evening': 'sera'
     };
     const formattedTimes = preferredTimes.map((time: string) => timeMap[time] || time).join(', ');
-    timesDescription = `con preferenza per attività durante: ${formattedTimes}`;
+    timesDescription = `con preferenza per attivitÃ  durante: ${formattedTimes}`;
   }
 
   return `
@@ -300,7 +303,7 @@ Sei un esperto pianificatore di viaggi italiano con conoscenza approfondita dell
 
 INFORMAZIONI SUL VIAGGIO:
 - Destinazione principale: ${mainDestination}
-- Destinazione specifica per queste attività: ${effectiveDestination}
+- Destinazione specifica per queste attivitÃ : ${effectiveDestination}
 - Tipo di viaggio: ${tripType}
 - Descrizione del tema di viaggio: ${tripTypeDescription}
 - Ritmo del viaggio: ${paceDescription} ${timesDescription}
@@ -315,13 +318,13 @@ ${destinationsSection}
 ${specificRequestsSection}
 
 COMPITO:
-Genera attività realistiche, specifiche e dettagliate per ciascuno dei giorni sopra indicati, tenendo conto degli interessi e delle preferenze dell'utente.
+Genera attivitÃ  realistiche, specifiche e dettagliate per ciascuno dei giorni sopra indicati, tenendo conto degli interessi e delle preferenze dell'utente.
 
 ${isLimitedRequest ?
-  `IMPORTANTE: L'utente ha richiesto SOLO attività specifiche e limitate. Genera ESATTAMENTE ${requestedActivityCount} attività come richiesto, NON aggiungere altre attività non richieste.` :
-  `Per ogni giorno, crea 3-5 attività che includano:`
+  `IMPORTANTE: L'utente ha richiesto SOLO attivitÃ  specifiche e limitate. Genera ESATTAMENTE ${requestedActivityCount} attivitÃ  come richiesto, NON aggiungere altre attivitÃ  non richieste.` :
+  `Per ogni giorno, crea 3-5 attivitÃ  che includano:`
 }
-1. Nome dell'attività (breve, specifico e descrittivo)
+1. Nome dell'attivitÃ  (breve, specifico e descrittivo)
 2. Tipo (scegli tra: sightseeing, food, shopping, nature, culture, relax, sport, entertainment)
 3. Orario di inizio e fine (in formato HH:MM, orari realistici)
 4. Luogo specifico (nome REALE del luogo e indirizzo completo per geocodifica)
@@ -330,35 +333,35 @@ ${isLimitedRequest ?
 
 LINEE GUIDA IMPORTANTI:
 ${isLimitedRequest ?
-  `- ATTENZIONE: L'utente ha richiesto SOLO attività specifiche. NON aggiungere attività extra non richieste
-- Genera ESATTAMENTE ${requestedActivityCount} attività come specificato dall'utente
+  `- ATTENZIONE: L'utente ha richiesto SOLO attivitÃ  specifiche. NON aggiungere attivitÃ  extra non richieste
+- Genera ESATTAMENTE ${requestedActivityCount} attivitÃ  come specificato dall'utente
 - NON creare un itinerario completo se non richiesto` :
   `- Crea un itinerario completo e bilanciato per la giornata`
 }
 - RISPETTA RIGOROSAMENTE IL TEMA DI VIAGGIO: ${tripTypeDescription}
-- Le attività DEVONO essere coerenti con il tipo di viaggio selezionato (${tripType})
-- Se il tema è "beach", privilegia attività balneari e costiere
-- Se il tema è "cultural", privilegia musei, siti storici e patrimonio culturale
-- Se il tema è "food", privilegia esperienze gastronomiche e culinarie
-- Se il tema è "adventure", privilegia attività sportive e all'aria aperta
-- Se il tema è "romantic", privilegia atmosfere intime e esperienze di coppia
-- Se il tema è "family", privilegia attività adatte a bambini e famiglie
-- Se il tema è "wellness", privilegia attività rilassanti e benessere
+- Le attivitÃ  DEVONO essere coerenti con il tipo di viaggio selezionato (${tripType})
+- Se il tema Ã¨ "beach", privilegia attivitÃ  balneari e costiere
+- Se il tema Ã¨ "cultural", privilegia musei, siti storici e patrimonio culturale
+- Se il tema Ã¨ "food", privilegia esperienze gastronomiche e culinarie
+- Se il tema Ã¨ "adventure", privilegia attivitÃ  sportive e all'aria aperta
+- Se il tema Ã¨ "romantic", privilegia atmosfere intime e esperienze di coppia
+- Se il tema Ã¨ "family", privilegia attivitÃ  adatte a bambini e famiglie
+- Se il tema Ã¨ "wellness", privilegia attivitÃ  rilassanti e benessere
 - RISPETTA RIGOROSAMENTE i vincoli temporali specificati dall'utente (es. "iniziare alle 8:00", "aperitivo alle 18:00")
-- Se l'utente richiede di iniziare le attività a un orario specifico, la prima attività DEVE iniziare a quell'ora esatta
-- Se l'utente richiede un'attività specifica (es. aperitivo, colazione, pranzo, cena) a un orario preciso, DEVI includerla esattamente a quell'ora
+- Se l'utente richiede di iniziare le attivitÃ  a un orario specifico, la prima attivitÃ  DEVE iniziare a quell'ora esatta
+- Se l'utente richiede un'attivitÃ  specifica (es. aperitivo, colazione, pranzo, cena) a un orario preciso, DEVI includerla esattamente a quell'ora
 - RISPETTA RIGOROSAMENTE la destinazione specifica richiesta dall'utente (es. "Matera" invece di "Bari")
 - IMPLEMENTA TUTTE le richieste specifiche dell'utente come descritte nelle "RICHIESTE SPECIFICHE DELL'UTENTE" sopra
-- Se l'utente chiede "colazione alle 9 di mattina", crea un'attività di colazione che inizia ESATTAMENTE alle 09:00
-- Se l'utente chiede "aperitivo alle 18:00", crea un'attività di aperitivo che inizia ESATTAMENTE alle 18:00
-- Assicurati che le attività siano realistiche e fattibili nel tempo indicato
-- Considera i tempi di spostamento tra le attività (includi pause adeguate)
-- Includi SOLO attività specifiche per la destinazione con nomi REALI di luoghi, non generici
-- Fornisci indirizzi COMPLETI e PRECISI per ogni luogo, includendo via, numero civico, città e paese per una corretta geocodifica
-- Distribuisci le attività durante la giornata rispettando i vincoli temporali e gli orari preferiti
-- Assegna priorità 1 (alta), 2 (media) o 3 (bassa) a ciascuna attività in base alla loro importanza
-- Includi una varietà di tipi di attività per rendere l'itinerario interessante
-- Considera l'ora dei pasti (colazione, pranzo, cena) quando pianifichi le attività
+- Se l'utente chiede "colazione alle 9 di mattina", crea un'attivitÃ  di colazione che inizia ESATTAMENTE alle 09:00
+- Se l'utente chiede "aperitivo alle 18:00", crea un'attivitÃ  di aperitivo che inizia ESATTAMENTE alle 18:00
+- Assicurati che le attivitÃ  siano realistiche e fattibili nel tempo indicato
+- Considera i tempi di spostamento tra le attivitÃ  (includi pause adeguate)
+- Includi SOLO attivitÃ  specifiche per la destinazione con nomi REALI di luoghi, non generici
+- Fornisci indirizzi COMPLETI e PRECISI per ogni luogo, includendo via, numero civico, cittÃ  e paese per una corretta geocodifica
+- Distribuisci le attivitÃ  durante la giornata rispettando i vincoli temporali e gli orari preferiti
+- Assegna prioritÃ  1 (alta), 2 (media) o 3 (bassa) a ciascuna attivitÃ  in base alla loro importanza
+- Includi una varietÃ  di tipi di attivitÃ  per rendere l'itinerario interessante
+- Considera l'ora dei pasti (colazione, pranzo, cena) quando pianifichi le attivitÃ 
 - Suggerisci ristoranti o luoghi specifici per i pasti, non generici
 - Includi dettagli culturali o storici nelle note quando appropriato
 - Considera il ritmo del viaggio richiesto (rilassato, moderato, attivo, intenso)
@@ -372,8 +375,8 @@ Fornisci la risposta SOLO in formato JSON con la seguente struttura:
     {
       "day_id": "ID_DEL_GIORNO",
       "day_date": "YYYY-MM-DD",
-      "name": "Nome dell'attività",
-      "type": "Tipo dell'attività",
+      "name": "Nome dell'attivitÃ ",
+      "type": "Tipo dell'attivitÃ ",
       "start_time": "YYYY-MM-DDTHH:MM:00Z",
       "end_time": "YYYY-MM-DDTHH:MM:00Z",
       "location": "Nome del luogo, Indirizzo/Zona",
@@ -426,16 +429,16 @@ function analyzeAdditionalPreferences(
   const normalizedText = additionalPreferences.toLowerCase();
 
   // Estrai le destinazioni specifiche
-  // Cerca pattern come "a [città]", "in [città]", "per [città]", "visitare [città]"
+  // Cerca pattern come "a [cittÃ ]", "in [cittÃ ]", "per [cittÃ ]", "visitare [cittÃ ]"
   const destinationPatterns = [
-    /\ba\s+([a-zàèéìòù]+(?:\s+[a-zàèéìòù]+)*)/g,
-    /\bin\s+([a-zàèéìòù]+(?:\s+[a-zàèéìòù]+)*)/g,
-    /\bper\s+([a-zàèéìòù]+(?:\s+[a-zàèéìòù]+)*)/g,
-    /\bvisitare\s+([a-zàèéìòù]+(?:\s+[a-zàèéìòù]+)*)/g,
-    /\bandare\s+(?:a|in)\s+([a-zàèéìòù]+(?:\s+[a-zàèéìòù]+)*)/g
+    /\ba\s+([a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+(?:\s+[a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+)*)/g,
+    /\bin\s+([a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+(?:\s+[a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+)*)/g,
+    /\bper\s+([a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+(?:\s+[a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+)*)/g,
+    /\bvisitare\s+([a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+(?:\s+[a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+)*)/g,
+    /\bandare\s+(?:a|in)\s+([a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+(?:\s+[a-zÃ Ã¨Ã©Ã¬Ã²Ã¹]+)*)/g
   ];
 
-  // Lista di città italiane comuni per verificare se una parola è una città
+  // Lista di cittÃ  italiane comuni per verificare se una parola Ã¨ una cittÃ 
   const commonItalianCities = [
     'roma', 'milano', 'napoli', 'torino', 'palermo', 'genova', 'bologna', 'firenze',
     'bari', 'catania', 'venezia', 'verona', 'messina', 'padova', 'trieste', 'taranto',
@@ -445,7 +448,7 @@ function analyzeAdditionalPreferences(
     'bolzano', 'novara', 'ancona', 'ferrara', 'ravenna', 'la spezia', 'terni', 'pisa'
   ];
 
-  // Aggiungi le destinazioni del viaggio alla lista di città da cercare
+  // Aggiungi le destinazioni del viaggio alla lista di cittÃ  da cercare
   const allCitiesToCheck = [...commonItalianCities];
   if (tripDestinations && tripDestinations.length > 0) {
     tripDestinations.forEach(dest => {
@@ -458,7 +461,7 @@ function analyzeAdditionalPreferences(
     allCitiesToCheck.push(mainDestination.toLowerCase());
   }
 
-  // Cerca città nel testo
+  // Cerca cittÃ  nel testo
   const potentialCities = new Set<string>();
 
   // Cerca pattern specifici
@@ -467,7 +470,7 @@ function analyzeAdditionalPreferences(
     for (const match of matches) {
       if (match[1]) {
         const city = match[1].trim();
-        // Verifica se la città è nella lista o è una delle destinazioni del viaggio
+        // Verifica se la cittÃ  Ã¨ nella lista o Ã¨ una delle destinazioni del viaggio
         if (allCitiesToCheck.some(knownCity =>
             city === knownCity ||
             city.includes(knownCity) ||
@@ -478,7 +481,7 @@ function analyzeAdditionalPreferences(
     }
   });
 
-  // Cerca direttamente le città conosciute nel testo
+  // Cerca direttamente le cittÃ  conosciute nel testo
   allCitiesToCheck.forEach(city => {
     if (normalizedText.includes(city)) {
       potentialCities.add(city);
@@ -491,7 +494,7 @@ function analyzeAdditionalPreferences(
     city.toLowerCase() !== mainDestination.toLowerCase()
   );
 
-  // Imposta la destinazione specifica (la prima città trovata diversa dalla destinazione principale)
+  // Imposta la destinazione specifica (la prima cittÃ  trovata diversa dalla destinazione principale)
   if (result.destinationsToVisit.length > 0) {
     result.specificDestination = result.destinationsToVisit[0];
     // Capitalizza la prima lettera
@@ -534,13 +537,13 @@ function analyzeAdditionalPreferences(
         // Crea il vincolo temporale
         let constraint = '';
         if (match[0].includes('entro') || match[0].includes('prima')) {
-          constraint = `Tutte le attività devono terminare entro le ${formattedTime}`;
+          constraint = `Tutte le attivitÃ  devono terminare entro le ${formattedTime}`;
         } else if (match[0].includes('fino')) {
-          constraint = `Le attività possono svolgersi fino alle ${formattedTime}`;
+          constraint = `Le attivitÃ  possono svolgersi fino alle ${formattedTime}`;
         } else if (match[0].includes('non dopo') || match[0].includes('non oltre')) {
-          constraint = `Nessuna attività deve iniziare o svolgersi dopo le ${formattedTime}`;
+          constraint = `Nessuna attivitÃ  deve iniziare o svolgersi dopo le ${formattedTime}`;
         } else if (match[0].includes('inizia') || match[0].includes('inizio') || match[0].includes('dalle') || match[0].includes('partire')) {
-          constraint = `La prima attività della giornata deve iniziare alle ${formattedTime}`;
+          constraint = `La prima attivitÃ  della giornata deve iniziare alle ${formattedTime}`;
         } else if (match[0].includes('aperitivo')) {
           constraint = `Includere un aperitivo alle ${formattedTime}`;
         } else if (match[0].includes('colazione')) {
@@ -607,12 +610,12 @@ function analyzeAdditionalPreferences(
     if (matches.length > 0) {
       result.isLimitedRequest = true;
 
-      // Conta quante attività specifiche sono state richieste
+      // Conta quante attivitÃ  specifiche sono state richieste
       let activityCount = 0;
       for (const match of matches) {
         if (match[1]) {
           const request = match[1].trim();
-          // Conta le attività separate da "e" o virgole
+          // Conta le attivitÃ  separate da "e" o virgole
           const activities = request.split(/\s+e\s+|,\s*/).filter(a => a.trim().length > 0);
           activityCount += activities.length;
         }
@@ -627,8 +630,8 @@ function analyzeAdditionalPreferences(
 
   // Rileva anche pattern numerici espliciti
   const numberPatterns = [
-    /(?:solo\s+)?(?:un[ao]?\s+)?(\d+)\s+attivit[àa]/gi,
-    /(?:solo\s+)?(\d+)\s+(?:cose?|attivit[àa])/gi
+    /(?:solo\s+)?(?:un[ao]?\s+)?(\d+)\s+attivit[Ã a]/gi,
+    /(?:solo\s+)?(\d+)\s+(?:cose?|attivit[Ã a])/gi
   ];
 
   for (const pattern of numberPatterns) {
@@ -640,7 +643,7 @@ function analyzeAdditionalPreferences(
     }
   }
 
-  // Se viene richiesta una singola attività specifica (colazione, pranzo, cena, aperitivo)
+  // Se viene richiesta una singola attivitÃ  specifica (colazione, pranzo, cena, aperitivo)
   const singleActivityPatterns = [
     /\b(?:solo\s+)?(?:la\s+)?colazione\b/gi,
     /\b(?:solo\s+)?(?:il\s+)?pranzo\b/gi,
@@ -661,10 +664,10 @@ function analyzeAdditionalPreferences(
   return result;
 }
 
-// Analizza la risposta per estrarre le attività
+// Analizza la risposta per estrarre le attivitÃ 
 function parseActivitiesFromResponse(response: string, days: any[], timeConstraints: string[]) {
   try {
-    console.log('Analisi risposta per estrarre attività...');
+    console.log('Analisi risposta per estrarre attivitÃ ...');
     console.log('Risposta grezza (primi 200 caratteri):', response.substring(0, 200));
 
     // Estrai il JSON dalla risposta
@@ -699,13 +702,13 @@ function parseActivitiesFromResponse(response: string, days: any[], timeConstrai
       const parsedData = JSON.parse(jsonString);
 
       if (!parsedData.activities || !Array.isArray(parsedData.activities)) {
-        console.error('Formato attività non valido:', parsedData);
-        throw new Error('Formato attività non valido');
+        console.error('Formato attivitÃ  non valido:', parsedData);
+        throw new Error('Formato attivitÃ  non valido');
       }
 
-      console.log('Numero di attività trovate:', parsedData.activities.length);
+      console.log('Numero di attivitÃ  trovate:', parsedData.activities.length);
 
-      // Valida e formatta le attività
+      // Valida e formatta le attivitÃ 
       return processActivities(parsedData.activities, days, timeConstraints);
     } catch (jsonError) {
       console.error('Errore nel parsing del JSON:', jsonError);
@@ -714,24 +717,24 @@ function parseActivitiesFromResponse(response: string, days: any[], timeConstrai
   } catch (error: any) {
     console.error('Error parsing activities:', error);
     const errorMessage = error.message || 'Errore sconosciuto';
-    throw new Error('Impossibile analizzare le attività dalla risposta: ' + errorMessage);
+    throw new Error('Impossibile analizzare le attivitÃ  dalla risposta: ' + errorMessage);
   }
 }
 
-// Funzione helper per processare le attività
+// Funzione helper per processare le attivitÃ 
 function processActivities(activities: any[], days: any[], timeConstraints: string[]) {
-  console.log('Processando attività...');
+  console.log('Processando attivitÃ ...');
 
-  // Ordina le attività per orario di inizio prima di processarle
+  // Ordina le attivitÃ  per orario di inizio prima di processarle
   activities.sort((a, b) => {
     const aTime = a.start_time ? new Date(a.start_time).getTime() : 0;
     const bTime = b.start_time ? new Date(b.start_time).getTime() : 0;
     return aTime - bTime;
   });
 
-  // Valida e formatta le attività
+  // Valida e formatta le attivitÃ 
   const processedActivities = activities.map((activity: any, index: number) => {
-    console.log(`Processando attività ${index + 1}:`, activity.name);
+    console.log(`Processando attivitÃ  ${index + 1}:`, activity.name);
 
     // Verifica che il day_id sia valido
     const dayExists = days.some(day => day.id === activity.day_id);
@@ -744,18 +747,18 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
 
     // Assicurati che tutti i campi necessari siano presenti
     if (!activity.name || !activity.type || !activity.start_time || !activity.end_time || !activity.location) {
-      console.warn('Campi obbligatori mancanti nell\'attività, aggiungendo valori predefiniti');
+      console.warn('Campi obbligatori mancanti nell\'attivitÃ , aggiungendo valori predefiniti');
 
       // Aggiungi valori predefiniti per i campi mancanti
-      if (!activity.name) activity.name = `Attività ${index + 1}`;
+      if (!activity.name) activity.name = `AttivitÃ  ${index + 1}`;
       if (!activity.type) activity.type = 'sightseeing';
 
       // Se mancano gli orari, usa orari predefiniti basati sull'indice
       if (!activity.start_time || !activity.end_time) {
         const dayDate = activity.day_date || days.find(day => day.id === activity.day_id)?.day_date;
 
-        // Se è la prima attività del giorno, inizia alle 9:00 (o all'orario specificato nelle preferenze)
-        // altrimenti, inizia 2 ore dopo l'attività precedente
+        // Se Ã¨ la prima attivitÃ  del giorno, inizia alle 9:00 (o all'orario specificato nelle preferenze)
+        // altrimenti, inizia 2 ore dopo l'attivitÃ  precedente
         let startHour = 9;
         if (index > 0) {
           startHour = 9 + (index % 4) * 2;
@@ -779,7 +782,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
     try {
       // Assicurati che gli orari siano in formato ISO
       if (typeof activity.start_time === 'string' && !activity.start_time.includes('T')) {
-        // Se è solo un orario (HH:MM), convertilo in ISO mantenendo il fuso orario locale
+        // Se Ã¨ solo un orario (HH:MM), convertilo in ISO mantenendo il fuso orario locale
         const [hours, minutes] = activity.start_time.split(':').map(Number);
         const dayDate = activity.day_date;
         // Crea la data in formato ISO mantenendo l'orario locale
@@ -788,7 +791,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
       }
 
       if (typeof activity.end_time === 'string' && !activity.end_time.includes('T')) {
-        // Se è solo un orario (HH:MM), convertilo in ISO mantenendo il fuso orario locale
+        // Se Ã¨ solo un orario (HH:MM), convertilo in ISO mantenendo il fuso orario locale
         const [hours, minutes] = activity.end_time.split(':').map(Number);
         const dayDate = activity.day_date;
         // Crea la data in formato ISO mantenendo l'orario locale
@@ -801,7 +804,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
       const endTime = new Date(activity.end_time);
 
       if (endTime <= startTime) {
-        console.warn(`Orario di fine non valido per l'attività ${activity.name}, aggiustando...`);
+        console.warn(`Orario di fine non valido per l'attivitÃ  ${activity.name}, aggiustando...`);
         // Aggiungi 1.5 ore all'orario di inizio
         const newEndTimeMs = startTime.getTime() + 90 * 60 * 1000;
         const newEndDate = new Date(newEndTimeMs);
@@ -814,9 +817,9 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
       console.error('Errore nella normalizzazione degli orari:', error);
     }
 
-    // Migliora la descrizione dell'attività se necessario
+    // Migliora la descrizione dell'attivitÃ  se necessario
     if (!activity.notes || activity.notes.trim() === '') {
-      // Genera una nota predefinita basata sul tipo di attività
+      // Genera una nota predefinita basata sul tipo di attivitÃ 
       switch (activity.type.toLowerCase()) {
         case 'food':
           activity.notes = `Gustare la cucina locale presso ${activity.location}`;
@@ -834,7 +837,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
           activity.notes = `Esperienza nella natura a ${activity.location}`;
           break;
         default:
-          activity.notes = `Attività di tipo ${activity.type} a ${activity.location}`;
+          activity.notes = `AttivitÃ  di tipo ${activity.type} a ${activity.location}`;
       }
     }
 
@@ -854,12 +857,12 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
     };
   });
 
-  // Ordina le attività per orario di inizio
+  // Ordina le attivitÃ  per orario di inizio
   processedActivities.sort((a, b) => {
     return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
   });
 
-  // Raggruppa le attività per giorno
+  // Raggruppa le attivitÃ  per giorno
   const activitiesByDay: Record<string, any[]> = {};
   processedActivities.forEach(activity => {
     const dayDate = activity.day_date;
@@ -869,11 +872,11 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
     activitiesByDay[dayDate].push(activity);
   });
 
-  // Per ogni giorno, assicurati che la prima attività inizi all'orario specificato (se presente)
+  // Per ogni giorno, assicurati che la prima attivitÃ  inizi all'orario specificato (se presente)
   Object.keys(activitiesByDay).forEach(dayDate => {
     const dayActivities = activitiesByDay[dayDate];
     if (dayActivities.length > 0) {
-      // Ordina le attività del giorno per orario di inizio
+      // Ordina le attivitÃ  del giorno per orario di inizio
       dayActivities.sort((a, b) => {
         return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
       });
@@ -883,10 +886,10 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
       if (startTimeConstraint) {
         const [hours, minutes] = startTimeConstraint.split(':').map(Number);
 
-        // Applica l'orario di inizio alla prima attività del giorno
+        // Applica l'orario di inizio alla prima attivitÃ  del giorno
         const firstActivity = dayActivities[0];
 
-        // Calcola la durata dell'attività prima di modificare l'orario
+        // Calcola la durata dell'attivitÃ  prima di modificare l'orario
         const currentStartTime = new Date(firstActivity.start_time);
         const currentEndTime = new Date(firstActivity.end_time);
         const duration = currentEndTime.getTime() - currentStartTime.getTime();
@@ -904,7 +907,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
         const newEndTime = `${dayDate}T${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}:00.000`;
         firstActivity.end_time = newEndTime;
 
-        // Aggiusta gli orari delle attività successive per evitare sovrapposizioni
+        // Aggiusta gli orari delle attivitÃ  successive per evitare sovrapposizioni
         for (let i = 1; i < dayActivities.length; i++) {
           const prevActivity = dayActivities[i-1];
           const currentActivity = dayActivities[i];
@@ -912,9 +915,9 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
           const prevEndTime = new Date(prevActivity.end_time);
           const currentStartTime = new Date(currentActivity.start_time);
 
-          // Se c'è sovrapposizione, sposta l'attività corrente dopo la precedente
+          // Se c'Ã¨ sovrapposizione, sposta l'attivitÃ  corrente dopo la precedente
           if (currentStartTime <= prevEndTime) {
-            // Aggiungi 30 minuti di pausa tra le attività
+            // Aggiungi 30 minuti di pausa tra le attivitÃ 
             const newStartTimeMs = prevEndTime.getTime() + 30 * 60 * 1000;
             const newStartDate = new Date(newStartTimeMs);
             const startHours = newStartDate.getHours();
@@ -922,7 +925,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
             const dayDate = currentActivity.day_date;
             currentActivity.start_time = `${dayDate}T${startHours.toString().padStart(2, '0')}:${startMinutes.toString().padStart(2, '0')}:00.000`;
 
-            // Calcola la durata dell'attività
+            // Calcola la durata dell'attivitÃ 
             const duration = new Date(currentActivity.end_time).getTime() - currentStartTime.getTime();
 
             // Aggiorna l'orario di fine mantenendo la stessa durata
@@ -941,7 +944,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
   function findStartTimeConstraint(): string | null {
     // Cerca nei vincoli temporali
     for (const constraint of timeConstraints) {
-      if (constraint.includes('La prima attività della giornata deve iniziare alle')) {
+      if (constraint.includes('La prima attivitÃ  della giornata deve iniziare alle')) {
         const match = constraint.match(/iniziare alle (\d{2}:\d{2})/);
         if (match && match[1]) {
           return match[1];
@@ -951,18 +954,18 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
     return null;
   }
 
-  // Gestisci attività specifiche a orari precisi (come aperitivo)
+  // Gestisci attivitÃ  specifiche a orari precisi (come aperitivo)
   Object.keys(activitiesByDay).forEach(dayDate => {
     const dayActivities = activitiesByDay[dayDate];
     if (dayActivities.length > 0) {
-      // Cerca vincoli per attività specifiche (aperitivo, pranzo, cena)
+      // Cerca vincoli per attivitÃ  specifiche (aperitivo, pranzo, cena)
       const specificTimeActivities = findSpecificTimeActivities();
 
       for (const specificActivity of specificTimeActivities) {
         const { activityType, time } = specificActivity;
         const [hours, minutes] = time.split(':').map(Number);
 
-        // Cerca se esiste già un'attività di questo tipo
+        // Cerca se esiste giÃ  un'attivitÃ  di questo tipo
         let existingActivity = dayActivities.find(activity =>
           activity.name.toLowerCase().includes(activityType.toLowerCase()) ||
           (activity.type === 'food' && activityType === 'pranzo') ||
@@ -971,10 +974,10 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
         );
 
         if (existingActivity) {
-          // Aggiorna l'orario dell'attività esistente mantenendo il fuso orario locale
+          // Aggiorna l'orario dell'attivitÃ  esistente mantenendo il fuso orario locale
           const activityDayDate = existingActivity.day_date || dayDate;
 
-          // Calcola la durata dell'attività prima di modificare l'orario
+          // Calcola la durata dell'attivitÃ  prima di modificare l'orario
           const currentStartTime = new Date(existingActivity.start_time);
           const currentEndTime = new Date(existingActivity.end_time);
           const duration = currentEndTime.getTime() - currentStartTime.getTime();
@@ -994,17 +997,17 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
 
           console.log(`Aggiornato orario per ${activityType} alle ${time}`);
         } else {
-          // Se non esiste, crea una nuova attività di questo tipo
-          console.log(`Non trovata attività di tipo ${activityType}, potrebbe essere necessario crearne una nuova`);
+          // Se non esiste, crea una nuova attivitÃ  di questo tipo
+          console.log(`Non trovata attivitÃ  di tipo ${activityType}, potrebbe essere necessario crearne una nuova`);
         }
       }
 
-      // Riordina le attività per orario dopo le modifiche
+      // Riordina le attivitÃ  per orario dopo le modifiche
       dayActivities.sort((a, b) => {
         return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
       });
 
-      // Aggiusta gli orari delle attività per evitare sovrapposizioni
+      // Aggiusta gli orari delle attivitÃ  per evitare sovrapposizioni
       for (let i = 1; i < dayActivities.length; i++) {
         const prevActivity = dayActivities[i-1];
         const currentActivity = dayActivities[i];
@@ -1012,9 +1015,9 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
         const prevEndTime = new Date(prevActivity.end_time);
         const currentStartTime = new Date(currentActivity.start_time);
 
-        // Se c'è sovrapposizione, sposta l'attività corrente dopo la precedente
+        // Se c'Ã¨ sovrapposizione, sposta l'attivitÃ  corrente dopo la precedente
         if (currentStartTime <= prevEndTime) {
-          // Aggiungi 30 minuti di pausa tra le attività
+          // Aggiungi 30 minuti di pausa tra le attivitÃ 
           const newStartTimeMs = prevEndTime.getTime() + 30 * 60 * 1000;
           const newStartDate = new Date(newStartTimeMs);
           const startHours = newStartDate.getHours();
@@ -1022,7 +1025,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
           const dayDate = currentActivity.day_date;
           currentActivity.start_time = `${dayDate}T${startHours.toString().padStart(2, '0')}:${startMinutes.toString().padStart(2, '0')}:00.000`;
 
-          // Calcola la durata dell'attività
+          // Calcola la durata dell'attivitÃ 
           const duration = new Date(currentActivity.end_time).getTime() - currentStartTime.getTime();
 
           // Aggiorna l'orario di fine mantenendo la stessa durata
@@ -1036,7 +1039,7 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
     }
   });
 
-  // Funzione per trovare attività specifiche a orari precisi
+  // Funzione per trovare attivitÃ  specifiche a orari precisi
   function findSpecificTimeActivities(): Array<{activityType: string, time: string}> {
     const result: Array<{activityType: string, time: string}> = [];
 
@@ -1071,6 +1074,6 @@ function processActivities(activities: any[], days: any[], timeConstraints: stri
     return result;
   }
 
-  console.log('Attività processate con successo:', processedActivities.length);
+  console.log('AttivitÃ  processate con successo:', processedActivities.length);
   return processedActivities;
 }

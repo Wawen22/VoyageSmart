@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { checkExpiredSubscriptions } from '@/lib/subscription-utils';
 
-// Questo endpoint può essere chiamato da un cron job per verificare e aggiornare
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
+
+// Questo endpoint puÃ² essere chiamato da un cron job per verificare e aggiornare
 // tutte le sottoscrizioni scadute
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +12,7 @@ export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('authorization');
     const apiKey = process.env.CRON_API_KEY;
     
-    // Se è configurata una chiave API, verifica che sia corretta
+    // Se Ã¨ configurata una chiave API, verifica che sia corretta
     if (apiKey && (!authHeader || authHeader !== `Bearer ${apiKey}`)) {
       return NextResponse.json(
         { error: 'Unauthorized' },

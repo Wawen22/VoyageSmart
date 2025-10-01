@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { logger } from '@/lib/logger';
 import fs from 'fs';
 import path from 'path';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 // Funzione di logging avanzata
 function logWebhookEvent(message: string, data?: any) {
@@ -35,7 +38,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16' as any,
 });
 
-// Inizializza Supabase (senza cookies perché è un webhook)
+// Inizializza Supabase (senza cookies perchÃ© Ã¨ un webhook)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

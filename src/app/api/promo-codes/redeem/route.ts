@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 /**
  * API per riscattare un codice promozionale
@@ -49,7 +52,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica se il codice esiste e se è valido
+    // Verifica se il codice esiste e se Ã¨ valido
     const { data: promoCode, error: promoCodeError } = await supabase
       .from('promo_codes')
       .select('*')
@@ -71,7 +74,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica se il codice è attivo
+    // Verifica se il codice Ã¨ attivo
     if (promoCode.is_active === false) {
       return NextResponse.json(
         { error: 'This promo code is no longer active' },
@@ -79,7 +82,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica se il codice è scaduto
+    // Verifica se il codice Ã¨ scaduto
     if (promoCode.expires_at && new Date(promoCode.expires_at) < new Date()) {
       return NextResponse.json(
         { error: 'This promo code has expired' },
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica se l'utente ha già utilizzato questo codice
+    // Verifica se l'utente ha giÃ  utilizzato questo codice
     const { data: existingRedemption, error: redemptionError } = await supabase
       .from('promo_code_redemptions')
       .select('id')
@@ -150,7 +153,7 @@ export async function POST(request: NextRequest) {
     // Aggiorna la sottoscrizione dell'utente
     let updateResult;
     if (currentSubscription) {
-      // Se l'utente ha già una sottoscrizione, aggiornala
+      // Se l'utente ha giÃ  una sottoscrizione, aggiornala
       updateResult = await supabase
         .from('user_subscriptions')
         .update({

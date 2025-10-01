@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Stripe from 'stripe';
 import { withAuth } from '@/app/api/middleware';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 // @ts-ignore - Ignora l'errore di tipo per la versione dell'API
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
 
       console.log('Downgrade API - Found subscription:', subscriptionData);
 
-      // Se l'utente è già sul piano free, non fare nulla
+      // Se l'utente Ã¨ giÃ  sul piano free, non fare nulla
       if (subscriptionData.tier === 'free') {
         console.log('Downgrade API - User is already on free tier');
         return NextResponse.json({ 
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Se c'è una sottoscrizione Stripe attiva, cancellarla
+      // Se c'Ã¨ una sottoscrizione Stripe attiva, cancellarla
       let stripeUpdateSuccessful = false;
       if (subscriptionData.stripe_subscription_id) {
         try {

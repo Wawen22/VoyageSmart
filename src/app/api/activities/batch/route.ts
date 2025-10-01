@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { logger } from '@/lib/logger';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +19,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Commentiamo temporaneamente la verifica dell'autenticazione per debug
-    // Se non c'è una sessione, procediamo comunque ma lo logghiamo
+    // Se non c'Ã¨ una sessione, procediamo comunque ma lo logghiamo
     if (!session) {
       logger.warn('User not authenticated, proceeding for debug purposes');
       // Continuiamo l'esecuzione invece di restituire un errore
@@ -31,12 +34,12 @@ export async function POST(request: NextRequest) {
 
     if (!activities || !Array.isArray(activities) || activities.length === 0) {
       return NextResponse.json(
-        { error: 'Dati mancanti: activities è richiesto e deve essere un array non vuoto' },
+        { error: 'Dati mancanti: activities Ã¨ richiesto e deve essere un array non vuoto' },
         { status: 400 }
       );
     }
 
-    // Verifica che l'utente abbia accesso al viaggio (solo se l'utente è autenticato)
+    // Verifica che l'utente abbia accesso al viaggio (solo se l'utente Ã¨ autenticato)
     const tripId = activities[0].trip_id;
 
     if (session) {
@@ -67,14 +70,14 @@ export async function POST(request: NextRequest) {
       logger.debug('Skipping trip access verification - user not authenticated');
     }
 
-    // Salva le attività nel database
+    // Salva le attivitÃ  nel database
     logger.debug('Saving activities to database', { activitiesCount: activities.length });
 
     try {
       // Utilizziamo il client admin creato in precedenza per il bypass delle politiche RLS
       logger.debug('Using supabaseAdmin for saving activities');
 
-      // Salva ogni attività singolarmente per gestire meglio gli errori
+      // Salva ogni attivitÃ  singolarmente per gestire meglio gli errori
       const savedActivities = [];
       const errors = [];
 
@@ -106,9 +109,9 @@ export async function POST(request: NextRequest) {
         });
 
         if (savedActivities.length === 0) {
-          // Se nessuna attività è stata salvata, restituisci un errore
+          // Se nessuna attivitÃ  Ã¨ stata salvata, restituisci un errore
           return NextResponse.json({
-            error: 'Nessuna attività salvata',
+            error: 'Nessuna attivitÃ  salvata',
             details: errors,
           }, { status: 500 });
         }

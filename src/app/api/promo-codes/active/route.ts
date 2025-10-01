@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 /**
  * API per ottenere i codici promozionali attivi dell'utente
@@ -63,7 +66,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Ottieni la sottoscrizione attuale dell'utente per verificare se è attiva tramite promo code
+    // Ottieni la sottoscrizione attuale dell'utente per verificare se Ã¨ attiva tramite promo code
     const { data: subscription, error: subscriptionError } = await supabase
       .from('user_subscriptions')
       .select('*')
@@ -78,8 +81,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verifica se la sottoscrizione è attiva tramite promo code
-    // Questo è un controllo semplificato, in un sistema reale potrebbe essere più complesso
+    // Verifica se la sottoscrizione Ã¨ attiva tramite promo code
+    // Questo Ã¨ un controllo semplificato, in un sistema reale potrebbe essere piÃ¹ complesso
     const hasActivePromoSubscription = subscription && 
                                       subscription.status === 'active' && 
                                       !subscription.stripe_subscription_id;

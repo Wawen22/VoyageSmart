@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import Stripe from 'stripe';
 import { supabase } from '@/lib/supabase';
 import { withAuth } from '@/app/api/middleware';
+
+// Force dynamic rendering - do not pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 // @ts-ignore - Ignora l'errore di tipo per la versione dell'API
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

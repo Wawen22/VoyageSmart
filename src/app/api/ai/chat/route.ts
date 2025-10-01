@@ -9,6 +9,9 @@ import { applyRateLimit } from '@/lib/rate-limit';
 import { hasCachedResponse } from '@/lib/services/aiApiService';
 import { analyzeMessageContext as analyzeContextualActions, formatActionsForResponse } from '@/lib/services/contextualActionsService';
 
+// Force dynamic rendering - don't pre-render this route during build
+export const dynamic = 'force-dynamic';
+
 // Funzione per analizzare il messaggio e determinare il contesto necessario
 function analyzeMessageContext(message: string): {
   needsItinerary: boolean;
