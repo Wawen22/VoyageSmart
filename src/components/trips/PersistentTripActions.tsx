@@ -12,7 +12,8 @@ import {
   BookOpenIcon,
   MapPinIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  InfoIcon
 } from 'lucide-react';
 import { useSubscription } from '@/lib/subscription';
 import UnreadBadge from '@/components/chat/UnreadBadge';
@@ -21,6 +22,8 @@ interface PersistentTripActionsProps {
   tripId: string;
   accommodationCount?: number;
   transportationCount?: number;
+  itineraryCount?: number;
+  expensesCount?: number;
   participantsCount?: number;
 }
 
@@ -28,6 +31,8 @@ export default function PersistentTripActions({
   tripId,
   accommodationCount = 0,
   transportationCount = 0,
+  itineraryCount = 0,
+  expensesCount = 0,
   participantsCount = 0
 }: PersistentTripActionsProps) {
   const pathname = usePathname();
@@ -83,6 +88,7 @@ export default function PersistentTripActions({
       glowColor: 'bg-blue-500/20',
       textColor: 'text-blue-500',
       badge: <BookOpenIcon className="h-3 w-3 text-purple-500" />,
+      count: itineraryCount,
       isActive: pathname.includes('/itinerary')
     },
     {
@@ -95,6 +101,7 @@ export default function PersistentTripActions({
       hoverGradient: 'from-emerald-500/10 via-transparent to-teal-500/10',
       glowColor: 'bg-emerald-500/20',
       textColor: 'text-emerald-500',
+      count: accommodationCount,
       counter: subscription?.tier === 'free' ? `${accommodationCount}/5` : undefined,
       isActive: pathname.includes('/accommodations')
     },
@@ -108,6 +115,7 @@ export default function PersistentTripActions({
       hoverGradient: 'from-sky-500/10 via-transparent to-cyan-500/10',
       glowColor: 'bg-sky-500/20',
       textColor: 'text-sky-500',
+      count: transportationCount,
       counter: subscription?.tier === 'free' ? `${transportationCount}/5` : undefined,
       isActive: pathname.includes('/transportation')
     },
@@ -118,9 +126,10 @@ export default function PersistentTripActions({
       title: 'Expenses',
       description: 'Track and split expenses',
       gradient: 'from-amber-500/20 to-orange-500/20',
-      hoverGradient: 'from-amber-500/10 via-transparent to-orange-500/10',
+      hoverGradient: 'from-amber-500/10 via-transparent to-amber-500/10',
       glowColor: 'bg-amber-500/20',
       textColor: 'text-amber-500',
+      count: expensesCount,
       isActive: pathname.includes('/expenses')
     },
     {
@@ -198,6 +207,30 @@ export default function PersistentTripActions({
                 <div className={`relative z-10 flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
                   {/* Icon Container */}
                   <div className="relative flex-shrink-0">
+                    {/* Free Plan Limit Info Icon - Positioned above the main icon */}
+                    {!isCollapsed && action.counter && (
+                      <div className="absolute -top-2 -left-2 z-20 group/limit">
+                        <div className={`p-1 rounded-full ${action.textColor.replace('text-', 'bg-')}/30 border ${action.textColor.replace('text-', 'border-')}/40 cursor-help transition-all duration-200 hover:scale-110 backdrop-blur-sm`}>
+                          <InfoIcon className={`h-3 w-3 ${action.textColor}`} />
+                        </div>
+
+                        {/* Tooltip */}
+                        <div className="absolute left-0 top-full mt-2 w-48 p-3 bg-popover border border-border rounded-lg shadow-2xl opacity-0 invisible group-hover/limit:opacity-100 group-hover/limit:visible transition-all duration-200 z-[9999]">
+                          <div className="text-xs space-y-1">
+                            <p className="font-semibold text-foreground">Free Plan Limit</p>
+                            <p className="text-muted-foreground">
+                              You're using <span className="font-bold text-foreground">{action.counter}</span>
+                            </p>
+                            <p className="text-xs text-muted-foreground pt-1 border-t border-border">
+                              Upgrade to Premium for unlimited access
+                            </p>
+                          </div>
+                          {/* Arrow */}
+                          <div className="absolute -top-1 left-4 w-2 h-2 bg-popover border-l border-t border-border rotate-45"></div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className={`icon-container rounded-xl bg-gradient-to-br ${action.gradient} backdrop-blur-sm border border-white/20 transition-all duration-300 ${
                       isCollapsed ? 'p-2' : 'p-2.5'
                     }`}>
@@ -228,18 +261,24 @@ export default function PersistentTripActions({
                   {/* Content */}
                   {!isCollapsed && (
                     <div className="ml-4 flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <h4 className={`text-sm font-semibold ${action.textColor} group-hover:${action.textColor} transition-colors duration-300`}>
                           {action.title}
                         </h4>
-                        
-                        {action.counter && (
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${action.textColor.replace('text-', 'bg-')}/20 ${action.textColor} border ${action.textColor.replace('text-', 'border-')}/30 backdrop-blur-sm`}>
-                            {action.counter}
-                          </span>
+
+                        {/* Count Badge - Shows total items */}
+                        {action.count !== undefined && action.count > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                              Items
+                            </span>
+                            <span className={`inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 rounded-full text-xs font-bold bg-gradient-to-br ${action.gradient} ${action.textColor} border border-white/30 backdrop-blur-sm shadow-sm`}>
+                              {action.count}
+                            </span>
+                          </div>
                         )}
                       </div>
-                      
+
                       <p className="text-xs text-muted-foreground mt-1 truncate">
                         {action.description}
                       </p>

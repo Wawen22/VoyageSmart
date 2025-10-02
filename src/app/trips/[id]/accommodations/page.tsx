@@ -22,7 +22,8 @@ import {
   MapPinIcon,
   ListIcon,
   MapIcon,
-  AlertTriangleIcon
+  AlertTriangleIcon,
+  Info
 } from 'lucide-react';
 import AccommodationCard from '@/components/accommodations/AccommodationCard';
 import AccommodationSkeleton from '@/components/accommodations/AccommodationSkeleton';
@@ -273,7 +274,7 @@ export default function AccommodationsPage() {
                 </div>
 
                 {/* Counter Widget - Mobile */}
-                <div className="flex justify-center">
+                <div className="flex justify-center gap-3">
                   <div className="glass-info-card flex items-center px-4 py-2 rounded-xl">
                     <div className="p-1 rounded-full bg-emerald-500/20 mr-2">
                       <Building2Icon className="h-3 w-3 text-emerald-500" />
@@ -285,6 +286,34 @@ export default function AccommodationsPage() {
                       </span>
                     </div>
                   </div>
+
+                  {/* Free Plan Limit Indicator - Mobile */}
+                  {subscription?.tier === 'free' && (
+                    <div className="relative group/limit-mobile">
+                      <div className="glass-info-card flex items-center px-3 py-2 rounded-xl border border-emerald-500/30 cursor-help transition-all duration-200 hover:border-emerald-500/50 hover:bg-emerald-500/5 active:scale-95">
+                        <Info className="h-3.5 w-3.5 text-emerald-500 mr-1.5" />
+                        <div className="text-center">
+                          <span className="text-xs font-semibold text-emerald-600">{accommodations.length}/5</span>
+                          <span className="text-[10px] text-muted-foreground ml-1">used</span>
+                        </div>
+                      </div>
+
+                      {/* Tooltip - Mobile (click/tap) & Desktop (hover) */}
+                      <div className="fixed left-1/2 -translate-x-1/2 top-auto mt-2 w-56 p-3 bg-popover border border-border rounded-lg shadow-2xl opacity-0 invisible group-hover/limit-mobile:opacity-100 group-hover/limit-mobile:visible transition-all duration-200 z-[9999] pointer-events-none group-hover/limit-mobile:pointer-events-auto">
+                        <div className="text-xs space-y-1.5">
+                          <p className="font-semibold text-foreground">Free Plan Limit</p>
+                          <p className="text-muted-foreground">
+                            You're using <span className="font-bold text-emerald-600">{accommodations.length} of 5</span> accommodations
+                          </p>
+                          <p className="text-xs text-muted-foreground pt-1.5 border-t border-border">
+                            💎 Upgrade to Premium for unlimited accommodations
+                          </p>
+                        </div>
+                        {/* Arrow */}
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-popover border-l border-t border-border rotate-45"></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -312,7 +341,7 @@ export default function AccommodationsPage() {
                 </div>
 
                 {/* Counter Widget - Desktop */}
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 flex items-center gap-3">
                   <div className="glass-info-card flex items-center px-4 py-2.5 rounded-2xl">
                     <div className="p-1.5 rounded-full bg-emerald-500/20 mr-3">
                       <Building2Icon className="h-4 w-4 text-emerald-500" />
@@ -324,6 +353,34 @@ export default function AccommodationsPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Free Plan Limit Indicator - Desktop */}
+                  {subscription?.tier === 'free' && (
+                    <div className="relative group/limit-desktop">
+                      <div className="glass-info-card flex items-center px-4 py-2.5 rounded-2xl border border-emerald-500/30 cursor-help transition-all duration-200 hover:border-emerald-500/50 hover:bg-emerald-500/5 hover:scale-105">
+                        <Info className="h-4 w-4 text-emerald-500 mr-2" />
+                        <div className="text-center">
+                          <div className="text-sm font-bold text-emerald-600">{accommodations.length}/5</div>
+                          <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Limit</div>
+                        </div>
+                      </div>
+
+                      {/* Tooltip - Desktop (hover) */}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 p-3 bg-popover border border-border rounded-lg shadow-2xl opacity-0 invisible group-hover/limit-desktop:opacity-100 group-hover/limit-desktop:visible transition-all duration-200 z-[9999]">
+                        <div className="text-xs space-y-1.5">
+                          <p className="font-semibold text-foreground">Free Plan Limit</p>
+                          <p className="text-muted-foreground">
+                            You're using <span className="font-bold text-emerald-600">{accommodations.length} of 5</span> accommodations
+                          </p>
+                          <p className="text-xs text-muted-foreground pt-1.5 border-t border-border">
+                            💎 Upgrade to Premium for unlimited accommodations
+                          </p>
+                        </div>
+                        {/* Arrow */}
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-popover border-l border-t border-border rotate-45"></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 

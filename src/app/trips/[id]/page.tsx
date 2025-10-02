@@ -29,7 +29,8 @@ import {
   ArrowLeft,
   InfoIcon,
   BookOpenIcon,
-  SparklesIcon
+  SparklesIcon,
+  Info
 } from 'lucide-react';
 
 type Trip = {
@@ -77,6 +78,8 @@ export default function TripDetails() {
   const [tripCount, setTripCount] = useState<number | null>(null);
   const [accommodationCount, setAccommodationCount] = useState<number>(0);
   const [transportationCount, setTransportationCount] = useState<number>(0);
+  const [itineraryCount, setItineraryCount] = useState<number>(0);
+  const [expensesCount, setExpensesCount] = useState<number>(0);
 
 
   useEffect(() => {
@@ -173,7 +176,7 @@ export default function TripDetails() {
     fetchTripDetails();
   }, [id, user]);
 
-  // Fetch counts for accommodations and transportation
+  // Fetch counts for accommodations, transportation, itinerary, and expenses
   useEffect(() => {
     const fetchCounts = async () => {
       if (!id) return;
@@ -191,8 +194,28 @@ export default function TripDetails() {
           .select('*', { count: 'exact', head: true })
           .eq('trip_id', id);
 
+        // Fetch itinerary days count
+        const { count: daysCount } = await supabase
+          .from('itinerary_days')
+          .select('*', { count: 'exact', head: true })
+          .eq('trip_id', id);
+
+        // Fetch activities count
+        const { count: activitiesCount } = await supabase
+          .from('activities')
+          .select('*', { count: 'exact', head: true })
+          .eq('trip_id', id);
+
+        // Fetch expenses count
+        const { count: expCount } = await supabase
+          .from('expenses')
+          .select('*', { count: 'exact', head: true })
+          .eq('trip_id', id);
+
         setAccommodationCount(accCount || 0);
         setTransportationCount(transCount || 0);
+        setItineraryCount((daysCount || 0) + (activitiesCount || 0));
+        setExpensesCount(expCount || 0);
       } catch (error) {
         console.error('Error fetching counts:', error);
       }
@@ -715,6 +738,18 @@ export default function TripDetails() {
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
                 <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-purple-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700" style={{ transitionDelay: '200ms' }}></div>
 
+                {/* Count Badge */}
+                {itineraryCount > 0 && (
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-blue-600/80 uppercase tracking-wide bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                      Items
+                    </span>
+                    <span className="inline-flex items-center justify-center min-w-[2rem] h-7 px-2.5 rounded-full text-xs font-bold bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-blue-600 border border-blue-500/30 backdrop-blur-sm shadow-sm">
+                      {itineraryCount}
+                    </span>
+                  </div>
+                )}
+
                 <div className="relative z-10 flex flex-col items-center text-center h-full">
                   {/* Icon Container */}
                   <div className="relative mb-4">
@@ -760,12 +795,39 @@ export default function TripDetails() {
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
-                {/* Free plan counter */}
-                {subscription?.tier === 'free' && (
-                  <div className="absolute top-3 right-3 z-20">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 backdrop-blur-sm">
-                      {accommodationCount}/5
+                {/* Count Badge - positioned on the left */}
+                {accommodationCount > 0 && (
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-emerald-600/80 uppercase tracking-wide bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                      Items
                     </span>
+                    <span className="inline-flex items-center justify-center min-w-[2rem] h-7 px-2.5 rounded-full text-xs font-bold bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-600 border border-emerald-500/30 backdrop-blur-sm shadow-sm">
+                      {accommodationCount}
+                    </span>
+                  </div>
+                )}
+
+                {/* Free plan limit info icon - positioned on the right */}
+                {subscription?.tier === 'free' && (
+                  <div className="absolute top-3 right-3 z-20 group/limit">
+                    <div className="p-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 cursor-help transition-all duration-200 hover:scale-110 hover:bg-emerald-500/30">
+                      <Info className="h-4 w-4 text-emerald-600" />
+                    </div>
+
+                    {/* Tooltip */}
+                    <div className="absolute right-0 top-full mt-2 w-52 p-3 bg-popover border border-border rounded-lg shadow-2xl opacity-0 invisible group-hover/limit:opacity-100 group-hover/limit:visible transition-all duration-200 z-[9999]">
+                      <div className="text-xs space-y-1.5">
+                        <p className="font-semibold text-foreground">Free Plan Limit</p>
+                        <p className="text-muted-foreground">
+                          You're using <span className="font-bold text-emerald-600">{accommodationCount} of 5</span> accommodations
+                        </p>
+                        <p className="text-xs text-muted-foreground pt-1.5 border-t border-border">
+                          💎 Upgrade to Premium for unlimited accommodations
+                        </p>
+                      </div>
+                      {/* Arrow */}
+                      <div className="absolute -top-1 right-4 w-2 h-2 bg-popover border-l border-t border-border rotate-45"></div>
+                    </div>
                   </div>
                 )}
 
@@ -809,12 +871,39 @@ export default function TripDetails() {
                 <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 via-transparent to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-sky-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
-                {/* Free plan counter */}
-                {subscription?.tier === 'free' && (
-                  <div className="absolute top-3 right-3 z-20">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-500/20 text-sky-600 border border-sky-500/30 backdrop-blur-sm">
-                      {transportationCount}/5
+                {/* Count Badge - positioned on the left */}
+                {transportationCount > 0 && (
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-sky-600/80 uppercase tracking-wide bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                      Items
                     </span>
+                    <span className="inline-flex items-center justify-center min-w-[2rem] h-7 px-2.5 rounded-full text-xs font-bold bg-gradient-to-br from-sky-500/20 to-cyan-500/20 text-sky-600 border border-sky-500/30 backdrop-blur-sm shadow-sm">
+                      {transportationCount}
+                    </span>
+                  </div>
+                )}
+
+                {/* Free plan limit info icon - positioned on the right */}
+                {subscription?.tier === 'free' && (
+                  <div className="absolute top-3 right-3 z-20 group/limit">
+                    <div className="p-2 rounded-full bg-sky-500/20 border border-sky-500/30 cursor-help transition-all duration-200 hover:scale-110 hover:bg-sky-500/30">
+                      <Info className="h-4 w-4 text-sky-600" />
+                    </div>
+
+                    {/* Tooltip */}
+                    <div className="absolute right-0 top-full mt-2 w-52 p-3 bg-popover border border-border rounded-lg shadow-2xl opacity-0 invisible group-hover/limit:opacity-100 group-hover/limit:visible transition-all duration-200 z-[9999]">
+                      <div className="text-xs space-y-1.5">
+                        <p className="font-semibold text-foreground">Free Plan Limit</p>
+                        <p className="text-muted-foreground">
+                          You're using <span className="font-bold text-sky-600">{transportationCount} of 5</span> transportation items
+                        </p>
+                        <p className="text-xs text-muted-foreground pt-1.5 border-t border-border">
+                          💎 Upgrade to Premium for unlimited transportation
+                        </p>
+                      </div>
+                      {/* Arrow */}
+                      <div className="absolute -top-1 right-4 w-2 h-2 bg-popover border-l border-t border-border rotate-45"></div>
+                    </div>
                   </div>
                 )}
 
@@ -857,6 +946,18 @@ export default function TripDetails() {
                 {/* Modern Background Elements */}
                 <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-amber-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+
+                {/* Count Badge */}
+                {expensesCount > 0 && (
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-amber-600/80 uppercase tracking-wide bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                      Items
+                    </span>
+                    <span className="inline-flex items-center justify-center min-w-[2rem] h-7 px-2.5 rounded-full text-xs font-bold bg-gradient-to-br from-amber-500/20 to-orange-500/20 text-amber-600 border border-amber-500/30 backdrop-blur-sm shadow-sm">
+                      {expensesCount}
+                    </span>
+                  </div>
+                )}
 
                 <div className="relative z-10 flex flex-col items-center text-center h-full">
                   {/* Icon Container */}

@@ -135,25 +135,57 @@ export default function AdvancedMetricsModal({ trips, trigger }: AdvancedMetrics
             </Card>
           </div>
 
-          {/* Export Options */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+          {/* Export Options - Coming Soon */}
+          <Card className="relative overflow-hidden border-dashed border-2 border-muted-foreground/20 bg-gradient-to-br from-muted/30 via-muted/20 to-background">
+            {/* Subtle animated background pattern */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,currentColor_25%,currentColor_50%,transparent_50%,transparent_75%,currentColor_75%,currentColor)] bg-[length:20px_20px]" />
+            </div>
+
+            <CardHeader className="relative">
+              <CardTitle className="flex items-center gap-2 text-muted-foreground">
                 <TrendingUpIcon className="h-5 w-5" />
                 Export & Reports
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3">
-                <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                  Export PDF Report
-                </Button>
-                <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                  Download CSV Data
-                </Button>
-                <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                  Share Analytics
-                </Button>
+            <CardContent className="relative">
+              <div className="flex flex-col items-center justify-center py-8 px-4 space-y-4">
+                {/* Icon with subtle animation */}
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+                  <div className="relative bg-gradient-to-br from-primary/10 to-primary/5 p-6 rounded-2xl border border-primary/20">
+                    <TrendingUpIcon className="h-12 w-12 text-primary/60" />
+                  </div>
+                </div>
+
+                {/* Coming Soon Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-sm font-semibold text-primary">Coming Soon</span>
+                </div>
+
+                {/* Description */}
+                <div className="text-center space-y-2 max-w-md">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Advanced Export Features
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    We're working on powerful export and reporting capabilities. Soon you'll be able to generate PDF reports, download CSV data, and share your analytics with ease.
+                  </p>
+                </div>
+
+                {/* Feature Preview Pills */}
+                <div className="flex flex-wrap justify-center gap-2 pt-2">
+                  <div className="px-3 py-1.5 rounded-full bg-background border border-border text-xs font-medium text-muted-foreground">
+                    📄 PDF Reports
+                  </div>
+                  <div className="px-3 py-1.5 rounded-full bg-background border border-border text-xs font-medium text-muted-foreground">
+                    📊 CSV Export
+                  </div>
+                  <div className="px-3 py-1.5 rounded-full bg-background border border-border text-xs font-medium text-muted-foreground">
+                    🔗 Share Analytics
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -21,6 +21,8 @@ export default function TripLayout({
   const [loading, setLoading] = useState(true);
   const [accommodationCount, setAccommodationCount] = useState<number>(0);
   const [transportationCount, setTransportationCount] = useState<number>(0);
+  const [itineraryCount, setItineraryCount] = useState<number>(0);
+  const [expensesCount, setExpensesCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -167,6 +169,14 @@ export default function TripLayout({
         setAccommodationCount((accommodationsData || []).length);
         setTransportationCount((transportationData || []).length);
 
+        // Calculate itinerary count (total days + activities)
+        const totalActivities = (activitiesData || []).length;
+        const totalDays = (itineraryDaysData || []).length;
+        setItineraryCount(totalDays + totalActivities);
+
+        // Set expenses count
+        setExpensesCount(processedExpenses.length);
+
         setTrip(tripWithDetails);
 
         // Fetch participants
@@ -210,6 +220,8 @@ export default function TripLayout({
           tripId={id as string}
           accommodationCount={accommodationCount}
           transportationCount={transportationCount}
+          itineraryCount={itineraryCount}
+          expensesCount={expensesCount}
           participantsCount={participants.length}
         />
       )}
