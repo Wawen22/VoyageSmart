@@ -13,6 +13,7 @@ import MobileNavbar from '@/components/layout/MobileNavbar';
 import OnboardingModal, { OnboardingModalProvider } from '@/components/subscription/OnboardingModal';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
+import { CookieConsent } from '@/components/gdpr/CookieConsent';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -59,6 +60,7 @@ export default function RootLayout({
               <MobileNavbar />
               <OnboardingModal />
               <ServiceWorkerRegistration />
+              <CookieConsent />
             </OnboardingModalProvider>
           </Providers>
         </ErrorBoundary>

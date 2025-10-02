@@ -1118,9 +1118,12 @@ export default function Home() {
               <Button
                 variant="outline"
                 className="group px-8 py-6 text-base font-medium rounded-xl border-primary/20 hover:bg-primary/5 transition-all duration-300 hover:scale-105"
+                asChild
               >
-                <PhoneIcon className="h-5 w-5 mr-3 group-hover:text-primary transition-colors duration-300" />
-                <span className="group-hover:text-primary transition-colors duration-300">Contact Support</span>
+                <Link href="/support">
+                  <PhoneIcon className="h-5 w-5 mr-3 group-hover:text-primary transition-colors duration-300" />
+                  <span className="group-hover:text-primary transition-colors duration-300">Contact Support</span>
+                </Link>
               </Button>
             </div>
           </div>
@@ -1290,13 +1293,13 @@ export default function Home() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
+                  <Link href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Privacy Policy</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
+                  <Link href="/terms-of-service" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Terms of Service</span>
                   </Link>

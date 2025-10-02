@@ -688,7 +688,8 @@ This project is **private and proprietary**. All rights reserved.
 
 Need help? We're here for you!
 
-- 📧 **Email**: support@voyage-smart.app
+- 📧 **Email**: info@voyage-smart.app
+- 🆘 **Support Page**: [/support](/support)
 - 📖 **Documentation**: [./Documentation](./Documentation)
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Wawen22/VoyageSmart/issues)
 - 💡 **Feature Requests**: [GitHub Issues](https://github.com/Wawen22/VoyageSmart/issues)

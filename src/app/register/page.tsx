@@ -18,6 +18,8 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
+  const [acceptMarketing, setAcceptMarketing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -44,7 +46,12 @@ export default function Register() {
     }
 
     if (!acceptTerms) {
-      setError('You must accept the terms and conditions');
+      setError('You must accept the Terms of Service');
+      return;
+    }
+
+    if (!acceptPrivacy) {
+      setError('You must accept the Privacy Policy');
       return;
     }
 
@@ -62,12 +69,19 @@ export default function Register() {
       setSuccess('Registration successful! Please check your email to confirm your account.');
       setLoading(false); // Stop loading indicator
 
+      // Store marketing consent if accepted
+      if (acceptMarketing) {
+        localStorage.setItem('consent-marketing', 'true');
+      }
+
       // Clear form fields after successful registration
       setFullName('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
       setAcceptTerms(false);
+      setAcceptPrivacy(false);
+      setAcceptMarketing(false);
 
       // If there's a returnUrl, add it to the login redirect
       if (returnUrl) {
@@ -247,7 +261,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Terms and Conditions */}
+            {/* Terms of Service */}
             <div className="flex items-start space-x-3">
               <div className="flex items-center h-5 mt-1">
                 <div className="relative">
@@ -268,13 +282,63 @@ export default function Register() {
               <div className="text-sm">
                 <label htmlFor="terms" className="font-medium text-foreground cursor-pointer">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-primary hover:text-primary/80 transition-colors underline">
+                  <Link href="/terms-of-service" className="text-primary hover:text-primary/80 transition-colors underline">
                     Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" className="text-primary hover:text-primary/80 transition-colors underline">
+                  </Link>
+                  <span className="text-destructive ml-1">*</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Privacy Policy */}
+            <div className="flex items-start space-x-3">
+              <div className="flex items-center h-5 mt-1">
+                <div className="relative">
+                  <input
+                    id="privacy"
+                    name="privacy"
+                    type="checkbox"
+                    required
+                    checked={acceptPrivacy}
+                    onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                    className="h-5 w-5 text-primary focus:ring-2 focus:ring-primary/50 border-2 border-black/30 dark:border-white/20 bg-black/10 dark:bg-white/5 rounded-md backdrop-blur-sm transition-all duration-300"
+                  />
+                  {acceptPrivacy && (
+                    <Check className="absolute inset-0 h-5 w-5 text-primary pointer-events-none" />
+                  )}
+                </div>
+              </div>
+              <div className="text-sm">
+                <label htmlFor="privacy" className="font-medium text-foreground cursor-pointer">
+                  I agree to the{' '}
+                  <Link href="/privacy-policy" className="text-primary hover:text-primary/80 transition-colors underline">
                     Privacy Policy
                   </Link>
+                  <span className="text-destructive ml-1">*</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Marketing Consent (Optional) */}
+            <div className="flex items-start space-x-3">
+              <div className="flex items-center h-5 mt-1">
+                <div className="relative">
+                  <input
+                    id="marketing"
+                    name="marketing"
+                    type="checkbox"
+                    checked={acceptMarketing}
+                    onChange={(e) => setAcceptMarketing(e.target.checked)}
+                    className="h-5 w-5 text-primary focus:ring-2 focus:ring-primary/50 border-2 border-black/30 dark:border-white/20 bg-black/10 dark:bg-white/5 rounded-md backdrop-blur-sm transition-all duration-300"
+                  />
+                  {acceptMarketing && (
+                    <Check className="absolute inset-0 h-5 w-5 text-primary pointer-events-none" />
+                  )}
+                </div>
+              </div>
+              <div className="text-sm">
+                <label htmlFor="marketing" className="font-medium text-muted-foreground cursor-pointer">
+                  I want to receive travel tips, special offers, and updates via email (optional)
                 </label>
               </div>
             </div>

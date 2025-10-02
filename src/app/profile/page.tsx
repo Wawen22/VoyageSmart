@@ -9,7 +9,7 @@ import { useSubscription } from '@/lib/subscription';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
-import { RocketIcon, TagIcon, LockIcon, SparklesIcon, UserIcon } from 'lucide-react';
+import { RocketIcon, TagIcon, LockIcon, SparklesIcon, UserIcon, Shield, ArrowRight } from 'lucide-react';
 
 export default function Profile() {
   const { user, updateProfile, signOut } = useAuth();
@@ -315,23 +315,82 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Delete Account */}
+        {/* Privacy & Security */}
         <div className="mt-6 bg-card shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg leading-6 font-medium text-foreground">Delete Account</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg leading-6 font-medium text-foreground flex items-center">
+                <Shield className="h-5 w-5 mr-2" />
+                Privacy & Security
+              </h3>
+            </div>
+
+            <div className="mt-2 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Manage your privacy settings, data export, and account deletion options.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                {/* Privacy Settings */}
+                <Link
+                  href="/profile/privacy"
+                  className="group p-4 border border-border rounded-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-200"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-foreground mb-1 flex items-center">
+                        <Shield className="h-4 w-4 mr-2 text-primary" />
+                        Privacy Settings
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Manage consents, export data, and delete account
+                      </p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                  </div>
+                </Link>
+
+                {/* GDPR Compliance */}
+                <div className="p-4 border border-border rounded-lg bg-green-500/5">
+                  <div className="flex items-start">
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-foreground mb-1 flex items-center">
+                        <LockIcon className="h-4 w-4 mr-2 text-green-600 dark:text-green-400" />
+                        GDPR Compliant
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        Your data is protected according to EU regulations
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  <strong>Your Rights:</strong> Access, rectify, export, or delete your personal data at any time.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Account */}
+        <div className="mt-6 bg-card shadow overflow-hidden sm:rounded-lg border-destructive/20">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg leading-6 font-medium text-foreground flex items-center text-destructive">
+              <LockIcon className="h-5 w-5 mr-2" />
+              Danger Zone
+            </h3>
             <div className="mt-2 max-w-xl text-sm text-muted-foreground">
               <p>
                 Once you delete your account, all of your data will be permanently removed.
-                This action cannot be undone.
+                This action cannot be undone. For account deletion, please visit the{' '}
+                <Link href="/profile/privacy" className="text-primary hover:underline">
+                  Privacy Settings
+                </Link>{' '}
+                page.
               </p>
-            </div>
-            <div className="mt-5">
-              <button
-                type="button"
-                className="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-destructive bg-destructive/10 hover:bg-destructive/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive sm:text-sm transition-colors"
-              >
-                Delete Account
-              </button>
             </div>
           </div>
         </div>
