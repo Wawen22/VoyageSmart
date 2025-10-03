@@ -37,9 +37,6 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { LazyMapView } from '@/components/LazyComponents';
 import { uploadFile } from '@/lib/fileUpload';
-// TransportationStopForm import removed temporarily
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
@@ -58,7 +55,6 @@ export default function TransportationModal({
 }: TransportationModalProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('basic');
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
 
@@ -124,7 +120,6 @@ export default function TransportationModal({
     setArrivalCoordinates(null);
     setDocuments([]);
     setNewFiles([]);
-    setActiveTab('basic');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -281,8 +276,8 @@ export default function TransportationModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto  border-sky-500/20">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="w-full max-w-[calc(100vw-1rem)] sm:max-w-[700px] max-h-[90vh] overflow-y-auto overflow-x-hidden border-sky-500/20">
         {/* Modern Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-cyan-500/5 opacity-50 rounded-2xl"></div>
         <div className="absolute -top-12 -right-12 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl opacity-50"></div>
@@ -305,114 +300,81 @@ export default function TransportationModal({
           </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="relative z-10">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="glass-nav rounded-xl p-1 border border-white/20 grid w-full grid-cols-3">
-              <TabsTrigger
-                value="basic"
-                className="rounded-lg data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-600 transition-all duration-300"
-              >
-                Basic Info
-              </TabsTrigger>
-              <TabsTrigger
-                value="details"
-                className="rounded-lg data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-600 transition-all duration-300"
-              >
-                Details
-              </TabsTrigger>
-              <TabsTrigger
-                value="documents"
-                className="rounded-lg data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-600 transition-all duration-300"
-              >
-                Documents
-              </TabsTrigger>
-            </TabsList>
+        <form onSubmit={handleSubmit} className="space-y-6 py-4 relative z-10">
 
-            {/* Basic Info Tab */}
-            <TabsContent value="basic" className="space-y-4 py-4">
+          {/* Basic Information Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-sky-500/20 mr-2">
+                <PlaneTakeoffIcon className="h-4 w-4 text-sky-500" />
+              </div>
+              Basic Information
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Transportation Type */}
               <div className="space-y-2">
-                <Label htmlFor="type">Transportation Type</Label>
+                <Label htmlFor="type" className="text-sm font-medium text-foreground">
+                  Transportation Type *
+                </Label>
                 <Select
                   value={formData.type}
                   onValueChange={(value) => handleSelectChange('type', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="type" className="glass-button border-white/20 bg-background/50 backdrop-blur-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="flight" className="flex items-center">
-                      <div className="flex items-center">
-                        <PlaneTakeoffIcon className="h-4 w-4 mr-2" />
-                        Flight
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="train">
-                      <div className="flex items-center">
-                        <TrainIcon className="h-4 w-4 mr-2" />
-                        Train
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="bus">
-                      <div className="flex items-center">
-                        <BusIcon className="h-4 w-4 mr-2" />
-                        Bus
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="car">
-                      <div className="flex items-center">
-                        <CarIcon className="h-4 w-4 mr-2" />
-                        Car
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="ferry">
-                      <div className="flex items-center">
-                        <ShipIcon className="h-4 w-4 mr-2" />
-                        Ferry
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="other">
-                      <div className="flex items-center">
-                        <MoreHorizontalIcon className="h-4 w-4 mr-2" />
-                        Other
-                      </div>
-                    </SelectItem>
+                    <SelectItem value="flight">Flight</SelectItem>
+                    <SelectItem value="train">Train</SelectItem>
+                    <SelectItem value="bus">Bus</SelectItem>
+                    <SelectItem value="car">Car</SelectItem>
+                    <SelectItem value="ferry">Ferry</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Provider */}
               <div className="space-y-2">
-                <Label htmlFor="provider">Provider</Label>
+                <Label htmlFor="provider" className="text-sm font-medium text-foreground">
+                  Provider
+                </Label>
                 <Input
                   id="provider"
                   name="provider"
                   value={formData.provider}
                   onChange={handleChange}
                   placeholder="Airline, train company, etc."
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
                 />
               </div>
 
               {/* Booking Reference */}
               <div className="space-y-2">
-                <Label htmlFor="booking_reference">Booking Reference</Label>
+                <Label htmlFor="booking_reference" className="text-sm font-medium text-foreground">
+                  Booking Reference
+                </Label>
                 <Input
                   id="booking_reference"
                   name="booking_reference"
                   value={formData.booking_reference}
                   onChange={handleChange}
                   placeholder="Booking or ticket number"
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
                 />
               </div>
 
               {/* Status */}
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status" className="text-sm font-medium text-foreground">
+                  Status
+                </Label>
                 <Select
                   value={formData.status}
                   onValueChange={(value) => handleSelectChange('status', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="status" className="glass-button border-white/20 bg-background/50 backdrop-blur-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -422,110 +384,140 @@ export default function TransportationModal({
                   </SelectContent>
                 </Select>
               </div>
-            </TabsContent>
+            </div>
+          </div>
 
-            {/* Details Tab */}
-            <TabsContent value="details" className="space-y-4 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Departure Section */}
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Departure</h3>
+          {/* Travel Details Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-blue-500/20 mr-2">
+                <CalendarIcon className="h-4 w-4 text-blue-500" />
+              </div>
+              Travel Details
+            </h3>
 
-                  {/* Departure Time */}
-                  <div className="space-y-2">
-                    <Label htmlFor="departure_time">Departure Time</Label>
-                    <Input
-                      id="departure_time"
-                      name="departure_time"
-                      type="datetime-local"
-                      value={formData.departure_time}
-                      onChange={handleChange}
-                    />
-                  </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Departure Time */}
+              <div className="space-y-2">
+                <Label htmlFor="departure_time" className="text-sm font-medium text-foreground">
+                  Departure Time
+                </Label>
+                <Input
+                  id="departure_time"
+                  name="departure_time"
+                  type="datetime-local"
+                  value={formData.departure_time}
+                  onChange={handleChange}
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
 
-                  {/* Departure Location */}
-                  <div className="space-y-2">
-                    <Label htmlFor="departure_location">Departure Location</Label>
-                    <Input
-                      id="departure_location"
-                      name="departure_location"
-                      value={formData.departure_location}
-                      onChange={handleChange}
-                      placeholder="Airport, station, etc."
-                    />
-                  </div>
+              {/* Arrival Time */}
+              <div className="space-y-2">
+                <Label htmlFor="arrival_time" className="text-sm font-medium text-foreground">
+                  Arrival Time
+                </Label>
+                <Input
+                  id="arrival_time"
+                  name="arrival_time"
+                  type="datetime-local"
+                  value={formData.arrival_time}
+                  onChange={handleChange}
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
 
-                  {/* Departure Map */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <MapPinIcon className="h-4 w-4 mr-1" />
-                      Departure Location on Map
-                      <span className="text-xs text-muted-foreground ml-2">
-                        (Click on the map to set location)
-                      </span>
-                    </Label>
-                    <LazyMapView
-                      address={formData.departure_location}
-                      coordinates={departureCoordinates}
-                      interactive={true}
-                      onLocationSelect={handleDepartureLocationSelect}
-                    />
-                  </div>
-                </div>
+              {/* Departure Location */}
+              <div className="space-y-2">
+                <Label htmlFor="departure_location" className="text-sm font-medium text-foreground">
+                  Departure Location
+                </Label>
+                <Input
+                  id="departure_location"
+                  name="departure_location"
+                  value={formData.departure_location}
+                  onChange={handleChange}
+                  placeholder="Airport, station, etc."
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
 
-                {/* Arrival Section */}
-                <div className="space-y-4">
-                  <h3 className="font-medium text-lg">Arrival</h3>
+              {/* Arrival Location */}
+              <div className="space-y-2">
+                <Label htmlFor="arrival_location" className="text-sm font-medium text-foreground">
+                  Arrival Location
+                </Label>
+                <Input
+                  id="arrival_location"
+                  name="arrival_location"
+                  value={formData.arrival_location}
+                  onChange={handleChange}
+                  placeholder="Airport, station, etc."
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+            </div>
+          </div>
 
-                  {/* Arrival Time */}
-                  <div className="space-y-2">
-                    <Label htmlFor="arrival_time">Arrival Time</Label>
-                    <Input
-                      id="arrival_time"
-                      name="arrival_time"
-                      type="datetime-local"
-                      value={formData.arrival_time}
-                      onChange={handleChange}
-                    />
-                  </div>
+          {/* Location Maps Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-purple-500/20 mr-2">
+                <MapPinIcon className="h-4 w-4 text-purple-500" />
+              </div>
+              Location on Map
+              <span className="text-xs text-muted-foreground ml-2 font-normal">
+                (Click on the map to set location)
+              </span>
+            </h3>
 
-                  {/* Arrival Location */}
-                  <div className="space-y-2">
-                    <Label htmlFor="arrival_location">Arrival Location</Label>
-                    <Input
-                      id="arrival_location"
-                      name="arrival_location"
-                      value={formData.arrival_location}
-                      onChange={handleChange}
-                      placeholder="Airport, station, etc."
-                    />
-                  </div>
-
-                  {/* Arrival Map */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center">
-                      <MapPinIcon className="h-4 w-4 mr-1" />
-                      Arrival Location on Map
-                      <span className="text-xs text-muted-foreground ml-2">
-                        (Click on the map to set location)
-                      </span>
-                    </Label>
-                    <LazyMapView
-                      address={formData.arrival_location}
-                      coordinates={arrivalCoordinates}
-                      interactive={true}
-                      onLocationSelect={handleArrivalLocationSelect}
-                    />
-                  </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Departure Map */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">Departure</Label>
+                <div className="rounded-xl overflow-hidden border border-white/20">
+                  <LazyMapView
+                    address={formData.departure_location}
+                    coordinates={departureCoordinates}
+                    interactive={true}
+                    onLocationSelect={handleDepartureLocationSelect}
+                    height="200px"
+                  />
                 </div>
               </div>
 
-              <Separator />
+              {/* Arrival Map */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">Arrival</Label>
+                <div className="rounded-xl overflow-hidden border border-white/20">
+                  <LazyMapView
+                    address={formData.arrival_location}
+                    coordinates={arrivalCoordinates}
+                    interactive={true}
+                    onLocationSelect={handleArrivalLocationSelect}
+                    height="200px"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
+          {/* Cost and Notes Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 mr-2">
+                <DollarSignIcon className="h-4 w-4 text-emerald-500" />
+              </div>
+              Additional Details
+            </h3>
+
+            <div className="space-y-4">
               {/* Cost */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="cost">Cost</Label>
+                  <Label htmlFor="cost" className="text-sm font-medium text-foreground">
+                    Cost
+                  </Label>
                   <Input
                     id="cost"
                     name="cost"
@@ -534,16 +526,19 @@ export default function TransportationModal({
                     value={formData.cost}
                     onChange={handleChange}
                     placeholder="0.00"
+                    className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
+                  <Label htmlFor="currency" className="text-sm font-medium text-foreground">
+                    Currency
+                  </Label>
                   <Select
                     value={formData.currency}
                     onValueChange={(value) => handleSelectChange('currency', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="currency" className="glass-button border-white/20 bg-background/50 backdrop-blur-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -561,7 +556,9 @@ export default function TransportationModal({
 
               {/* Notes */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes" className="text-sm font-medium text-foreground">
+                  Notes
+                </Label>
                 <Textarea
                   id="notes"
                   name="notes"
@@ -569,23 +566,33 @@ export default function TransportationModal({
                   onChange={handleChange}
                   placeholder="Additional information"
                   rows={4}
+                  className="glass-button border-white/20 bg-background/50 backdrop-blur-sm"
                 />
               </div>
-            </TabsContent>
+            </div>
+          </div>
 
-            {/* Stops Tab removed temporarily */}
+          {/* Documents Section */}
+          <div className="glass-info-card p-4 rounded-2xl">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center">
+              <div className="p-1.5 rounded-lg bg-orange-500/20 mr-2">
+                <FileIcon className="h-4 w-4 text-orange-500" />
+              </div>
+              Documents
+            </h3>
 
-            {/* Documents Tab */}
-            <TabsContent value="documents" className="space-y-4 py-4">
-              {/* File Upload */}
+            {/* File Upload */}
+            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="documents">Upload Documents</Label>
+                <Label htmlFor="documents" className="text-sm font-medium text-foreground">
+                  Upload Documents
+                </Label>
                 <Input
                   id="documents"
                   type="file"
                   onChange={handleFileChange}
                   multiple
-                  className="cursor-pointer"
+                  className="cursor-pointer glass-button border-white/20 bg-background/50 backdrop-blur-sm"
                 />
                 <p className="text-xs text-muted-foreground">
                   Upload tickets, boarding passes, or other relevant documents.
@@ -595,15 +602,15 @@ export default function TransportationModal({
               {/* Existing Documents */}
               {documents.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Existing Documents</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Label className="text-sm font-medium text-foreground">Existing Documents</Label>
+                  <div className="space-y-2">
                     {documents.map((doc, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-2 border rounded-md"
+                        className="flex items-center justify-between p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10"
                       >
                         <div className="flex items-center overflow-hidden">
-                          <FileIcon className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <FileIcon className="h-4 w-4 mr-2 flex-shrink-0 text-muted-foreground" />
                           <span className="text-sm truncate">{doc.name}</span>
                         </div>
                         <Button
@@ -611,7 +618,7 @@ export default function TransportationModal({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveDocument(index)}
-                          className="h-8 w-8 p-0 text-destructive"
+                          className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
                         >
                           <span className="sr-only">Remove</span>
                           <XIcon className="h-4 w-4" />
@@ -625,16 +632,18 @@ export default function TransportationModal({
               {/* New Files */}
               {newFiles.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Files to Upload</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Label className="text-sm font-medium text-foreground">Files to Upload</Label>
+                  <div className="space-y-2">
                     {newFiles.map((file, index) => (
                       <div
                         key={index}
-                        className="flex items-center p-2 border rounded-md"
+                        className="flex items-center justify-between p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10"
                       >
-                        <FileIcon className="h-4 w-4 mr-2" />
-                        <span className="text-sm truncate">{file.name}</span>
-                        <Badge variant="outline" className="ml-2 text-xs">
+                        <div className="flex items-center overflow-hidden">
+                          <FileIcon className="h-4 w-4 mr-2 flex-shrink-0 text-muted-foreground" />
+                          <span className="text-sm truncate">{file.name}</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
                           New
                         </Badge>
                       </div>
@@ -642,10 +651,10 @@ export default function TransportationModal({
                   </div>
                 </div>
               )}
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
 
-          <DialogFooter className="relative z-10 pt-6 border-t border-white/10 mt-6">
+          <DialogFooter className="relative z-10 pt-6 border-t border-white/10 modal-footer-mobile">
             <div className="flex space-x-3 w-full sm:justify-end">
               <button
                 type="button"

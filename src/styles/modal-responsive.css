@@ -10,6 +10,13 @@
     overflow: hidden !important;
     position: fixed !important;
     width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  /* Prevent horizontal scroll on html and body */
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
   }
 
   /* Ensure proper spacing for mobile navigation */
@@ -171,6 +178,7 @@
     justify-content: center !important;
     padding: 8px !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   /* Reset all positioning for content and center it */
@@ -187,12 +195,20 @@
     max-height: calc(100vh - 80px) !important; /* Leave space for mobile navigation */
     flex-shrink: 0 !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
   }
 
   /* Specific optimizations for Analytics Modal */
   [data-radix-dialog-content] {
     display: flex !important;
     flex-direction: column !important;
+  }
+
+  /* Prevent horizontal overflow in all child elements */
+  [data-radix-dialog-content] * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   [data-radix-dialog-content] .space-y-6,
@@ -221,5 +237,20 @@
     overflow-y: auto !important;
     flex: 1 !important;
     min-height: 0 !important;
+  }
+
+  /* Ensure form elements don't cause overflow */
+  [data-radix-dialog-content] form {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Ensure all sections stay within bounds */
+  [data-radix-dialog-content] .glass-info-card,
+  [data-radix-dialog-content] .glass-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
