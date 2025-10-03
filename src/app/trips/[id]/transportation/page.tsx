@@ -224,9 +224,9 @@ export default function TransportationPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative overflow-hidden mb-6">
+      <header className="relative overflow-visible mb-6">
         {/* Modern Glassmorphism Background - Sky/Cyan Theme */}
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 via-background/95 to-cyan-500/10 backdrop-blur-xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-500/10 via-background/95 to-cyan-500/10 backdrop-blur-xl overflow-hidden"></div>
 
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -253,7 +253,7 @@ export default function TransportationPage() {
         </div>
 
         {/* Main Header Content */}
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:py-8 md:py-12 sm:px-6 lg:px-8 relative z-10 trip-header-mobile transportation-header-mobile">
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:py-8 md:py-12 sm:px-6 lg:px-8 relative z-30 trip-header-mobile transportation-header-mobile">
           <div className="animate-glass-fade-in">
             {/* Section Title with Modern Typography */}
             <div className="relative mb-6">
@@ -296,7 +296,7 @@ export default function TransportationPage() {
 
                   {/* Free Plan Limit Indicator - Mobile */}
                   {subscription?.tier === 'free' && (
-                    <div className="relative group/limit-mobile">
+                    <div className="relative group/limit-mobile z-[9999]">
                       <div className="glass-info-card flex items-center px-3 py-2 rounded-xl border border-sky-500/30 cursor-help transition-all duration-200 hover:border-sky-500/50 hover:bg-sky-500/5 active:scale-95">
                         <Info className="h-3.5 w-3.5 text-sky-500 mr-1.5" />
                         <div className="text-center">
@@ -306,18 +306,20 @@ export default function TransportationPage() {
                       </div>
 
                       {/* Tooltip - Mobile (click/tap) & Desktop (hover) */}
-                      <div className="fixed left-1/2 -translate-x-1/2 top-auto mt-2 w-56 p-3 bg-popover border border-border rounded-lg shadow-2xl opacity-0 invisible group-hover/limit-mobile:opacity-100 group-hover/limit-mobile:visible transition-all duration-200 z-[9999] pointer-events-none group-hover/limit-mobile:pointer-events-auto">
-                        <div className="text-xs space-y-1.5">
-                          <p className="font-semibold text-foreground">Free Plan Limit</p>
-                          <p className="text-muted-foreground">
-                            You're using <span className="font-bold text-sky-600">{transportations.length} of 5</span> transportation items
-                          </p>
-                          <p className="text-xs text-muted-foreground pt-1.5 border-t border-border">
-                            💎 Upgrade to Premium for unlimited transportation
-                          </p>
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 opacity-0 invisible group-hover/limit-mobile:opacity-100 group-hover/limit-mobile:visible transition-all duration-200 z-[9999] pointer-events-none group-hover/limit-mobile:pointer-events-auto">
+                        <div className="p-3 bg-popover border border-border rounded-lg shadow-2xl">
+                          <div className="text-xs space-y-1.5">
+                            <p className="font-semibold text-foreground">Free Plan Limit</p>
+                            <p className="text-muted-foreground">
+                              You're using <span className="font-bold text-sky-600">{transportations.length} of 5</span> transportation items
+                            </p>
+                            <p className="text-xs text-muted-foreground pt-1.5 border-t border-border">
+                              💎 Upgrade to Premium for unlimited transportation
+                            </p>
+                          </div>
+                          {/* Arrow pointing down */}
+                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-popover border-r border-b border-border rotate-45"></div>
                         </div>
-                        {/* Arrow */}
-                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-popover border-l border-t border-border rotate-45"></div>
                       </div>
                     </div>
                   )}
@@ -363,7 +365,7 @@ export default function TransportationPage() {
 
                   {/* Free Plan Limit Indicator - Desktop */}
                   {subscription?.tier === 'free' && (
-                    <div className="relative group/limit-desktop">
+                    <div className="relative group/limit-desktop z-[9999]">
                       <div className="glass-info-card flex items-center px-4 py-2.5 rounded-2xl border border-sky-500/30 cursor-help transition-all duration-200 hover:border-sky-500/50 hover:bg-sky-500/5 hover:scale-105">
                         <Info className="h-4 w-4 text-sky-500 mr-2" />
                         <div className="text-center">
@@ -372,19 +374,21 @@ export default function TransportationPage() {
                         </div>
                       </div>
 
-                      {/* Tooltip - Desktop (hover) */}
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 p-3 bg-popover border border-border rounded-lg shadow-2xl opacity-0 invisible group-hover/limit-desktop:opacity-100 group-hover/limit-desktop:visible transition-all duration-200 z-[9999]">
-                        <div className="text-xs space-y-1.5">
-                          <p className="font-semibold text-foreground">Free Plan Limit</p>
-                          <p className="text-muted-foreground">
-                            You're using <span className="font-bold text-sky-600">{transportations.length} of 5</span> transportation items
-                          </p>
-                          <p className="text-xs text-muted-foreground pt-1.5 border-t border-border">
-                            💎 Upgrade to Premium for unlimited transportation
-                          </p>
+                      {/* Tooltip - Desktop (hover) - Portal-like positioning */}
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 opacity-0 invisible group-hover/limit-desktop:opacity-100 group-hover/limit-desktop:visible transition-all duration-200 z-[9999] pointer-events-none group-hover/limit-desktop:pointer-events-auto">
+                        <div className="p-3 bg-popover border border-border rounded-lg shadow-2xl">
+                          <div className="text-xs space-y-1.5">
+                            <p className="font-semibold text-foreground">Free Plan Limit</p>
+                            <p className="text-muted-foreground">
+                              You're using <span className="font-bold text-sky-600">{transportations.length} of 5</span> transportation items
+                            </p>
+                            <p className="text-xs text-muted-foreground pt-1.5 border-t border-border">
+                              💎 Upgrade to Premium for unlimited transportation
+                            </p>
+                          </div>
+                          {/* Arrow pointing down */}
+                          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-popover border-r border-b border-border rotate-45"></div>
                         </div>
-                        {/* Arrow */}
-                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-popover border-l border-t border-border rotate-45"></div>
                       </div>
                     </div>
                   )}

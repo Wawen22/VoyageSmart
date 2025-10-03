@@ -154,7 +154,7 @@ export default function PersistentTripActions({
       isCollapsed ? 'w-20 collapsed' : 'w-80'
     }`}>
       {/* Main Container */}
-      <div className="glass-card rounded-2xl border-0 overflow-hidden shadow-2xl">
+      <div className="glass-card rounded-2xl border-0 overflow-visible shadow-2xl">
         {/* Header */}
         <div className={`border-b border-white/10 ${isCollapsed ? 'p-2' : 'p-4'}`}>
           <div className={`flex items-center ${isCollapsed ? 'flex-col space-y-2' : 'justify-between'}`}>
@@ -194,39 +194,43 @@ export default function PersistentTripActions({
               href={action.href}
               className="group block mb-2 last:mb-0"
             >
-              <div className={`action-item relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] ${
+              <div className={`action-item relative overflow-visible rounded-xl transition-all duration-300 hover:scale-[1.02] ${
                 action.isActive
                   ? 'active bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20'
                   : 'hover:bg-white/5'
               } ${isCollapsed ? 'p-2' : 'p-4'}`}>
-                
-                {/* Hover Background */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${action.hoverGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
-                <div className={`absolute -top-12 -right-12 w-24 h-24 ${action.glowColor} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700`}></div>
+
+                {/* Hover Background - Contained wrapper */}
+                <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${action.hoverGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                  <div className={`absolute -top-12 -right-12 w-24 h-24 ${action.glowColor} rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700`}></div>
+                </div>
 
                 <div className={`relative z-10 flex items-center ${isCollapsed ? 'justify-center' : ''}`}>
                   {/* Icon Container */}
                   <div className="relative flex-shrink-0">
                     {/* Free Plan Limit Info Icon - Positioned above the main icon */}
                     {!isCollapsed && action.counter && (
-                      <div className="absolute -top-2 -left-2 z-20 group/limit">
+                      <div className="absolute -top-2 -left-2 z-[9999] group/limit">
                         <div className={`p-1 rounded-full ${action.textColor.replace('text-', 'bg-')}/30 border ${action.textColor.replace('text-', 'border-')}/40 cursor-help transition-all duration-200 hover:scale-110 backdrop-blur-sm`}>
                           <InfoIcon className={`h-3 w-3 ${action.textColor}`} />
                         </div>
 
                         {/* Tooltip */}
-                        <div className="absolute left-0 top-full mt-2 w-48 p-3 bg-popover border border-border rounded-lg shadow-2xl opacity-0 invisible group-hover/limit:opacity-100 group-hover/limit:visible transition-all duration-200 z-[9999]">
-                          <div className="text-xs space-y-1">
-                            <p className="font-semibold text-foreground">Free Plan Limit</p>
-                            <p className="text-muted-foreground">
-                              You're using <span className="font-bold text-foreground">{action.counter}</span>
-                            </p>
-                            <p className="text-xs text-muted-foreground pt-1 border-t border-border">
-                              Upgrade to Premium for unlimited access
-                            </p>
+                        <div className="absolute left-0 bottom-full mb-2 w-48 opacity-0 invisible group-hover/limit:opacity-100 group-hover/limit:visible transition-all duration-200 z-[9999] pointer-events-none group-hover/limit:pointer-events-auto">
+                          <div className="p-3 bg-popover border border-border rounded-lg shadow-2xl">
+                            <div className="text-xs space-y-1">
+                              <p className="font-semibold text-foreground">Free Plan Limit</p>
+                              <p className="text-muted-foreground">
+                                You're using <span className="font-bold text-foreground">{action.counter}</span>
+                              </p>
+                              <p className="text-xs text-muted-foreground pt-1 border-t border-border">
+                                Upgrade to Premium for unlimited access
+                              </p>
+                            </div>
+                            {/* Arrow pointing down */}
+                            <div className="absolute -bottom-1 left-4 w-2 h-2 bg-popover border-r border-b border-border rotate-45"></div>
                           </div>
-                          {/* Arrow */}
-                          <div className="absolute -top-1 left-4 w-2 h-2 bg-popover border-l border-t border-border rotate-45"></div>
                         </div>
                       </div>
                     )}
