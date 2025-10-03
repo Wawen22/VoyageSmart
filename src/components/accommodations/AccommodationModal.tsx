@@ -267,7 +267,7 @@ export default function AccommodationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto  border-emerald-500/20">
+      <DialogContent className="w-full max-w-[calc(100vw-1rem)] sm:max-w-[700px] max-h-[90vh] overflow-y-auto overflow-x-hidden border-emerald-500/20">
         {/* Modern Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 opacity-50 rounded-2xl"></div>
         <div className="absolute -top-12 -right-12 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl opacity-50"></div>
