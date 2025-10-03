@@ -66,8 +66,8 @@ const DEFAULT_PERMISSIONS: Record<Role, RolePermissions> = {
     canAddExpenses: true,
     canEditExpenses: true,
     canDeleteExpenses: false,
-    canAddAccommodations: false,
-    canEditAccommodations: false,
+    canAddAccommodations: true,
+    canEditAccommodations: true,
     canDeleteAccommodations: false,
   },
 };
