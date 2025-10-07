@@ -308,27 +308,13 @@ export default function Home() {
               </div>
             </div>
             <div className="hidden md:flex space-x-8">
-              <button
-                onClick={() => scrollToSection(featuresRef)}
+              <Link
+                href="/hub"
                 className="text-foreground/70 hover:text-primary transition-all duration-300 font-medium relative group"
               >
-                Features
+                Travel Hub
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </button>
-              <button
-                onClick={() => scrollToSection(pricingRef)}
-                className="text-foreground/70 hover:text-primary transition-all duration-300 font-medium relative group"
-              >
-                Plans & Pricing
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </button>
-              <button
-                onClick={() => scrollToSection(faqRef)}
-                className="text-foreground/70 hover:text-primary transition-all duration-300 font-medium relative group"
-              >
-                FAQ
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
-              </button>
+              </Link>
               <Link
                 href="/documentation"
                 target="_blank"
@@ -1258,6 +1244,12 @@ export default function Home() {
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Plans & Pricing</span>
                   </button>
+                </li>
+                <li>
+                  <Link href="/hub" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
+                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Travel Hub</span>
+                  </Link>
                 </li>
                 <li>
                   <button

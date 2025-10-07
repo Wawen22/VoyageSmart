@@ -30,6 +30,14 @@ const nextConfig = {
           ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
           : '*.supabase.co', // wildcard for development
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 3600, // 1 hour cache

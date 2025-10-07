@@ -94,6 +94,18 @@ export default function Navbar() {
                 Documentation
               </Link>
 
+              {/* Travel Hub link - always visible */}
+              <Link
+                href="/hub"
+                className={`${
+                  pathname.startsWith('/hub')
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                } text-sm font-medium transition-colors`}
+              >
+                Travel Hub
+              </Link>
+
               {!isAuthPage && (
                 <>
                   <Link
@@ -136,6 +148,19 @@ export default function Navbar() {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
                 aria-label="Documentation"
+              >
+                <BookOpenIcon className="h-5 w-5" />
+              </Link>
+
+              {/* Travel Hub link for mobile */}
+              <Link
+                href="/hub"
+                className={`p-2 rounded-md ${
+                  pathname.startsWith('/hub')
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-label="Travel Hub"
               >
                 <BookOpenIcon className="h-5 w-5" />
               </Link>
@@ -242,6 +267,16 @@ export default function Navbar() {
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Documentation
+              </Link>
+              <Link
+                href="/hub"
+                className={`nav-indicator ${
+                  pathname.startsWith('/hub')
+                    ? 'border-primary text-foreground active'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Travel Hub
               </Link>
             </div>
           </div>

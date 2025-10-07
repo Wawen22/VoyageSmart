@@ -16,7 +16,8 @@ import {
   ZapIcon,
   RocketIcon,
   SparklesIcon,
-  BarChart3Icon
+  BarChart3Icon,
+  BookOpenIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -40,6 +41,15 @@ export default function QuickActionsWidget({ className, trips = [] }: QuickActio
       gradient: 'from-blue-500 to-purple-600',
       shortcut: 'Ctrl+N',
       primary: true
+    },
+    {
+      id: 'travel-hub',
+      title: 'Travel Hub',
+      description: 'Guides, tips & inspiration',
+      icon: BookOpenIcon,
+      href: '/hub',
+      gradient: 'from-indigo-500 to-purple-600',
+      shortcut: 'H'
     },
     {
       id: 'ai-assistant',

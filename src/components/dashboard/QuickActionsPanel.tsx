@@ -29,20 +29,20 @@ export default function QuickActionsPanel({ className }: QuickActionsPanelProps)
       bgGradient: 'from-blue-50 to-cyan-50 dark:from-blue-950 dark:to-cyan-950'
     },
     {
+      title: 'Travel Hub',
+      description: 'Guides, tips & travel inspiration',
+      icon: BookOpenIcon,
+      href: '/hub',
+      gradient: 'from-indigo-500 to-purple-500',
+      bgGradient: 'from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950'
+    },
+    {
       title: 'Quick Itinerary',
       description: 'Create a day-by-day plan',
       icon: CalendarIcon,
       href: '/trips/new?quick=true',
       gradient: 'from-emerald-500 to-teal-500',
       bgGradient: 'from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950'
-    },
-    {
-      title: 'Travel Journal',
-      description: 'Document your memories',
-      icon: BookOpenIcon,
-      href: '/trips/new?type=journal',
-      gradient: 'from-purple-500 to-pink-500',
-      bgGradient: 'from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950'
     },
     {
       title: 'Explore Destinations',
@@ -131,8 +131,8 @@ export default function QuickActionsPanel({ className }: QuickActionsPanelProps)
 export function CompactQuickActions({ className }: QuickActionsPanelProps) {
   const actions = [
     { icon: PlusIcon, label: 'New Trip', href: '/trips/new', color: 'blue' },
+    { icon: BookOpenIcon, label: 'Travel Hub', href: '/hub', color: 'indigo' },
     { icon: CalendarIcon, label: 'Itinerary', href: '/trips/new?quick=true', color: 'emerald' },
-    { icon: CameraIcon, label: 'Journal', href: '/trips/new?type=journal', color: 'purple' },
     { icon: GlobeIcon, label: 'Explore', href: '/explore', color: 'orange' }
   ];
 
@@ -152,6 +152,7 @@ export function CompactQuickActions({ className }: QuickActionsPanelProps) {
             <div className={cn(
               "w-10 h-10 rounded-lg flex items-center justify-center",
               action.color === 'blue' && "bg-blue-100 dark:bg-blue-900/30 text-blue-600",
+              action.color === 'indigo' && "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600",
               action.color === 'emerald' && "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600",
               action.color === 'purple' && "bg-purple-100 dark:bg-purple-900/30 text-purple-600",
               action.color === 'orange' && "bg-orange-100 dark:bg-orange-900/30 text-orange-600"
