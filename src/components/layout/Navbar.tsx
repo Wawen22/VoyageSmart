@@ -239,26 +239,6 @@ export default function Navbar() {
                 Dashboard
               </Link>
               <Link
-                href="/trips/new"
-                className={`nav-indicator ${
-                  pathname === '/trips/new'
-                    ? 'border-primary text-foreground active'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-              >
-                New Trip
-              </Link>
-              <Link
-                href={user ? "/subscription" : "/pricing"}
-                className={`nav-indicator ${
-                  pathname === '/pricing' || pathname === '/subscription'
-                    ? 'border-primary text-foreground active'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-              >
-                {user ? "Subscription" : "Pricing"}
-              </Link>
-              <Link
                 href="/documentation"
                 className={`nav-indicator ${
                   pathname.startsWith('/documentation')
@@ -494,6 +474,20 @@ export default function Navbar() {
                   >
                     <BookOpenIcon className="h-4 w-4" />
                     Documentation
+                  </Link>
+
+                  <Link
+                    href="/hub"
+                    className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
+                      pathname.startsWith('/hub') ? 'text-primary bg-muted' : 'text-foreground'
+                    }`}
+                    onClick={(e) => {
+                      // Allow the navigation to happen first
+                      setTimeout(() => setIsProfileMenuOpen(false), 0);
+                    }}
+                  >
+                    <BookOpenIcon className="h-4 w-4" />
+                    Travel Hub
                   </Link>
 
                   {/* Group Chat - Only show when viewing a trip */}
