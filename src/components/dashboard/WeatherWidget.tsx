@@ -949,38 +949,41 @@ export default function WeatherWidget() {
     }
   };
 
-  const getGradientByCondition = (condition: string) => {
-    switch (condition.toLowerCase()) {
-      case 'sunny':
-      case 'clear':
-        return 'from-yellow-400 via-orange-400 to-red-400';
-      case 'partly cloudy':
-        return 'from-blue-400 via-cyan-400 to-teal-400';
-      case 'cloudy':
-        return 'from-gray-400 via-slate-400 to-gray-500';
-      case 'rainy':
-      case 'rain':
-        return 'from-blue-500 via-indigo-500 to-purple-500';
-      case 'snowy':
-      case 'snow':
-        return 'from-blue-200 via-cyan-200 to-white';
-      default:
-        return 'from-blue-400 via-cyan-400 to-teal-400';
-    }
+  const getOrbColorByCondition = (condition: string, secondary = false) => {
+    const colors = {
+      'sunny': secondary ? 'linear-gradient(135deg, rgba(251, 146, 60, 0.4), rgba(249, 115, 22, 0.3))' : 'linear-gradient(135deg, rgba(250, 204, 21, 0.5), rgba(251, 146, 60, 0.4))',
+      'clear': secondary ? 'linear-gradient(135deg, rgba(251, 146, 60, 0.4), rgba(249, 115, 22, 0.3))' : 'linear-gradient(135deg, rgba(250, 204, 21, 0.5), rgba(251, 146, 60, 0.4))',
+      'partly cloudy': secondary ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(14, 165, 233, 0.3))' : 'linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(6, 182, 212, 0.4))',
+      'cloudy': secondary ? 'linear-gradient(135deg, rgba(100, 116, 139, 0.4), rgba(71, 85, 105, 0.3))' : 'linear-gradient(135deg, rgba(148, 163, 184, 0.5), rgba(100, 116, 139, 0.4))',
+      'clouds': secondary ? 'linear-gradient(135deg, rgba(100, 116, 139, 0.4), rgba(71, 85, 105, 0.3))' : 'linear-gradient(135deg, rgba(148, 163, 184, 0.5), rgba(100, 116, 139, 0.4))',
+      'rainy': secondary ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.3))' : 'linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(99, 102, 241, 0.4))',
+      'rain': secondary ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.3))' : 'linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(99, 102, 241, 0.4))',
+      'drizzle': secondary ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.3))' : 'linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(99, 102, 241, 0.4))',
+      'snowy': secondary ? 'linear-gradient(135deg, rgba(186, 230, 253, 0.4), rgba(224, 242, 254, 0.3))' : 'linear-gradient(135deg, rgba(125, 211, 252, 0.5), rgba(186, 230, 253, 0.4))',
+      'snow': secondary ? 'linear-gradient(135deg, rgba(186, 230, 253, 0.4), rgba(224, 242, 254, 0.3))' : 'linear-gradient(135deg, rgba(125, 211, 252, 0.5), rgba(186, 230, 253, 0.4))',
+      'thunderstorm': secondary ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(168, 85, 247, 0.3))' : 'linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.4))',
+    };
+
+    const conditionLower = condition.toLowerCase();
+    return colors[conditionLower as keyof typeof colors] || (secondary ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(14, 165, 233, 0.3))' : 'linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(6, 182, 212, 0.4))');
   };
 
   if (loading) {
     return (
-      <div className="bg-card rounded-xl p-4 border border-border animate-pulse">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-muted rounded-lg"></div>
-            <div className="flex-1">
-              <div className="h-4 bg-muted rounded mb-2"></div>
-              <div className="h-3 bg-muted rounded w-2/3"></div>
+      <div className="glass-card rounded-2xl p-6 animate-pulse relative overflow-hidden">
+        {/* Animated background orbs */}
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl opacity-50 animate-pulse" />
+        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl opacity-50 animate-pulse" style={{ animationDelay: '1s' }} />
+
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/10 dark:bg-white/5 rounded-xl backdrop-blur-sm"></div>
+            <div className="flex-1 space-y-2">
+              <div className="h-5 bg-white/10 dark:bg-white/5 rounded-lg w-32 backdrop-blur-sm"></div>
+              <div className="h-4 bg-white/10 dark:bg-white/5 rounded-lg w-24 backdrop-blur-sm"></div>
             </div>
           </div>
-          <div className="w-8 h-8 bg-muted rounded"></div>
+          <div className="w-10 h-10 bg-white/10 dark:bg-white/5 rounded-lg backdrop-blur-sm"></div>
         </div>
       </div>
     );
@@ -988,22 +991,32 @@ export default function WeatherWidget() {
 
   if (error && !weather) {
     return (
-      <div className="bg-card rounded-xl p-4 border border-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-muted-foreground">
-            <AlertCircleIcon className="h-8 w-8" />
+      <div className="glass-card rounded-2xl p-6 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+        {/* Animated background orbs */}
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-red-500/20 rounded-full blur-3xl opacity-50" />
+        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl opacity-50" />
+
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4 text-foreground/80">
+            <div className="p-3 rounded-xl bg-red-500/10 backdrop-blur-sm border border-red-500/20">
+              <AlertCircleIcon className="h-6 w-6 text-red-500" />
+            </div>
             <div>
-              <div className="font-medium">Weather unavailable</div>
-              <div className="text-sm">{error || 'Unable to fetch weather data'}</div>
+              <div className="font-semibold text-foreground">Weather unavailable</div>
+              <div className="text-sm text-muted-foreground">{error || 'Unable to fetch weather data'}</div>
             </div>
           </div>
           <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className="glass-button hover:scale-105 transition-transform"
+              >
                 <SettingsIcon className="h-4 w-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="glass-card">
               <DialogHeader>
                 <DialogTitle>Set Location</DialogTitle>
               </DialogHeader>
@@ -1012,7 +1025,7 @@ export default function WeatherWidget() {
                   <Button
                     onClick={getCurrentLocation}
                     disabled={location.isLoading}
-                    className="w-full"
+                    className="w-full glass-button-primary"
                   >
                     {location.isLoading ? (
                       <RefreshCwIcon className="h-4 w-4 mr-2 animate-spin" />
@@ -1027,7 +1040,7 @@ export default function WeatherWidget() {
                     placeholder="Enter city name (e.g., London, UK)"
                     value={manualLocation}
                     onChange={(e) => setManualLocation(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleManualLocation()}
+                    onKeyDown={(e) => e.key === 'Enter' && handleManualLocation()}
                   />
                   <Button
                     onClick={handleManualLocation}
@@ -1048,33 +1061,39 @@ export default function WeatherWidget() {
 
   return (
     <div className={cn(
-      "relative overflow-hidden bg-gradient-to-br rounded-xl p-4 shadow-lg transition-all duration-300 hover:shadow-xl",
-      getGradientByCondition(weather.condition)
+      "glass-info-card relative overflow-hidden rounded-2xl p-6 group transition-all duration-500",
+      "hover:shadow-2xl hover:scale-[1.02]"
     )}>
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"></div>
-      </div>
+      {/* Animated background orbs based on weather condition */}
+      <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl opacity-30 transition-all duration-700 group-hover:opacity-50"
+        style={{ background: getOrbColorByCondition(weather.condition) }} />
+      <div className="absolute -bottom-16 -left-16 w-40 h-40 rounded-full blur-3xl opacity-20 transition-all duration-700 group-hover:opacity-40"
+        style={{ background: getOrbColorByCondition(weather.condition, true), animationDelay: '1s' }} />
+
+      {/* Subtle grid pattern */}
+      <div className="absolute inset-0 opacity-5 glass-grid-pattern" />
 
       <div className="relative z-10">
         {/* Header with location controls */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-1 text-white text-sm opacity-90">
-            <MapPinIcon className="h-3 w-3" />
-            {weather.location}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2 text-foreground/90 font-medium">
+            <div className="p-1.5 rounded-lg bg-primary/10 backdrop-blur-sm">
+              <MapPinIcon className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <span className="text-sm">{weather.location}</span>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={refreshWeather}
               disabled={loading}
-              className="h-6 w-6 p-0 text-white hover:bg-white/20"
+              className="h-8 w-8 p-0 glass-button hover:scale-110 transition-all"
               title="Refresh weather"
             >
               <RefreshCwIcon className={cn(
-                "h-3 w-3",
+                "h-4 w-4",
                 loading && "animate-spin"
               )} />
             </Button>
@@ -1084,21 +1103,24 @@ export default function WeatherWidget() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0 text-white hover:bg-white/20"
+                  className="h-8 w-8 p-0 glass-button hover:scale-110 transition-all"
                 >
-                  <SettingsIcon className="h-3 w-3" />
+                  <SettingsIcon className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="glass-card">
                 <DialogHeader>
-                  <DialogTitle>Change Location</DialogTitle>
+                  <DialogTitle className="flex items-center gap-2">
+                    <MapPinIcon className="h-5 w-5 text-primary" />
+                    Change Location
+                  </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
                     <Button
                       onClick={getCurrentLocation}
                       disabled={location.isLoading}
-                      className="w-full"
+                      className="w-full glass-button-primary"
                     >
                       {location.isLoading ? (
                         <RefreshCwIcon className="h-4 w-4 mr-2 animate-spin" />
@@ -1117,7 +1139,7 @@ export default function WeatherWidget() {
                       placeholder="Search for a city..."
                       value={manualLocation}
                       onChange={(e) => handleLocationInputChange(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleManualLocation()}
+                      onKeyDown={(e) => e.key === 'Enter' && handleManualLocation()}
                       onFocus={() => manualLocation.length >= 2 && setShowSuggestions(true)}
                     />
 
@@ -1217,38 +1239,50 @@ export default function WeatherWidget() {
         </div>
 
         {/* Main weather info */}
-        <div className="flex items-center gap-3 mb-3">
-          {getWeatherIcon(weather.condition, weather.icon)}
-          <div className="text-white">
-            <div className="text-2xl font-bold">{weather.temperature}°C</div>
-            <div className="text-sm opacity-90">{weather.description || weather.condition}</div>
+        <div className="flex items-center gap-4 mb-5">
+          <div className="p-3 rounded-2xl bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
+            {getWeatherIcon(weather.condition, weather.icon)}
+          </div>
+          <div>
+            <div className="text-4xl font-bold text-foreground mb-1 group-hover:scale-105 transition-transform duration-300">
+              {weather.temperature}°C
+            </div>
+            <div className="text-sm text-muted-foreground font-medium capitalize">
+              {weather.description || weather.condition}
+            </div>
           </div>
         </div>
 
-        {/* Weather details */}
-        <div className="grid grid-cols-3 gap-3 text-white">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <ThermometerIcon className="h-3 w-3 opacity-75" />
+        {/* Weather details - Glass cards */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-center mb-2">
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <ThermometerIcon className="h-4 w-4 text-blue-500" />
+              </div>
             </div>
-            <div className="text-xs opacity-75">Humidity</div>
-            <div className="text-sm font-semibold">{weather.humidity}%</div>
+            <div className="text-xs text-muted-foreground mb-1">Humidity</div>
+            <div className="text-sm font-bold text-foreground">{weather.humidity}%</div>
           </div>
-          
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <WindIcon className="h-3 w-3 opacity-75" />
+
+          <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-center mb-2">
+              <div className="p-2 rounded-lg bg-cyan-500/10">
+                <WindIcon className="h-4 w-4 text-cyan-500" />
+              </div>
             </div>
-            <div className="text-xs opacity-75">Wind</div>
-            <div className="text-sm font-semibold">{weather.windSpeed} km/h</div>
+            <div className="text-xs text-muted-foreground mb-1">Wind</div>
+            <div className="text-sm font-bold text-foreground">{weather.windSpeed} km/h</div>
           </div>
-          
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <EyeIcon className="h-3 w-3 opacity-75" />
+
+          <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-center mb-2">
+              <div className="p-2 rounded-lg bg-purple-500/10">
+                <EyeIcon className="h-4 w-4 text-purple-500" />
+              </div>
             </div>
-            <div className="text-xs opacity-75">Visibility</div>
-            <div className="text-sm font-semibold">{weather.visibility} km</div>
+            <div className="text-xs text-muted-foreground mb-1">Visibility</div>
+            <div className="text-sm font-bold text-foreground">{weather.visibility} km</div>
           </div>
         </div>
       </div>

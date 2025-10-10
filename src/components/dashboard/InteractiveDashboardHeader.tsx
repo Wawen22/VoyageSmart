@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import {
   SearchIcon,
   GridIcon,
-  ListIcon,
   SparklesIcon,
   MapIcon,
   SunIcon,
@@ -19,9 +18,15 @@ import {
   BarChart3Icon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import WeatherWidget, { CompactWeatherWidget } from './WeatherWidget';
+import WeatherWidget from './WeatherWidget';
 import { getTimeOfDay } from '@/lib/date-utils';
 import CompactTopDestinations from './CompactTopDestinations';
 import AdvancedMetricsModal from './AdvancedMetricsModal';
@@ -66,15 +71,14 @@ export default function InteractiveDashboardHeader({
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening'>('morning');
 
   useEffect(() => {
-    // Use the utility function for consistent time of day calculation
     setTimeOfDay(getTimeOfDay());
   }, []);
 
   const getGreeting = () => {
     const greetings = {
-      morning: { text: 'Good morning', icon: SunIcon, color: 'from-yellow-400 to-orange-500' },
-      afternoon: { text: 'Good afternoon', icon: CloudIcon, color: 'from-blue-400 to-cyan-500' },
-      evening: { text: 'Good evening', icon: MoonIcon, color: 'from-purple-400 to-pink-500' }
+      morning: { text: 'Good morning', icon: SunIcon, color: 'from-amber-400 to-orange-500' },
+      afternoon: { text: 'Good afternoon', icon: CloudIcon, color: 'from-blue-400 to-teal-500' },
+      evening: { text: 'Good evening', icon: MoonIcon, color: 'from-purple-500 to-pink-500' }
     };
     return greetings[timeOfDay];
   };
@@ -114,215 +118,246 @@ export default function InteractiveDashboardHeader({
   ];
 
   return (
-    <div className="relative overflow-hidden bg-card border-border">
-      {/* Background pattern simile al resto dell'app */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent"></div>
+    <section className="relative overflow-hidden rounded-[32px] border border-white/20 bg-white/10 px-5 py-6 shadow-[0_32px_120px_-70px_rgba(15,23,42,0.65)] backdrop-blur-2xl transition-all duration-500 dark:border-white/10 dark:bg-slate-950/45 sm:px-8 sm:py-8">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-28 top-14 h-56 w-56 rounded-full bg-primary/25 blur-3xl dark:bg-primary/30" />
+        <div className="absolute -right-28 bottom-10 h-72 w-72 rounded-full bg-purple-400/25 blur-[140px] dark:bg-purple-700/25" />
+        <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent dark:via-white/12" />
       </div>
 
+      <div className="relative z-10 flex flex-col gap-6 dashboard-header-mobile dashboard-mobile-refresh">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.9fr)] xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,0.85fr)]">
+          <div className="flex flex-col gap-5">
+            <div className="rounded-[28px] border border-white/18 bg-white/12 p-5 shadow-[0_26px_90px_-60px_rgba(15,23,42,0.65)] backdrop-blur-2xl dark:border-white/12 dark:bg-white/5">
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+                  <div className="flex items-center gap-3 lg:gap-4">
+                    <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg lg:h-14 lg:w-14 bg-gradient-to-br', greeting.color)}>
+                      <GreetingIcon className="h-6 w-6 text-white lg:h-7 lg:w-7" />
+                    </div>
+                    <div className="space-y-1">
+                      <h1 className="text-2xl font-semibold text-foreground lg:text-3xl">
+                        {greeting.text}, {userName}!
+                      </h1>
+                      <p className="text-sm text-muted-foreground lg:text-base">
+                        You have{' '}
+                        <span className="font-semibold text-foreground">{tripCount}</span>{' '}
+                        {tripCount === 1 ? 'trip' : 'trips'} planned
+                      </p>
+                    </div>
+                  </div>
 
-      <div className="relative z-10 px-6 py-3 lg:py-6 lg:px-8 dashboard-header-mobile dashboard-mobile-refresh">
-        {/* Welcome Section */}
-        <div className="mb-4 lg:mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
-            {/* Left side - Greeting */}
-            <div className="flex items-center gap-3 lg:gap-4">
-              <div className="relative">
-                <div className={cn(
-                  "w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
-                  greeting.color
-                )}>
-                  <GreetingIcon className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
+                  <div className="flex flex-wrap items-center justify-start gap-2 text-[0.65rem] uppercase tracking-[0.32em] text-white/70">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-3 py-1.5 shadow-inner backdrop-blur-xl">
+                      <SparklesIcon className="h-4 w-4 text-yellow-300" />
+                      Live analytics
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-3 py-1.5 shadow-inner backdrop-blur-xl">
+                      <CalendarIcon className="h-4 w-4 text-cyan-200" />
+                      Smart filters
+                    </span>
+                  </div>
+                </div>
+
+                {trips.length > 0 && (
+                  <div className="rounded-[24px] border border-white/15 bg-white/10 p-4 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.6)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/5">
+                    <CompactTopDestinations trips={trips} />
+                  </div>
+                )}
+
+                <div className="hidden lg:block">
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-0 rounded-2xl border border-white/15 bg-white/10 shadow-inner backdrop-blur-lg dark:border-white/10 dark:bg-white/5" />
+                    <div className="relative">
+                      <SearchIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Search your trips..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => setIsSearchFocused(false)}
+                        className="w-full rounded-2xl border border-transparent bg-transparent py-3 pl-11 pr-4 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-white/50 focus:outline-none"
+                      />
+                      {searchTerm && (
+                        <button
+                          onClick={() => setSearchTerm('')}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div className="space-y-0.5 lg:space-y-1">
-                <h1 className="text-xl lg:text-2xl xl:text-3xl font-bold text-foreground">
-                  {greeting.text}, {userName}!
-                </h1>
-                <p className="text-sm lg:text-base text-muted-foreground">
-                  You have <span className="font-semibold text-foreground">{tripCount}</span> {tripCount === 1 ? 'trip' : 'trips'} planned
-                </p>
-              </div>
             </div>
 
-            {/* Center - Top Destinations with integrated Analytics */}
-            <div className="flex-1 lg:max-w-4xl">
-              {trips.length > 0 && (
-                <CompactTopDestinations trips={trips} />
-              )}
+            <div className="hidden lg:flex items-center gap-3">
+              <AdvancedMetricsModal
+                trips={trips}
+                trigger={
+                  <Button
+                    variant="secondary"
+                    className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/20 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_18px_65px_-55px_rgba(15,23,42,0.6)] backdrop-blur-xl dark:border-white/15 dark:bg-white/10 dark:text-white transition-all hover:-translate-y-0.5"
+                  >
+                    <span className="flex items-center gap-2">
+                      <BarChart3Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                      Open analytics
+                      <SparklesIcon className="h-4 w-4 text-yellow-300 transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
+                    </span>
+                    <div className="pointer-events-none absolute inset-0 rounded-2xl bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  </Button>
+                }
+              />
             </div>
+          </div>
 
-            {/* Right side - Weather Widget */}
-            <div className="lg:max-w-sm w-full lg:w-auto">
-              <div className="hidden lg:block">
-                <WeatherWidget />
-              </div>
-              <div className="lg:hidden">
-                <CompactWeatherWidget />
-              </div>
-            </div>
+          <div className="flex h-full items-stretch">
+            <WeatherWidget />
           </div>
         </div>
 
-        {/* Mobile Analytics Button - Clean and Minimal */}
-        <div className="lg:hidden mb-4 flex justify-center">
+        <div className="lg:hidden flex flex-col gap-3">
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-0 rounded-2xl border border-white/15 bg-white/10 shadow-inner backdrop-blur-lg dark:border-white/10 dark:bg-white/5" />
+            <div className="relative">
+              <SearchIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search your trips..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+                className="w-full rounded-2xl border border-transparent bg-transparent py-3 pl-11 pr-4 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground focus:border-white/40"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
           <AdvancedMetricsModal
             trips={trips}
             trigger={
-              <button className="group relative bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl overflow-hidden mobile-touch-optimized mobile-analytics-button">
-                {/* Animated background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-
-                <div className="relative flex items-center gap-3">
-                  <div className="relative">
-                    <BarChart3Icon className="h-5 w-5 transition-all duration-300 group-hover:animate-bounce" />
-                    <div className="absolute inset-0 bg-white/30 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity duration-300"></div>
-                  </div>
-
-                  <span className="relative font-semibold">
-                    📊 View Analytics
-                    <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <SparklesIcon className="h-3 w-3 text-yellow-300 animate-pulse" />
-                    </div>
-                  </span>
-                </div>
-
-                {/* Enhanced glow effect */}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/30 to-indigo-600/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+              <button className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 active:scale-95">
+                <BarChart3Icon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+                View analytics
+                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </button>
             }
           />
         </div>
 
-        {/* Desktop Search Bar */}
-        <div className="hidden lg:block mb-4 lg:mb-6 search-mobile">
-          <div className="relative">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search your trips..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-              className="w-full pl-10 pr-4 py-2.5 lg:py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        </div>
+        <div className="relative">
+          <div className="absolute inset-0 rounded-[28px] border border-white/18 bg-white/12 shadow-[0_22px_80px_-62px_rgba(15,23,42,0.68)] backdrop-blur-2xl dark:border-white/12 dark:bg-white/5" />
+          <div className="relative flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:p-5 filter-tabs-mobile">
+            <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
+              {filterOptions.map((option) => {
+                const isActive = filter === option.value;
 
-        {/* Filter Tabs with Stats and View Controls - Mobile Optimized */}
-        <div className="relative mb-4 lg:mb-6">
-          {/* Glass Background Container */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-white/10 dark:from-white/5 dark:via-white/2 dark:to-white/5 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-white/10 shadow-lg"></div>
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => setFilter(option.value as any)}
+                    className={cn(
+                      'flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200 sm:px-4 sm:py-2 sm:text-sm',
+                      isActive
+                        ? 'bg-white/90 text-slate-900 shadow-lg dark:bg-white/90'
+                        : 'bg-white/12 text-white/70 hover:bg-white/16'
+                    )}
+                  >
+                    <option.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{option.label}</span>
+                    <span className="sm:hidden">{option.label.split(' ')[0]}</span>
+                    <span
+                      className={cn(
+                        'ml-1 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold',
+                        isActive ? 'bg-slate-900 text-white' : 'bg-white/10 text-white/70'
+                      )}
+                    >
+                      {option.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4 p-4 lg:p-5 filter-tabs-mobile">
-            {/* Filter Tabs - Mobile Optimized */}
-            <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
-            {filterOptions.map((option) => {
-              const isActive = filter === option.value;
-
-              return (
-                <button
-                  key={option.value}
-                  onClick={() => setFilter(option.value as any)}
-                  className={cn(
-                    "flex items-center gap-1.5 lg:gap-2 px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg font-medium transition-all duration-200 mobile-touch-optimized",
-                    "text-xs lg:text-sm",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-md scale-105"
-                      : "bg-muted/80 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50 hover:border-border active:scale-95"
-                  )}
-                >
-                  <option.icon className="h-3.5 w-3.5 lg:h-4 lg:w-4 flex-shrink-0" />
-                  <span className="hidden sm:inline text-xs lg:text-sm">{option.label}</span>
-                  <span className="sm:hidden text-xs font-semibold">{option.label.split(' ')[0]}</span>
-                  <span className={cn(
-                    "text-xs px-1.5 lg:px-2 py-0.5 rounded-full font-semibold",
-                    isActive
-                      ? "bg-primary-foreground/20 text-primary-foreground"
-                      : "bg-background/80 text-foreground"
-                  )}>
-                    {option.count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* View Controls */}
-          <div className="flex items-center gap-3 justify-center lg:justify-end">
-            {/* Year Filter */}
-            {availableYears.length > 1 && (
-              <div className="flex items-center gap-2">
-                <FilterIcon className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="w-20 h-8 text-xs">
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {availableYears.map(year => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Map View - Compact Button */}
-            <button
-              onClick={() => setViewMode('map')}
-              className={cn(
-                "relative group px-3 py-2 rounded-lg font-medium text-xs transition-all duration-300 transform hover:scale-105 overflow-hidden",
-                viewMode === 'map'
-                  ? "bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-600 text-white shadow-lg"
-                  : "bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground border border-border"
+            <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-end">
+              {availableYears.length > 1 && (
+                <div className="flex items-center gap-2 rounded-xl border border-white/18 bg-white/12 px-3 py-2 text-xs text-white/80 shadow-inner backdrop-blur-lg dark:border-white/12 dark:bg-white/5">
+                  <FilterIcon className="h-4 w-4" />
+                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger className="h-8 w-24 rounded-lg border-0 bg-transparent text-xs text-white focus:ring-0">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      {availableYears.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
-              title="🗺️ Interactive Map View"
-            >
-              <div className="relative flex items-center gap-1.5">
-                <MapIcon className={cn(
-                  "h-4 w-4 transition-all duration-300",
-                  viewMode === 'map' && "animate-bounce"
-                )} />
-                <span className="whitespace-nowrap">🗺️ Map</span>
-              </div>
-            </button>
 
-            {/* Separator */}
-            <div className="h-6 w-px bg-border"></div>
-
-            {/* Standard View Mode Toggle */}
-            <div className="flex items-center bg-muted rounded-lg p-1 border border-border">
               <button
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode('map')}
                 className={cn(
-                  "p-1.5 rounded-md transition-all duration-200",
-                  viewMode === 'grid'
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  'relative flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 sm:px-4 sm:py-2',
+                  viewMode === 'map'
+                    ? 'bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white shadow-lg'
+                    : 'bg-white/12 text-white/70 hover:bg-white/16'
                 )}
-                title="Grid View"
+                title="Interactive map view"
               >
-                <GridIcon className="h-4 w-4" />
+                <MapIcon
+                  className={cn(
+                    'h-4 w-4 transition-transform duration-300',
+                    viewMode === 'map' && 'scale-110'
+                  )}
+                />
+                <span className="uppercase tracking-[0.26em]">Map</span>
               </button>
 
+              <div className="hidden items-center rounded-xl border border-white/18 bg-white/10 p-1 shadow-inner backdrop-blur-lg sm:flex">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={cn(
+                    'rounded-lg p-1.5 transition-all duration-200',
+                    viewMode === 'grid'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-white/60 hover:text-white'
+                  )}
+                  title="Grid view"
+                >
+                  <GridIcon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('map')}
+                  className={cn(
+                    'rounded-lg p-1.5 transition-all duration-200',
+                    viewMode === 'map'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-white/60 hover:text-white'
+                  )}
+                  title="Map view"
+                >
+                  <MapIcon className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    </div>
+    </section>
   );
 }

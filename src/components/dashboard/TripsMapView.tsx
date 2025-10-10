@@ -1,13 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { MapPinIcon, CalendarIcon, UsersIcon, DollarSignIcon, InfoIcon, ZoomInIcon, ZoomOutIcon, LayersIcon, MaximizeIcon, MinimizeIcon, FilterIcon, RotateCcwIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/lib/utils';
-import MapboxWrapper from '@/components/map/MapboxWrapper';
-import { TripDestinations } from '@/lib/types/destination';
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  CalendarIcon,
+  CompassIcon,
+  LayersIcon,
+  MapPinIcon,
+  MaximizeIcon,
+  MinimizeIcon,
+  RotateCcwIcon,
+  XIcon
+} from "lucide-react";
+import { cn, formatCurrency } from "@/lib/utils";
+import MapboxWrapper from "@/components/map/MapboxWrapper";
+import { TripDestinations } from "@/lib/types/destination";
+import { logger } from "@/lib/logger";
 
-interface Trip {
+type Trip = {
   id: string;
   name: string;
   description: string | null;
@@ -21,151 +31,191 @@ interface Trip {
     trip_type?: string;
     destinations?: TripDestinations;
   };
-}
+};
+
+type TripFilter = "all" | "upcoming" | "ongoing" | "past";
 
 interface TripsMapViewProps {
   trips: Trip[];
   searchTerm?: string;
-  filter?: 'all' | 'upcoming' | 'ongoing' | 'past';
+  filter?: TripFilter;
+  onTripFocus?: (tripId: string | null) => void;
+}
+
+interface Coordinates {
+  lat: number;
+  lng: number;
 }
 
 interface ProcessedTrip extends Trip {
-  status: 'upcoming' | 'ongoing' | 'completed' | 'planning';
-  coordinates?: { lat: number; lng: number };
+  status: "upcoming" | "ongoing" | "completed" | "planning";
+  coordinates?: Coordinates;
   primaryDestination?: string;
+  geocoded?: boolean;
 }
 
-export default function TripsMapView({ trips, searchTerm = '', filter = 'all' }: TripsMapViewProps) {
+const DEFAULT_CENTER: [number, number] = [12.4964, 41.9028];
+
+const STATUS_CONFIG: Record<
+  ProcessedTrip["status"],
+  { marker: string; halo: string; badge: string; label: string }
+> = {
+  upcoming: {
+    marker: "bg-emerald-500 text-white",
+    halo: "bg-emerald-400/40",
+    badge: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+    label: "Upcoming"
+  },
+  ongoing: {
+    marker: "bg-orange-500 text-white",
+    halo: "bg-orange-400/40",
+    badge: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
+    label: "Ongoing"
+  },
+  completed: {
+    marker: "bg-purple-500 text-white",
+    halo: "bg-purple-400/40",
+    badge: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
+    label: "Completed"
+  },
+  planning: {
+    marker: "bg-blue-500 text-white",
+    halo: "bg-blue-400/40",
+    badge: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+    label: "Planning"
+  }
+};
+
+const MAP_STYLE_OPTIONS = [
+  { id: "streets-v12", emoji: "🗺️", label: "Streets" },
+  { id: "satellite-v9", emoji: "🛰️", label: "Satellite" },
+  { id: "outdoors-v12", emoji: "🏔️", label: "Outdoors" },
+  { id: "dark-v11", emoji: "🌙", label: "Dark" }
+];
+
+const destinationCoordinateCache = new Map<string, Coordinates>();
+
+export default function TripsMapView({
+  trips,
+  searchTerm = "",
+  filter = "all",
+  onTripFocus
+}: TripsMapViewProps) {
+  const [mapStyle, setMapStyle] = useState(
+    "mapbox://styles/mapbox/streets-v12"
+  );
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (!isFullscreen) {
+      return;
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFullscreen]);
+
   return (
     <MapboxWrapper
       fallback={
-        <div className="w-full h-[600px] bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl flex items-center justify-center border border-border">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto">
-              <MapPinIcon className="h-8 w-8 text-blue-500" />
+        <div className="flex h-[520px] w-full items-center justify-center rounded-2xl border border-border bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-950">
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <MapPinIcon className="h-8 w-8 text-primary" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">Map Loading...</h3>
-              <p className="text-sm text-muted-foreground">Preparing your travel map</p>
-            </div>
+            <h3 className="text-lg font-semibold text-foreground">Preparing your map</h3>
+            <p className="text-sm text-muted-foreground">
+              Loading destinations and calibrating markers…
+            </p>
           </div>
         </div>
       }
     >
       {(mapboxgl) => (
-        <TripsMapContent
+        <TripsMapCanvas
           mapboxgl={mapboxgl}
           trips={trips}
           searchTerm={searchTerm}
           filter={filter}
+          mapStyle={mapStyle}
+          onStyleChange={setMapStyle}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={() => setIsFullscreen((prev) => !prev)}
+          onTripFocus={onTripFocus}
         />
       )}
     </MapboxWrapper>
   );
 }
 
-interface TripsMapContentProps {
+interface TripsMapCanvasProps extends TripsMapViewProps {
   mapboxgl: any;
-  trips: Trip[];
-  searchTerm: string;
-  filter: 'all' | 'upcoming' | 'ongoing' | 'past';
+  mapStyle: string;
+  onStyleChange: (style: string) => void;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
 
-function TripsMapContent({ mapboxgl, trips, searchTerm, filter }: TripsMapContentProps) {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const fullscreenMapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
-  const markers = useRef<any[]>([]);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState<ProcessedTrip | null>(null);
-  const [mapStyle, setMapStyle] = useState('mapbox://styles/mapbox/streets-v12');
-  const [showClusters, setShowClusters] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [hoveredTrip, setHoveredTrip] = useState<string | null>(null);
+function TripsMapCanvas({
+  mapboxgl,
+  trips,
+  searchTerm = "",
+  filter = "all",
+  mapStyle,
+  onStyleChange,
+  isFullscreen,
+  onToggleFullscreen,
+  onTripFocus
+}: TripsMapCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const styleRef = useRef(mapStyle);
+  const [mapReady, setMapReady] = useState(false);
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
+  const [hoveredTripId, setHoveredTripId] = useState<string | null>(null);
+  const [coordinatesCache, setCoordinatesCache] = useState<Record<string, Coordinates>>({});
+  const coordinatesCacheRef = useRef<Record<string, Coordinates>>({});
 
-  // Create trip marker function
-  const createTripMarker = (trip: ProcessedTrip, mapboxgl: any) => {
-    if (!trip.coordinates || !map.current) return null;
+  useEffect(() => {
+    coordinatesCacheRef.current = coordinatesCache;
+  }, [coordinatesCache]);
 
-    // Create custom marker element
-    const el = document.createElement('div');
-    el.className = 'trip-marker';
+  const token = useMemo(
+    () => process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "",
+    []
+  );
 
-    const statusConfig = getStatusConfig(trip.status);
-
-    el.innerHTML = `
-      <div class="relative group cursor-pointer">
-        <div class="w-10 h-10 rounded-full ${statusConfig.bgColor} ${statusConfig.borderColor} border-3 shadow-lg transform transition-all duration-300 hover:scale-110 hover:shadow-xl flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        ${statusConfig.pulseClass ? `<div class="absolute inset-0 rounded-full ${statusConfig.pulseClass} animate-ping opacity-75"></div>` : ''}
-      </div>
-    `;
-
-    // Create popup
-    const popup = new mapboxgl.Popup({
-      offset: 25,
-      closeButton: false,
-      className: 'trip-popup'
-    }).setHTML(createPopupContent(trip));
-
-    // Create marker
-    const marker = new mapboxgl.Marker(el)
-      .setLngLat([trip.coordinates.lng, trip.coordinates.lat])
-      .setPopup(popup)
-      .addTo(map.current);
-
-    // Add hover and click handlers
-    el.addEventListener('mouseenter', () => {
-      setHoveredTrip(trip.id);
-    });
-
-    el.addEventListener('mouseleave', () => {
-      setHoveredTrip(null);
-    });
-
-    el.addEventListener('click', () => {
-      setSelectedTrip(trip);
-      // Fly to the trip location
-      map.current.flyTo({
-        center: [trip.coordinates!.lng, trip.coordinates!.lat],
-        zoom: 12,
-        duration: 1000
-      });
-    });
-
-    return marker;
-  };
-
-  // Process trips with coordinates and status
-  const processedTrips = useMemo(() => {
+  const processedTrips = useMemo<ProcessedTrip[]>(() => {
     const now = new Date();
-    
-    return trips.map(trip => {
-      let status: 'upcoming' | 'ongoing' | 'completed' | 'planning' = 'planning';
-      
+    return trips.map((trip) => {
+      let status: ProcessedTrip["status"] = "planning";
+
       if (trip.start_date && trip.end_date) {
         const start = new Date(trip.start_date);
         const end = new Date(trip.end_date);
-        
-        if (now < start) status = 'upcoming';
-        else if (now >= start && now <= end) status = 'ongoing';
-        else status = 'completed';
+        if (now < start) status = "upcoming";
+        else if (now >= start && now <= end) status = "ongoing";
+        else status = "completed";
+      } else if (trip.start_date) {
+        const start = new Date(trip.start_date);
+        status = now < start ? "upcoming" : "planning";
       }
 
-      // Get coordinates from destinations
-      let coordinates: { lat: number; lng: number } | undefined;
-      let primaryDestination = trip.destination;
+      let coordinates: Coordinates | undefined;
+      let primaryDestination = trip.destination ?? undefined;
 
-      if (trip.preferences?.destinations?.destinations?.length > 0) {
-        const destinations = trip.preferences.destinations.destinations;
-        const primary = destinations.find(d => d.id === trip.preferences?.destinations?.primary) || destinations[0];
-        
+      const destinationGroup = trip.preferences?.destinations;
+      if (destinationGroup?.destinations?.length) {
+        const candidates = destinationGroup.destinations;
+        const primary = destinationGroup.primary
+          ? candidates.find((dest) => dest.id === destinationGroup.primary)
+          : candidates[0];
         if (primary) {
           coordinates = primary.coordinates;
-          primaryDestination = primary.name;
+          primaryDestination = primary.name ?? primaryDestination;
         }
       }
 
@@ -174,560 +224,831 @@ function TripsMapContent({ mapboxgl, trips, searchTerm, filter }: TripsMapConten
         status,
         coordinates,
         primaryDestination
-      } as ProcessedTrip;
+      };
     });
   }, [trips]);
 
-  // Filter trips based on search and filter criteria
-  const filteredTrips = useMemo(() => {
-    return processedTrips.filter(trip => {
-      // Only show trips with coordinates
+  const resolvedTrips = useMemo<ProcessedTrip[]>(() => {
+    return processedTrips.map((trip) => {
+      const cached = coordinatesCache[trip.id];
+      if (cached && !trip.coordinates) {
+        return { ...trip, coordinates: cached, geocoded: true };
+      }
+      return trip;
+    });
+  }, [processedTrips, coordinatesCache]);
+
+  const visibleTrips = useMemo<ProcessedTrip[]>(() => {
+    return resolvedTrips.filter((trip) => {
       if (!trip.coordinates) return false;
 
-      // Apply status filter
-      if (filter !== 'all') {
-        if (filter === 'upcoming' && trip.status !== 'upcoming') return false;
-        if (filter === 'ongoing' && trip.status !== 'ongoing') return false;
-        if (filter === 'past' && trip.status !== 'completed') return false;
-      }
+      if (filter === "upcoming" && trip.status !== "upcoming") return false;
+      if (filter === "ongoing" && trip.status !== "ongoing") return false;
+      if (filter === "past" && trip.status !== "completed") return false;
 
-      // Apply search filter
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
-        return (
-          trip.name.toLowerCase().includes(term) ||
-          (trip.primaryDestination?.toLowerCase().includes(term) || false) ||
-          (trip.description?.toLowerCase().includes(term) || false)
-        );
+        const haystack = [
+          trip.name,
+          trip.primaryDestination,
+          trip.description,
+          trip.destination
+        ]
+          .filter(Boolean)
+          .map((value) => value!.toLowerCase());
+        if (!haystack.some((value) => value.includes(term))) {
+          return false;
+        }
       }
 
       return true;
     });
-  }, [processedTrips, filter, searchTerm]);
+  }, [resolvedTrips, filter, searchTerm]);
 
-  // Initialize map
+  const unmappedTripCount = useMemo(() => {
+    return resolvedTrips.filter((trip) => !trip.coordinates).length;
+  }, [resolvedTrips]);
+
+  const mapSummary = useMemo(() => computeMapSummary(visibleTrips), [visibleTrips]);
+
+  const selectedTrip = useMemo(() => {
+    if (!selectedTripId) return null;
+    return (
+      visibleTrips.find((trip) => trip.id === selectedTripId) ??
+      resolvedTrips.find((trip) => trip.id === selectedTripId) ??
+      null
+    );
+  }, [visibleTrips, resolvedTrips, selectedTripId]);
+
+  const focusTrip = useCallback(
+    (trip: ProcessedTrip) => {
+      if (!trip.coordinates || !mapRef.current) return;
+      mapRef.current.flyTo({
+        center: [trip.coordinates.lng, trip.coordinates.lat],
+        zoom: 9,
+        speed: 1.2,
+        curve: 1.4,
+        essential: true
+      });
+    },
+    []
+  );
+
+  const handleTripSelection = useCallback(
+    (trip: ProcessedTrip) => {
+      setSelectedTripId(trip.id);
+      focusTrip(trip);
+      onTripFocus?.(trip.id);
+    },
+    [focusTrip, onTripFocus]
+  );
+
   useEffect(() => {
-    const container = isFullscreen ? fullscreenMapContainer.current : mapContainer.current;
-    if (!container) return;
-
-    // Remove existing map if style changed or container changed
-    if (map.current) {
-      markers.current.forEach(marker => marker.remove());
-      markers.current = [];
-      map.current.remove();
-      map.current = null;
-      setMapLoaded(false);
+    if (!containerRef.current || mapRef.current) {
+      return;
     }
 
-    map.current = new mapboxgl.Map({
-      container: container,
+    mapRef.current = new mapboxgl.Map({
+      container: containerRef.current,
       style: mapStyle,
-      center: [12.4964, 41.9028], // Default to Rome
-      zoom: 2,
+      center: DEFAULT_CENTER,
+      zoom: 2.2,
       attributionControl: false
     });
 
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
-
-    // Add attribution control at bottom
-    map.current.addControl(new mapboxgl.AttributionControl({
-      compact: true
-    }), 'bottom-right');
-
-    map.current.on('load', () => {
-      console.log('Map loaded with style:', mapStyle, 'fullscreen:', isFullscreen);
-      setMapLoaded(true);
-
-      // Immediately create markers when map loads
-      setTimeout(() => {
-        if (filteredTrips.length > 0) {
-          console.log('Creating markers immediately after map load');
-          // Clear existing markers
-          markers.current.forEach(marker => marker.remove());
-          markers.current = [];
-
-          // Create markers for each trip
-          filteredTrips.forEach(trip => {
-            if (!trip.coordinates) return;
-            const marker = createTripMarker(trip, mapboxgl);
-            if (marker) markers.current.push(marker);
-          });
-
-          console.log('Created', markers.current.length, 'markers immediately');
-        }
-      }, 100);
+    const navigationControl = new mapboxgl.NavigationControl({
+      showCompass: true,
+      showZoom: true
     });
+    mapRef.current.addControl(navigationControl, "bottom-right");
+    mapRef.current.addControl(
+      new mapboxgl.AttributionControl({ compact: true }),
+      "bottom-right"
+    );
+
+    const handleLoad = () => setMapReady(true);
+    mapRef.current.on("load", handleLoad);
 
     return () => {
-      // Cleanup markers
-      markers.current.forEach(marker => marker.remove());
-      markers.current = [];
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current = [];
+      mapRef.current?.off("load", handleLoad);
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, [mapboxgl, mapStyle]);
 
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
+  useEffect(() => {
+    if (!mapRef.current) return;
+    if (styleRef.current === mapStyle) return;
+
+    styleRef.current = mapStyle;
+    setMapReady(false);
+    mapRef.current.setStyle(mapStyle);
+    mapRef.current.once("style.load", () => setMapReady(true));
+  }, [mapStyle]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const resize = () => mapRef.current?.resize();
+    const timeout = window.setTimeout(resize, 300);
+    return () => window.clearTimeout(timeout);
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!token) {
+      logger.warn("Mapbox token missing; skipping trip geocoding.");
+      return;
+    }
+
+    const missingTrips = processedTrips.filter((trip) => {
+      if (trip.coordinates) return false;
+      if (coordinatesCacheRef.current[trip.id]) return false;
+      return Boolean(trip.primaryDestination || trip.destination);
+    });
+
+    if (missingTrips.length === 0) {
+      return;
+    }
+
+    const geocodeSequentially = async () => {
+      for (const trip of missingTrips) {
+        if (cancelled) break;
+
+        const label = trip.primaryDestination ?? trip.destination ?? "";
+        if (!label) continue;
+
+        const cacheKey = label.toLowerCase();
+        if (destinationCoordinateCache.has(cacheKey)) {
+          const cached = destinationCoordinateCache.get(cacheKey)!;
+          setCoordinatesCache((prev) => ({ ...prev, [trip.id]: cached }));
+          continue;
+        }
+
+        try {
+          const coordinates = await geocodeDestination(label, token);
+          if (!coordinates) continue;
+          destinationCoordinateCache.set(cacheKey, coordinates);
+          if (!cancelled) {
+            setCoordinatesCache((prev) => ({ ...prev, [trip.id]: coordinates }));
+          }
+        } catch (error) {
+          logger.error("Failed to geocode trip destination", {
+            destination: label,
+            error
+          });
+        }
       }
     };
-  }, [mapStyle, isFullscreen]);
 
-  // Update markers when trips change or map loads
+    void geocodeSequentially();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [processedTrips, token]);
+
   useEffect(() => {
-    if (!map.current || !mapLoaded) return;
+    if (!mapRef.current || !mapReady) return;
 
-    console.log('Creating markers for', filteredTrips.length, 'trips');
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
 
-    // Clear existing markers
-    markers.current.forEach(marker => marker.remove());
-    markers.current = [];
-
-    if (filteredTrips.length === 0) return;
-
-    // Create markers for each trip
-    filteredTrips.forEach(trip => {
+    visibleTrips.forEach((trip) => {
       if (!trip.coordinates) return;
 
-      const marker = createTripMarker(trip, mapboxgl);
-      if (marker) markers.current.push(marker);
-    });
-
-    console.log('Created', markers.current.length, 'markers');
-
-  }, [filteredTrips, mapLoaded, mapboxgl]);
-
-  // Separate effect for fitting bounds only when trips change (not style)
-  useEffect(() => {
-    if (!map.current || !mapLoaded || filteredTrips.length === 0) return;
-
-    // Use a timeout to ensure markers are rendered before fitting bounds
-    setTimeout(() => {
-      if (map.current && markers.current.length > 0) {
-        const bounds = new mapboxgl.LngLatBounds();
-        filteredTrips.forEach(trip => {
-          if (trip.coordinates) {
-            bounds.extend([trip.coordinates.lng, trip.coordinates.lat]);
-          }
-        });
-
-        map.current.fitBounds(bounds, {
-          padding: { top: 50, bottom: 50, left: 50, right: 50 },
-          maxZoom: 10,
-          duration: 1000
-        });
-      }
-    }, 200);
-  }, [filteredTrips, mapLoaded]);
-
-  // Force marker recreation when map style or fullscreen changes
-  useEffect(() => {
-    if (!map.current || filteredTrips.length === 0) return;
-
-    console.log('Map style/fullscreen changed, forcing marker recreation');
-
-    // Wait for map to be ready and then recreate markers
-    const recreateMarkers = () => {
-      if (!map.current) return;
-
-      // Clear existing markers
-      markers.current.forEach(marker => marker.remove());
-      markers.current = [];
-
-      // Recreate markers
-      filteredTrips.forEach(trip => {
-        if (!trip.coordinates) return;
-        const marker = createTripMarker(trip, mapboxgl);
-        if (marker) markers.current.push(marker);
+      const markerElement = createMarkerElement({
+        trip,
+        isSelected: selectedTripId === trip.id,
+        isHovered: hoveredTripId === trip.id
       });
 
-      console.log('Force recreated', markers.current.length, 'markers');
-    };
+      const popup = new mapboxgl.Popup({
+        offset: 18,
+        closeButton: false,
+        className: "trip-popup"
+      }).setHTML(buildPopupContent(trip));
 
-    if (mapLoaded) {
-      // If map is already loaded, recreate immediately
-      setTimeout(recreateMarkers, 100);
-    } else {
-      // If map is not loaded yet, wait for it
-      const checkMapLoaded = setInterval(() => {
-        if (mapLoaded) {
-          clearInterval(checkMapLoaded);
-          setTimeout(recreateMarkers, 100);
-        }
-      }, 100);
+      const marker = new mapboxgl.Marker({
+        element: markerElement,
+        anchor: "bottom"
+      })
+        .setLngLat([trip.coordinates.lng, trip.coordinates.lat])
+        .setPopup(popup)
+        .addTo(mapRef.current);
 
-      // Cleanup interval after 5 seconds
-      setTimeout(() => clearInterval(checkMapLoaded), 5000);
+      markerElement.addEventListener("mouseenter", () => {
+        setHoveredTripId(trip.id);
+      });
+
+      markerElement.addEventListener("mouseleave", () => {
+        setHoveredTripId((current) => (current === trip.id ? null : current));
+      });
+
+      markerElement.addEventListener("click", () => {
+        handleTripSelection(trip);
+        marker.togglePopup();
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [
+    visibleTrips,
+    mapReady,
+    handleTripSelection,
+    hoveredTripId,
+    selectedTripId,
+    mapboxgl
+  ]);
+
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
+    if (visibleTrips.length === 0) return;
+
+    if (visibleTrips.length === 1) {
+      focusTrip(visibleTrips[0]);
+      return;
     }
-  }, [mapStyle, isFullscreen, filteredTrips, mapboxgl]);
-
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case 'upcoming':
-        return {
-          bgColor: 'bg-emerald-500',
-          borderColor: 'border-emerald-300',
-          pulseClass: 'bg-emerald-400'
-        };
-      case 'ongoing':
-        return {
-          bgColor: 'bg-orange-500',
-          borderColor: 'border-orange-300',
-          pulseClass: 'bg-orange-400'
-        };
-      case 'completed':
-        return {
-          bgColor: 'bg-purple-500',
-          borderColor: 'border-purple-300',
-          pulseClass: null
-        };
-      default:
-        return {
-          bgColor: 'bg-blue-500',
-          borderColor: 'border-blue-300',
-          pulseClass: null
-        };
-    }
-  };
-
-  const createPopupContent = (trip: ProcessedTrip) => {
-    const statusConfig = getStatusConfig(trip.status);
-    const currency = trip.preferences?.currency || 'USD';
-    
-    return `
-      <div class="p-4 min-w-[280px]">
-        <div class="flex items-start justify-between mb-3">
-          <h3 class="font-semibold text-lg text-gray-900 dark:text-white pr-2">${trip.name}</h3>
-          <span class="px-2 py-1 text-xs font-medium rounded-full ${statusConfig.bgColor} text-white capitalize">${trip.status}</span>
-        </div>
-        
-        <div class="space-y-2 text-sm">
-          <div class="flex items-center text-gray-600 dark:text-gray-300">
-            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-            </svg>
-            ${trip.primaryDestination || 'Unknown destination'}
-          </div>
-          
-          ${trip.start_date ? `
-            <div class="flex items-center text-gray-600 dark:text-gray-300">
-              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-              </svg>
-              ${new Date(trip.start_date).toLocaleDateString()}
-              ${trip.end_date ? ` - ${new Date(trip.end_date).toLocaleDateString()}` : ''}
-            </div>
-          ` : ''}
-          
-          ${trip.budget_total ? `
-            <div class="flex items-center text-gray-600 dark:text-gray-300">
-              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
-              </svg>
-              ${formatCurrency(trip.budget_total, currency)}
-            </div>
-          ` : ''}
-        </div>
-        
-        <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-          <a href="/trips/${trip.id}" class="inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium">
-            View Details
-            <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </a>
-        </div>
-      </div>
-    `;
-  };
-
-  const mapStyles = [
-    { id: 'streets-v12', name: 'Streets', icon: '🗺️' },
-    { id: 'satellite-v9', name: 'Satellite', icon: '🛰️' },
-    { id: 'outdoors-v12', name: 'Outdoors', icon: '🏔️' },
-    { id: 'dark-v11', name: 'Dark', icon: '🌙' }
-  ];
-
-  const handleStyleChange = (styleId: string) => {
-    const newStyle = `mapbox://styles/mapbox/${styleId}`;
-    setMapStyle(newStyle);
-
-    // Auto-reset view when style changes
-    setTimeout(() => {
-      resetMapView();
-    }, 800); // Wait for map style to load before resetting view
-  };
-
-  const toggleFullscreen = () => {
-    const newFullscreenState = !isFullscreen;
-    console.log('Toggling fullscreen:', newFullscreenState);
-    setIsFullscreen(newFullscreenState);
-
-    // The map will be recreated by the useEffect when isFullscreen changes
-    // No need for manual resize since we're recreating the entire map
-  };
-
-  const resetMapView = () => {
-    if (!map.current || filteredTrips.length === 0) return;
 
     const bounds = new mapboxgl.LngLatBounds();
-    filteredTrips.forEach(trip => {
-      if (trip.coordinates) {
-        bounds.extend([trip.coordinates.lng, trip.coordinates.lat]);
-      }
+    visibleTrips.forEach((trip) => {
+      if (!trip.coordinates) return;
+      bounds.extend([trip.coordinates.lng, trip.coordinates.lat]);
     });
 
-    map.current.fitBounds(bounds, {
-      padding: { top: 50, bottom: 50, left: 50, right: 50 },
-      maxZoom: 10,
-      duration: 1000
+    if (!bounds.isEmpty()) {
+      mapRef.current.fitBounds(bounds, {
+        padding: isFullscreen
+          ? { top: 96, bottom: 192, left: 96, right: 96 }
+          : { top: 96, bottom: 220, left: 280, right: 280 },
+        duration: 850,
+        maxZoom: 9.5
+      });
+    }
+  }, [visibleTrips, mapReady, focusTrip, isFullscreen]);
+
+  useEffect(() => {
+    if (!selectedTripId) return;
+    if (!visibleTrips.some((trip) => trip.id === selectedTripId)) {
+      setSelectedTripId(null);
+    }
+  }, [visibleTrips, selectedTripId]);
+
+  const resetView = useCallback(() => {
+    if (!mapRef.current || visibleTrips.length === 0) return;
+    const bounds = new mapboxgl.LngLatBounds();
+    visibleTrips.forEach((trip) => {
+      if (!trip.coordinates) return;
+      bounds.extend([trip.coordinates.lng, trip.coordinates.lat]);
     });
-  };
+    if (!bounds.isEmpty()) {
+      mapRef.current.fitBounds(bounds, {
+        padding: isFullscreen
+          ? { top: 96, bottom: 192, left: 96, right: 96 }
+          : { top: 96, bottom: 220, left: 280, right: 280 },
+        duration: 750,
+        maxZoom: 9.5
+      });
+    }
+  }, [visibleTrips, isFullscreen]);
 
-  if (isFullscreen) {
-    return (
-      <>
-        {/* Fullscreen overlay */}
-        <div
-          className="fixed inset-0 bg-black/50 z-[9998]"
-          onClick={toggleFullscreen}
-        />
+  return (
+    <div
+      className={cn(
+        "relative w-full overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-background via-background to-muted/30 shadow-xl transition duration-300",
+        isFullscreen
+          ? "fixed inset-4 z-[9999] flex flex-col"
+          : "h-[560px]"
+      )}
+    >
+      <div ref={containerRef} className="h-full w-full" />
 
-        {/* Fullscreen map container */}
-        <div className="fixed inset-4 z-[9999] rounded-2xl overflow-hidden border border-border shadow-2xl bg-background">
-          <div ref={fullscreenMapContainer} className="w-full h-full" />
+      <div className="absolute top-4 left-4 z-20 flex flex-col gap-3">
+        <div className="flex items-center gap-1 rounded-xl border border-border/60 bg-background/90 p-2 backdrop-blur-md">
+          {MAP_STYLE_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() =>
+                onStyleChange(`mapbox://styles/mapbox/${option.id}`)
+              }
+              className={cn(
+                "flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition-all duration-200",
+                mapStyle.includes(option.id)
+                  ? "bg-primary text-primary-foreground shadow"
+                  : "text-muted-foreground hover:bg-muted/70"
+              )}
+            >
+              <span aria-hidden>{option.emoji}</span>
+              <span className="hidden sm:inline">{option.label}</span>
+            </button>
+          ))}
+        </div>
 
-          {/* Fullscreen controls */}
-          <div className="absolute top-4 left-4 z-10 space-y-2">
-            {/* Style Selector */}
-            <div className="bg-background/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-2">
-              <div className="flex items-center gap-1">
-                {mapStyles.map(style => (
-                  <button
-                    key={style.id}
-                    onClick={() => handleStyleChange(style.id)}
-                    className={cn(
-                      "px-2 py-1 text-xs rounded-md transition-all duration-200",
-                      mapStyle.includes(style.id)
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-muted text-muted-foreground"
-                    )}
-                    title={style.name}
-                  >
-                    {style.icon}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/90 p-1.5 backdrop-blur-md">
+          <button
+            type="button"
+            onClick={resetView}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
+            <RotateCcwIcon className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onToggleFullscreen}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
+            {isFullscreen ? (
+              <MinimizeIcon className="h-4 w-4" />
+            ) : (
+              <MaximizeIcon className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+      </div>
 
-            {/* Additional Controls - Compact */}
-            <div className="bg-background/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-1 w-max">
-              <div className="flex gap-0.5">
-                <button
-                  onClick={resetMapView}
-                  className="p-1.5 text-xs rounded-md transition-all duration-200 hover:bg-muted text-muted-foreground hover:text-foreground"
-                  title="Reset View"
-                >
-                  <RotateCcwIcon className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={toggleFullscreen}
-                  className="p-1.5 text-xs rounded-md transition-all duration-200 hover:bg-muted text-muted-foreground hover:text-foreground"
-                  title="Exit Fullscreen"
-                >
-                  <MinimizeIcon className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
+      <div className="absolute top-4 right-4 z-20 flex flex-col gap-3">
+        <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/95 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-md">
+          <MapPinIcon className="h-4 w-4 text-primary" />
+          <span>{visibleTrips.length}</span>
+          <span className="text-muted-foreground">
+            {visibleTrips.length === 1 ? "trip" : "trips"}
+          </span>
+        </div>
+
+        <div className="space-y-2 rounded-xl border border-border/60 bg-background/95 p-4 text-xs text-muted-foreground backdrop-blur-md">
+          <div className="flex items-center gap-2 text-foreground">
+            <LayersIcon className="h-4 w-4 text-primary" />
+            <span className="font-medium">Status legend</span>
           </div>
-
-          {/* Fullscreen trip counter and legend */}
-          <div className="absolute top-4 right-4 z-10 space-y-2">
-            <div className="bg-background/90 backdrop-blur-sm rounded-lg border border-border shadow-lg px-3 py-2">
-              <div className="flex items-center gap-2 text-sm">
-                <MapPinIcon className="h-4 w-4 text-primary" />
-                <span className="font-medium">{filteredTrips.length}</span>
-                <span className="text-muted-foreground">
-                  {filteredTrips.length === 1 ? 'trip' : 'trips'}
-                </span>
-              </div>
-            </div>
-
-            {/* Status Legend */}
-            <div className="bg-background/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-3">
-              <div className="space-y-2">
-                <div className="text-xs font-medium text-muted-foreground mb-2">Trip Status</div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                    <span>Upcoming</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                    <span>Ongoing</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                    <span>Completed</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span>Planning</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Empty State for fullscreen */}
-          {filteredTrips.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-20">
-              <div className="text-center space-y-4 max-w-md mx-auto p-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <MapPinIcon className="h-10 w-10 text-blue-500" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">No trips to display</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {searchTerm || filter !== 'all'
-                      ? 'Try adjusting your filters or search terms to see more trips on the map'
-                      : 'Create your first trip with destinations to see it on the map'
-                    }
-                  </p>
-                </div>
-                {!searchTerm && filter === 'all' && (
-                  <div className="mt-6">
-                    <a
-                      href="/trips/new"
-                      className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                    >
-                      Create Your First Trip
-                    </a>
-                  </div>
-                )}
-              </div>
+          <LegendItem color="bg-emerald-500" label="Upcoming" />
+          <LegendItem color="bg-orange-500" label="Ongoing" />
+          <LegendItem color="bg-purple-500" label="Completed" />
+          <LegendItem color="bg-blue-500" label="Planning" />
+          {unmappedTripCount > 0 && (
+            <div className="mt-2 rounded-lg bg-amber-500/10 p-2 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+              {unmappedTripCount} trip
+              {unmappedTripCount > 1 ? "s" : ""} missing precise
+              destination data
             </div>
           )}
         </div>
-      </>
-    );
-  }
-
-  return (
-    <div className="relative w-full h-[600px] rounded-2xl overflow-hidden border border-border shadow-lg">
-      {/* Map Container */}
-      <div ref={mapContainer} className="w-full h-full" />
-
-      {/* Map Controls */}
-      <div className="absolute top-4 left-4 z-10 space-y-2">
-        {/* Style Selector */}
-        <div className="bg-background/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-2">
-          <div className="flex items-center gap-1">
-            {mapStyles.map(style => (
-              <button
-                key={style.id}
-                onClick={() => handleStyleChange(style.id)}
-                className={cn(
-                  "px-2 py-1 text-xs rounded-md transition-all duration-200",
-                  mapStyle.includes(style.id)
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted text-muted-foreground"
-                )}
-                title={style.name}
-              >
-                {style.icon}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Additional Controls - Compact */}
-        <div className="bg-background/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-1 w-max">
-          <div className="flex gap-0.5">
-            <button
-              onClick={resetMapView}
-              className="p-1.5 text-xs rounded-md transition-all duration-200 hover:bg-muted text-muted-foreground hover:text-foreground"
-              title="Reset View"
-            >
-              <RotateCcwIcon className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={toggleFullscreen}
-              className="p-1.5 text-xs rounded-md transition-all duration-200 hover:bg-muted text-muted-foreground hover:text-foreground"
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            >
-              {isFullscreen ? <MinimizeIcon className="h-3.5 w-3.5" /> : <MaximizeIcon className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-        </div>
       </div>
 
-      {/* Trip Counter and Status Legend */}
-      <div className="absolute top-4 right-4 z-10 space-y-2">
-        <div className="bg-background/90 backdrop-blur-sm rounded-lg border border-border shadow-lg px-3 py-2">
-          <div className="flex items-center gap-2 text-sm">
-            <MapPinIcon className="h-4 w-4 text-primary" />
-            <span className="font-medium">{filteredTrips.length}</span>
-            <span className="text-muted-foreground">
-              {filteredTrips.length === 1 ? 'trip' : 'trips'}
-            </span>
+      <MapSummaryPanel summary={mapSummary} />
+
+      <TripCarousel
+        trips={visibleTrips}
+        selectedTripId={selectedTripId}
+        onSelect={handleTripSelection}
+      />
+
+      {selectedTrip && (
+        <TripDetailsOverlay
+          trip={selectedTrip}
+          onClose={() => {
+            setSelectedTripId(null);
+            onTripFocus?.(null);
+          }}
+        />
+      )}
+
+      {!mapReady && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <div className="flex items-center gap-3 rounded-full border border-border/60 bg-card px-4 py-2 text-sm font-medium text-muted-foreground shadow-lg">
+            <CompassIcon className="h-4 w-4 animate-spin" /> Calibrating map…
           </div>
         </div>
+      )}
 
-        {/* Status Legend */}
-        <div className="bg-background/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-3">
-          <div className="space-y-2">
-            <div className="text-xs font-medium text-muted-foreground mb-2">Trip Status</div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                <span>Upcoming</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                <span>Ongoing</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                <span>Completed</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                <span>Planning</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Empty State */}
-      {filteredTrips.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-20">
-          <div className="text-center space-y-4 max-w-md mx-auto p-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto">
-              <MapPinIcon className="h-10 w-10 text-blue-500" />
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">No trips to display</h3>
-              <p className="text-sm text-muted-foreground">
-                {searchTerm || filter !== 'all'
-                  ? 'Try adjusting your filters or search terms to see more trips on the map'
-                  : 'Create your first trip with destinations to see it on the map'
-                }
-              </p>
-            </div>
-            {!searchTerm && filter === 'all' && (
-              <div className="mt-6">
-                <a
-                  href="/trips/new"
-                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  Create Your First Trip
-                </a>
-              </div>
-            )}
+      {visibleTrips.length === 0 && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="mx-auto max-w-md rounded-2xl border border-border/70 bg-card/90 p-8 text-center shadow-xl">
+            <MapPinIcon className="mx-auto mb-4 h-12 w-12 text-primary" />
+            <h3 className="text-lg font-semibold text-foreground">
+              No trips match the current filters
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Adjust your filters or add destinations to your trips to see
+              them on the map. Live geocoding runs automatically when new
+              locations are detected.
+            </p>
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function LegendItem({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className={cn("h-2.5 w-2.5 rounded-full", color)} />
+      <span>{label}</span>
+    </div>
+  );
+}
+
+interface MapSummary {
+  counts: Record<ProcessedTrip["status"], number>;
+  totalTrips: number;
+  uniqueDestinations: number;
+  budgetByCurrency: Array<{ currency: string; total: number }>;
+  nextTripLabel: string;
+  daysUntilNextTrip: number | null;
+}
+
+function computeMapSummary(trips: ProcessedTrip[]): MapSummary {
+  const counts: MapSummary["counts"] = {
+    upcoming: 0,
+    ongoing: 0,
+    completed: 0,
+    planning: 0
+  };
+
+  const uniqueDestinations = new Set<string>();
+  const budgetByCurrency = new Map<string, number>();
+  let nextTrip: ProcessedTrip | null = null;
+  let nextTripDate: Date | null = null;
+  const now = new Date();
+
+  trips.forEach((trip) => {
+    counts[trip.status] += 1;
+
+    if (trip.primaryDestination) uniqueDestinations.add(trip.primaryDestination);
+    if (trip.destination) uniqueDestinations.add(trip.destination);
+    trip.preferences?.destinations?.destinations?.forEach((dest) => {
+      if (dest.name) uniqueDestinations.add(dest.name);
+    });
+
+    if (typeof trip.budget_total === "number") {
+      const currency = trip.preferences?.currency ?? "EUR";
+      budgetByCurrency.set(
+        currency,
+        (budgetByCurrency.get(currency) ?? 0) + trip.budget_total
+      );
+    }
+
+    if (trip.start_date) {
+      const start = new Date(trip.start_date);
+      if (start > now && (!nextTripDate || start < nextTripDate)) {
+        nextTrip = trip;
+        nextTripDate = start;
+      }
+    }
+  });
+
+  const daysUntilNextTrip = nextTripDate
+    ? Math.max(0, Math.ceil((nextTripDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+    : null;
+
+  return {
+    counts,
+    totalTrips: trips.length,
+    uniqueDestinations: uniqueDestinations.size,
+    budgetByCurrency: Array.from(budgetByCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => b.total - a.total),
+    nextTripLabel: nextTrip
+      ? formatDateRange(nextTrip.start_date ?? null, nextTrip.end_date ?? null)
+      : "Plan your next trip",
+    daysUntilNextTrip
+  };
+}
+
+function MapSummaryPanel({ summary }: { summary: MapSummary }) {
+  if (summary.totalTrips === 0) return null;
+
+  const budgetSummary = summary.budgetByCurrency.length
+    ? summary.budgetByCurrency
+        .slice(0, 2)
+        .map(({ currency, total }) => formatCurrency(total, currency))
+        .join(" • ")
+    : "No budgets logged";
+
+  return (
+    <div className="pointer-events-none absolute bottom-6 left-6 z-20 hidden w-[280px] flex-col gap-3 sm:flex">
+      <div className="pointer-events-auto rounded-2xl border border-border/60 bg-background/95 p-4 text-xs text-muted-foreground shadow-lg backdrop-blur-md">
+        <div className="mb-3 flex items-center justify-between text-foreground">
+          <span className="text-sm font-semibold">Map insights</span>
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+            {summary.totalTrips} trips
+          </span>
+        </div>
+
+        <div className="mb-3 grid grid-cols-2 gap-2">
+          {(["upcoming", "ongoing", "completed", "planning"] as Array<ProcessedTrip["status"]>).map((status) => {
+            const config = STATUS_CONFIG[status];
+            return (
+              <div
+                key={status}
+                className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1 text-[11px] font-medium"
+              >
+                <span className="capitalize text-foreground">{config.label}</span>
+                <span className={cn("text-foreground", summary.counts[status] === 0 && "text-muted-foreground")}>
+                  {summary.counts[status]}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="space-y-2 rounded-xl bg-muted/30 p-3">
+          <div className="flex items-center justify-between text-foreground">
+            <span className="font-medium">Destinations</span>
+            <span className="text-sm font-semibold">{summary.uniqueDestinations}</span>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-foreground">Total budget</p>
+            <p className="text-[11px]">{budgetSummary}</p>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium text-foreground">Next departure</p>
+            <p className="text-[11px]">
+              {summary.daysUntilNextTrip !== null
+                ? `${summary.nextTripLabel} · ${summary.daysUntilNextTrip} ${summary.daysUntilNextTrip === 1 ? "day" : "days"}`
+                : summary.nextTripLabel}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface TripCarouselProps {
+  trips: ProcessedTrip[];
+  selectedTripId: string | null;
+  onSelect: (trip: ProcessedTrip) => void;
+}
+
+function TripCarousel({ trips, selectedTripId, onSelect }: TripCarouselProps) {
+  if (trips.length === 0) return null;
+
+  return (
+    <div className="pointer-events-auto absolute bottom-6 left-1/2 z-20 w-[92%] max-w-4xl -translate-x-1/2">
+      <div className="flex gap-3 overflow-x-auto rounded-2xl border border-border/60 bg-background/95 p-3 backdrop-blur-md shadow-lg scrollbar-thin scrollbar-thumb-muted-foreground/30">
+        {trips.map((trip) => {
+          const isActive = selectedTripId === trip.id;
+          return (
+            <button
+              key={trip.id}
+              type="button"
+              onClick={() => onSelect(trip)}
+              className={cn(
+                "min-w-[220px] max-w-[260px] rounded-2xl border border-border/60 px-4 py-3 text-left transition-all duration-200",
+                "hover:-translate-y-1 hover:border-primary/60 hover:shadow-lg",
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-lg"
+                  : "bg-card/90 text-foreground"
+              )}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <p className="line-clamp-1 text-sm font-semibold">
+                  {trip.name}
+                </p>
+                <StatusBadge status={trip.status} />
+              </div>
+              <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                {trip.primaryDestination ?? trip.destination ?? "Destination TBD"}
+              </p>
+              <p className="mt-2 text-xs font-medium text-foreground">
+                {formatDateRange(trip.start_date, trip.end_date)}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TripDetailsOverlay({
+  trip,
+  onClose
+}: {
+  trip: ProcessedTrip;
+  onClose: () => void;
+}) {
+  const currency = trip.preferences?.currency ?? "USD";
+
+  return (
+    <div className="pointer-events-auto absolute bottom-28 left-1/2 z-30 w-[min(420px,90%)] -translate-x-1/2 rounded-3xl border border-border/70 bg-background/95 p-6 shadow-2xl backdrop-blur-xl">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Selected trip
+          </p>
+          <h3 className="mt-1 text-xl font-bold leading-6 text-foreground">
+            {trip.name}
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          aria-label="Close trip details"
+        >
+          <XIcon className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="mt-4 space-y-3 text-sm text-foreground">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+            <MapPinIcon className="h-4 w-4 text-primary" />
+          </span>
+          <div>
+            <p className="font-medium">
+              {trip.primaryDestination ?? trip.destination ?? "Destination coming soon"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Tap any marker to jump between adventures
+            </p>
+          </div>
+        </div>
+
+        {(trip.start_date || trip.end_date) && (
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            </span>
+            <p className="font-medium">
+              {formatDateRange(trip.start_date, trip.end_date)}
+            </p>
+          </div>
+        )}
+
+        {typeof trip.budget_total === "number" && (
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground">
+              €
+            </span>
+            <p className="font-medium">
+              {formatCurrency(trip.budget_total, currency)}
+            </p>
+          </div>
+        )}
+
+        {trip.description && (
+          <p className="rounded-2xl bg-muted/60 p-3 text-sm text-muted-foreground line-clamp-3">
+            {trip.description}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-6 flex items-center justify-between gap-3">
+        <StatusBadge status={trip.status} />
+        <Link
+          href={`/trips/${trip.id}`}
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-110"
+        >
+          View trip
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: ProcessedTrip["status"] }) {
+  const config = STATUS_CONFIG[status];
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize",
+        config.badge
+      )}
+    >
+      {config.label}
+    </span>
+  );
+}
+
+function createMarkerElement({
+  trip,
+  isSelected,
+  isHovered
+}: {
+  trip: ProcessedTrip;
+  isSelected: boolean;
+  isHovered: boolean;
+}): HTMLButtonElement {
+  const element = document.createElement("button");
+  element.type = "button";
+  const config = STATUS_CONFIG[trip.status];
+  element.className = cn(
+    "trip-marker relative flex h-12 w-12 items-center justify-center rounded-full border-2 border-background shadow-lg transition-transform duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    config.marker,
+    isSelected ? "scale-110 ring-2 ring-primary/50" : "scale-100",
+    isHovered ? "scale-105" : ""
+  );
+  element.setAttribute("data-trip-id", trip.id);
+  element.setAttribute("aria-label", trip.name);
+  element.setAttribute("title", trip.name);
+
+  const halo = document.createElement("span");
+  halo.className = cn(
+    "pointer-events-none absolute inset-0 -z-10 rounded-full blur-md transition-opacity duration-300",
+    config.halo,
+    isSelected ? "opacity-100" : "opacity-80"
+  );
+  element.appendChild(halo);
+
+  const inner = document.createElement("span");
+  inner.className = "relative inline-flex h-3 w-3 rounded-full bg-white shadow-md";
+  inner.setAttribute("aria-hidden", "true");
+  element.appendChild(inner);
+
+  return element;
+}
+
+function buildPopupContent(trip: ProcessedTrip): string {
+  const config = STATUS_CONFIG[trip.status];
+  const currency = trip.preferences?.currency ?? "USD";
+  const budget =
+    typeof trip.budget_total === "number"
+      ? formatCurrency(trip.budget_total, currency)
+      : null;
+  const destination =
+    trip.primaryDestination ?? trip.destination ?? "Destination TBD";
+
+  return `
+    <div class="min-w-[260px] max-w-[320px] rounded-2xl bg-background/95 p-4 text-left text-foreground">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h3 class="text-base font-semibold">${escapeHtml(trip.name)}</h3>
+          <p class="mt-1 text-xs text-muted-foreground">${escapeHtml(destination)}</p>
+        </div>
+        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${config.badge}">
+          ${config.label}
+        </span>
+      </div>
+      <div class="mt-3 space-y-2 text-xs text-muted-foreground">
+        <div>${escapeHtml(formatDateRange(trip.start_date, trip.end_date))}</div>
+        ${
+          budget
+            ? `<div class="font-medium text-foreground">Budget: ${escapeHtml(budget)}</div>`
+            : ""
+        }
+      </div>
+      <a class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80" href="/trips/${trip.id}">
+        View trip
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H4a1 1 0 110-2h10.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+  `;
+}
+
+async function geocodeDestination(
+  destination: string,
+  token: string
+): Promise<Coordinates | null> {
+  const encoded = encodeURIComponent(destination);
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encoded}.json?access_token=${token}&limit=1&language=en`;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Mapbox geocoding failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  const feature = data?.features?.[0];
+  if (!feature?.center || feature.center.length < 2) {
+    return null;
+  }
+
+  const [lng, lat] = feature.center;
+  if (typeof lat !== "number" || typeof lng !== "number") {
+    return null;
+  }
+
+  return { lat, lng };
+}
+
+function formatDateRange(
+  start: string | null,
+  end: string | null
+): string {
+  if (!start && !end) return "Dates not set";
+
+  const format = (value: string | null) =>
+    value ? new Date(value).toLocaleDateString() : "TBD";
+
+  if (start && end) {
+    return `${format(start)} – ${format(end)}`;
+  }
+
+  return format(start ?? end);
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
