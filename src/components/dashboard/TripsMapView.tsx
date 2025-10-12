@@ -1,21 +1,19 @@
-"use client";
+'use client';
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Feature, FeatureCollection, Point } from "geojson";
+import MapboxWrapper from "@/components/map/MapboxWrapper";
+import { cn, formatCurrency } from "@/lib/utils";
+import { TripDestinations } from "@/lib/types/destination";
+import { logger } from "@/lib/logger";
 import {
-  CalendarIcon,
   CompassIcon,
   LayersIcon,
   MapPinIcon,
   MaximizeIcon,
   MinimizeIcon,
-  RotateCcwIcon,
-  XIcon
+  RotateCcwIcon
 } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
-import MapboxWrapper from "@/components/map/MapboxWrapper";
-import { TripDestinations } from "@/lib/types/destination";
-import { logger } from "@/lib/logger";
 
 type Trip = {
   id: string;
@@ -54,35 +52,42 @@ interface ProcessedTrip extends Trip {
   geocoded?: boolean;
 }
 
+interface TripFeatureProperties {
+  tripId: string;
+  status: ProcessedTrip["status"];
+  name: string;
+  destination: string;
+  startDate: string | null;
+  endDate: string | null;
+  budget: number | null;
+  currency: string;
+}
+
 const DEFAULT_CENTER: [number, number] = [12.4964, 41.9028];
 
 const STATUS_CONFIG: Record<
   ProcessedTrip["status"],
-  { marker: string; halo: string; badge: string; label: string }
+  { label: string; indicator: string; legend: string }
 > = {
   upcoming: {
-    marker: "bg-emerald-500 text-white",
-    halo: "bg-emerald-400/40",
-    badge: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-    label: "Upcoming"
+    label: "Upcoming",
+    indicator: "bg-emerald-500",
+    legend: "text-emerald-500"
   },
   ongoing: {
-    marker: "bg-orange-500 text-white",
-    halo: "bg-orange-400/40",
-    badge: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
-    label: "Ongoing"
+    label: "Ongoing",
+    indicator: "bg-orange-500",
+    legend: "text-orange-500"
   },
   completed: {
-    marker: "bg-purple-500 text-white",
-    halo: "bg-purple-400/40",
-    badge: "bg-purple-500/15 text-purple-700 dark:text-purple-300",
-    label: "Completed"
+    label: "Completed",
+    indicator: "bg-purple-500",
+    legend: "text-purple-500"
   },
   planning: {
-    marker: "bg-blue-500 text-white",
-    halo: "bg-blue-400/40",
-    badge: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
-    label: "Planning"
+    label: "Planning",
+    indicator: "bg-sky-500",
+    legend: "text-sky-500"
   }
 };
 
@@ -91,6 +96,34 @@ const MAP_STYLE_OPTIONS = [
   { id: "satellite-v9", emoji: "🛰️", label: "Satellite" },
   { id: "outdoors-v12", emoji: "🏔️", label: "Outdoors" },
   { id: "dark-v11", emoji: "🌙", label: "Dark" }
+];
+
+const TRIP_SOURCE_ID = "dashboard-trip-points";
+const TRIP_LAYER_HALO_ID = "dashboard-trip-points-halo";
+const TRIP_LAYER_CORE_ID = "dashboard-trip-points-core";
+
+const STATUS_COLOR_EXPRESSION: any = [
+  "match",
+  ["get", "status"],
+  "upcoming",
+  "#34d399",
+  "ongoing",
+  "#fb923c",
+  "completed",
+  "#a855f7",
+  "#0ea5e9"
+];
+
+const HALO_COLOR_EXPRESSION: any = [
+  "match",
+  ["get", "status"],
+  "upcoming",
+  "rgba(52, 211, 153, 0.28)",
+  "ongoing",
+  "rgba(251, 146, 60, 0.25)",
+  "completed",
+  "rgba(168, 85, 247, 0.28)",
+  "rgba(14, 165, 233, 0.25)"
 ];
 
 const destinationCoordinateCache = new Map<string, Coordinates>();
@@ -107,9 +140,7 @@ export default function TripsMapView({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    if (!isFullscreen) {
-      return;
-    }
+    if (!isFullscreen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -125,7 +156,9 @@ export default function TripsMapView({
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <MapPinIcon className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">Preparing your map</h3>
+            <h3 className="text-lg font-semibold text-foreground">
+              Preparing your map
+            </h3>
             <p className="text-sm text-muted-foreground">
               Loading destinations and calibrating markers…
             </p>
@@ -171,13 +204,17 @@ function TripsMapCanvas({
 }: TripsMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
+  const popupRef = useRef<any>(null);
   const styleRef = useRef(mapStyle);
   const [mapReady, setMapReady] = useState(false);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [hoveredTripId, setHoveredTripId] = useState<string | null>(null);
   const [coordinatesCache, setCoordinatesCache] = useState<Record<string, Coordinates>>({});
   const coordinatesCacheRef = useRef<Record<string, Coordinates>>({});
+  const visibleTripsRef = useRef<ProcessedTrip[]>([]);
+  const featureIdsRef = useRef<Set<string>>(new Set());
+  const previousSelectedRef = useRef<string | null>(null);
+  const previousHoveredRef = useRef<string | null>(null);
 
   useEffect(() => {
     coordinatesCacheRef.current = coordinatesCache;
@@ -190,6 +227,7 @@ function TripsMapCanvas({
 
   const processedTrips = useMemo<ProcessedTrip[]>(() => {
     const now = new Date();
+
     return trips.map((trip) => {
       let status: ProcessedTrip["status"] = "planning";
 
@@ -210,12 +248,21 @@ function TripsMapCanvas({
       const destinationGroup = trip.preferences?.destinations;
       if (destinationGroup?.destinations?.length) {
         const candidates = destinationGroup.destinations;
-        const primary = destinationGroup.primary
+        const preferredCandidate = destinationGroup.primary
           ? candidates.find((dest) => dest.id === destinationGroup.primary)
-          : candidates[0];
-        if (primary) {
-          coordinates = primary.coordinates;
-          primaryDestination = primary.name ?? primaryDestination;
+          : undefined;
+        const candidateWithCoordinates =
+          (preferredCandidate?.coordinates && preferredCandidate) ??
+          candidates.find((dest) => dest.coordinates);
+        const resolvedCandidate =
+          candidateWithCoordinates ?? preferredCandidate ?? candidates[0];
+
+        if (resolvedCandidate?.coordinates) {
+          coordinates = resolvedCandidate.coordinates;
+        }
+
+        if (resolvedCandidate?.name) {
+          primaryDestination = resolvedCandidate.name;
         }
       }
 
@@ -265,48 +312,172 @@ function TripsMapCanvas({
     });
   }, [resolvedTrips, filter, searchTerm]);
 
+  const featureCollection = useMemo<FeatureCollection<Point, TripFeatureProperties>>(
+    () => ({
+      type: "FeatureCollection",
+      features: visibleTrips.map((trip) => ({
+        type: "Feature",
+        id: trip.id,
+        properties: {
+          tripId: trip.id,
+          status: trip.status,
+          name: trip.name,
+          destination:
+            trip.primaryDestination ?? trip.destination ?? "Destination coming soon",
+          startDate: trip.start_date,
+          endDate: trip.end_date,
+          budget: typeof trip.budget_total === "number" ? trip.budget_total : null,
+          currency: trip.preferences?.currency ?? "USD"
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [trip.coordinates!.lng, trip.coordinates!.lat]
+        }
+      }))
+    }),
+    [visibleTrips]
+  );
+
+  useEffect(() => {
+    visibleTripsRef.current = visibleTrips;
+    featureIdsRef.current = new Set(visibleTrips.map((trip) => trip.id));
+  }, [visibleTrips]);
+
   const unmappedTripCount = useMemo(() => {
     return resolvedTrips.filter((trip) => !trip.coordinates).length;
   }, [resolvedTrips]);
 
-  const selectedTrip = useMemo(() => {
-    if (!selectedTripId) return null;
-    return (
-      visibleTrips.find((trip) => trip.id === selectedTripId) ??
-      resolvedTrips.find((trip) => trip.id === selectedTripId) ??
-      null
-    );
-  }, [visibleTrips, resolvedTrips, selectedTripId]);
+  const ensureSourceAndLayers = useCallback((map: any) => {
+    if (!map || !map.isStyleLoaded()) return;
 
-  const focusTrip = useCallback(
-    (trip: ProcessedTrip) => {
-      if (!trip.coordinates || !mapRef.current) return;
-      mapRef.current.flyTo({
-        center: [trip.coordinates.lng, trip.coordinates.lat],
-        zoom: 9,
-        speed: 1.2,
-        curve: 1.4,
-        essential: true
+    if (!map.getSource(TRIP_SOURCE_ID)) {
+      map.addSource(TRIP_SOURCE_ID, {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: []
+        },
+        promoteId: "tripId"
       });
+    }
+
+    if (!map.getLayer(TRIP_LAYER_HALO_ID)) {
+      map.addLayer({
+        id: TRIP_LAYER_HALO_ID,
+        type: "circle",
+        source: TRIP_SOURCE_ID,
+        paint: {
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            2,
+            16,
+            10,
+            48
+          ],
+          "circle-color": HALO_COLOR_EXPRESSION,
+          "circle-blur": 0.55,
+          "circle-opacity": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            0.55,
+            ["boolean", ["feature-state", "hovered"], false],
+            0.35,
+            0.18
+          ]
+        }
+      });
+    }
+
+    if (!map.getLayer(TRIP_LAYER_CORE_ID)) {
+      map.addLayer({
+        id: TRIP_LAYER_CORE_ID,
+        type: "circle",
+        source: TRIP_SOURCE_ID,
+        paint: {
+          "circle-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            2,
+            6,
+            10,
+            16
+          ],
+          "circle-color": STATUS_COLOR_EXPRESSION,
+          "circle-stroke-color": "rgba(255,255,255,0.95)",
+          "circle-stroke-width": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
+            2.4,
+            ["boolean", ["feature-state", "hovered"], false],
+            1.6,
+            1.1
+          ],
+          "circle-opacity": 0.95
+        }
+      });
+    }
+  }, []);
+
+  const updateSourceData = useCallback(
+    (targetMap?: any) => {
+      const map = targetMap ?? mapRef.current;
+      if (!map || !map.isStyleLoaded()) return;
+
+      ensureSourceAndLayers(map);
+      const source = map.getSource(TRIP_SOURCE_ID) as any;
+      if (source) {
+        source.setData(featureCollection);
+      }
     },
-    []
+    [ensureSourceAndLayers, featureCollection]
   );
 
-  const handleTripSelection = useCallback(
+  const focusTrip = useCallback((trip: ProcessedTrip) => {
+    const map = mapRef.current;
+    if (!map || !trip.coordinates) return;
+
+    map.flyTo({
+      center: [trip.coordinates.lng, trip.coordinates.lat],
+      zoom: 9,
+      speed: 1.15,
+      curve: 1.35,
+      essential: true
+    });
+  }, []);
+
+  const closePopup = useCallback(() => {
+    if (popupRef.current) {
+      popupRef.current.remove();
+      popupRef.current = null;
+    }
+  }, []);
+
+  const openPopupForTrip = useCallback(
     (trip: ProcessedTrip) => {
-      setSelectedTripId(trip.id);
-      focusTrip(trip);
-      onTripFocus?.(trip.id);
+      const map = mapRef.current;
+      if (!map || !trip.coordinates) return;
+
+      closePopup();
+
+      popupRef.current = new mapboxgl.Popup({
+        offset: 18,
+        closeButton: false,
+        className: "trip-popup"
+      })
+        .setLngLat([trip.coordinates.lng, trip.coordinates.lat])
+        .setHTML(buildPopupContent(trip))
+        .addTo(map);
     },
-    [focusTrip, onTripFocus]
+    [closePopup, mapboxgl]
   );
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) {
-      return;
-    }
+    if (!containerRef.current || mapRef.current) return;
 
-    mapRef.current = new mapboxgl.Map({
+    const map = new mapboxgl.Map({
       container: containerRef.current,
       style: mapStyle,
       center: DEFAULT_CENTER,
@@ -314,44 +485,166 @@ function TripsMapCanvas({
       attributionControl: false
     });
 
-    const navigationControl = new mapboxgl.NavigationControl({
-      showCompass: true,
-      showZoom: true
-    });
-    mapRef.current.addControl(navigationControl, "bottom-right");
-    mapRef.current.addControl(
-      new mapboxgl.AttributionControl({ compact: true }),
+    mapRef.current = map;
+
+    map.addControl(
+      new mapboxgl.NavigationControl({ showCompass: true, showZoom: true }),
       "bottom-right"
     );
+    map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-right");
 
-    const handleLoad = () => setMapReady(true);
-    mapRef.current.on("load", handleLoad);
+    const handleLoad = () => {
+      ensureSourceAndLayers(map);
+      updateSourceData(map);
+      setMapReady(true);
+    };
+
+    map.on("load", handleLoad);
 
     return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
-      mapRef.current?.off("load", handleLoad);
-      mapRef.current?.remove();
+      map.off("load", handleLoad);
+      map.remove();
       mapRef.current = null;
+      setMapReady(false);
+      closePopup();
     };
-  }, [mapboxgl, mapStyle]);
+  }, [closePopup, ensureSourceAndLayers, mapStyle, mapboxgl, updateSourceData]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    const map = mapRef.current;
+    if (!map) return;
     if (styleRef.current === mapStyle) return;
 
     styleRef.current = mapStyle;
     setMapReady(false);
-    mapRef.current.setStyle(mapStyle);
-    mapRef.current.once("style.load", () => setMapReady(true));
-  }, [mapStyle]);
+    map.setStyle(mapStyle);
+
+    const handleStyleLoad = () => {
+      ensureSourceAndLayers(map);
+      updateSourceData(map);
+      setMapReady(true);
+    };
+
+    map.once("style.load", handleStyleLoad);
+
+    return () => {
+      map.off("style.load", handleStyleLoad);
+    };
+  }, [ensureSourceAndLayers, mapStyle, updateSourceData]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
-    const resize = () => mapRef.current?.resize();
-    const timeout = window.setTimeout(resize, 300);
-    return () => window.clearTimeout(timeout);
-  }, [isFullscreen]);
+    updateSourceData();
+  }, [updateSourceData]);
+
+  useEffect(() => {
+    if (!mapReady) return;
+    const map = mapRef.current;
+    if (!map) return;
+
+    const handleMouseEnter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+
+    const handleMouseMove = (event: any) => {
+      const feature = event?.features?.[0];
+      const tripId: string | undefined = feature?.properties?.tripId;
+      if (!tripId || tripId === hoveredTripId) return;
+      setHoveredTripId(tripId);
+    };
+
+    const handleMouseLeave = () => {
+      map.getCanvas().style.cursor = "";
+      setHoveredTripId(null);
+    };
+
+    const handleClick = (event: any) => {
+      const feature = event?.features?.[0];
+      const tripId: string | undefined = feature?.properties?.tripId;
+      if (!tripId) return;
+      setSelectedTripId(tripId);
+    };
+
+    const handleMapClick = (event: any) => {
+      const features = map.queryRenderedFeatures(event.point, {
+        layers: [TRIP_LAYER_CORE_ID]
+      });
+      if (features.length === 0) {
+        setSelectedTripId(null);
+      }
+    };
+
+    map.on("mouseenter", TRIP_LAYER_CORE_ID, handleMouseEnter);
+    map.on("mousemove", TRIP_LAYER_CORE_ID, handleMouseMove);
+    map.on("mouseleave", TRIP_LAYER_CORE_ID, handleMouseLeave);
+    map.on("click", TRIP_LAYER_CORE_ID, handleClick);
+    map.on("click", handleMapClick);
+
+    return () => {
+      map.off("mouseenter", TRIP_LAYER_CORE_ID, handleMouseEnter);
+      map.off("mousemove", TRIP_LAYER_CORE_ID, handleMouseMove);
+      map.off("mouseleave", TRIP_LAYER_CORE_ID, handleMouseLeave);
+      map.off("click", TRIP_LAYER_CORE_ID, handleClick);
+      map.off("click", handleMapClick);
+    };
+  }, [hoveredTripId, mapReady]);
+
+  useEffect(() => {
+    if (!mapReady) return;
+    const map = mapRef.current;
+    if (!map) return;
+
+    const previous = previousHoveredRef.current;
+    if (previous && featureIdsRef.current.has(previous)) {
+      map.setFeatureState(
+        { source: TRIP_SOURCE_ID, id: previous },
+        { hovered: false }
+      );
+    }
+
+    if (hoveredTripId && featureIdsRef.current.has(hoveredTripId)) {
+      map.setFeatureState(
+        { source: TRIP_SOURCE_ID, id: hoveredTripId },
+        { hovered: true }
+      );
+    }
+
+    previousHoveredRef.current = hoveredTripId ?? null;
+  }, [hoveredTripId, mapReady]);
+
+  useEffect(() => {
+    if (!mapReady) return;
+    const map = mapRef.current;
+    if (!map) return;
+
+    const previous = previousSelectedRef.current;
+    if (previous && featureIdsRef.current.has(previous)) {
+      map.setFeatureState(
+        { source: TRIP_SOURCE_ID, id: previous },
+        { selected: false }
+      );
+    }
+
+    if (selectedTripId && featureIdsRef.current.has(selectedTripId)) {
+      map.setFeatureState(
+        { source: TRIP_SOURCE_ID, id: selectedTripId },
+        { selected: true }
+      );
+
+      const trip = visibleTripsRef.current.find((item) => item.id === selectedTripId);
+      if (trip) {
+        openPopupForTrip(trip);
+        focusTrip(trip);
+      }
+    } else {
+      closePopup();
+    }
+
+    previousSelectedRef.current = selectedTripId ?? null;
+  }, [selectedTripId, mapReady, closePopup, focusTrip, openPopupForTrip]);
+
+  useEffect(() => {
+    onTripFocus?.(selectedTripId);
+  }, [selectedTripId, onTripFocus]);
 
   useEffect(() => {
     let cancelled = false;
@@ -408,61 +701,9 @@ function TripsMapCanvas({
   }, [processedTrips, token]);
 
   useEffect(() => {
-    if (!mapRef.current || !mapReady) return;
-
-    markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = [];
-
-    visibleTrips.forEach((trip) => {
-      if (!trip.coordinates) return;
-
-      const markerElement = createMarkerElement({
-        trip,
-        isSelected: selectedTripId === trip.id,
-        isHovered: hoveredTripId === trip.id
-      });
-
-      const popup = new mapboxgl.Popup({
-        offset: 18,
-        closeButton: false,
-        className: "trip-popup"
-      }).setHTML(buildPopupContent(trip));
-
-      const marker = new mapboxgl.Marker({
-        element: markerElement,
-        anchor: "bottom"
-      })
-        .setLngLat([trip.coordinates.lng, trip.coordinates.lat])
-        .setPopup(popup)
-        .addTo(mapRef.current);
-
-      markerElement.addEventListener("mouseenter", () => {
-        setHoveredTripId(trip.id);
-      });
-
-      markerElement.addEventListener("mouseleave", () => {
-        setHoveredTripId((current) => (current === trip.id ? null : current));
-      });
-
-      markerElement.addEventListener("click", () => {
-        handleTripSelection(trip);
-        marker.togglePopup();
-      });
-
-      markersRef.current.push(marker);
-    });
-  }, [
-    visibleTrips,
-    mapReady,
-    handleTripSelection,
-    hoveredTripId,
-    selectedTripId,
-    mapboxgl
-  ]);
-
-  useEffect(() => {
-    if (!mapRef.current || !mapReady) return;
-    if (visibleTrips.length === 0) return;
+    if (!mapReady) return;
+    const map = mapRef.current;
+    if (!map || visibleTrips.length === 0) return;
 
     if (visibleTrips.length === 1) {
       focusTrip(visibleTrips[0]);
@@ -476,40 +717,49 @@ function TripsMapCanvas({
     });
 
     if (!bounds.isEmpty()) {
-      mapRef.current.fitBounds(bounds, {
+      map.fitBounds(bounds, {
         padding: isFullscreen
-          ? { top: 96, bottom: 192, left: 96, right: 96 }
-          : { top: 96, bottom: 220, left: 280, right: 280 },
+          ? { top: 96, bottom: 160, left: 96, right: 96 }
+          : { top: 96, bottom: 200, left: 240, right: 240 },
         duration: 850,
         maxZoom: 9.5
       });
     }
   }, [visibleTrips, mapReady, focusTrip, isFullscreen]);
 
-  useEffect(() => {
-    if (!selectedTripId) return;
-    if (!visibleTrips.some((trip) => trip.id === selectedTripId)) {
-      setSelectedTripId(null);
-    }
-  }, [visibleTrips, selectedTripId]);
+  const clearSelection = useCallback(() => {
+    setSelectedTripId(null);
+    setHoveredTripId(null);
+    closePopup();
+  }, [closePopup]);
 
   const resetView = useCallback(() => {
-    if (!mapRef.current || visibleTrips.length === 0) return;
+    const map = mapRef.current;
+    if (!map || visibleTrips.length === 0) return;
+
+    clearSelection();
+
     const bounds = new mapboxgl.LngLatBounds();
     visibleTrips.forEach((trip) => {
       if (!trip.coordinates) return;
       bounds.extend([trip.coordinates.lng, trip.coordinates.lat]);
     });
+
     if (!bounds.isEmpty()) {
-      mapRef.current.fitBounds(bounds, {
+      map.fitBounds(bounds, {
         padding: isFullscreen
-          ? { top: 96, bottom: 192, left: 96, right: 96 }
-          : { top: 96, bottom: 220, left: 280, right: 280 },
+          ? { top: 96, bottom: 160, left: 96, right: 96 }
+          : { top: 96, bottom: 200, left: 240, right: 240 },
         duration: 750,
         maxZoom: 9.5
       });
     }
-  }, [visibleTrips, isFullscreen]);
+  }, [clearSelection, isFullscreen, visibleTrips]);
+
+  const selectedTrip = useMemo(() => {
+    if (!selectedTripId) return null;
+    return visibleTrips.find((trip) => trip.id === selectedTripId) ?? null;
+  }, [selectedTripId, visibleTrips]);
 
   return (
     <div
@@ -528,18 +778,16 @@ function TripsMapCanvas({
             <button
               key={option.id}
               type="button"
-              onClick={() =>
-                onStyleChange(`mapbox://styles/mapbox/${option.id}`)
-              }
+              onClick={() => onStyleChange(`mapbox://styles/mapbox/${option.id}`)}
               className={cn(
-                "flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition-all duration-200",
-                mapStyle.includes(option.id)
-                  ? "bg-primary text-primary-foreground shadow"
-                  : "text-muted-foreground hover:bg-muted/70"
+                "flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition",
+                mapStyle.endsWith(option.id)
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
               )}
             >
-              <span aria-hidden>{option.emoji}</span>
-              <span className="hidden sm:inline">{option.label}</span>
+              <span>{option.emoji}</span>
+              {option.label}
             </button>
           ))}
         </div>
@@ -580,34 +828,35 @@ function TripsMapCanvas({
             <LayersIcon className="h-4 w-4 text-primary" />
             <span className="font-medium">Status legend</span>
           </div>
-          <LegendItem color="bg-emerald-500" label="Upcoming" />
-          <LegendItem color="bg-orange-500" label="Ongoing" />
-          <LegendItem color="bg-purple-500" label="Completed" />
-          <LegendItem color="bg-blue-500" label="Planning" />
+          {Object.entries(STATUS_CONFIG).map(([status, config]) => (
+            <LegendItem
+              key={status}
+              color={config.indicator}
+              label={config.label}
+              className={config.legend}
+            />
+          ))}
           {unmappedTripCount > 0 && (
             <div className="mt-2 rounded-lg bg-amber-500/10 p-2 text-[11px] font-medium text-amber-600 dark:text-amber-400">
               {unmappedTripCount} trip
-              {unmappedTripCount > 1 ? "s" : ""} missing precise
-              destination data
+              {unmappedTripCount > 1 ? "s" : ""} missing precise destination data
             </div>
           )}
         </div>
       </div>
 
-      <TripCarousel
-        trips={visibleTrips}
-        selectedTripId={selectedTripId}
-        onSelect={handleTripSelection}
-      />
-
       {selectedTrip && (
-        <TripDetailsOverlay
-          trip={selectedTrip}
-          onClose={() => {
-            setSelectedTripId(null);
-            onTripFocus?.(null);
-          }}
-        />
+        <div className="pointer-events-none absolute left-4 bottom-4 z-20 max-w-sm rounded-2xl border border-border/60 bg-background/95 px-4 py-3 text-sm shadow-xl backdrop-blur-lg">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Selected trip
+          </p>
+          <p className="mt-1 text-base font-semibold text-foreground">
+            {selectedTrip.name}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {selectedTrip.primaryDestination ?? selectedTrip.destination ?? "Destination coming soon"}
+          </p>
+        </div>
       )}
 
       {!mapReady && (
@@ -618,7 +867,7 @@ function TripsMapCanvas({
         </div>
       )}
 
-      {visibleTrips.length === 0 && (
+      {visibleTrips.length === 0 && mapReady && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
           <div className="mx-auto max-w-md rounded-2xl border border-border/70 bg-card/90 p-8 text-center shadow-xl">
             <MapPinIcon className="mx-auto mb-4 h-12 w-12 text-primary" />
@@ -626,9 +875,7 @@ function TripsMapCanvas({
               No trips match the current filters
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Adjust your filters or add destinations to your trips to see
-              them on the map. Live geocoding runs automatically when new
-              locations are detected.
+              Adjust your filters or add destinations to your trips to see them on the map.
             </p>
           </div>
         </div>
@@ -637,238 +884,21 @@ function TripsMapCanvas({
   );
 }
 
-function LegendItem({ color, label }: { color: string; label: string }) {
+function LegendItem({
+  color,
+  label,
+  className
+}: {
+  color: string;
+  label: string;
+  className?: string;
+}) {
   return (
     <div className="flex items-center gap-2">
       <span className={cn("h-2.5 w-2.5 rounded-full", color)} />
-      <span>{label}</span>
+      <span className={cn("font-medium", className)}>{label}</span>
     </div>
   );
-}
-
-interface TripCarouselProps {
-  trips: ProcessedTrip[];
-  selectedTripId: string | null;
-  onSelect: (trip: ProcessedTrip) => void;
-}
-
-function TripCarousel({ trips, selectedTripId, onSelect }: TripCarouselProps) {
-  if (trips.length === 0) return null;
-
-  return (
-    <div className="pointer-events-auto absolute bottom-6 left-1/2 z-20 w-[92%] max-w-4xl -translate-x-1/2">
-      <div className="flex gap-3 overflow-x-auto rounded-2xl border border-border/60 bg-background/95 p-3 backdrop-blur-md shadow-lg scrollbar-thin scrollbar-thumb-muted-foreground/30">
-        {trips.map((trip) => {
-          const isActive = selectedTripId === trip.id;
-          return (
-            <button
-              key={trip.id}
-              type="button"
-              onClick={() => onSelect(trip)}
-              className={cn(
-                "min-w-[220px] max-w-[260px] rounded-2xl border border-border/60 px-4 py-3 text-left transition-all duration-200",
-                "hover:-translate-y-1 hover:border-primary/60 hover:shadow-lg",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-lg"
-                  : "bg-card/90 text-foreground"
-              )}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p className="line-clamp-1 text-sm font-semibold">
-                  {trip.name}
-                </p>
-                <StatusBadge status={trip.status} />
-              </div>
-              <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
-                {trip.primaryDestination ?? trip.destination ?? "Destination TBD"}
-              </p>
-              <p className="mt-2 text-xs font-medium text-foreground">
-                {formatDateRange(trip.start_date, trip.end_date)}
-              </p>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function TripDetailsOverlay({
-  trip,
-  onClose
-}: {
-  trip: ProcessedTrip;
-  onClose: () => void;
-}) {
-  const currency = trip.preferences?.currency ?? "USD";
-
-  return (
-    <div className="pointer-events-auto absolute bottom-28 left-1/2 z-30 w-[min(420px,90%)] -translate-x-1/2 rounded-3xl border border-border/70 bg-background/95 p-6 shadow-2xl backdrop-blur-xl">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Selected trip
-          </p>
-          <h3 className="mt-1 text-xl font-bold leading-6 text-foreground">
-            {trip.name}
-          </h3>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          aria-label="Close trip details"
-        >
-          <XIcon className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="mt-4 space-y-3 text-sm text-foreground">
-        <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-            <MapPinIcon className="h-4 w-4 text-primary" />
-          </span>
-          <div>
-            <p className="font-medium">
-              {trip.primaryDestination ?? trip.destination ?? "Destination coming soon"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Tap any marker to jump between adventures
-            </p>
-          </div>
-        </div>
-
-        {(trip.start_date || trip.end_date) && (
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-            </span>
-            <p className="font-medium">
-              {formatDateRange(trip.start_date, trip.end_date)}
-            </p>
-          </div>
-        )}
-
-        {typeof trip.budget_total === "number" && (
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground">
-              €
-            </span>
-            <p className="font-medium">
-              {formatCurrency(trip.budget_total, currency)}
-            </p>
-          </div>
-        )}
-
-        {trip.description && (
-          <p className="rounded-2xl bg-muted/60 p-3 text-sm text-muted-foreground line-clamp-3">
-            {trip.description}
-          </p>
-        )}
-      </div>
-
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <StatusBadge status={trip.status} />
-        <Link
-          href={`/trips/${trip.id}`}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-110"
-        >
-          View trip
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: ProcessedTrip["status"] }) {
-  const config = STATUS_CONFIG[status];
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize",
-        config.badge
-      )}
-    >
-      {config.label}
-    </span>
-  );
-}
-
-function createMarkerElement({
-  trip,
-  isSelected,
-  isHovered
-}: {
-  trip: ProcessedTrip;
-  isSelected: boolean;
-  isHovered: boolean;
-}): HTMLButtonElement {
-  const element = document.createElement("button");
-  element.type = "button";
-  const config = STATUS_CONFIG[trip.status];
-  element.className = cn(
-    "trip-marker relative flex h-12 w-12 items-center justify-center rounded-full border-2 border-background shadow-lg transition-transform duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-    config.marker,
-    isSelected ? "scale-110 ring-2 ring-primary/50" : "scale-100",
-    isHovered ? "scale-105" : ""
-  );
-  element.setAttribute("data-trip-id", trip.id);
-  element.setAttribute("aria-label", trip.name);
-  element.setAttribute("title", trip.name);
-
-  const halo = document.createElement("span");
-  halo.className = cn(
-    "pointer-events-none absolute inset-0 -z-10 rounded-full blur-md transition-opacity duration-300",
-    config.halo,
-    isSelected ? "opacity-100" : "opacity-80"
-  );
-  element.appendChild(halo);
-
-  const inner = document.createElement("span");
-  inner.className = "relative inline-flex h-3 w-3 rounded-full bg-white shadow-md";
-  inner.setAttribute("aria-hidden", "true");
-  element.appendChild(inner);
-
-  return element;
-}
-
-function buildPopupContent(trip: ProcessedTrip): string {
-  const config = STATUS_CONFIG[trip.status];
-  const currency = trip.preferences?.currency ?? "USD";
-  const budget =
-    typeof trip.budget_total === "number"
-      ? formatCurrency(trip.budget_total, currency)
-      : null;
-  const destination =
-    trip.primaryDestination ?? trip.destination ?? "Destination TBD";
-
-  return `
-    <div class="min-w-[260px] max-w-[320px] rounded-2xl bg-background/95 p-4 text-left text-foreground">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <h3 class="text-base font-semibold">${escapeHtml(trip.name)}</h3>
-          <p class="mt-1 text-xs text-muted-foreground">${escapeHtml(destination)}</p>
-        </div>
-        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${config.badge}">
-          ${config.label}
-        </span>
-      </div>
-      <div class="mt-3 space-y-2 text-xs text-muted-foreground">
-        <div>${escapeHtml(formatDateRange(trip.start_date, trip.end_date))}</div>
-        ${
-          budget
-            ? `<div class="font-medium text-foreground">Budget: ${escapeHtml(budget)}</div>`
-            : ""
-        }
-      </div>
-      <a class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80" href="/trips/${trip.id}">
-        View trip
-        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H4a1 1 0 110-2h10.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-        </svg>
-      </a>
-    </div>
-  `;
 }
 
 async function geocodeDestination(
@@ -920,4 +950,43 @@ function escapeHtml(value: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function buildPopupContent(trip: ProcessedTrip): string {
+  const statusConfig = STATUS_CONFIG[trip.status];
+  const currency = trip.preferences?.currency ?? "USD";
+  const budget =
+    typeof trip.budget_total === "number"
+      ? formatCurrency(trip.budget_total, currency)
+      : null;
+  const destination =
+    trip.primaryDestination ?? trip.destination ?? "Destination TBD";
+
+  return `
+    <div class="min-w-[260px] max-w-[320px] rounded-2xl bg-background/95 p-4 text-left text-foreground">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h3 class="text-base font-semibold">${escapeHtml(trip.name)}</h3>
+          <p class="mt-1 text-xs text-muted-foreground">${escapeHtml(destination)}</p>
+        </div>
+        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusConfig.legend}">
+          ${statusConfig.label}
+        </span>
+      </div>
+      <div class="mt-3 space-y-2 text-xs text-muted-foreground">
+        <div>${escapeHtml(formatDateRange(trip.start_date, trip.end_date))}</div>
+        ${
+          budget
+            ? `<div class="font-medium text-foreground">Budget: ${escapeHtml(budget)}</div>`
+            : ""
+        }
+      </div>
+      <a class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80" href="/trips/${trip.id}">
+        View trip
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H4a1 1 0 110-2h10.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+  `;
 }
