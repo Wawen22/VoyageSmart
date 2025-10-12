@@ -493,7 +493,7 @@ export default function DashboardPage() {
           {renderHeader()}
 
           {!showLoading && hasTrips && (
-            <SwipeableStats trips={trips} className="lg:hidden" showAnalyticsButton />
+            <SwipeableStats trips={trips} className="lg:hidden" />
           )}
 
           {showLoading && (

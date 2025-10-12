@@ -968,14 +968,21 @@ export default function WeatherWidget() {
     return colors[conditionLower as keyof typeof colors] || (secondary ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(14, 165, 233, 0.3))' : 'linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(6, 182, 212, 0.4))');
   };
 
+  const baseCardClasses = "relative flex h-full w-full flex-col overflow-hidden rounded-2xl";
+  const interactiveCardClasses = cn(
+    "glass-info-card group transition-all duration-500 p-6",
+    baseCardClasses,
+    "justify-between min-h-[320px] hover:scale-[1.02] hover:shadow-2xl"
+  );
+
   if (loading) {
     return (
-      <div className="glass-card rounded-2xl p-6 animate-pulse relative overflow-hidden">
+      <div className={cn("glass-card animate-pulse p-6", baseCardClasses)}>
         {/* Animated background orbs */}
         <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl opacity-50 animate-pulse" />
         <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl opacity-50 animate-pulse" style={{ animationDelay: '1s' }} />
 
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex flex-1 items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-white/10 dark:bg-white/5 rounded-xl backdrop-blur-sm"></div>
             <div className="flex-1 space-y-2">
@@ -991,12 +998,16 @@ export default function WeatherWidget() {
 
   if (error && !weather) {
     return (
-      <div className="glass-card rounded-2xl p-6 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+      <div className={cn(
+        "glass-card p-6 transition-all duration-300",
+        baseCardClasses,
+        "justify-between hover:scale-[1.02]"
+      )}>
         {/* Animated background orbs */}
         <div className="absolute -top-12 -right-12 w-32 h-32 bg-red-500/20 rounded-full blur-3xl opacity-50" />
         <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl opacity-50" />
 
-        <div className="relative z-10 flex items-center justify-between">
+        <div className="relative z-10 flex flex-1 flex-col justify-between gap-4">
           <div className="flex items-center gap-4 text-foreground/80">
             <div className="p-3 rounded-xl bg-red-500/10 backdrop-blur-sm border border-red-500/20">
               <AlertCircleIcon className="h-6 w-6 text-red-500" />
@@ -1060,10 +1071,7 @@ export default function WeatherWidget() {
   }
 
   return (
-    <div className={cn(
-      "glass-info-card relative overflow-hidden rounded-2xl p-6 group transition-all duration-500",
-      "hover:shadow-2xl hover:scale-[1.02]"
-    )}>
+    <div className={interactiveCardClasses}>
       {/* Animated background orbs based on weather condition */}
       <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl opacity-30 transition-all duration-700 group-hover:opacity-50"
         style={{ background: getOrbColorByCondition(weather.condition) }} />
@@ -1073,14 +1081,19 @@ export default function WeatherWidget() {
       {/* Subtle grid pattern */}
       <div className="absolute inset-0 opacity-5 glass-grid-pattern" />
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex h-full flex-col justify-between">
         {/* Header with location controls */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2 text-foreground/90 font-medium">
-            <div className="p-1.5 rounded-lg bg-primary/10 backdrop-blur-sm">
-              <MapPinIcon className="h-3.5 w-3.5 text-primary" />
+        <div className="flex items-start justify-between gap-4 mb-5">
+          <div className="flex items-center gap-3 text-foreground/90 font-medium">
+            <div className="p-2 rounded-lg bg-primary/10 backdrop-blur-sm border border-white/20">
+              <MapPinIcon className="h-4 w-4 text-primary" />
             </div>
-            <span className="text-sm">{weather.location}</span>
+            <div className="flex flex-col">
+              <span className="text-xs uppercase tracking-[0.35em] text-muted-foreground/70">Current Weather</span>
+              <span className="text-base font-semibold text-foreground max-w-[14rem] truncate">
+                {location.selectedLocation || weather.location}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -1238,51 +1251,53 @@ export default function WeatherWidget() {
           </div>
         </div>
 
-        {/* Main weather info */}
-        <div className="flex items-center gap-4 mb-5">
-          <div className="p-3 rounded-2xl bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
-            {getWeatherIcon(weather.condition, weather.icon)}
-          </div>
-          <div>
-            <div className="text-4xl font-bold text-foreground mb-1 group-hover:scale-105 transition-transform duration-300">
-              {weather.temperature}°C
+        <div className="flex flex-1 flex-col justify-center gap-6">
+          {/* Main weather info */}
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              {getWeatherIcon(weather.condition, weather.icon)}
             </div>
-            <div className="text-sm text-muted-foreground font-medium capitalize">
-              {weather.description || weather.condition}
-            </div>
-          </div>
-        </div>
-
-        {/* Weather details - Glass cards */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 rounded-lg bg-blue-500/10">
-                <ThermometerIcon className="h-4 w-4 text-blue-500" />
+            <div>
+              <div className="text-4xl font-bold text-foreground mb-1 group-hover:scale-105 transition-transform duration-300">
+                {weather.temperature}°C
+              </div>
+              <div className="text-sm text-muted-foreground font-medium capitalize">
+                {weather.description || weather.condition}
               </div>
             </div>
-            <div className="text-xs text-muted-foreground mb-1">Humidity</div>
-            <div className="text-sm font-bold text-foreground">{weather.humidity}%</div>
           </div>
 
-          <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 rounded-lg bg-cyan-500/10">
-                <WindIcon className="h-4 w-4 text-cyan-500" />
+          {/* Weather details - Glass cards */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 rounded-lg bg-blue-500/10">
+                  <ThermometerIcon className="h-4 w-4 text-blue-500" />
+                </div>
               </div>
+              <div className="text-xs text-muted-foreground mb-1">Humidity</div>
+              <div className="text-sm font-bold text-foreground">{weather.humidity}%</div>
             </div>
-            <div className="text-xs text-muted-foreground mb-1">Wind</div>
-            <div className="text-sm font-bold text-foreground">{weather.windSpeed} km/h</div>
-          </div>
 
-          <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 rounded-lg bg-purple-500/10">
-                <EyeIcon className="h-4 w-4 text-purple-500" />
+            <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 rounded-lg bg-cyan-500/10">
+                  <WindIcon className="h-4 w-4 text-cyan-500" />
+                </div>
               </div>
+              <div className="text-xs text-muted-foreground mb-1">Wind</div>
+              <div className="text-sm font-bold text-foreground">{weather.windSpeed} km/h</div>
             </div>
-            <div className="text-xs text-muted-foreground mb-1">Visibility</div>
-            <div className="text-sm font-bold text-foreground">{weather.visibility} km</div>
+
+            <div className="glass-card rounded-xl p-3 text-center hover:scale-105 transition-all duration-300">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 rounded-lg bg-purple-500/10">
+                  <EyeIcon className="h-4 w-4 text-purple-500" />
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground mb-1">Visibility</div>
+              <div className="text-sm font-bold text-foreground">{weather.visibility} km</div>
+            </div>
           </div>
         </div>
       </div>

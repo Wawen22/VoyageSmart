@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { GlobeIcon, BarChart3Icon } from 'lucide-react';
+import { GlobeIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import AdvancedMetricsModal from './AdvancedMetricsModal';
 
 interface Trip {
   id: string;
@@ -105,41 +104,8 @@ export default function TopDestinationsWidget({ trips }: TopDestinationsWidgetPr
         )}
       </div>
 
-      {/* Analytics Button */}
-      <div className="space-y-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-2 border-dashed border-primary/20">
-          <CardContent className="p-6 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto">
-                <BarChart3Icon className="h-8 w-8 text-white" />
-              </div>
-              
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Advanced Analytics</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Dive deeper into your travel patterns, insights, and detailed metrics.
-                </p>
-              </div>
-
-              <AdvancedMetricsModal 
-                trips={trips}
-                trigger={
-                  <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                    View Analytics
-                  </button>
-                }
-              />
-              
-              <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground mt-3">
-                <span>📊 Charts</span>
-                <span>📈 Trends</span>
-                <span>🗺️ Maps</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Tip */}
+      {/* Tips / Guidance */}
+      <div>
         <Card className="bg-muted/50">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">

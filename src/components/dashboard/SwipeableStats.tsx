@@ -12,12 +12,10 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
-import MobileAnalyticsButton from './MobileAnalyticsButton';
 
 interface SwipeableStatsProps {
   trips: any[];
   className?: string;
-  showAnalyticsButton?: boolean;
 }
 
 interface StatCard {
@@ -64,7 +62,7 @@ const MOBILE_CARD_THEMES: Record<string, string> = {
   completed: 'bg-gradient-to-br from-violet-100/80 via-purple-100/60 to-pink-100/50 text-slate-900 dark:from-violet-500/15 dark:via-purple-600/15 dark:to-pink-600/15 dark:text-white'
 };
 
-export default function SwipeableStats({ trips, className, showAnalyticsButton = false }: SwipeableStatsProps) {
+export default function SwipeableStats({ trips, className }: SwipeableStatsProps) {
   const metrics = useMemo(() => computeTripMetrics(trips), [trips]);
   const desktopCards = useMemo<StatCard[]>(
     () => [
@@ -221,11 +219,6 @@ export default function SwipeableStats({ trips, className, showAnalyticsButton =
               Travel performance snapshot
             </h3>
           </div>
-          {showAnalyticsButton && (
-            <div className="flex items-center gap-3 sm:-mt-1">
-              <MobileAnalyticsButton trips={trips} />
-            </div>
-          )}
         </div>
 
         <InsightChips chips={insightChips} />

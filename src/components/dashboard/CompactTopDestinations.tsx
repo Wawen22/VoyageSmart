@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { GlobeIcon, BarChart3Icon, SparklesIcon } from 'lucide-react';
+import { GlobeIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import AdvancedMetricsModal from './AdvancedMetricsModal';
 
 interface Trip {
   id: string;
@@ -84,7 +83,7 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
           ))}
         </div>
 
-        {/* Stats and Analytics */}
+        {/* Stats */}
         <div className="flex items-center gap-4 flex-shrink-0">
           {/* Quick Stats */}
           <div className="flex items-center gap-4">
@@ -96,32 +95,6 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
               <p className="text-lg font-bold text-emerald-600">{topDestinations.length}</p>
               <p className="text-xs text-muted-foreground">Countries</p>
             </div>
-          </div>
-
-          {/* Analytics Button */}
-          <div className="border-l border-border/50 pl-4">
-            <AdvancedMetricsModal
-              trips={trips}
-              trigger={
-                <button className="group relative bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-lg font-medium text-xs transition-all duration-300 transform hover:scale-105 hover:shadow-lg shadow-md overflow-hidden">
-                  {/* Animated background */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-
-                  <div className="relative flex items-center gap-2">
-                    <BarChart3Icon className="h-3.5 w-3.5 transition-all duration-300 group-hover:animate-bounce" />
-                    <span className="relative">
-                      View Analytics
-                      <div className="absolute -top-0.5 -right-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <SparklesIcon className="h-2 w-2 text-yellow-300 animate-pulse" />
-                      </div>
-                    </span>
-                  </div>
-
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
-                </button>
-              }
-            />
           </div>
         </div>
       </div>
@@ -138,19 +111,6 @@ export default function CompactTopDestinations({ trips }: CompactTopDestinations
               <h3 className="font-semibold text-xs">Top Destinations</h3>
             </div>
           </div>
-
-          {/* Mobile Analytics Button */}
-          <AdvancedMetricsModal
-            trips={trips}
-            trigger={
-              <button className="group relative bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-2 py-1 rounded-md font-medium text-xs transition-all duration-300 transform active:scale-95 shadow-md overflow-hidden">
-                <div className="relative flex items-center gap-1">
-                  <BarChart3Icon className="h-2.5 w-2.5" />
-                  <span>Analytics</span>
-                </div>
-              </button>
-            }
-          />
         </div>
 
         {/* Destinations Row */}

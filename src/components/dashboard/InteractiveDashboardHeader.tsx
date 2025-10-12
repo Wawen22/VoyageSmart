@@ -126,11 +126,11 @@ export default function InteractiveDashboardHeader({
       </div>
 
       <div className="relative z-10 flex flex-col gap-6 dashboard-header-mobile dashboard-mobile-refresh">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.9fr)] xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,0.85fr)]">
-          <div className="flex flex-col gap-5">
-            <div className="rounded-[28px] border border-white/18 bg-white/12 p-5 shadow-[0_26px_90px_-60px_rgba(15,23,42,0.65)] backdrop-blur-2xl dark:border-white/12 dark:bg-white/5">
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+        <div className="grid gap-6 justify-items-center lg:grid-cols-[minmax(0,1.55fr)_minmax(260px,0.75fr)] lg:items-stretch lg:justify-items-stretch xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.7fr)]">
+          <div className="flex w-full max-w-3xl flex-col gap-5">
+            <div className="h-full min-h-[320px] rounded-[28px] border border-white/18 bg-white/12 p-5 shadow-[0_26px_90px_-60px_rgba(15,23,42,0.65)] backdrop-blur-2xl dark:border-white/12 dark:bg-white/5">
+              <div className="flex h-full flex-col gap-6">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between xl:gap-6">
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg lg:h-14 lg:w-14 bg-gradient-to-br', greeting.color)}>
                       <GreetingIcon className="h-6 w-6 text-white lg:h-7 lg:w-7" />
@@ -147,7 +147,7 @@ export default function InteractiveDashboardHeader({
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-start gap-2 text-[0.65rem] uppercase tracking-[0.32em] text-white/70">
+                  <div className="order-3 flex flex-wrap items-center justify-start gap-2 text-[0.65rem] uppercase tracking-[0.32em] text-white/70 sm:order-2">
                     <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-3 py-1.5 shadow-inner backdrop-blur-xl">
                       <SparklesIcon className="h-4 w-4 text-yellow-300" />
                       Live analytics
@@ -156,6 +156,19 @@ export default function InteractiveDashboardHeader({
                       <CalendarIcon className="h-4 w-4 text-cyan-200" />
                       Smart filters
                     </span>
+                  </div>
+
+                  <div className="order-2 flex w-full justify-start sm:w-auto sm:justify-end xl:order-3">
+                    <AdvancedMetricsModal
+                      trips={trips}
+                      trigger={
+                        <Button className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-purple-700 hover:to-indigo-700 sm:w-auto">
+                          <BarChart3Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                          Open analytics
+                          <SparklesIcon className="h-3 w-3 text-yellow-300 opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
+                        </Button>
+                      }
+                    />
                   </div>
                 </div>
 
@@ -192,29 +205,12 @@ export default function InteractiveDashboardHeader({
                 </div>
               </div>
             </div>
-
-            <div className="hidden lg:flex items-center gap-3">
-              <AdvancedMetricsModal
-                trips={trips}
-                trigger={
-                  <Button
-                    variant="secondary"
-                    className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/20 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_18px_65px_-55px_rgba(15,23,42,0.6)] backdrop-blur-xl dark:border-white/15 dark:bg-white/10 dark:text-white transition-all hover:-translate-y-0.5"
-                  >
-                    <span className="flex items-center gap-2">
-                      <BarChart3Icon className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-                      Open analytics
-                      <SparklesIcon className="h-4 w-4 text-yellow-300 transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
-                    </span>
-                    <div className="pointer-events-none absolute inset-0 rounded-2xl bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  </Button>
-                }
-              />
-            </div>
           </div>
 
-          <div className="flex h-full items-stretch">
-            <WeatherWidget />
+          <div className="flex w-full items-stretch justify-center lg:justify-end">
+            <div className="w-full max-w-md lg:max-w-[360px]">
+              <WeatherWidget />
+            </div>
           </div>
         </div>
 
@@ -242,17 +238,6 @@ export default function InteractiveDashboardHeader({
               )}
             </div>
           </div>
-
-          <AdvancedMetricsModal
-            trips={trips}
-            trigger={
-              <button className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 active:scale-95">
-                <BarChart3Icon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-                View analytics
-                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-white/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              </button>
-            }
-          />
         </div>
 
         <div className="relative">

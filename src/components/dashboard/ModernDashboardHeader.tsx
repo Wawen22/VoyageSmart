@@ -78,113 +78,120 @@ export default function ModernDashboardHeader({
       </div>
       
       <div className="relative z-10 px-6 py-8 lg:px-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
-            <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-              {getGreeting()}, {userName}
-            </h1>
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+          {/* Welcome Section */}
+          <div className="space-y-2">
+            <div className="mb-2 flex items-center gap-3">
+              <div className="h-8 w-2 rounded-full bg-gradient-to-b from-blue-500 to-purple-600" />
+              <h1 className="text-3xl font-bold text-transparent bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text dark:from-white dark:to-slate-300 lg:text-4xl">
+                {getGreeting()}, {userName}
+              </h1>
+            </div>
+            <p className="ml-5 text-lg text-slate-600 dark:text-slate-400">
+              Ready for your next adventure? You have{' '}
+              <span className="font-semibold text-blue-600 dark:text-blue-400">{tripCount}</span>{' '}
+              {tripCount === 1 ? 'trip' : 'trips'} planned
+            </p>
           </div>
-          <p className="text-slate-600 dark:text-slate-400 text-lg ml-5">
-            Ready for your next adventure? You have{' '}
-            <span className="font-semibold text-blue-600 dark:text-blue-400">{tripCount}</span>{' '}
-            {tripCount === 1 ? 'trip' : 'trips'} planned
-          </p>
-        </div>
 
-        {/* Search and Actions Bar */}
-        <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between mb-6">
-          {/* Search */}
-          <div className="relative flex-1 max-w-md">
-            <div className={cn(
-              "relative transition-all duration-300",
-              isSearchFocused ? "scale-105" : ""
-            )}>
-              <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search your adventures..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-                className="w-full pl-12 pr-4 py-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm focus:shadow-lg focus:border-blue-500 focus:outline-none transition-all duration-300"
-              />
-              {searchTerm && (
+          {/* Search and Actions Bar */}
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <div
+                className={cn(
+                  "relative transition-all duration-300",
+                  isSearchFocused ? "scale-105" : ""
+                )}
+              >
+                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 transform text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search your adventures..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  className="w-full rounded-2xl border border-slate-200 bg-white/80 py-3 pl-12 pr-4 text-base shadow-sm transition-all duration-300 focus:border-blue-500 focus:outline-none focus:shadow-lg dark:border-slate-700 dark:bg-slate-800/80"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 transform text-slate-400 transition-colors hover:text-slate-600"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-3">
+              {/* View Mode Toggle */}
+              <div className="flex items-center rounded-xl bg-white/80 p-1 shadow-sm backdrop-blur-sm dark:bg-slate-800/80">
                 <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  onClick={() => setViewMode('grid')}
+                  className={cn(
+                    "rounded-lg p-2 transition-all duration-200",
+                    viewMode === 'grid'
+                      ? "bg-blue-500 text-white shadow-sm"
+                      : "text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                  )}
                 >
-                  ×
+                  <GridIcon className="h-4 w-4" />
                 </button>
-              )}
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={cn(
+                    "rounded-lg p-2 transition-all duration-200",
+                    viewMode === 'list'
+                      ? "bg-blue-500 text-white shadow-sm"
+                      : "text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                  )}
+                >
+                  <ListIcon className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Create Trip Button */}
+              <Button
+                asChild
+                className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:shadow-xl hover:to-purple-700"
+              >
+                <Link href="/trips/new" className="flex items-center gap-2">
+                  <PlusIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">New Adventure</span>
+                </Link>
+              </Button>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-            {/* View Mode Toggle */}
-            <div className="flex items-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl p-1 shadow-sm">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={cn(
-                  "p-2 rounded-lg transition-all duration-200",
-                  viewMode === 'grid' 
-                    ? "bg-blue-500 text-white shadow-sm" 
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                )}
-              >
-                <GridIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={cn(
-                  "p-2 rounded-lg transition-all duration-200",
-                  viewMode === 'list' 
-                    ? "bg-blue-500 text-white shadow-sm" 
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                )}
-              >
-                <ListIcon className="h-4 w-4" />
-              </button>
-            </div>
+          {/* Filter Tabs */}
+          <div className="flex flex-wrap gap-2">
+            {filterOptions.map((option) => {
+              const Icon = option.icon;
+              const isActive = filter === option.value;
 
-            {/* Create Trip Button */}
-            <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <Link href="/trips/new" className="flex items-center gap-2">
-                <PlusIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">New Adventure</span>
-              </Link>
-            </Button>
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => setFilter(option.value as any)}
+                  className={cn(
+                    "group relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300",
+                    isActive
+                      ? `scale-105 bg-gradient-to-r ${option.gradient} text-white shadow-lg`
+                      : "bg-white/60 text-slate-700 hover:scale-105 hover:bg-white/80 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-800/80"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{option.label}</span>
+                  {isActive && (
+                    <div className="absolute inset-0 rounded-xl bg-white/20 animate-pulse" />
+                  )}
+                </button>
+              );
+            })}
           </div>
-        </div>
-
-        {/* Filter Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {filterOptions.map((option) => {
-            const Icon = option.icon;
-            const isActive = filter === option.value;
-            
-            return (
-              <button
-                key={option.value}
-                onClick={() => setFilter(option.value as any)}
-                className={cn(
-                  "relative flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 group",
-                  isActive
-                    ? `bg-gradient-to-r ${option.gradient} text-white shadow-lg scale-105`
-                    : "bg-white/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/80 hover:scale-105"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="text-sm">{option.label}</span>
-                {isActive && (
-                  <div className="absolute inset-0 bg-white/20 rounded-xl animate-pulse" />
-                )}
-              </button>
-            );
-          })}
         </div>
       </div>
     </div>
