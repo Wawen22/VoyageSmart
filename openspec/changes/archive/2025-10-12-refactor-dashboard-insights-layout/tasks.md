@@ -1,0 +1,5 @@
+- [x] Review `src/app/dashboard/page.tsx`, `SwipeableStats`, and `TravelInsights` to confirm current mobile layout and data needs.
+- [x] Refactor `TravelInsights` (and related wrappers) to embed the analytics snapshot cards inside the insights section with responsive behaviour; remove the standalone mobile analytics card.
+- [x] Refresh the Travel Insights UI with glassy styling, consistent spacing, and updated card treatments while reusing the design system primitives.
+- [x] Restructure the Travel Insights analytics presentation to surface the requested set of cards (Next Destination, Planning Readiness, Average Lead Time, Top Destinations, Total Adventures, Upcoming Departures, Active Journeys, Memories Captured) with a two-per-row layout and no duplicated metrics.
+- [x] Smoke test the dashboard on mobile and desktop viewports (`npm run lint` not required) to verify layout, animations, and data render as expected.

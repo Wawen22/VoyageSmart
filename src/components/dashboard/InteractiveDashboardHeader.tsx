@@ -297,26 +297,57 @@ export default function InteractiveDashboardHeader({
               <button
                 onClick={() => setViewMode('map')}
                 className={cn(
-                  'relative flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 sm:px-4 sm:py-2',
+                  'relative hidden items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 sm:flex sm:px-4 sm:py-2',
                   viewMode === 'map'
                     ? 'bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white shadow-lg'
                     : 'bg-white/12 text-white/70 hover:bg-white/16'
                 )}
                 title="Interactive map view"
               >
-                <MapIcon
-                  className={cn(
-                    'h-4 w-4 transition-transform duration-300',
-                    viewMode === 'map' && 'scale-110'
-                  )}
-                />
-                <span className="uppercase tracking-[0.26em]">Map</span>
-              </button>
+              <MapIcon
+                className={cn(
+                  'h-4 w-4 transition-transform duration-300',
+                  viewMode === 'map' && 'scale-110'
+                )}
+              />
+              <span className="uppercase tracking-[0.26em]">Map</span>
+            </button>
 
-              <div className="hidden items-center rounded-xl border border-white/18 bg-white/10 p-1 shadow-inner backdrop-blur-lg sm:flex">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={cn(
+            <div className="flex w-full items-center justify-between rounded-xl border border-white/18 bg-white/10 p-1 shadow-inner backdrop-blur-lg sm:hidden">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  'flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+                  viewMode === 'grid'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-white/70 hover:text-white'
+                )}
+                aria-label="Switch to list view"
+              >
+                <GridIcon className="h-4 w-4" />
+                List
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('map')}
+                className={cn(
+                  'flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+                  viewMode === 'map'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-white/70 hover:text-white'
+                )}
+                aria-label="Switch to map view"
+              >
+                <MapIcon className="h-4 w-4" />
+                Map
+              </button>
+            </div>
+
+            <div className="hidden items-center rounded-xl border border-white/18 bg-white/10 p-1 shadow-inner backdrop-blur-lg sm:flex">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={cn(
                     'rounded-lg p-1.5 transition-all duration-200',
                     viewMode === 'grid'
                       ? 'bg-white text-slate-900 shadow-sm'

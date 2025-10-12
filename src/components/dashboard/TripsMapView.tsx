@@ -269,8 +269,6 @@ function TripsMapCanvas({
     return resolvedTrips.filter((trip) => !trip.coordinates).length;
   }, [resolvedTrips]);
 
-  const mapSummary = useMemo(() => computeMapSummary(visibleTrips), [visibleTrips]);
-
   const selectedTrip = useMemo(() => {
     if (!selectedTripId) return null;
     return (
@@ -596,8 +594,6 @@ function TripsMapCanvas({
         </div>
       </div>
 
-      <MapSummaryPanel summary={mapSummary} />
-
       <TripCarousel
         trips={visibleTrips}
         selectedTripId={selectedTripId}
@@ -646,133 +642,6 @@ function LegendItem({ color, label }: { color: string; label: string }) {
     <div className="flex items-center gap-2">
       <span className={cn("h-2.5 w-2.5 rounded-full", color)} />
       <span>{label}</span>
-    </div>
-  );
-}
-
-interface MapSummary {
-  counts: Record<ProcessedTrip["status"], number>;
-  totalTrips: number;
-  uniqueDestinations: number;
-  budgetByCurrency: Array<{ currency: string; total: number }>;
-  nextTripLabel: string;
-  daysUntilNextTrip: number | null;
-}
-
-function computeMapSummary(trips: ProcessedTrip[]): MapSummary {
-  const counts: MapSummary["counts"] = {
-    upcoming: 0,
-    ongoing: 0,
-    completed: 0,
-    planning: 0
-  };
-
-  const uniqueDestinations = new Set<string>();
-  const budgetByCurrency = new Map<string, number>();
-  let nextTrip: ProcessedTrip | null = null;
-  let nextTripDate: Date | null = null;
-  const now = new Date();
-
-  trips.forEach((trip) => {
-    counts[trip.status] += 1;
-
-    if (trip.primaryDestination) uniqueDestinations.add(trip.primaryDestination);
-    if (trip.destination) uniqueDestinations.add(trip.destination);
-    trip.preferences?.destinations?.destinations?.forEach((dest) => {
-      if (dest.name) uniqueDestinations.add(dest.name);
-    });
-
-    if (typeof trip.budget_total === "number") {
-      const currency = trip.preferences?.currency ?? "EUR";
-      budgetByCurrency.set(
-        currency,
-        (budgetByCurrency.get(currency) ?? 0) + trip.budget_total
-      );
-    }
-
-    if (trip.start_date) {
-      const start = new Date(trip.start_date);
-      if (start > now && (!nextTripDate || start < nextTripDate)) {
-        nextTrip = trip;
-        nextTripDate = start;
-      }
-    }
-  });
-
-  const daysUntilNextTrip = nextTripDate
-    ? Math.max(0, Math.ceil((nextTripDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-    : null;
-
-  return {
-    counts,
-    totalTrips: trips.length,
-    uniqueDestinations: uniqueDestinations.size,
-    budgetByCurrency: Array.from(budgetByCurrency.entries())
-      .map(([currency, total]) => ({ currency, total }))
-      .sort((a, b) => b.total - a.total),
-    nextTripLabel: nextTrip
-      ? formatDateRange(nextTrip.start_date ?? null, nextTrip.end_date ?? null)
-      : "Plan your next trip",
-    daysUntilNextTrip
-  };
-}
-
-function MapSummaryPanel({ summary }: { summary: MapSummary }) {
-  if (summary.totalTrips === 0) return null;
-
-  const budgetSummary = summary.budgetByCurrency.length
-    ? summary.budgetByCurrency
-        .slice(0, 2)
-        .map(({ currency, total }) => formatCurrency(total, currency))
-        .join(" • ")
-    : "No budgets logged";
-
-  return (
-    <div className="pointer-events-none absolute bottom-6 left-6 z-20 hidden w-[280px] flex-col gap-3 sm:flex">
-      <div className="pointer-events-auto rounded-2xl border border-border/60 bg-background/95 p-4 text-xs text-muted-foreground shadow-lg backdrop-blur-md">
-        <div className="mb-3 flex items-center justify-between text-foreground">
-          <span className="text-sm font-semibold">Map insights</span>
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-            {summary.totalTrips} trips
-          </span>
-        </div>
-
-        <div className="mb-3 grid grid-cols-2 gap-2">
-          {(["upcoming", "ongoing", "completed", "planning"] as Array<ProcessedTrip["status"]>).map((status) => {
-            const config = STATUS_CONFIG[status];
-            return (
-              <div
-                key={status}
-                className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1 text-[11px] font-medium"
-              >
-                <span className="capitalize text-foreground">{config.label}</span>
-                <span className={cn("text-foreground", summary.counts[status] === 0 && "text-muted-foreground")}>
-                  {summary.counts[status]}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="space-y-2 rounded-xl bg-muted/30 p-3">
-          <div className="flex items-center justify-between text-foreground">
-            <span className="font-medium">Destinations</span>
-            <span className="text-sm font-semibold">{summary.uniqueDestinations}</span>
-          </div>
-          <div>
-            <p className="text-[11px] font-medium text-foreground">Total budget</p>
-            <p className="text-[11px]">{budgetSummary}</p>
-          </div>
-          <div>
-            <p className="text-[11px] font-medium text-foreground">Next departure</p>
-            <p className="text-[11px]">
-              {summary.daysUntilNextTrip !== null
-                ? `${summary.nextTripLabel} · ${summary.daysUntilNextTrip} ${summary.daysUntilNextTrip === 1 ? "day" : "days"}`
-                : summary.nextTripLabel}
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

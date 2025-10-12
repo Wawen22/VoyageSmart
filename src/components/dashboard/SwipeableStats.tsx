@@ -16,6 +16,7 @@ import { cn, formatCurrency } from '@/lib/utils';
 interface SwipeableStatsProps {
   trips: any[];
   className?: string;
+  showHeader?: boolean;
 }
 
 interface StatCard {
@@ -46,6 +47,8 @@ interface TripMetrics {
   nextTripLabel: string;
   nextTripDestination: string;
   daysUntilNextTrip: number | null;
+  plannedTripsPercent: number;
+  budgetCoveragePercent: number;
 }
 
 const CARD_GRADIENTS: Record<string, string> = {
@@ -62,7 +65,7 @@ const MOBILE_CARD_THEMES: Record<string, string> = {
   completed: 'bg-gradient-to-br from-violet-100/80 via-purple-100/60 to-pink-100/50 text-slate-900 dark:from-violet-500/15 dark:via-purple-600/15 dark:to-pink-600/15 dark:text-white'
 };
 
-export default function SwipeableStats({ trips, className }: SwipeableStatsProps) {
+export default function SwipeableStats({ trips, className, showHeader = true }: SwipeableStatsProps) {
   const metrics = useMemo(() => computeTripMetrics(trips), [trips]);
   const desktopCards = useMemo<StatCard[]>(
     () => [
@@ -180,15 +183,15 @@ export default function SwipeableStats({ trips, className }: SwipeableStatsProps
         icon: PlaneTakeoffIcon
       },
       {
-        id: 'avg-duration',
-        label: metrics.avgDuration > 0 ? `${metrics.avgDuration} days` : 'Duration TBD',
-        helper: 'Average trip length',
-        icon: ClockIcon
+        id: 'planning-coverage',
+        label: metrics.plannedTripsPercent > 0 ? `${metrics.plannedTripsPercent}% planned` : 'Add travel dates',
+        helper: 'Trips with confirmed start dates',
+        icon: CalendarIcon
       },
       {
-        id: 'lifetime-budget',
-        label: formatCurrency(metrics.totalBudget, 'EUR'),
-        helper: 'Total budget tracked',
+        id: 'budget-coverage',
+        label: metrics.budgetCoveragePercent > 0 ? `${metrics.budgetCoveragePercent}% budgeted` : 'Assign trip budgets',
+        helper: 'Trips with budgets set',
         icon: DollarSignIcon
       }
     ],
@@ -210,16 +213,18 @@ export default function SwipeableStats({ trips, className }: SwipeableStatsProps
       </div>
 
       <div className="relative z-10 flex flex-col gap-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.36em] text-muted-foreground/70">
-              Analytics
-            </p>
-            <h3 className="text-lg font-semibold tracking-tight text-foreground sm:text-[1.4rem]">
-              Travel performance snapshot
-            </h3>
+        {showHeader && (
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.36em] text-muted-foreground/70">
+                Analytics
+              </p>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground sm:text-[1.4rem]">
+                Travel performance snapshot
+              </h3>
+            </div>
           </div>
-        </div>
+        )}
 
         <InsightChips chips={insightChips} />
 
@@ -234,20 +239,20 @@ function InsightChips({ chips }: { chips: InsightChip[] }) {
   if (!chips.length) return null;
 
   return (
-    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2">
       {chips.map((chip) => {
         const Icon = chip.icon;
         return (
           <div
             key={chip.id}
-            className="group flex items-center gap-3 rounded-2xl border border-white/25 bg-white/18 px-4 py-3 text-sm text-slate-900 shadow-[0_22px_60px_-48px_rgba(15,23,42,0.55)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/25 dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:hover:border-white/20 dark:hover:bg-white/10"
+            className="group flex items-center gap-4 rounded-2xl border border-white/25 bg-white/18 px-5 py-4 text-sm text-slate-900 shadow-[0_22px_60px_-48px_rgba(15,23,42,0.55)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/25 dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:hover:border-white/20 dark:hover:bg-white/10"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/35 bg-white/70 shadow-inner backdrop-blur-md dark:border-white/15 dark:bg-white/10">
-              <Icon className="h-4 w-4 text-slate-900 dark:text-white/80" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/35 bg-white/70 shadow-inner backdrop-blur-md dark:border-white/15 dark:bg-white/10">
+              <Icon className="h-5 w-5 text-slate-900 dark:text-white/80" />
             </div>
-            <div className="flex-1 space-y-0.5">
-              <p className="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">{chip.label}</p>
-              <p className="text-xs uppercase tracking-[0.28em] text-slate-900/55 dark:text-white/45">
+            <div className="flex-1 space-y-1">
+              <p className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">{chip.label}</p>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-slate-900/55 dark:text-white/45">
                 {chip.helper}
               </p>
             </div>
@@ -260,7 +265,7 @@ function InsightChips({ chips }: { chips: InsightChip[] }) {
 
 function DesktopStats({ cards }: { cards: StatCard[] }) {
   return (
-    <div className="hidden gap-5 lg:grid lg:grid-cols-4">
+    <div className="hidden gap-5 lg:grid lg:grid-cols-2">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
@@ -419,7 +424,9 @@ function computeTripMetrics(trips: any[]): TripMetrics {
       uniqueDestinations: 0,
       nextTripLabel: 'No trips scheduled',
       nextTripDestination: '',
-      daysUntilNextTrip: null
+      daysUntilNextTrip: null,
+      plannedTripsPercent: 0,
+      budgetCoveragePercent: 0
     };
   }
 
@@ -428,6 +435,8 @@ function computeTripMetrics(trips: any[]): TripMetrics {
   let totalBudget = 0;
   let durationAccumulator = 0;
   let tripsWithDuration = 0;
+  let tripsWithBudget = 0;
+  let tripsWithDates = 0;
 
   const upcomingTripsList: any[] = [];
   let ongoingTrips = 0;
@@ -440,6 +449,9 @@ function computeTripMetrics(trips: any[]): TripMetrics {
 
     if (typeof trip.budget_total === 'number') {
       totalBudget += trip.budget_total;
+      if (trip.budget_total > 0) {
+        tripsWithBudget += 1;
+      }
     }
 
     if (trip.start_date && trip.end_date) {
@@ -454,6 +466,7 @@ function computeTripMetrics(trips: any[]): TripMetrics {
 
     if (trip.start_date) {
       const start = new Date(trip.start_date);
+      tripsWithDates += 1;
       const end = trip.end_date ? new Date(trip.end_date) : null;
 
       if (start > now) {
@@ -483,6 +496,9 @@ function computeTripMetrics(trips: any[]): TripMetrics {
     ? Math.max(0, Math.ceil((new Date(nextTrip.start_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     : null;
 
+  const plannedTripsPercent = trips.length > 0 ? Math.round((tripsWithDates / trips.length) * 100) : 0;
+  const budgetCoveragePercent = trips.length > 0 ? Math.round((tripsWithBudget / trips.length) * 100) : 0;
+
   return {
     totalTrips: trips.length,
     upcomingTrips: upcomingTripsList.length,
@@ -493,7 +509,9 @@ function computeTripMetrics(trips: any[]): TripMetrics {
     uniqueDestinations: uniqueDestinations.size,
     nextTripLabel,
     nextTripDestination,
-    daysUntilNextTrip
+    daysUntilNextTrip,
+    plannedTripsPercent,
+    budgetCoveragePercent
   };
 }
 

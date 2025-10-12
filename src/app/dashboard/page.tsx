@@ -8,11 +8,9 @@ import FloatingActionButton from '@/components/dashboard/FloatingActionButton';
 import InteractiveDashboardHeader from '@/components/dashboard/InteractiveDashboardHeader';
 import InteractiveTripCard from '@/components/dashboard/InteractiveTripCard';
 import InteractiveEmptyState from '@/components/dashboard/InteractiveEmptyState';
-import SwipeableStats from '@/components/dashboard/SwipeableStats';
 import TripsMapView from '@/components/dashboard/TripsMapView';
 import ModernLoadingSkeleton, {
-  ModernHeaderLoadingSkeleton,
-  ModernStatsLoadingSkeleton
+  ModernHeaderLoadingSkeleton
 } from '@/components/dashboard/ModernLoadingSkeleton';
 import { useAuth } from '@/lib/auth';
 import { TripDestinations } from '@/lib/types/destination';
@@ -22,7 +20,7 @@ import {
   useOptimizedLoading
 } from '@/hooks/usePerformance';
 import { useDashboardShortcuts } from '@/components/ui/KeyboardShortcutsHelp';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 
 type TripFilter = 'all' | 'upcoming' | 'ongoing' | 'past';
 
@@ -47,6 +45,17 @@ type TripStats = {
   upcoming: number;
   ongoing: number;
   completed: number;
+};
+
+type MapTripStatus = 'upcoming' | 'ongoing' | 'completed' | 'planning';
+
+type MapSummary = {
+  counts: Record<MapTripStatus, number>;
+  totalTrips: number;
+  uniqueDestinations: number;
+  budgetByCurrency: Array<{ currency: string; total: number }>;
+  nextTripLabel: string;
+  daysUntilNextTrip: number | null;
 };
 
 type SortOption = 'created_desc' | 'created_asc' | 'name_asc' | 'name_desc' | 'date_asc';
@@ -201,7 +210,8 @@ const getUpcomingTrips = (trips: Trip[], limit = 3) => {
     .slice(0, limit);
 };
 
-const buildMapInsights = (trips: Trip[], stats: TripStats) => {
+const buildMapInsights = (trips: Trip[]) => {
+  const stats = computeTripStats(trips);
   const uniqueDestinations = new Set<string>();
   trips.forEach((trip) => {
     if (trip.destination) uniqueDestinations.add(trip.destination);
@@ -250,6 +260,87 @@ const buildMapInsights = (trips: Trip[], stats: TripStats) => {
   ];
 };
 
+const determineMapStatus = (trip: Trip, reference: Date): MapTripStatus => {
+  if (trip.start_date && trip.end_date) {
+    const start = new Date(trip.start_date);
+    const end = new Date(trip.end_date);
+
+    if (reference < start) {
+      return 'upcoming';
+    }
+
+    if (reference >= start && reference <= end) {
+      return 'ongoing';
+    }
+
+    if (reference > end) {
+      return 'completed';
+    }
+  } else if (trip.start_date) {
+    const start = new Date(trip.start_date);
+    if (reference < start) {
+      return 'upcoming';
+    }
+
+    if (reference >= start) {
+      return 'planning';
+    }
+  }
+
+  return 'planning';
+};
+
+const computeMapSummary = (trips: Trip[]): MapSummary => {
+  const now = new Date();
+  const counts: MapSummary['counts'] = {
+    upcoming: 0,
+    ongoing: 0,
+    completed: 0,
+    planning: 0
+  };
+  const uniqueDestinations = new Set<string>();
+  const budgetByCurrency = new Map<string, number>();
+
+  trips.forEach((trip) => {
+    const status = determineMapStatus(trip, now);
+    counts[status] += 1;
+
+    if (trip.destination) uniqueDestinations.add(trip.destination);
+    const destinations = trip.preferences?.destinations?.destinations;
+    destinations?.forEach((dest) => {
+      if (dest.name) uniqueDestinations.add(dest.name);
+    });
+
+    if (typeof trip.budget_total === 'number') {
+      const currency = trip.preferences?.currency ?? 'EUR';
+      budgetByCurrency.set(currency, (budgetByCurrency.get(currency) ?? 0) + trip.budget_total);
+    }
+  });
+
+  const nextTrip = findNextTrip(trips);
+  const daysUntilNextTrip = nextTrip?.start_date
+    ? Math.max(
+        0,
+        Math.ceil(
+          (new Date(nextTrip.start_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        )
+      )
+    : null;
+
+  return {
+    counts,
+    totalTrips: trips.length,
+    uniqueDestinations: uniqueDestinations.size,
+    budgetByCurrency: Array.from(budgetByCurrency.entries())
+      .map(([currency, total]) => ({ currency, total }))
+      .sort((a, b) => b.total - a.total),
+    nextTripLabel: nextTrip
+      ? formatDateRange(nextTrip.start_date, nextTrip.end_date)
+      : 'Plan your next trip',
+    daysUntilNextTrip
+  };
+};
+
 export default function DashboardPage() {
   const { user, supabase } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -292,7 +383,8 @@ export default function DashboardPage() {
     [filter, selectedYear, searchTerm, sortBy, trips]
   );
   const hasTrips = trips.length > 0;
-  const mapInsights = useMemo(() => buildMapInsights(filteredTrips, stats), [filteredTrips, stats]);
+  const mapInsights = useMemo(() => buildMapInsights(filteredTrips), [filteredTrips]);
+  const mapSummary = useMemo(() => computeMapSummary(filteredTrips), [filteredTrips]);
   const upcomingTrips = useMemo(() => getUpcomingTrips(trips), [trips]);
 
   useEffect(() => {
@@ -446,7 +538,7 @@ export default function DashboardPage() {
 
     if (viewMode === 'map') {
       return (
-        <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr),320px] xl:grid-cols-[minmax(0,1fr),360px]">
+        <section className="grid gap-4 lg:gap-6 lg:grid-cols-[minmax(0,1fr),320px] xl:grid-cols-[minmax(0,1fr),360px]">
           <div className="min-h-[520px] overflow-hidden rounded-3xl border border-border bg-card/60 p-0 shadow-xl">
             <TripsMapView
               trips={filteredTrips}
@@ -455,7 +547,12 @@ export default function DashboardPage() {
             />
           </div>
 
-          <MapInsightsPanel insights={mapInsights} upcomingTrips={upcomingTrips} animate={shouldAnimate} />
+          <MapInsightsPanel
+            insights={mapInsights}
+            upcomingTrips={upcomingTrips}
+            summary={mapSummary}
+            animate={shouldAnimate}
+          />
         </section>
       );
     }
@@ -492,16 +589,6 @@ export default function DashboardPage() {
 
           {renderHeader()}
 
-          {!showLoading && hasTrips && (
-            <SwipeableStats trips={trips} className="lg:hidden" />
-          )}
-
-          {showLoading && (
-            <div className="hidden lg:block">
-              <ModernStatsLoadingSkeleton />
-            </div>
-          )}
-
           {renderContent()}
         </main>
       </PullToRefresh>
@@ -516,10 +603,35 @@ type MapInsight = ReturnType<typeof buildMapInsights>[number];
 type MapInsightsPanelProps = {
   insights: MapInsight[];
   upcomingTrips: Trip[];
+  summary: MapSummary;
   animate: boolean;
 };
 
-function MapInsightsPanel({ insights, upcomingTrips, animate }: MapInsightsPanelProps) {
+function MapInsightsPanel({ insights, upcomingTrips, summary, animate }: MapInsightsPanelProps) {
+  const hasTripData = summary.totalTrips > 0;
+  const statusOrder: MapTripStatus[] = ['upcoming', 'ongoing', 'completed', 'planning'];
+  const statusLabels: Record<MapTripStatus, string> = {
+    upcoming: 'Upcoming',
+    ongoing: 'Ongoing',
+    completed: 'Completed',
+    planning: 'Planning'
+  };
+  const statusIndicators: Record<MapTripStatus, string> = {
+    upcoming: 'bg-emerald-500',
+    ongoing: 'bg-orange-500',
+    completed: 'bg-purple-500',
+    planning: 'bg-blue-500'
+  };
+  const budgetSummary = summary.budgetByCurrency.length
+    ? summary.budgetByCurrency
+        .slice(0, 2)
+        .map(({ currency, total }) => formatCurrency(total, currency))
+        .join(' • ')
+    : 'No budgets logged';
+  const nextDepartureText = summary.daysUntilNextTrip !== null
+    ? `${summary.nextTripLabel} · ${summary.daysUntilNextTrip} ${summary.daysUntilNextTrip === 1 ? 'day' : 'days'}`
+    : summary.nextTripLabel;
+
   return (
     <aside
       className={cn(
@@ -533,6 +645,62 @@ function MapInsightsPanel({ insights, upcomingTrips, animate }: MapInsightsPanel
           Quick highlights about the trips currently plotted on your map.
         </p>
       </div>
+
+      {hasTripData ? (
+        <div className="space-y-3 rounded-2xl border border-border/60 bg-background/80 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Overview
+            </span>
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+              {summary.totalTrips} {summary.totalTrips === 1 ? 'trip' : 'trips'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {statusOrder.map((status) => (
+              <div
+                key={status}
+                className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2 text-xs font-medium"
+              >
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <span className={cn('h-2 w-2 rounded-full', statusIndicators[status])} />
+                  {statusLabels[status]}
+                </span>
+                <span
+                  className={cn(
+                    'text-foreground',
+                    summary.counts[status] === 0 && 'text-muted-foreground'
+                  )}
+                >
+                  {summary.counts[status]}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2 rounded-2xl bg-muted/30 p-3">
+            <div className="flex items-center justify-between text-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Destinations
+              </span>
+              <span className="text-sm font-semibold">{summary.uniqueDestinations}</span>
+            </div>
+            <div>
+              <p className="text-[11px] font-medium text-foreground">Total budget</p>
+              <p className="text-[11px] text-muted-foreground">{budgetSummary}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-medium text-foreground">Next departure</p>
+              <p className="text-[11px] text-muted-foreground">{nextDepartureText}</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-border/70 bg-background/40 p-4 text-xs text-muted-foreground">
+          Add trips with destinations and budgets to see quick map insights here.
+        </div>
+      )}
 
       <div className="space-y-3">
         {insights.map((insight) => {
