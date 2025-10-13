@@ -1177,7 +1177,7 @@ function TripsMapCanvas({
           </div>
         </div>
 
-        <div className="pointer-events-auto absolute right-4 top-4 flex flex-col items-end gap-2 sm:right-6 sm:top-6">
+        <div className="pointer-events-auto absolute right-4 top-4 hidden flex-col items-end gap-2 sm:right-6 sm:top-6 sm:flex">
           <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/90 px-4 py-2 text-sm font-semibold text-foreground shadow-lg shadow-black/10 backdrop-blur-md">
             <MapPinIcon className="h-4 w-4 text-primary" />
             <span>{filteredMarkers.length}</span>

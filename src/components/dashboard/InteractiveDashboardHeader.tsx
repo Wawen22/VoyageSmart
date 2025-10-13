@@ -26,7 +26,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import WeatherWidget from './WeatherWidget';
+import WeatherWidget, { CompactWeatherWidget } from './WeatherWidget';
 import { getTimeOfDay } from '@/lib/date-utils';
 import CompactTopDestinations from './CompactTopDestinations';
 import AdvancedMetricsModal from './AdvancedMetricsModal';
@@ -118,18 +118,18 @@ export default function InteractiveDashboardHeader({
   ];
 
   return (
-    <section className="relative overflow-hidden rounded-[32px] border border-white/20 bg-white/10 px-5 py-6 shadow-[0_32px_120px_-70px_rgba(15,23,42,0.65)] backdrop-blur-2xl transition-all duration-500 dark:border-white/10 dark:bg-slate-950/45 sm:px-8 sm:py-8">
+    <section className="relative overflow-hidden rounded-[32px] border border-white/20 bg-white/10 px-4 py-5 shadow-[0_32px_120px_-70px_rgba(15,23,42,0.65)] backdrop-blur-2xl transition-all duration-500 dark:border-white/10 dark:bg-slate-950/45 sm:px-8 sm:py-8">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-28 top-14 h-56 w-56 rounded-full bg-primary/25 blur-3xl dark:bg-primary/30" />
-        <div className="absolute -right-28 bottom-10 h-72 w-72 rounded-full bg-purple-400/25 blur-[140px] dark:bg-purple-700/25" />
-        <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent dark:via-white/12" />
+        <div className="hidden sm:block absolute -left-28 top-14 h-56 w-56 rounded-full bg-primary/25 blur-3xl dark:bg-primary/30" />
+        <div className="hidden sm:block absolute -right-28 bottom-10 h-72 w-72 rounded-full bg-purple-400/25 blur-[140px] dark:bg-purple-700/25" />
+        <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent dark:via-white/12 sm:inset-x-10" />
       </div>
 
-      <div className="relative z-10 flex flex-col gap-6 dashboard-header-mobile dashboard-mobile-refresh">
-        <div className="grid gap-6 justify-items-center lg:grid-cols-[minmax(0,1.55fr)_minmax(260px,0.75fr)] lg:items-stretch lg:justify-items-stretch xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.7fr)]">
-          <div className="flex w-full max-w-3xl flex-col gap-5">
-            <div className="h-full min-h-[320px] rounded-[28px] border border-white/18 bg-white/12 p-5 shadow-[0_26px_90px_-60px_rgba(15,23,42,0.65)] backdrop-blur-2xl dark:border-white/12 dark:bg-white/5">
-              <div className="flex h-full flex-col gap-6">
+      <div className="relative z-10 flex flex-col gap-5 dashboard-header-mobile dashboard-mobile-refresh sm:gap-6">
+        <div className="grid gap-5 justify-items-center lg:grid-cols-[minmax(0,1.55fr)_minmax(260px,0.75fr)] lg:items-stretch lg:justify-items-stretch xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.7fr)]">
+          <div className="flex w-full max-w-3xl flex-col gap-4 sm:gap-5">
+            <div className="h-full min-h-[220px] rounded-[28px] border border-white/18 bg-white/12 p-4 shadow-[0_20px_70px_-58px_rgba(15,23,42,0.65)] backdrop-blur-2xl dark:border-white/12 dark:bg-white/5 sm:min-h-[320px] sm:p-5">
+              <div className="flex h-full flex-col gap-4 sm:gap-6">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between xl:gap-6">
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg lg:h-14 lg:w-14 bg-gradient-to-br', greeting.color)}>
@@ -173,7 +173,7 @@ export default function InteractiveDashboardHeader({
                 </div>
 
                 {trips.length > 0 && (
-                  <div className="rounded-[24px] border border-white/15 bg-white/10 p-4 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.6)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/5">
+                  <div className="hidden rounded-[24px] border border-white/15 bg-white/10 p-4 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.6)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/5 sm:block">
                     <CompactTopDestinations trips={trips} />
                   </div>
                 )}
@@ -208,8 +208,11 @@ export default function InteractiveDashboardHeader({
           </div>
 
           <div className="flex w-full items-stretch justify-center lg:justify-end">
-            <div className="w-full max-w-md lg:max-w-[360px]">
+            <div className="hidden w-full max-w-md sm:block lg:max-w-[360px]">
               <WeatherWidget />
+            </div>
+            <div className="w-full sm:hidden">
+              <CompactWeatherWidget />
             </div>
           </div>
         </div>
@@ -241,8 +244,8 @@ export default function InteractiveDashboardHeader({
         </div>
 
         <div className="relative">
-          <div className="absolute inset-0 rounded-[28px] border border-white/18 bg-white/12 shadow-[0_22px_80px_-62px_rgba(15,23,42,0.68)] backdrop-blur-2xl dark:border-white/12 dark:bg-white/5" />
-          <div className="relative flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:p-5 filter-tabs-mobile">
+          <div className="absolute inset-0 hidden rounded-[28px] border border-white/18 bg-white/12 shadow-[0_22px_80px_-62px_rgba(15,23,42,0.68)] backdrop-blur-2xl dark:border-white/12 dark:bg-white/5 sm:block" />
+          <div className="relative rounded-[24px] border border-white/15 bg-white/8 p-3 shadow-[0_18px_60px_-55px_rgba(15,23,42,0.6)] backdrop-blur-2xl lg:flex lg:items-center lg:justify-between lg:gap-4 lg:p-5 filter-tabs-mobile">
             <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
               {filterOptions.map((option) => {
                 const isActive = filter === option.value;
@@ -274,9 +277,9 @@ export default function InteractiveDashboardHeader({
               })}
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-end">
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-1 lg:justify-end lg:gap-3 lg:pt-0">
               {availableYears.length > 1 && (
-                <div className="flex items-center gap-2 rounded-xl border border-white/18 bg-white/12 px-3 py-2 text-xs text-white/80 shadow-inner backdrop-blur-lg dark:border-white/12 dark:bg-white/5">
+                <div className="flex items-center gap-2 rounded-xl border border-white/18 bg-white/12 px-2.5 py-1.5 text-xs text-white/80 shadow-inner backdrop-blur-lg dark:border-white/12 dark:bg-white/5 sm:px-3 sm:py-2">
                   <FilterIcon className="h-4 w-4" />
                   <Select value={selectedYear} onValueChange={setSelectedYear}>
                     <SelectTrigger className="h-8 w-24 rounded-lg border-0 bg-transparent text-xs text-white focus:ring-0">
