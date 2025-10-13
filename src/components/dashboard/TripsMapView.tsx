@@ -2,16 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MapboxWrapper from "@/components/map/MapboxWrapper";
+import Link from "next/link";
 import type { FeatureCollection, Point } from "geojson";
 import type { Destination, TripDestinations } from "@/lib/types/destination";
 import { cn, formatCurrency } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 import {
+  ArrowUpRightIcon,
   CompassIcon,
   MapPinIcon,
   MaximizeIcon,
   MinimizeIcon,
-  RotateCcwIcon
+  RotateCcwIcon,
+  XIcon
 } from "lucide-react";
 
 const DEFAULT_CENTER: [number, number] = [12.4964, 41.9028];
@@ -1118,56 +1121,59 @@ function TripsMapCanvas({
       <div ref={containerRef} className="absolute inset-0" />
 
       <div className="pointer-events-none absolute inset-0">
-        <div className="pointer-events-auto absolute left-4 top-4 flex max-w-md flex-col gap-3 sm:left-6 sm:top-6">
-          <div className="rounded-2xl border border-border/70 bg-background/90 p-3 shadow-lg shadow-black/15 backdrop-blur-md sm:p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Map style
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {MAP_STYLE_OPTIONS.map((option) => {
-                const active = mapStyle.endsWith(option.id);
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() =>
-                      onStyleChange(`mapbox://styles/mapbox/${option.id}`)
-                    }
-                    className={cn(
-                      "flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition",
-                      active
-                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/30"
-                        : "bg-muted/60 text-muted-foreground hover:bg-muted/90"
-                    )}
-                  >
-                    <span>{option.emoji}</span>
-                    {option.label}
-                  </button>
-                );
-              })}
+        <div className="pointer-events-auto absolute left-4 top-4 flex items-center gap-2 sm:left-6 sm:top-6 sm:gap-3">
+          <div className="rounded-xl border border-border/60 bg-background/85 px-3 py-2 shadow-md shadow-black/10 backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Style
+              </span>
+              <div className="flex flex-wrap items-center gap-1">
+                {MAP_STYLE_OPTIONS.map((option) => {
+                  const active = mapStyle.endsWith(option.id);
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() =>
+                        onStyleChange(`mapbox://styles/mapbox/${option.id}`)
+                      }
+                      className={cn(
+                        "flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition",
+                        active
+                          ? "bg-primary text-primary-foreground shadow-sm shadow-primary/30"
+                          : "bg-muted/60 text-muted-foreground hover:bg-muted/80"
+                      )}
+                    >
+                      <span>{option.emoji}</span>
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="mt-3 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={resetView}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background/80 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                aria-label="Reset map view"
-              >
-                <RotateCcwIcon className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={onToggleFullscreen}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-background/80 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-              >
-                {isFullscreen ? (
-                  <MinimizeIcon className="h-4 w-4" />
-                ) : (
-                  <MaximizeIcon className="h-4 w-4" />
-                )}
-              </button>
-            </div>
+          </div>
+
+          <div className="flex items-center gap-1 rounded-xl border border-border/60 bg-background/85 px-2 py-1.5 shadow-md shadow-black/10 backdrop-blur">
+            <button
+              type="button"
+              onClick={resetView}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted-foreground transition hover:border-border hover:text-foreground"
+              aria-label="Reset map view"
+            >
+              <RotateCcwIcon className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onToggleFullscreen}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-muted-foreground transition hover:border-border hover:text-foreground"
+              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullscreen ? (
+                <MinimizeIcon className="h-4 w-4" />
+              ) : (
+                <MaximizeIcon className="h-4 w-4" />
+              )}
+            </button>
           </div>
         </div>
 
@@ -1198,36 +1204,49 @@ function TripsMapCanvas({
                     : "translate(-50%, 24px)"
               }}
             >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-foreground">
-                  {selectedTrip.name}
-                </span>
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                    STATUS_META[selectedTrip.status].chipClass
-                  )}
-                >
-                  {STATUS_META[selectedTrip.status].emoji}
-                  {STATUS_META[selectedTrip.status].label}
-                </span>
+              <button
+                type="button"
+                onClick={() => setSelectedTripId(null)}
+                className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-border/60 bg-background/90 text-muted-foreground transition hover:text-foreground"
+                aria-label="Close trip preview"
+              >
+                <XIcon className="h-3.5 w-3.5" />
+              </button>
+              <div className="pr-8">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">
+                    {selectedTrip.name}
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                      STATUS_META[selectedTrip.status].chipClass
+                    )}
+                  >
+                    {STATUS_META[selectedTrip.status].emoji}
+                    {STATUS_META[selectedTrip.status].label}
+                  </span>
+                </div>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
                 {selectedTrip.primaryDestination ??
                   selectedTrip.destination ??
                   "Destination coming soon"}
               </p>
-              <div className="mt-3 flex items-center gap-2 text-[11px] text-muted-foreground">
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                 <span>{formatDateRange(selectedTrip.start_date, selectedTrip.end_date)}</span>
                 <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                <button
-                  type="button"
-                  onClick={() => setSelectedTripId(null)}
-                  className="text-xs font-semibold text-primary transition hover:text-primary/80"
-                >
-                  Clear
-                </button>
+                <span className="font-medium text-foreground">
+                  {selectedTrip.preferences?.currency ?? "USD"}
+                </span>
               </div>
+              <Link
+                href={`/trips/${selectedTrip.id}`}
+                className="mt-3 inline-flex items-center gap-1 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/15"
+              >
+                Open trip
+                <ArrowUpRightIcon className="h-3.5 w-3.5" />
+              </Link>
               <span
                 className="pointer-events-none absolute h-3 w-3 border border-border/80 bg-background/95"
                 style={
