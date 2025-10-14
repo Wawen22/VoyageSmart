@@ -28,9 +28,14 @@ interface ModernTripCardProps {
   trip: Trip;
   isFavorited?: boolean;
   onFavoriteToggle?: () => void;
+  status: {
+    text: string;
+    color: string;
+    emoji: string;
+  };
 }
 
-export default function ModernTripCard({ trip, isFavorited = false, onFavoriteToggle }: ModernTripCardProps) {
+export default function ModernTripCard({ trip, isFavorited = false, onFavoriteToggle, status }: ModernTripCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const formatDate = (dateString: string | null) => {
@@ -41,16 +46,6 @@ export default function ModernTripCard({ trip, isFavorited = false, onFavoriteTo
     } catch {
       return 'Invalid date';
     }
-  };
-
-  const getStatus = () => {
-    if (!trip.start_date || !trip.end_date) return { text: 'Planning', color: 'from-blue-500 to-cyan-500', emoji: '📋' };
-    const now = new Date();
-    const start = parseISO(trip.start_date);
-    const end = parseISO(trip.end_date);
-    if (now < start) return { text: 'Upcoming', color: 'from-emerald-500 to-teal-500', emoji: '🚀' };
-    if (now >= start && now <= end) return { text: 'Ongoing', color: 'from-orange-500 to-red-500', emoji: '✈️' };
-    return { text: 'Completed', color: 'from-purple-500 to-pink-500', emoji: '✅' };
   };
 
   const getDuration = () => {
@@ -65,15 +60,21 @@ export default function ModernTripCard({ trip, isFavorited = false, onFavoriteTo
     }
   };
 
-  const status = getStatus();
   const duration = getDuration();
+
+  const cardClasses = cn(
+    'glass-info-card rounded-2xl p-6 hover:scale-[1.02] transition-all duration-500',
+    {
+      'opacity-75 saturate-50 grayscale-[50%]': status.text === 'Completed',
+    }
+  );
 
   return (
     <Link href={`/trips/${trip.id}`} className="block group">
       <div
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="glass-info-card rounded-2xl p-6 hover:scale-[1.02] transition-all duration-500"
+        className={cardClasses}
       >
         <div className="absolute -top-16 -right-16 w-40 h-40 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-all duration-700" />
         <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-all duration-700" />
@@ -81,9 +82,15 @@ export default function ModernTripCard({ trip, isFavorited = false, onFavoriteTo
 
         <div className="relative z-10">
           <div className="flex justify-between items-start">
-            <Badge className={cn('text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 border border-white/20', status.color)}>
-              <span className="mr-1.5">{status.emoji}</span>
-              {status.text}
+            <Badge className={cn(
+                "relative text-[10px] font-bold px-3 py-1 rounded-full shadow-lg backdrop-blur-xl transition-all duration-300 border border-white/20",
+                status.color,
+                "overflow-hidden before:content-[''] before:absolute before:inset-0 before:bg-white/10 before:backdrop-blur-xl before:scale-0 before:transition-transform before:duration-300 group-hover:before:scale-100"
+              )}>
+              <span className={cn("relative z-10 mr-1.5", {
+                "animate-pulse": status.text === 'Ongoing' || status.text === 'Upcoming',
+              })}>{status.emoji}</span>
+              <span className="relative z-10">{status.text}</span>
             </Badge>
             <button
               onClick={(e) => {
