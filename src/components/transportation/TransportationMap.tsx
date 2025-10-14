@@ -248,6 +248,7 @@ function TransportationMapContent({
         },
       });
     }
+
   }, []);
 
   const updateMarkerOverlayPosition = useCallback(() => {
@@ -291,7 +292,7 @@ function TransportationMapContent({
       }
 
       if (previousHighlightedRouteRef.current && mapInstance.getLayer(previousHighlightedRouteRef.current)) {
-        mapInstance.setPaintProperty(previousHighlightedRouteRef.current, 'line-width', 3);
+        mapInstance.setPaintProperty(previousHighlightedRouteRef.current, 'line-width', 2.6);
         mapInstance.setPaintProperty(previousHighlightedRouteRef.current, 'line-opacity', 0.85);
       }
       previousHighlightedRouteRef.current = null;
@@ -307,13 +308,13 @@ function TransportationMapContent({
     const currentRouteId = `${ROUTE_LAYER_PREFIX}${selectedMarker.transportationId}`;
     if (previousHighlightedRouteRef.current && previousHighlightedRouteRef.current !== currentRouteId) {
       if (mapInstance.getLayer(previousHighlightedRouteRef.current)) {
-        mapInstance.setPaintProperty(previousHighlightedRouteRef.current, 'line-width', 3);
+        mapInstance.setPaintProperty(previousHighlightedRouteRef.current, 'line-width', 2.6);
         mapInstance.setPaintProperty(previousHighlightedRouteRef.current, 'line-opacity', 0.85);
       }
     }
 
     if (mapInstance.getLayer(currentRouteId)) {
-      mapInstance.setPaintProperty(currentRouteId, 'line-width', 3.8);
+      mapInstance.setPaintProperty(currentRouteId, 'line-width', 3.3);
       mapInstance.setPaintProperty(currentRouteId, 'line-opacity', 1);
       previousHighlightedRouteRef.current = currentRouteId;
     } else {
@@ -386,11 +387,15 @@ function TransportationMapContent({
     const features: TransportationMarkerFeature[] = [];
 
     routeIdsRef.current.forEach((routeId) => {
-      if (mapInstance.getLayer(routeId)) {
-        mapInstance.removeLayer(routeId);
-      }
-      if (mapInstance.getSource(routeId)) {
-        mapInstance.removeSource(routeId);
+      try {
+        if (mapInstance.getLayer(routeId)) {
+          mapInstance.removeLayer(routeId);
+        }
+        if (mapInstance.getSource(routeId)) {
+          mapInstance.removeSource(routeId);
+        }
+      } catch (error) {
+        // Ignore removal errors during style transitions
       }
     });
     routeIdsRef.current = [];
@@ -399,16 +404,16 @@ function TransportationMapContent({
     let hasBounds = false;
 
     validTransportations.forEach((transportation) => {
-    const pushFeature = (
-      markerType: MarkerType,
-      coordinates: [number, number],
-      options: { idSuffix: string; label?: string; stopIndex?: number }
-    ) => {
-      const featureId = `${transportation.id}-${options.idSuffix}`;
+      const pushFeature = (
+        markerType: MarkerType,
+        coordinates: [number, number],
+        options: { idSuffix: string; label?: string; stopIndex?: number }
+      ) => {
+        const featureId = `${transportation.id}-${options.idSuffix}`;
 
-      markersByFeatureRef.current[featureId] = coordinates;
+        markersByFeatureRef.current[featureId] = coordinates;
 
-      features.push({
+        features.push({
           type: 'Feature',
           id: featureId,
           geometry: {
@@ -501,15 +506,16 @@ function TransportationMapContent({
             },
             paint: {
               'line-color': getRouteColor(transportation.type),
-              'line-width': 3,
-              'line-opacity': 0.85,
-              'line-dasharray': [1.1, 1],
+              'line-width': 2.6,
+              'line-opacity': 0.9,
+              'line-dasharray': [0.25, 0.18],
             },
           },
           MARKER_HALO_LAYER_ID
         );
 
         routeIdsRef.current.push(routeId);
+
       }
     });
 
@@ -828,12 +834,21 @@ function rebuildRoutes(
   transportations: Transportation[],
   routeIdsRef: MutableRefObject<string[]>
 ) {
+  if (!mapInstance || !mapInstance.getStyle?.()) {
+    routeIdsRef.current = [];
+    return;
+  }
+
   routeIdsRef.current.forEach((routeId) => {
-    if (mapInstance.getLayer(routeId)) {
-      mapInstance.removeLayer(routeId);
-    }
-    if (mapInstance.getSource(routeId)) {
-      mapInstance.removeSource(routeId);
+    try {
+      if (mapInstance.getLayer(routeId)) {
+        mapInstance.removeLayer(routeId);
+      }
+      if (mapInstance.getSource(routeId)) {
+        mapInstance.removeSource(routeId);
+      }
+    } catch (error) {
+      // Mapbox can throw if style is reloading; ignore and continue cleanup
     }
   });
 
@@ -880,9 +895,9 @@ function rebuildRoutes(
           },
           paint: {
             'line-color': getRouteColor(transportation.type),
-            'line-width': 3,
-            'line-opacity': 0.85,
-            'line-dasharray': [1.1, 1],
+            'line-width': 2.6,
+            'line-opacity': 0.9,
+            'line-dasharray': [0.25, 0.18],
           },
         },
         MARKER_HALO_LAYER_ID
