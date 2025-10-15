@@ -1,7 +1,10 @@
+import type { InteractiveComponent } from '@/lib/ai/interactiveDsl';
+
 export type Message = {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: Date;
+  interactiveComponents?: InteractiveComponent[];
 };
 
 // Suggested questions that will appear after AI responses

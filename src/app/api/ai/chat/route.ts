@@ -8,6 +8,7 @@ import { formatTimeLocal, formatDateLocal } from '@/lib/utils';
 import { applyRateLimit } from '@/lib/rate-limit';
 import { hasCachedResponse } from '@/lib/services/aiApiService';
 import { analyzeMessageContext as analyzeContextualActions, formatActionsForResponse } from '@/lib/services/contextualActionsService';
+import { extractInteractiveComponents, INTERACTIVE_COMPONENTS_PROMPT } from '@/lib/ai/interactiveDsl';
 
 // Funzione per analizzare il messaggio e determinare il contesto necessario
 function analyzeMessageContext(message: string): {
@@ -1211,6 +1212,12 @@ I marcatori visuali vengono aggiunti automaticamente dal sistema quando rileva c
 
 NON includere manualmente i marcatori [AI_DATA:...] nelle tue risposte - il sistema li aggiungerà automaticamente quando appropriato.
 
+`;
+
+    // Append DSL instructions for interactive UI components
+    promptText += INTERACTIVE_COMPONENTS_PROMPT;
+
+    promptText += `
 Concentrati solo su fornire risposte utili e informative. Il sistema di post-processing si occuperà di aggiungere i componenti visuali quando necessario.
 
 LINEE GUIDA PER LA FORMATTAZIONE DELLE RISPOSTE:
@@ -1456,6 +1463,8 @@ Domanda dell'utente: ${message}`;
       }
     }
 
+    const { text: finalMessage, components: interactiveComponents } = extractInteractiveComponents(enhancedResponse);
+
     // Log performance and analytics
     const duration = performance.now() - startTime;
 
@@ -1463,23 +1472,25 @@ Domanda dell'utente: ${message}`;
     aiAnalytics.logRequest({
       tripId,
       messageLength: message.length,
-      responseLength: enhancedResponse.length,
+      responseLength: finalMessage.length,
       duration,
       success: true,
-      cacheHit: cacheAlready
+      cacheHit: cacheAlready,
     });
 
     logger.performance('AI Chat API', duration, {
       tripId,
       messageLength: message.length,
-      responseLength: enhancedResponse.length,
+      responseLength: finalMessage.length,
       originalResponseLength: responseText.length,
-      visualComponentsAdded: enhancedResponse !== responseText
+      visualComponentsAdded: enhancedResponse !== responseText,
+      interactiveComponents: interactiveComponents.length,
     });
 
     return NextResponse.json({
       success: true,
-      message: enhancedResponse,
+      message: finalMessage,
+      interactiveComponents,
     });
   } catch (error: any) {
     const duration = performance.now() - startTime;

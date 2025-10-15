@@ -29,6 +29,7 @@ import ConversationUIHandler from './ConversationUIHandler';
 import { logger } from '@/lib/logger';
 import MinimizedButton from './MinimizedButton';
 import { Message, SuggestedQuestion, TripData, ChatBotProps } from './types';
+import InteractiveComponentRenderer from './InteractiveComponentRenderer';
 import { getRandomGreeting, getCurrentSection } from './utils';
 import { generateSuggestedQuestions } from './suggestedQuestions';
 import '@/styles/ai-assistant.css';
@@ -150,7 +151,8 @@ export default function ChatBot({
             // Aggiorna il messaggio iniziale con le informazioni del viaggio
             setMessages([{
               role: 'assistant',
-              content: data.message || `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
+              content: data.message || `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`,
+              interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : []
             }]);
             setContextLoaded(true);
             setRetryCount(0); // Reset retry count on success
@@ -221,7 +223,8 @@ export default function ChatBot({
             // Aggiorna il messaggio iniziale con le informazioni del viaggio
             setMessages([{
               role: 'assistant',
-              content: data.message || `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
+              content: data.message || `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`,
+              interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : []
             }]);
             setContextLoaded(true);
             setRetryCount(0); // Reset retry count on success
@@ -905,7 +908,8 @@ export default function ChatBot({
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: data.message || 'Mi dispiace, non sono riuscito a elaborare una risposta.',
-          timestamp: new Date()
+          timestamp: new Date(),
+          interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : []
         }]);
 
         // Reset retry count and consecutive errors on successful message
@@ -1180,6 +1184,13 @@ export default function ChatBot({
                     tripData={tripData}
                     tripId={tripId}
                   />
+
+                  {message.interactiveComponents && message.interactiveComponents.length > 0 && (
+                    <InteractiveComponentRenderer
+                      components={message.interactiveComponents}
+                      onSendMessage={(value) => handleSendMessage(value)}
+                    />
+                  )}
 
                   {/* Componente UI conversazionale se attivo per questo messaggio */}
                   {activeUIComponent && activeUIComponent.messageIndex === index && (
