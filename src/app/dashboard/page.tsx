@@ -369,7 +369,8 @@ export default function DashboardPage() {
     refresh: refreshProactiveSuggestions,
     markAsRead: markSuggestionAsRead,
     snooze: snoozeSuggestion,
-    restore: restoreSuggestion
+    restore: restoreSuggestion,
+    uncomplete: uncompleteSuggestion
   } = useProactiveSuggestions();
 
   const { shouldAnimate, getAnimationClass } = useAnimationOptimization();
@@ -625,29 +626,32 @@ export default function DashboardPage() {
           )}
 
           <div className="flex justify-end">
-            <ProactiveSuggestionsTray
-              snoozedSuggestions={snoozedSuggestions}
-              recentCompletedSuggestions={recentCompletedSuggestions}
-              retentionDays={suggestionsRetentionDays}
-              onMarkRead={(id) => {
-                void markSuggestionAsRead(id);
-              }}
-              onRestore={(id) => {
-                void restoreSuggestion(id);
-              }}
-            />
-          </div>
-
-          <ProactiveSuggestionsPanel
-            suggestions={activeSuggestions}
-            loading={suggestionsLoading}
+          <ProactiveSuggestionsTray
+            snoozedSuggestions={snoozedSuggestions}
+            recentCompletedSuggestions={recentCompletedSuggestions}
+            retentionDays={suggestionsRetentionDays}
             onMarkRead={(id) => {
               void markSuggestionAsRead(id);
             }}
-            onSnooze={(id) => {
-              void snoozeSuggestion(id);
+            onRestore={(id) => {
+              void restoreSuggestion(id);
+            }}
+            onUncomplete={(id) => {
+              void uncompleteSuggestion(id);
             }}
           />
+        </div>
+
+        <ProactiveSuggestionsPanel
+          suggestions={activeSuggestions}
+          loading={suggestionsLoading}
+          onMarkRead={(id) => {
+            void markSuggestionAsRead(id);
+          }}
+          onSnooze={(id) => {
+            void snoozeSuggestion(id);
+          }}
+        />
 
           {renderHeader()}
 

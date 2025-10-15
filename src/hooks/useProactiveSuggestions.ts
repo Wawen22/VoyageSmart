@@ -30,6 +30,7 @@ interface UseProactiveSuggestionsResult {
   markAsRead: (id: string) => Promise<void>;
   snooze: (id: string) => Promise<void>;
   restore: (id: string) => Promise<void>;
+  uncomplete: (id: string) => Promise<void>;
 }
 
 const COMPLETED_RETENTION_DAYS = 3;
@@ -204,6 +205,13 @@ export function useProactiveSuggestions(): UseProactiveSuggestionsResult {
     [mutateStatus]
   );
 
+  const uncomplete = useCallback(
+    async (id: string) => {
+      await mutateStatus(id, 'delivered');
+    },
+    [mutateStatus]
+  );
+
   const activeSuggestions = useMemo(
     () => allSuggestions.filter((suggestion) => suggestion.status === 'pending' || suggestion.status === 'delivered'),
     [allSuggestions]
@@ -234,6 +242,7 @@ export function useProactiveSuggestions(): UseProactiveSuggestionsResult {
     refresh,
     markAsRead,
     snooze,
-    restore
+    restore,
+    uncomplete
   };
 }

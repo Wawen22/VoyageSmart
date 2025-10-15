@@ -12,6 +12,7 @@ interface ProactiveSuggestionsTrayProps {
   retentionDays: number;
   onMarkRead: (id: string) => void;
   onRestore: (id: string) => void;
+  onUncomplete: (id: string) => void;
 }
 
 export function ProactiveSuggestionsTray({
@@ -19,7 +20,8 @@ export function ProactiveSuggestionsTray({
   recentCompletedSuggestions,
   retentionDays,
   onMarkRead,
-  onRestore
+  onRestore,
+  onUncomplete
 }: ProactiveSuggestionsTrayProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -190,9 +192,19 @@ export function ProactiveSuggestionsTray({
                       <div className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-200/80 leading-relaxed whitespace-pre-line">
                         {suggestion.message}
                       </div>
-                      <p className="mt-2 text-[11px] font-medium uppercase tracking-wide text-emerald-700/70 dark:text-emerald-200/60">
-                        Completato {renderRelativeTime(suggestion.readAt)}
-                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-3">
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-emerald-700/70 dark:text-emerald-200/60">
+                          Completato {renderRelativeTime(suggestion.readAt)}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => onUncomplete(suggestion.id)}
+                          className="inline-flex items-center gap-1 rounded-full border border-emerald-400/60 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-500/20 hover:border-emerald-500"
+                        >
+                          <RefreshCcwIcon className="h-3.5 w-3.5" />
+                          Ripristina
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}
