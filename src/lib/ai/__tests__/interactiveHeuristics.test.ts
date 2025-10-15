@@ -30,6 +30,40 @@ describe('interactiveHeuristics', () => {
     expect(topics).toContain('Ristorazione');
   });
 
+  it('detects airport location hints and adapts suggestions', () => {
+    const { components } = buildHeuristicComponents({
+      intents: detectIntents('Mostrami ristoranti vicino all’aeroporto di Tokyo'),
+      tripContext: {
+        trip: { destination: 'Osaka' },
+      },
+      message: 'Mostrami ristoranti vicino all’aeroporto di Tokyo',
+    });
+
+    const mapComponent = components.find((component) => component.type === 'map');
+    expect(mapComponent).toBeDefined();
+    if (mapComponent && mapComponent.type === 'map') {
+      expect(mapComponent.title.toLowerCase()).toContain('tokyo');
+      expect(mapComponent.points.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('adapts suggestions for Italian cuisine in Kyoto', () => {
+    const { components } = buildHeuristicComponents({
+      intents: detectIntents('Vorrei dei ristoranti italiani a Kyoto'),
+      tripContext: {
+        trip: { destination: 'Kyoto' },
+      },
+      message: 'Vorrei dei ristoranti italiani a Kyoto',
+    });
+
+    const mapComponent = components.find((component) => component.type === 'map');
+    expect(mapComponent).toBeDefined();
+    if (mapComponent && mapComponent.type === 'map') {
+      expect(mapComponent.title.toLowerCase()).toContain('italian');
+      expect(mapComponent.points.length).toBeGreaterThan(0);
+    }
+  });
+
   it('merges interactive components without duplicates', () => {
     const base = [
       { type: 'map', id: 'dining-map', points: [], title: 'Map' },
@@ -61,4 +95,3 @@ describe('interactiveHeuristics', () => {
     expect(topics).toContain('Alloggi');
   });
 });
-

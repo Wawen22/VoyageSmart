@@ -17,6 +17,11 @@ interface BuildPromptArgs {
   currentSection?: string;
   isInitialMessage?: boolean;
   intents?: ChatIntent[];
+  contextFocus?: {
+    location?: string;
+    locationType?: string;
+    cuisinePreferences?: string[];
+  };
 }
 
 export function buildChatPrompt({
@@ -26,6 +31,7 @@ export function buildChatPrompt({
   currentSection,
   isInitialMessage = false,
   intents,
+  contextFocus,
 }: BuildPromptArgs): string {
   const effectiveIntents = intents && intents.length > 0 ? intents : detectIntents(message);
   const intentNames =
@@ -36,6 +42,7 @@ export function buildChatPrompt({
   const overview = buildTripOverview(tripContext, tripName);
   const sectionContext = getSectionDescription(currentSection);
   const structuredInsights = buildStructuredInsights(tripContext);
+  const focusSnippet = buildFocusSnippet(contextFocus);
 
   const responseGuidelines = isInitialMessage
     ? buildInitialResponseGuidelines(tripContext, currentSection)
@@ -50,12 +57,13 @@ export function buildChatPrompt({
 Quando condividi liste di trasporti, alloggi, attività o spese, utilizza gli elenchi puntati o numerati.
 Evita paragrafi lunghi; separa sempre le sezioni con righe vuote.`;
 
-  const interactiveGuidelines = `INTERACTIVE COMPONENTS:
+const interactiveGuidelines = `INTERACTIVE COMPONENTS:
 - Non dire mai che un'azione non è possibile. Suggerisci alternative pratiche o i pulsanti che appariranno sotto la tua risposta.
 - Se stai guidando l'utente verso mappe, prenotazioni o filtri, menziona che può usare i pulsanti interattivi qui sotto per agire subito.
-- Non includere manualmente il blocco [[AI_COMPONENTS ...]]; il sistema lo gestisce automaticamente.`;
+- Non includere manualmente il blocco [[AI_COMPONENTS ...]]; il sistema lo gestisce automaticamente.
+- Evita frasi come "non ho accesso"; fornisci suggerimenti o procedure alternative.`;
 
-  const toneGuidelines = `TONO E STILE:
+const toneGuidelines = `TONO E STILE:
 - Tono professionale ma amichevole; vai dritto al punto.
 - Rispondi in italiano naturale; evita frasi ripetute come "non ho integrato".
 - Trasforma le mancanze in suggerimenti pratici (es. "Posso consigliarti...", "Puoi usare il pulsante qui sotto...").
@@ -67,6 +75,7 @@ Evita paragrafi lunghi; separa sempre le sezioni con righe vuote.`;
     'Sei un assistente di viaggio premium per VoyageSmart.',
     overview,
     sectionContext && `CONTESTO SEZIONE CORRENTE:\n${sectionContext}`,
+    focusSnippet,
     structuredInsights,
     responseGuidelines,
     structuredDataGuidelines,
@@ -147,6 +156,25 @@ function buildStructuredInsights(tripContext: TripContext) {
 - ${expenseSnippet}`;
 }
 
+function buildFocusSnippet(focus?: { location?: string; locationType?: string; cuisinePreferences?: string[] }) {
+  if (!focus) return '';
+
+  const parts: string[] = [];
+
+  if (focus.location) {
+    const descriptor = focus.locationType === 'airport' ? 'zona aeroporto' : 'località';
+    parts.push(`Focus richiesta: ${descriptor} ${focus.location}.`);
+  }
+
+  if (focus.cuisinePreferences && focus.cuisinePreferences.length > 0) {
+    parts.push(`Preferenza culinaria: ${focus.cuisinePreferences.join(', ')}.`);
+  }
+
+  if (parts.length === 0) return '';
+
+  return `CONTESTO SPECIFICO DELL'UTENTE:\n${parts.join(' ')}`;
+}
+
 function buildInitialResponseGuidelines(tripContext: TripContext, currentSection?: string) {
   const sectionMessage = currentSection
     ? `Concentrati sulla sezione ${currentSection.toUpperCase()} perché l'utente si trova lì.`
@@ -198,4 +226,3 @@ function formatDate(dateLike?: string) {
     year: 'numeric',
   }).format(date);
 }
-

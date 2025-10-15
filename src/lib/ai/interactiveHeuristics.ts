@@ -144,9 +144,13 @@ export function buildHeuristicComponents({
   intents,
   tripContext,
   message,
+  locationHint,
+  cuisinePreferences,
 }: BuildComponentsArgs): HeuristicResult {
   const components: InteractiveComponent[] = [];
   const topics: string[] = [];
+  const detectedLocation = locationHint ?? extractLocationHint(message, tripContext);
+  const detectedCuisines = cuisinePreferences ?? extractCuisinePreferences(message);
 
   const unique = <T,>(items: T[], keyFn: (item: T) => string) => {
     const seen = new Set<string>();
@@ -167,7 +171,7 @@ export function buildHeuristicComponents({
     topics.push(TOPIC_LABELS[intent.type]);
     switch (intent.type) {
       case 'dining': {
-        components.push(...buildDiningComponents(tripContext));
+        components.push(...buildDiningComponents(tripContext, detectedLocation, detectedCuisines));
         break;
       }
       case 'transportation': {
@@ -264,17 +268,47 @@ export function inferTopicsFromComponents(components: InteractiveComponent[]): s
   return Array.from(new Set(topics));
 }
 
-function buildDiningComponents(tripContext: any): InteractiveComponent[] {
+function buildDiningComponents(
+  tripContext: any,
+  locationHint?: LocationHint | null,
+  cuisinePreferences?: string[],
+): InteractiveComponent[] {
   const destination: string =
     tripContext?.trip?.destination || tripContext?.trip?.destinations?.[0] || 'la tua destinazione';
   const hotelName = tripContext?.accommodations?.[0]?.name;
   const hotelAddress = tripContext?.accommodations?.[0]?.address;
-  const googleQuery = hotelName
-    ? `${hotelName} ${destination}`
-    : `${destination} ristoranti`;
 
-  const points = getDiningSuggestions(destination, hotelName);
-  if (hotelName) {
+  const targetLocation = locationHint?.location || hotelName || destination;
+  const primaryCuisine = cuisinePreferences && cuisinePreferences.length > 0 ? cuisinePreferences[0] : null;
+  const scope =
+    locationHint?.type === 'airport'
+      ? 'zona aeroportuale'
+      : locationHint?.type === 'city'
+        ? `zona di ${locationHint.location}`
+        : 'zona';
+  const googleQuery = `${targetLocation} ${primaryCuisine ?? 'ristoranti'}`;
+
+  const points =
+    locationHint?.type === 'airport'
+      ? getAirportDiningSuggestions(locationHint.location)
+      : getDiningSuggestions(locationHint?.location || destination, hotelName, cuisinePreferences);
+
+  if (points.length === 0) {
+    points.push({
+      id: 'dining-generic-search',
+      label: `Cerca su Maps (${targetLocation})`,
+      description: primaryCuisine
+        ? `Apri Google Maps con ristoranti ${primaryCuisine} in ${targetLocation}.`
+        : `Apri Google Maps per esplorare ristoranti a ${targetLocation}.`,
+      action: {
+        type: 'open_url',
+        value: `https://www.google.com/maps/search/${encodeURIComponent(googleQuery)}`,
+        label: 'Apri in Maps',
+      },
+    });
+  }
+
+  if (!locationHint && hotelName) {
     points.unshift({
       id: 'hotel-location',
       label: hotelName,
@@ -282,7 +316,7 @@ function buildDiningComponents(tripContext: any): InteractiveComponent[] {
       description: 'Punto di partenza: il tuo alloggio.',
       action: {
         type: 'open_url',
-        value: `https://www.google.com/maps/search/ristoranti+vicino+${encodeURIComponent(googleQuery)}`,
+        value: `https://www.google.com/maps/search/ristoranti+vicino+${encodeURIComponent(`${hotelName} ${destination}`)}`,
         label: 'Apri mappa',
       },
     });
@@ -291,11 +325,17 @@ function buildDiningComponents(tripContext: any): InteractiveComponent[] {
   const mapComponent: InteractiveComponent = {
     type: 'map',
     id: 'dining-map',
-    title: `Ristoranti vicino a ${hotelName || destination}`,
-    subtitle: 'Suggerimenti curati per iniziare la tua ricerca',
+    title: primaryCuisine
+      ? `Ristoranti ${primaryCuisine} a ${targetLocation}`
+      : `Ristoranti vicino a ${targetLocation}`,
+    subtitle: primaryCuisine
+      ? `Opzioni selezionate per cucina ${primaryCuisine}`
+      : `Suggerimenti curati per la ${scope}`,
     points,
     footnote:
-      'Tocca un suggerimento per aprire la posizione o chiedimi di filtrare per budget, tipo di cucina o distanza.',
+      primaryCuisine
+        ? `Tocca un suggerimento per aprire la posizione o chiedimi di restringere la ricerca a un quartiere specifico.`
+        : 'Tocca un suggerimento per aprire la posizione o chiedimi di filtrare per budget, tipo di cucina o distanza.',
   };
 
   const quickReplies: QuickRepliesComponent = {
@@ -305,18 +345,37 @@ function buildDiningComponents(tripContext: any): InteractiveComponent[] {
     options: [
       {
         id: 'dining-local',
-        label: 'Cucina locale',
-        value: `Mostrami ristoranti di cucina locale vicino a ${hotelName || destination}`,
+        label:
+          locationHint?.type === 'airport'
+            ? 'Opzioni in aeroporto'
+            : primaryCuisine
+              ? `Più ${primaryCuisine}`
+              : 'Cucina locale',
+        value:
+          locationHint?.type === 'airport'
+            ? `Suggerisci ristoranti all'interno o vicino a ${targetLocation}`
+            : primaryCuisine
+              ? `Mostrami altre opzioni di cucina ${primaryCuisine} vicino a ${targetLocation}`
+              : `Mostrami ristoranti di cucina locale vicino a ${targetLocation}`,
       },
       {
         id: 'dining-budget',
         label: 'Opzioni economiche',
-        value: `Suggerisci ristoranti economici nella zona di ${hotelName || destination}`,
+        value: `Suggerisci ristoranti economici nella zona di ${targetLocation}`,
       },
       {
         id: 'dining-special',
-        label: 'Cena speciale',
-        value: `Consigliami un ristorante per una serata speciale a ${destination}`,
+        label: locationHint?.type === 'airport'
+          ? 'Cena pre-volo'
+          : primaryCuisine
+            ? 'Esperienza speciale'
+            : 'Cena speciale',
+        value:
+          locationHint?.type === 'airport'
+            ? `Consigliami un posto tranquillo dove cenare prima del volo a ${targetLocation}`
+            : primaryCuisine
+              ? `Suggeriscimi ristoranti ${primaryCuisine} eleganti a ${targetLocation}`
+              : `Consigliami un ristorante per una serata speciale a ${destination}`,
       },
     ],
   };
@@ -324,7 +383,12 @@ function buildDiningComponents(tripContext: any): InteractiveComponent[] {
   const infoCard: InteractiveComponent = {
     type: 'info_card',
     id: 'dining-insights',
-    content: `**Suggerimenti rapidi per mangiare a ${destination}:**\n\n- Prenota con anticipo i locali più popolari, soprattutto nei weekend.\n- Chiedimi di filtrare per tipo di cucina, dietetica o budget.\n- Vuoi street food o opzioni take-away? Posso suggerirti zone e mercati famosi.`,
+    content:
+      locationHint?.type === 'airport'
+        ? `**Mangiare bene a ${targetLocation}:**\n\n- Verifica le food court nei diversi terminal: spesso offrono specialità locali e opzioni internazionali.\n- Se hai tempo, considera i quartieri a breve distanza (tram o treno) per un pasto più autentico.\n- Posso suggerirti locali con servizio veloce o spazi tranquilli per lavorare prima del volo.`
+        : primaryCuisine
+          ? `**Suggerimenti per cucina ${primaryCuisine} a ${targetLocation}:**\n\n- Prenota con anticipo i ristoranti più richiesti, soprattutto nei weekend.\n- Posso filtrare per fascia di prezzo, atmosfera o quartiere.\n- Se desideri un'opzione informale, chiedimi enoteche, trattorie o take-away.`
+          : `**Suggerimenti rapidi per mangiare a ${destination}:**\n\n- Prenota con anticipo i locali più popolari, soprattutto nei weekend.\n- Chiedimi di filtrare per tipo di cucina, dietetica o budget.\n- Vuoi street food o opzioni take-away? Posso suggerirti zone e mercati famosi.`,
   };
 
   return [mapComponent, quickReplies, infoCard];
@@ -449,14 +513,50 @@ function buildExpenseComponents(tripContext: any): InteractiveComponent[] {
   return [quickReplies, infoCard];
 }
 
-function getDiningSuggestions(destination: string, hotelName?: string) {
+function getDiningSuggestions(destination: string, hotelName?: string, cuisinePreferences?: string[]) {
   const normalized = destination.toLowerCase();
+  const primaryCuisine = cuisinePreferences && cuisinePreferences.length > 0 ? cuisinePreferences[0] : null;
   const baseSuggestions: Array<{
     id: string;
     label: string;
     description: string;
     action?: { type: 'open_url' | 'send_message'; value: string; label?: string };
   }> = [];
+
+  if (primaryCuisine === 'italiana') {
+    return [
+      {
+        id: 'italian-trattoria',
+        label: 'Trattorie autentiche',
+        description: 'Chiedimi locali con pasta fresca, wine list e atmosfera conviviale.',
+        action: {
+          type: 'send_message',
+          value: `Consigliami trattorie italiane autentiche a ${destination}`,
+          label: 'Trattorie',
+        },
+      },
+      {
+        id: 'italian-gourmet',
+        label: 'Italiano gourmet',
+        description: 'Ristoranti italiani di fascia alta, perfetti per occasioni speciali.',
+        action: {
+          type: 'send_message',
+          value: `Trova ristoranti italiani gourmet nella zona di ${destination}`,
+          label: 'Gourmet',
+        },
+      },
+      {
+        id: 'italian-pizza',
+        label: 'Pizza e street food',
+        description: 'Opzioni veloci per pizza, focacce o cucina italiana da asporto.',
+        action: {
+          type: 'send_message',
+          value: `Suggerisci pizzerie o street food italiani vicino a ${destination}`,
+          label: 'Pizza e street food',
+        },
+      },
+    ];
+  }
 
   if (normalized.includes('osaka')) {
     baseSuggestions.push(
@@ -528,6 +628,210 @@ function getDiningSuggestions(destination: string, hotelName?: string) {
 
   return baseSuggestions;
 }
+
+interface LocationHint {
+  location: string;
+  type: 'airport' | 'city' | 'generic';
+}
+
+export function extractLocationHint(message: string, tripContext?: any): LocationHint | null {
+  const lower = message.toLowerCase();
+  const airportRegex = /aeroporto(?:\s+di)?\s+([a-zà-ù\s']+)/i;
+  const airportMatch = airportRegex.exec(message);
+  if (airportMatch && airportMatch[1]) {
+    return {
+      location: airportMatch[1].trim(),
+      type: 'airport',
+    };
+  }
+
+  const airportEnglishRegex = /airport(?:\s+of|\s+in)?\s+([a-zà-ù\s']+)/i;
+  const airportEnglishMatch = airportEnglishRegex.exec(message);
+  if (airportEnglishMatch && airportEnglishMatch[1]) {
+    return {
+      location: airportEnglishMatch[1].trim(),
+      type: 'airport',
+    };
+  }
+
+  if (lower.includes('aeroporto') || lower.includes('airport')) {
+    return {
+      location: "l'aeroporto",
+      type: 'airport',
+    };
+  }
+
+  const cityRegex = /\b(?:a|in|verso|per)\s+([A-ZÀ-Ú][A-Za-zÀ-ú'’\s]+)\b/;
+  const cityMatch = cityRegex.exec(message);
+  if (cityMatch && cityMatch[1]) {
+    return {
+      location: cityMatch[1].trim(),
+      type: 'city',
+    };
+  }
+
+  const uppercaseWords = message
+    .split(/[\s,;.!?]+/)
+    .filter((word) => word.length > 2 && /^[A-ZÀ-Ú]+$/.test(word));
+  if (uppercaseWords.length > 0) {
+    return {
+      location: uppercaseWords[0],
+      type: 'city',
+    };
+  }
+
+  const destinations: string[] = Array.isArray(tripContext?.trip?.destinations)
+    ? tripContext.trip.destinations
+    : [];
+  for (const dest of destinations) {
+    if (lower.includes(dest.toLowerCase())) {
+      return {
+        location: dest,
+        type: 'city',
+      };
+    }
+  }
+
+  return null;
+}
+
+export function extractCuisinePreferences(message: string): string[] {
+  const lower = message.toLowerCase();
+  const cuisines: { keyword: string; label: string }[] = [
+    { keyword: 'italian', label: 'italiana' },
+    { keyword: 'italiano', label: 'italiana' },
+    { keyword: 'italiani', label: 'italiana' },
+    { keyword: 'italiana', label: 'italiana' },
+    { keyword: 'pizza', label: 'italiana' },
+    { keyword: 'sushi', label: 'sushi' },
+    { keyword: 'vegan', label: 'vegana' },
+    { keyword: 'vegano', label: 'vegana' },
+    { keyword: 'vegetarian', label: 'vegetariana' },
+    { keyword: 'vegetariano', label: 'vegetariana' },
+    { keyword: 'thai', label: 'thai' },
+    { keyword: 'messican', label: 'messicana' },
+    { keyword: 'mexican', label: 'messicana' },
+    { keyword: 'cinese', label: 'cinese' },
+    { keyword: 'korean', label: 'coreana' },
+    { keyword: 'corean', label: 'coreana' },
+    { keyword: 'bbq', label: 'barbecue' },
+    { keyword: 'steak', label: 'steakhouse' },
+    { keyword: 'fusion', label: 'fusion' },
+  ];
+
+  const matches = cuisines
+    .filter(({ keyword }) => lower.includes(keyword))
+    .map(({ label }) => label);
+
+  return Array.from(new Set(matches));
+}
+
+function getAirportDiningSuggestions(location: string) {
+  const normalized = location.toLowerCase();
+  if (normalized.includes('tokyo') || normalized.includes('haneda')) {
+    return [
+      {
+        id: 'haneda-food',
+        label: 'Haneda Edo Market (Terminal 1)',
+        description: 'Area con ramen, sushi e dolci tradizionali prima dei controlli di sicurezza.',
+        action: {
+          type: 'open_url',
+          value: 'https://maps.google.com/?q=Haneda+Airport+Edo+Market',
+          label: 'Apri in Maps',
+        },
+      },
+      {
+        id: 'haneda-observation',
+        label: 'Observation Deck Restaurants',
+        description: 'Ristoranti con vista sulla pista, perfetti per una pausa rilassante prima del volo.',
+        action: {
+          type: 'open_url',
+          value: 'https://maps.google.com/?q=Haneda+Airport+Observation+Deck+Restaurants',
+          label: 'Apri in Maps',
+        },
+      },
+      {
+        id: 'haneda-sushi',
+        label: 'Sushi Kyotatsu',
+        description: 'Sushi bar famoso al Terminal 2, ottimo per provare nigiri freschissimo.',
+        action: {
+          type: 'open_url',
+          value: 'https://maps.google.com/?q=Sushi+Kyotatsu+Haneda',
+          label: 'Apri in Maps',
+        },
+      },
+    ];
+  }
+
+  if (normalized.includes('narita')) {
+    return [
+      {
+        id: 'narita-terminal1',
+        label: 'Narita Dining Terrace',
+        description: 'Food court con ramen, curry giapponese e dessert, al Terminal 1.',
+        action: {
+          type: 'open_url',
+          value: 'https://maps.google.com/?q=Narita+Airport+Dining+Terrace',
+          label: 'Apri in Maps',
+        },
+      },
+      {
+        id: 'narita-sushi',
+        label: 'Sushiden',
+        description: 'Sushi di qualità all’interno dell’aeroporto, perfetto per un pasto veloce prima del volo.',
+        action: {
+          type: 'open_url',
+          value: 'https://maps.google.com/?q=Sushiden+Narita+Airport',
+          label: 'Apri in Maps',
+        },
+      },
+      {
+        id: 'narita-sozai',
+        label: 'Sozai Delica',
+        description: 'Bento freschi e piatti pronti da portare in volo.',
+        action: {
+          type: 'open_url',
+          value: 'https://maps.google.com/?q=Sozai+Delica+Narita',
+          label: 'Apri in Maps',
+        },
+      },
+    ];
+  }
+
+  return [
+    {
+      id: 'airport-food-court',
+      label: `Food court dell'aeroporto`,
+      description: 'Controlla le opzioni nei vari terminal: spesso includono specialità locali e catene internazionali.',
+      action: {
+        type: 'send_message',
+        value: `Mostrami le food court disponibili all'interno di ${location}`,
+        label: 'Food court',
+      },
+    },
+    {
+      id: 'airport-lounge',
+      label: 'Lounge con ristorazione',
+      description: 'Se hai accesso a una lounge, puoi trovare buffet e spazi tranquilli per mangiare o lavorare.',
+      action: {
+        type: 'send_message',
+        value: `Suggerisci lounge con buona ristorazione disponibili a ${location}`,
+        label: 'Scopri lounge',
+      },
+    },
+    {
+      id: 'airport-nearby',
+      label: 'Quartieri vicini',
+      description: 'Considera un trasferimento rapido verso quartieri vicini per scelta più ampia di ristoranti.',
+      action: {
+        type: 'send_message',
+        value: `Consigliami quartieri vicini a ${location} dove andare a mangiare prima del volo`,
+        label: 'Quartieri vicini',
+      },
+    },
+  ];
+}
+
 
 function formatDateTime(dateLike?: string) {
   if (!dateLike) return '';

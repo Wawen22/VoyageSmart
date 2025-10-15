@@ -12,6 +12,8 @@ import { extractInteractiveComponents } from '@/lib/ai/interactiveDsl';
 import {
   buildHeuristicComponents,
   detectIntents,
+  extractCuisinePreferences,
+  extractLocationHint,
   inferTopicsFromComponents,
   mergeInteractiveComponents,
 } from '@/lib/ai/interactiveHeuristics';
@@ -650,6 +652,9 @@ export async function POST(request: NextRequest) {
       expensesCount: Array.isArray(tripContext.expenses) ? tripContext.expenses.length : 0
     });
 
+    const locationHint = extractLocationHint(message, tripContext);
+    const cuisinePreferences = extractCuisinePreferences(message);
+
     let intents = detectIntents(message);
     let promptText: string;
     try {
@@ -660,6 +665,11 @@ export async function POST(request: NextRequest) {
         currentSection,
         isInitialMessage: !!isInitialMessage,
         intents,
+        contextFocus: {
+          location: locationHint?.location,
+          locationType: locationHint?.type,
+          cuisinePreferences,
+        },
       });
     } catch (promptError: any) {
       logger.error('Prompt builder error', {
@@ -1546,6 +1556,8 @@ Domanda dell'utente: ${message}`;
         intents,
         tripContext,
         message,
+        locationHint,
+        cuisinePreferences,
       });
       mergedComponents = mergeInteractiveComponents(interactiveComponents, heuristicData.components);
       const derivedTopics = inferTopicsFromComponents(mergedComponents);
