@@ -136,9 +136,9 @@ export function ProactiveSuggestionsTray({
                     className="rounded-2xl border border-border/70 bg-background/80 p-3 text-sm shadow-sm"
                   >
                     <p className="font-semibold text-foreground">{suggestion.title}</p>
-                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    <div className="mt-1 text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
                       {suggestion.message}
-                    </p>
+                    </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         type="button"
@@ -187,9 +187,9 @@ export function ProactiveSuggestionsTray({
                       <p className="font-semibold text-emerald-900 dark:text-emerald-100">
                         {suggestion.title}
                       </p>
-                      <p className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-200/80 leading-relaxed">
+                      <div className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-200/80 leading-relaxed whitespace-pre-line">
                         {suggestion.message}
-                      </p>
+                      </div>
                       <p className="mt-2 text-[11px] font-medium uppercase tracking-wide text-emerald-700/70 dark:text-emerald-200/60">
                         Completato {renderRelativeTime(suggestion.readAt)}
                       </p>
