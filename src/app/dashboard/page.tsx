@@ -9,6 +9,8 @@ import InteractiveDashboardHeader from '@/components/dashboard/InteractiveDashbo
 import InteractiveTripCard from '@/components/dashboard/InteractiveTripCard';
 import InteractiveEmptyState from '@/components/dashboard/InteractiveEmptyState';
 import TripsMapView from '@/components/dashboard/TripsMapView';
+import { ProactiveSuggestionsPanel } from '@/components/dashboard/ProactiveSuggestionsPanel';
+import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
 import ModernLoadingSkeleton, {
   ModernHeaderLoadingSkeleton
 } from '@/components/dashboard/ModernLoadingSkeleton';
@@ -20,6 +22,7 @@ import {
   useOptimizedLoading
 } from '@/hooks/usePerformance';
 import { useDashboardShortcuts } from '@/components/ui/KeyboardShortcutsHelp';
+import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 import { cn, formatCurrency } from '@/lib/utils';
 
 type TripFilter = 'all' | 'upcoming' | 'ongoing' | 'past';
@@ -355,6 +358,20 @@ export default function DashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const sortBy = INITIAL_SORT;
 
+  const {
+    activeSuggestions,
+    snoozedSuggestions,
+    recentCompletedSuggestions,
+    loading: suggestionsLoading,
+    error: suggestionsError,
+    retentionDays: suggestionsRetentionDays,
+    trigger: triggerProactiveSuggestions,
+    refresh: refreshProactiveSuggestions,
+    markAsRead: markSuggestionAsRead,
+    snooze: snoozeSuggestion,
+    restore: restoreSuggestion
+  } = useProactiveSuggestions();
+
   const { shouldAnimate, getAnimationClass } = useAnimationOptimization();
   const { isLoading: optimizedLoading, startLoading, stopLoading } = useOptimizedLoading();
   useDashboardShortcuts();
@@ -369,6 +386,17 @@ export default function DashboardPage() {
   useEffect(() => {
     stopLoadingRef.current = stopLoading;
   }, [stopLoading]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const run = async () => {
+      await refreshProactiveSuggestions();
+      await triggerProactiveSuggestions({ trigger: 'app_open' });
+    };
+
+    void run();
+  }, [user?.id, refreshProactiveSuggestions, triggerProactiveSuggestions]);
 
   const showLoading = loading || optimizedLoading;
   const stats = useMemo(() => computeTripStats(trips), [trips]);
@@ -466,6 +494,9 @@ export default function DashboardPage() {
       setTrips(data ?? []);
       setAvailableYears(buildAvailableYears(data ?? []));
       setError(null);
+      if (user?.id) {
+        await triggerProactiveSuggestions({ trigger: 'app_open' });
+      }
     } catch (refreshError) {
       logger.error('Dashboard error during refresh', {
         error: refreshError instanceof Error ? refreshError.message : String(refreshError),
@@ -586,6 +617,37 @@ export default function DashboardPage() {
               {error}
             </div>
           )}
+
+          {suggestionsError && (
+            <div className="rounded-2xl border border-amber-200/60 bg-amber-50/80 p-4 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-900/20 dark:text-amber-200">
+              Non siamo riusciti a aggiornare i suggerimenti proattivi. Riproveremo tra poco.
+            </div>
+          )}
+
+          <div className="flex justify-end">
+            <ProactiveSuggestionsTray
+              snoozedSuggestions={snoozedSuggestions}
+              recentCompletedSuggestions={recentCompletedSuggestions}
+              retentionDays={suggestionsRetentionDays}
+              onMarkRead={(id) => {
+                void markSuggestionAsRead(id);
+              }}
+              onRestore={(id) => {
+                void restoreSuggestion(id);
+              }}
+            />
+          </div>
+
+          <ProactiveSuggestionsPanel
+            suggestions={activeSuggestions}
+            loading={suggestionsLoading}
+            onMarkRead={(id) => {
+              void markSuggestionAsRead(id);
+            }}
+            onSnooze={(id) => {
+              void snoozeSuggestion(id);
+            }}
+          />
 
           {renderHeader()}
 

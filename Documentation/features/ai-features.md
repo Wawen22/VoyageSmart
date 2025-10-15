@@ -145,6 +145,73 @@ interface GeneratedItinerary {
 - **Group Consensus**: Balance preferences for group trips
 - **Budget Reallocation**: Suggest budget adjustments for better experiences
 
+## Proactive AI Suggestions
+
+VoyageSmart now surfaces proactive guidance without waiting for a chat prompt. The proactive suggestion engine evaluates each user’s trips when key triggers occur (opening the dashboard, sharing a location ping) and stores outcomes in the new `ai_proactive_suggestions` table.
+
+### Trigger Workflow
+- **`app_open`**: When the dashboard loads, the service inspects upcoming trips starting within the next three days and pushes a packing checklist tailored to the destination.
+- **`location_ping`**: While a trip is in progress, a location ping combined with an empty itinerary slot creates a nearby activity suggestion focused on local highlights.
+- Suggestions are persisted with status (`pending`, `delivered`, `read`, `dismissed`) so the UI can avoid duplicates and track acknowledgement.
+
+### Data Model
+```sql
+-- Supabase table
+ai_proactive_suggestions (
+  id uuid primary key,
+  user_id uuid references users,
+  trip_id uuid references trips,
+  suggestion_type text check (suggestion_type in ('upcoming_trip','in_trip_activity')),
+  trigger_event text,
+  title text,
+  message text,
+  metadata jsonb,
+  status text check (status in ('pending','delivered','read','dismissed')),
+  created_at timestamptz default now(),
+  delivered_at timestamptz,
+  read_at timestamptz
+)
+```
+
+### API Usage
+```ts
+// Trigger proactive suggestions when the dashboard mounts
+await fetch('/api/ai/proactive-suggestions', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ trigger: 'app_open' })
+});
+
+// Retrieve unread suggestions
+const { suggestions } = await fetch('/api/ai/proactive-suggestions?status=delivered')
+  .then((res) => res.json());
+
+// Mark a suggestion as read or dismissed
+await fetch(`/api/ai/proactive-suggestions/${suggestionId}`, {
+  method: 'PATCH',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ status: 'read' })
+});
+```
+
+### Sample Suggestion Payload
+```json
+{
+  "id": "suggestion-1",
+  "type": "upcoming_trip",
+  "title": "Mancano 2 giorni al tuo viaggio per Rome",
+  "message": "Prepara tutto il necessario con la nostra checklist intelligente:\n• Documento di identità...\n• Power bank...",
+  "metadata": {
+    "tripId": "trip-1",
+    "countdownDays": 2,
+    "checklist": ["Documento di identità...", "Power bank..."]
+  },
+  "status": "delivered"
+}
+```
+
+Interactive cards on the dashboard present these suggestions with actions to mark them as done or snooze them. Snoozed items collapse into the floating lightbulb hub so travellers can revisit them later, while completed items stay in a “Recent” section for three days to keep a short audit trail.
+
 ### AI Wizard
 
 #### Step-by-Step Planning

@@ -1,9 +1,9 @@
 ## 1. Implementation
 
 ### 1.1 Proactive AI Suggestions
-- [ ] 1.1.1 Design and implement the event-driven architecture for the Proactive Suggestion Service.
-- [ ] 1.1.2 Develop the suggestion engine with initial rules for common travel scenarios.
-- [ ] 1.1.3 Integrate the notification service to deliver suggestions via in-app messages.
+- [x] 1.1.1 Design and implement the event-driven architecture for the Proactive Suggestion Service.
+- [x] 1.1.2 Develop the suggestion engine with initial rules for common travel scenarios.
+- [x] 1.1.3 Integrate the notification service to deliver suggestions via in-app messages.
 
 ### 1.2 Interactive AI Components
 - [ ] 1.2.1 Define the JSON-based DSL for rendering interactive components.
@@ -26,7 +26,7 @@
 
 ## 2. Validation
 
-- [ ] 2.1 Write unit tests for the Proactive Suggestion Service and the suggestion engine.
+- [x] 2.1 Write unit tests for the Proactive Suggestion Service and the suggestion engine.
 - [ ] 2.2 Write unit and integration tests for the Interactive AI Component Framework.
 - [ ] 2.3 Write unit and integration tests for the Advanced Preference Center API and UI.
 - [ ] 2.4 Write E2E tests for the new AI features, including proactive suggestions and interactive components.
