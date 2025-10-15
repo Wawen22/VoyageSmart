@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button';
 import { PlusIcon, ReceiptIcon, BarChart3Icon, UsersIcon, DollarSignIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Toaster } from '@/components/ui/toaster';
+import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 
 type DatabaseUser = {
   full_name: string;
@@ -122,6 +124,19 @@ export default function ExpensesPage() {
   const [isEditExpenseModalOpen, setIsEditExpenseModalOpen] = useState(false);
   const [currentExpense, setCurrentExpense] = useState<ExpenseWithParticipants | null>(null);
   const [activeTab, setActiveTab] = useState('expenses');
+
+  const {
+    activeSuggestions,
+    snoozedSuggestions,
+    recentCompletedSuggestions,
+    retentionDays: suggestionRetentionDays,
+    trigger: triggerProactiveSuggestions,
+    refresh: refreshProactiveSuggestions,
+    markAsRead: markSuggestionAsRead,
+    snooze: snoozeSuggestion,
+    restore: restoreSuggestion,
+    uncomplete: uncompleteSuggestion
+  } = useProactiveSuggestions();
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -290,6 +305,30 @@ export default function ExpensesPage() {
 
     fetchTripDetails();
   }, [id, user]);
+
+  useEffect(() => {
+    if (!user?.id || !id) return;
+
+    const run = async () => {
+      await refreshProactiveSuggestions({ silent: true });
+      await triggerProactiveSuggestions({ trigger: 'app_open' });
+    };
+
+    void run();
+  }, [user?.id, id, refreshProactiveSuggestions, triggerProactiveSuggestions]);
+
+  const filteredActiveSuggestions = useMemo(
+    () => activeSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [activeSuggestions, id]
+  );
+  const filteredSnoozedSuggestions = useMemo(
+    () => snoozedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [snoozedSuggestions, id]
+  );
+  const filteredCompletedSuggestions = useMemo(
+    () => recentCompletedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [recentCompletedSuggestions, id]
+  );
 
   // Helper function to refresh expenses data - wrapped in useCallback for real-time subscription
   const refreshExpenses = useCallback(async () => {
@@ -762,7 +801,7 @@ export default function ExpensesPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="relative overflow-hidden mb-6">
+        <header className="relative overflow-visible mb-6">
           {/* Modern Glassmorphism Background - Amber/Orange Theme */}
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-background/95 to-orange-500/10 backdrop-blur-xl"></div>
 
@@ -778,12 +817,35 @@ export default function ExpensesPage() {
 
           {/* Navigation Bar with Glass Effect */}
           <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
-            <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-              <BackButton
-                href={`/trips/${id}`}
-                label="Back to Trip"
-                theme="amber"
-              />
+            <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <BackButton
+                  href={`/trips/${id}`}
+                  label="Back to Trip"
+                  theme="amber"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+                <ProactiveSuggestionsTray
+                  activeSuggestions={filteredActiveSuggestions}
+                  snoozedSuggestions={filteredSnoozedSuggestions}
+                  recentCompletedSuggestions={filteredCompletedSuggestions}
+                  retentionDays={suggestionRetentionDays}
+                  onMarkRead={(suggestionId) => {
+                    void markSuggestionAsRead(suggestionId);
+                  }}
+                  onSnooze={(suggestionId) => {
+                    void snoozeSuggestion(suggestionId);
+                  }}
+                  onRestore={(suggestionId) => {
+                    void restoreSuggestion(suggestionId);
+                  }}
+                  onUncomplete={(suggestionId) => {
+                    void uncompleteSuggestion(suggestionId);
+                  }}
+                />
+              </div>
             </div>
           </div>
 
@@ -835,7 +897,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative overflow-hidden mb-6">
+      <header className="relative overflow-visible mb-6">
         {/* Modern Glassmorphism Background - Amber/Orange Theme */}
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-background/95 to-orange-500/10 backdrop-blur-xl"></div>
 
@@ -854,12 +916,35 @@ export default function ExpensesPage() {
 
         {/* Navigation Bar with Glass Effect */}
         <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
-          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-            <BackButton
-              href={`/trips/${id}`}
-              label="Back to Trip"
-              theme="amber"
-            />
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <BackButton
+                href={`/trips/${id}`}
+                label="Back to Trip"
+                theme="amber"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+              <ProactiveSuggestionsTray
+                activeSuggestions={filteredActiveSuggestions}
+                snoozedSuggestions={filteredSnoozedSuggestions}
+                recentCompletedSuggestions={filteredCompletedSuggestions}
+                retentionDays={suggestionRetentionDays}
+                onMarkRead={(suggestionId) => {
+                  void markSuggestionAsRead(suggestionId);
+                }}
+                onSnooze={(suggestionId) => {
+                  void snoozeSuggestion(suggestionId);
+                }}
+                onRestore={(suggestionId) => {
+                  void restoreSuggestion(suggestionId);
+                }}
+                onUncomplete={(suggestionId) => {
+                  void uncompleteSuggestion(suggestionId);
+                }}
+              />
+            </div>
           </div>
         </div>
 

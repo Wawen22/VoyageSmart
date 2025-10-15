@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
@@ -22,6 +22,8 @@ import { LazyItineraryMapView } from '@/components/LazyComponents';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
 import { fetchJournalEntries, fetchJournalMedia, JournalEntry } from '@/lib/features/journalSlice';
+import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 
 // Lazy load heavy components
 const ActivityModal = lazy(() => import('@/components/itinerary/ActivityModal'));
@@ -108,6 +110,19 @@ export default function TripItinerary() {
   const [currentEntry, setCurrentEntry] = useState<JournalEntry | null>(null);
   const [showMediaUploader, setShowMediaUploader] = useState(false);
   const [showJournalInfoModal, setShowJournalInfoModal] = useState(false);
+
+  const {
+    activeSuggestions,
+    snoozedSuggestions,
+    recentCompletedSuggestions,
+    retentionDays: suggestionRetentionDays,
+    trigger: triggerProactiveSuggestions,
+    refresh: refreshProactiveSuggestions,
+    markAsRead: markSuggestionAsRead,
+    snooze: snoozeSuggestion,
+    restore: restoreSuggestion,
+    uncomplete: uncompleteSuggestion
+  } = useProactiveSuggestions();
 
   useEffect(() => {
     // Load journal data
@@ -256,6 +271,17 @@ export default function TripItinerary() {
     fetchTripAndItinerary();
   }, [id, user]);
 
+  useEffect(() => {
+    if (!user?.id || !id) return;
+
+    const run = async () => {
+      await refreshProactiveSuggestions({ silent: true });
+      await triggerProactiveSuggestions({ trigger: 'app_open' });
+    };
+
+    void run();
+  }, [user?.id, id, refreshProactiveSuggestions, triggerProactiveSuggestions]);
+
   const createDefaultItineraryDays = async (startDate: string, endDate: string) => {
     try {
       // Validate trip ID
@@ -354,6 +380,19 @@ export default function TripItinerary() {
       setError('Failed to create default itinerary days. Please try again.');
     }
   };
+
+  const filteredActiveSuggestions = useMemo(
+    () => activeSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [activeSuggestions, id]
+  );
+  const filteredSnoozedSuggestions = useMemo(
+    () => snoozedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [snoozedSuggestions, id]
+  );
+  const filteredCompletedSuggestions = useMemo(
+    () => recentCompletedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [recentCompletedSuggestions, id]
+  );
 
   const handleSaveDay = async (formData: { day_date: string; notes: string }) => {
     try {
@@ -731,7 +770,7 @@ export default function TripItinerary() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative overflow-hidden mb-6">
+      <header className="relative overflow-visible mb-6">
         {/* Modern Glassmorphism Background - Blue/Purple Theme */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-background/95 to-purple-500/10 backdrop-blur-xl"></div>
 
@@ -750,12 +789,35 @@ export default function TripItinerary() {
 
         {/* Navigation Bar with Glass Effect */}
         <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
-          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-            <BackButton
-              href={`/trips/${id}`}
-              label="Back to Trip"
-              theme="blue"
-            />
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <BackButton
+                href={`/trips/${id}`}
+                label="Back to Trip"
+                theme="blue"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+              <ProactiveSuggestionsTray
+                activeSuggestions={filteredActiveSuggestions}
+                snoozedSuggestions={filteredSnoozedSuggestions}
+                recentCompletedSuggestions={filteredCompletedSuggestions}
+                retentionDays={suggestionRetentionDays}
+                onMarkRead={(suggestionId) => {
+                  void markSuggestionAsRead(suggestionId);
+                }}
+                onSnooze={(suggestionId) => {
+                  void snoozeSuggestion(suggestionId);
+                }}
+                onRestore={(suggestionId) => {
+                  void restoreSuggestion(suggestionId);
+                }}
+                onUncomplete={(suggestionId) => {
+                  void uncompleteSuggestion(suggestionId);
+                }}
+              />
+            </div>
           </div>
         </div>
 

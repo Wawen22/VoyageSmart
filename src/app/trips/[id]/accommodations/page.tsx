@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
@@ -33,6 +33,8 @@ const AccommodationDetailsModal = lazy(() => import('@/components/accommodations
 import { LazyMapView, LazyAccommodationsMapView } from '@/components/LazyComponents';
 import UpgradePrompt from '@/components/subscription/UpgradePrompt';
 import AccommodationCounterWidget from '@/components/ui/AccommodationCounterWidget';
+import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 
 type Trip = {
   id: string;
@@ -61,6 +63,19 @@ export default function AccommodationsPage() {
   const { canEdit } = useRolePermissions(id as string);
   const [canAddMore, setCanAddMore] = useState(true);
 
+  const {
+    activeSuggestions,
+    snoozedSuggestions,
+    recentCompletedSuggestions,
+    retentionDays: suggestionRetentionDays,
+    trigger: triggerProactiveSuggestions,
+    refresh: refreshProactiveSuggestions,
+    markAsRead: markSuggestionAsRead,
+    snooze: snoozeSuggestion,
+    restore: restoreSuggestion,
+    uncomplete: uncompleteSuggestion
+  } = useProactiveSuggestions();
+
   useEffect(() => {
     const checkAccommodationLimit = async () => {
       if (user && id) {
@@ -71,6 +86,17 @@ export default function AccommodationsPage() {
 
     checkAccommodationLimit();
   }, [user, id, canAddAccommodationToTrip, accommodations]);
+
+  useEffect(() => {
+    if (!user?.id || !id) return;
+
+    const run = async () => {
+      await refreshProactiveSuggestions({ silent: true });
+      await triggerProactiveSuggestions({ trigger: 'app_open' });
+    };
+
+    void run();
+  }, [user?.id, id, refreshProactiveSuggestions, triggerProactiveSuggestions]);
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -157,6 +183,19 @@ export default function AccommodationsPage() {
     fetchTripDetails();
   }, [id, user, dispatch]);
 
+  const filteredActiveSuggestions = useMemo(
+    () => activeSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [activeSuggestions, id]
+  );
+  const filteredSnoozedSuggestions = useMemo(
+    () => snoozedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [snoozedSuggestions, id]
+  );
+  const filteredCompletedSuggestions = useMemo(
+    () => recentCompletedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [recentCompletedSuggestions, id]
+  );
+
   const handleAddAccommodation = () => {
     dispatch(setCurrentAccommodation(null));
     setIsAddModalOpen(true);
@@ -236,12 +275,35 @@ export default function AccommodationsPage() {
 
         {/* Navigation Bar with Glass Effect */}
         <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
-          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-            <BackButton
-              href={`/trips/${id}`}
-              label="Back to Trip"
-              theme="green"
-            />
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <BackButton
+                href={`/trips/${id}`}
+                label="Back to Trip"
+                theme="green"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+              <ProactiveSuggestionsTray
+                activeSuggestions={filteredActiveSuggestions}
+                snoozedSuggestions={filteredSnoozedSuggestions}
+                recentCompletedSuggestions={filteredCompletedSuggestions}
+                retentionDays={suggestionRetentionDays}
+                onMarkRead={(suggestionId) => {
+                  void markSuggestionAsRead(suggestionId);
+                }}
+                onSnooze={(suggestionId) => {
+                  void snoozeSuggestion(suggestionId);
+                }}
+                onRestore={(suggestionId) => {
+                  void restoreSuggestion(suggestionId);
+                }}
+                onUncomplete={(suggestionId) => {
+                  void uncompleteSuggestion(suggestionId);
+                }}
+              />
+            </div>
           </div>
         </div>
 

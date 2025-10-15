@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
 import { useParams, useRouter } from 'next/navigation';
@@ -13,6 +13,8 @@ import PremiumIndicator from '@/components/subscription/PremiumIndicator';
 import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 import TripWeather from '@/components/weather/TripWeather';
 import { TripDestinations } from '@/lib/types/destination';
+import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 import {
   MapPinIcon,
   CalendarIcon,
@@ -80,6 +82,19 @@ export default function TripDetails() {
   const [transportationCount, setTransportationCount] = useState<number>(0);
   const [itineraryCount, setItineraryCount] = useState<number>(0);
   const [expensesCount, setExpensesCount] = useState<number>(0);
+
+  const {
+    activeSuggestions,
+    snoozedSuggestions,
+    recentCompletedSuggestions,
+    retentionDays: suggestionRetentionDays,
+    trigger: triggerProactiveSuggestions,
+    refresh: refreshProactiveSuggestions,
+    markAsRead: markSuggestionAsRead,
+    snooze: snoozeSuggestion,
+    restore: restoreSuggestion,
+    uncomplete: uncompleteSuggestion
+  } = useProactiveSuggestions();
 
 
   useEffect(() => {
@@ -263,6 +278,30 @@ export default function TripDetails() {
     }
   };
 
+  useEffect(() => {
+    if (!user?.id || !id) return;
+
+    const run = async () => {
+      await refreshProactiveSuggestions({ silent: true });
+      await triggerProactiveSuggestions({ trigger: 'app_open' });
+    };
+
+    void run();
+  }, [user?.id, id, refreshProactiveSuggestions, triggerProactiveSuggestions]);
+
+  const filteredActiveSuggestions = useMemo(
+    () => activeSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [activeSuggestions, id]
+  );
+  const filteredSnoozedSuggestions = useMemo(
+    () => snoozedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [snoozedSuggestions, id]
+  );
+  const filteredCompletedSuggestions = useMemo(
+    () => recentCompletedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [recentCompletedSuggestions, id]
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
@@ -308,7 +347,7 @@ export default function TripDetails() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative overflow-hidden">
+      <header className="relative overflow-visible">
         {/* Modern Glassmorphism Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/95 to-secondary/10 backdrop-blur-xl"></div>
 
@@ -332,7 +371,7 @@ export default function TripDetails() {
 
         {/* Navigation Bar with Glass Effect */}
         <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
-          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <BackButton
                 href="/dashboard"
@@ -341,25 +380,46 @@ export default function TripDetails() {
               />
             </div>
 
-            {isOwner && (
-              <div className="flex space-x-2">
-                <Link
-                  href={`/trips/${id}/edit`}
-                  className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-primary-foreground bg-primary/90 hover:bg-primary backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
-                >
-                  <PencilIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
-                  Edit
-                </Link>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-destructive/25"
-                >
-                  <TrashIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
-                  {deleting ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+              <ProactiveSuggestionsTray
+                activeSuggestions={filteredActiveSuggestions}
+                snoozedSuggestions={filteredSnoozedSuggestions}
+                recentCompletedSuggestions={filteredCompletedSuggestions}
+                retentionDays={suggestionRetentionDays}
+                onMarkRead={(suggestionId) => {
+                  void markSuggestionAsRead(suggestionId);
+                }}
+                onSnooze={(suggestionId) => {
+                  void snoozeSuggestion(suggestionId);
+                }}
+                onRestore={(suggestionId) => {
+                  void restoreSuggestion(suggestionId);
+                }}
+                onUncomplete={(suggestionId) => {
+                  void uncompleteSuggestion(suggestionId);
+                }}
+              />
+
+              {isOwner && (
+                <div className="flex space-x-2">
+                  <Link
+                    href={`/trips/${id}/edit`}
+                    className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-primary-foreground bg-primary/90 hover:bg-primary backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
+                  >
+                    <PencilIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
+                    Edit
+                  </Link>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-destructive/25"
+                  >
+                    <TrashIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
+                    {deleting ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

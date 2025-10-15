@@ -627,11 +627,15 @@ export default function DashboardPage() {
 
           <div className="flex justify-end">
           <ProactiveSuggestionsTray
+            activeSuggestions={activeSuggestions}
             snoozedSuggestions={snoozedSuggestions}
             recentCompletedSuggestions={recentCompletedSuggestions}
             retentionDays={suggestionsRetentionDays}
             onMarkRead={(id) => {
               void markSuggestionAsRead(id);
+            }}
+            onSnooze={(id) => {
+              void snoozeSuggestion(id);
             }}
             onRestore={(id) => {
               void restoreSuggestion(id);
