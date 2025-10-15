@@ -14,6 +14,7 @@ import {
   detectIntents,
   extractCuisinePreferences,
   extractLocationHint,
+  extractServiceKeywords,
   inferTopicsFromComponents,
   mergeInteractiveComponents,
 } from '@/lib/ai/interactiveHeuristics';
@@ -654,6 +655,7 @@ export async function POST(request: NextRequest) {
 
     const locationHint = extractLocationHint(message, tripContext);
     const cuisinePreferences = extractCuisinePreferences(message);
+    const serviceKeywords = extractServiceKeywords(message);
 
     let intents = detectIntents(message);
     let promptText: string;
@@ -669,6 +671,7 @@ export async function POST(request: NextRequest) {
           location: locationHint?.location,
           locationType: locationHint?.type,
           cuisinePreferences,
+          serviceKeywords,
         },
       });
     } catch (promptError: any) {
@@ -1558,6 +1561,7 @@ Domanda dell'utente: ${message}`;
         message,
         locationHint,
         cuisinePreferences,
+        serviceKeywords,
       });
       mergedComponents = mergeInteractiveComponents(interactiveComponents, heuristicData.components);
       const derivedTopics = inferTopicsFromComponents(mergedComponents);

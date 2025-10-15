@@ -6,6 +6,7 @@ export type ChatIntentType =
   | 'itinerary'
   | 'accommodations'
   | 'expenses'
+  | 'local_services'
   | 'overview';
 
 export interface ChatIntent {
@@ -18,6 +19,9 @@ interface BuildComponentsArgs {
   intents: ChatIntent[];
   tripContext: any;
   message: string;
+  locationHint?: LocationHint | null;
+  cuisinePreferences?: string[];
+  serviceKeywords?: string[];
 }
 
 interface HeuristicResult {
@@ -94,6 +98,26 @@ const INTENT_KEYWORDS: Record<ChatIntentType, string[]> = {
     'debito',
     'credito',
   ],
+  local_services: [
+    'parrucchi',
+    'barbier',
+    'salone',
+    'hair stylist',
+    'salon',
+    'spa',
+    'massaggi',
+    'estetica',
+    'beauty',
+    'lavanderia',
+    'laundry',
+    'farmacia',
+    'pharmacy',
+    'supermercato',
+    'market',
+    'negozio',
+    'shopping',
+    'servizio',
+  ],
   overview: ['aiuto', 'consigli', 'suggerimenti', 'informazioni', 'generale'],
 };
 
@@ -103,6 +127,7 @@ const TOPIC_LABELS: Record<ChatIntentType, string> = {
   itinerary: 'Itinerario',
   accommodations: 'Alloggi',
   expenses: 'Spese',
+  local_services: 'Servizi',
   overview: 'Panoramica',
 };
 
@@ -146,11 +171,13 @@ export function buildHeuristicComponents({
   message,
   locationHint,
   cuisinePreferences,
+  serviceKeywords,
 }: BuildComponentsArgs): HeuristicResult {
   const components: InteractiveComponent[] = [];
   const topics: string[] = [];
   const detectedLocation = locationHint ?? extractLocationHint(message, tripContext);
   const detectedCuisines = cuisinePreferences ?? extractCuisinePreferences(message);
+  const detectedServices = serviceKeywords ?? extractServiceKeywords(message);
 
   const unique = <T,>(items: T[], keyFn: (item: T) => string) => {
     const seen = new Set<string>();
@@ -188,6 +215,10 @@ export function buildHeuristicComponents({
       }
       case 'expenses': {
         components.push(...buildExpenseComponents(tripContext));
+        break;
+      }
+      case 'local_services': {
+        components.push(...buildServiceComponents(tripContext, detectedLocation, detectedServices));
         break;
       }
       default:
@@ -232,7 +263,11 @@ export function inferTopicsFromComponents(components: InteractiveComponent[]): s
   components.forEach((component) => {
     switch (component.type) {
       case 'map':
-        topics.push('Ristorazione');
+        if (component.id?.includes('service')) {
+          topics.push('Servizi');
+        } else {
+          topics.push('Ristorazione');
+        }
         break;
       case 'quick_replies':
         if (component.title?.toLowerCase().includes('trasporto')) {
@@ -245,6 +280,8 @@ export function inferTopicsFromComponents(components: InteractiveComponent[]): s
           topics.push('Itinerario');
         } else if (component.title?.toLowerCase().includes('ristor')) {
           topics.push('Ristorazione');
+        } else if (component.title?.toLowerCase().includes('service') || component.title?.toLowerCase().includes('approfondire')) {
+          topics.push('Servizi');
         }
         break;
       case 'info_card':
@@ -258,6 +295,8 @@ export function inferTopicsFromComponents(components: InteractiveComponent[]): s
           topics.push('Itinerario');
         } else if (component.id?.includes('dining')) {
           topics.push('Ristorazione');
+        } else if (component.id?.includes('service')) {
+          topics.push('Servizi');
         }
         break;
       default:
@@ -389,6 +428,65 @@ function buildDiningComponents(
         : primaryCuisine
           ? `**Suggerimenti per cucina ${primaryCuisine} a ${targetLocation}:**\n\n- Prenota con anticipo i ristoranti più richiesti, soprattutto nei weekend.\n- Posso filtrare per fascia di prezzo, atmosfera o quartiere.\n- Se desideri un'opzione informale, chiedimi enoteche, trattorie o take-away.`
           : `**Suggerimenti rapidi per mangiare a ${destination}:**\n\n- Prenota con anticipo i locali più popolari, soprattutto nei weekend.\n- Chiedimi di filtrare per tipo di cucina, dietetica o budget.\n- Vuoi street food o opzioni take-away? Posso suggerirti zone e mercati famosi.`,
+  };
+
+  return [mapComponent, quickReplies, infoCard];
+}
+
+function buildServiceComponents(
+  tripContext: any,
+  locationHint?: LocationHint | null,
+  serviceKeywords?: string[],
+): InteractiveComponent[] {
+  const destination: string =
+    tripContext?.trip?.destination || tripContext?.trip?.destinations?.[0] || 'la tua destinazione';
+  const targetLocation = locationHint?.location || destination;
+  const primaryService = serviceKeywords && serviceKeywords.length > 0 ? serviceKeywords[0] : 'servizi locali';
+  const googleQuery = `${primaryService} ${targetLocation}`;
+
+  const points = getServiceSuggestions(primaryService, targetLocation, locationHint);
+
+  const mapComponent: InteractiveComponent = {
+    type: 'map',
+    id: 'service-map',
+    title: `${capitalize(primaryService)} a ${targetLocation}`,
+    subtitle: 'Suggerimenti rapidi per iniziare la ricerca',
+    points,
+    footnote:
+      'Usa i pulsanti interattivi o chiedimi di filtrare per prezzo, disponibilità o recensioni.',
+  };
+
+  const quickReplies: QuickRepliesComponent = {
+    type: 'quick_replies',
+    id: 'service-quick-replies',
+    title: 'Vuoi approfondire?',
+    options: [
+      {
+        id: 'service-book',
+        label: 'Prenota appuntamento',
+        value: `Aiutami a prenotare ${primaryService} a ${targetLocation}`,
+      },
+      {
+        id: 'service-budget',
+        label: 'Opzioni economiche',
+        value: `Mostrami ${primaryService} economici nella zona di ${targetLocation}`,
+      },
+      {
+        id: 'service-hours',
+        label: 'Orari disponibili',
+        value: `Quali ${primaryService} sono aperti adesso vicino a ${targetLocation}?`,
+      },
+    ],
+  };
+
+  const infoCard: InteractiveComponent = {
+    type: 'info_card',
+    id: 'service-insights',
+    content: `**Suggerimenti per ${primaryService} a ${targetLocation}:**
+
+- Controlla le recensioni recenti per valutare qualità e disponibilità.
+- Se hai esigenze specifiche (lingua, fasce orarie, budget), chiedimi di filtrare i risultati.
+- Molti servizi permettono la prenotazione online: posso indicarti piattaforme affidabili o preparare un messaggio da inviare.`,
   };
 
   return [mapComponent, quickReplies, infoCard];
@@ -629,6 +727,100 @@ function getDiningSuggestions(destination: string, hotelName?: string, cuisinePr
   return baseSuggestions;
 }
 
+function getServiceSuggestions(service: string, location: string, locationHint?: LocationHint | null) {
+  const normalizedService = service.toLowerCase();
+  const suggestions: Array<{
+    id: string;
+    label: string;
+    description: string;
+    action?: { type: 'open_url' | 'send_message'; value: string; label?: string };
+  }> = [];
+
+  if (normalizedService.includes('parrucch') || normalizedService.includes('hair') || normalizedService.includes('barbier')) {
+    suggestions.push(
+      {
+        id: 'service-hair-hotpepper',
+        label: 'Hot Pepper Beauty',
+        description: 'Portale popolare in Giappone per prenotare parrucchieri con recensioni dettagliate.',
+        action: {
+          type: 'open_url',
+          value: `https://beauty.hotpepper.jp/search/?kw=${encodeURIComponent(location)}`,
+          label: 'Apri portale',
+        },
+      },
+      {
+        id: 'service-hair-lux',
+        label: 'Saloni premium',
+        description: 'Chiedimi hair stylist bilingue o trattamenti specifici (colorazioni, tagli uomo/donna).',
+        action: {
+          type: 'send_message',
+          value: `Suggeriscimi parrucchieri premium con disponibilità rapida a ${location}`,
+          label: 'Chiedi consigli',
+        },
+      },
+    );
+  } else if (normalizedService.includes('lavander') || normalizedService.includes('laundry')) {
+    suggestions.push(
+      {
+        id: 'service-laundry-coin',
+        label: 'Coin laundry 24h',
+        description: 'Lavanderie self-service con asciugatrici e cambio monete.',
+        action: {
+          type: 'send_message',
+          value: `Indica le coin laundry aperte vicino a ${location}`,
+          label: 'Coin laundry',
+        },
+      },
+      {
+        id: 'service-laundry-pickup',
+        label: 'Ritiro & consegna',
+        description: 'Servizi che ritirano i capi in hotel/appartamento con consegna in giornata.',
+        action: {
+          type: 'send_message',
+          value: `Trova lavanderie con ritiro e consegna vicino a ${location}`,
+          label: 'Servizio pickup',
+        },
+      },
+    );
+  } else if (normalizedService.includes('spa') || normalizedService.includes('massagg')) {
+    suggestions.push(
+      {
+        id: 'service-spa-onsen',
+        label: 'Spa & onsen consigliati',
+        description: 'Posso suggerirti spa tradizionali o modern wellness lounge con Day Pass.',
+        action: {
+          type: 'send_message',
+          value: `Mostrami spa o onsen rilassanti vicino a ${location}`,
+          label: 'Chiedi spa',
+        },
+      },
+      {
+        id: 'service-spa-hotel',
+        label: 'Hotel con spa accessibile',
+        description: 'Hotel che offrono accesso esterno alla spa o trattamenti estetici.',
+        action: {
+          type: 'send_message',
+          value: `Suggerisci hotel con spa aperte anche ai non ospiti a ${location}`,
+          label: 'Hotel spa',
+        },
+      },
+    );
+  }
+
+  suggestions.push({
+    id: 'service-google-search',
+    label: `Ricerca rapida: ${capitalize(service)} (${location})`,
+    description: 'Apri Google Maps per vedere opzioni, orari aggiornati e recensioni.',
+    action: {
+      type: 'open_url',
+      value: `https://www.google.com/maps/search/${encodeURIComponent(`${service} ${location}`)}`,
+      label: 'Apri in Maps',
+    },
+  });
+
+  return suggestions;
+}
+
 interface LocationHint {
   location: string;
   type: 'airport' | 'city' | 'generic';
@@ -721,6 +913,26 @@ export function extractCuisinePreferences(message: string): string[] {
 
   const matches = cuisines
     .filter(({ keyword }) => lower.includes(keyword))
+    .map(({ label }) => label);
+
+  return Array.from(new Set(matches));
+}
+
+export function extractServiceKeywords(message: string): string[] {
+  const lower = message.toLowerCase();
+  const services: { keywords: string[]; label: string }[] = [
+    { keywords: ['parrucch', 'hair', 'barbier', 'salon'], label: 'parrucchieri' },
+    { keywords: ['spa', 'massagg', 'wellness'], label: 'spa' },
+    { keywords: ['estetic', 'beauty'], label: 'centro estetico' },
+    { keywords: ['lavander', 'laundry'], label: 'lavanderia' },
+    { keywords: ['farmacia', 'pharmacy', 'drugstore'], label: 'farmacia' },
+    { keywords: ['supermercat', 'market', 'grocery'], label: 'supermercato' },
+    { keywords: ['noleggio auto', 'rent a car', 'car rental'], label: 'noleggio auto' },
+    { keywords: ['medico', 'clinic', 'doctor'], label: 'clinica' },
+  ];
+
+  const matches = services
+    .filter(({ keywords }) => keywords.some((keyword) => lower.includes(keyword)))
     .map(({ label }) => label);
 
   return Array.from(new Set(matches));
@@ -887,4 +1099,9 @@ function buildItineraryCard(day: any) {
   }
 
   return `**${formattedDate.toUpperCase()}**\n\nNon hai attività specifiche per questa giornata. Vuoi che ti proponga un itinerario personalizzato?`;
+}
+
+function capitalize(text: string) {
+  if (!text) return text;
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }

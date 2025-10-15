@@ -21,6 +21,7 @@ interface BuildPromptArgs {
     location?: string;
     locationType?: string;
     cuisinePreferences?: string[];
+    serviceKeywords?: string[];
   };
 }
 
@@ -156,7 +157,12 @@ function buildStructuredInsights(tripContext: TripContext) {
 - ${expenseSnippet}`;
 }
 
-function buildFocusSnippet(focus?: { location?: string; locationType?: string; cuisinePreferences?: string[] }) {
+function buildFocusSnippet(focus?: {
+  location?: string;
+  locationType?: string;
+  cuisinePreferences?: string[];
+  serviceKeywords?: string[];
+}) {
   if (!focus) return '';
 
   const parts: string[] = [];
@@ -168,6 +174,10 @@ function buildFocusSnippet(focus?: { location?: string; locationType?: string; c
 
   if (focus.cuisinePreferences && focus.cuisinePreferences.length > 0) {
     parts.push(`Preferenza culinaria: ${focus.cuisinePreferences.join(', ')}.`);
+  }
+
+  if (focus.serviceKeywords && focus.serviceKeywords.length > 0) {
+    parts.push(`Servizio richiesto: ${focus.serviceKeywords.join(', ')}.`);
   }
 
   if (parts.length === 0) return '';

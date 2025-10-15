@@ -64,6 +64,24 @@ describe('interactiveHeuristics', () => {
     }
   });
 
+  it('builds service suggestions for hair salons in Kyoto', () => {
+    const { components, topics } = buildHeuristicComponents({
+      intents: detectIntents('Ci sono parrucchieri in centro a Kyoto?'),
+      tripContext: {
+        trip: { destination: 'Kyoto' },
+      },
+      message: 'Ci sono parrucchieri in centro a Kyoto?'
+    });
+
+    const mapComponent = components.find((component) => component.type === 'map');
+    expect(mapComponent).toBeDefined();
+    if (mapComponent && mapComponent.type === 'map') {
+      expect(mapComponent.title.toLowerCase()).toContain('parrucch');
+      expect(mapComponent.points.length).toBeGreaterThan(0);
+    }
+    expect(topics).toContain('Servizi');
+  });
+
   it('merges interactive components without duplicates', () => {
     const base = [
       { type: 'map', id: 'dining-map', points: [], title: 'Map' },
