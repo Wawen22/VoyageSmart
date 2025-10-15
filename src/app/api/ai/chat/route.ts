@@ -8,7 +8,14 @@ import { formatTimeLocal, formatDateLocal } from '@/lib/utils';
 import { applyRateLimit } from '@/lib/rate-limit';
 import { hasCachedResponse } from '@/lib/services/aiApiService';
 import { analyzeMessageContext as analyzeContextualActions, formatActionsForResponse } from '@/lib/services/contextualActionsService';
-import { extractInteractiveComponents, INTERACTIVE_COMPONENTS_PROMPT } from '@/lib/ai/interactiveDsl';
+import { extractInteractiveComponents } from '@/lib/ai/interactiveDsl';
+import {
+  buildHeuristicComponents,
+  detectIntents,
+  inferTopicsFromComponents,
+  mergeInteractiveComponents,
+} from '@/lib/ai/interactiveHeuristics';
+import { buildChatPrompt } from '@/lib/ai/chatPromptBuilder';
 
 // Funzione per analizzare il messaggio e determinare il contesto necessario
 function analyzeMessageContext(message: string): {
@@ -181,6 +188,45 @@ function getExpenseSettlementStatus(expense: any): string {
 
   // Default se non ci sono informazioni sui partecipanti
   return '[ℹ️ STATO SCONOSCIUTO]';
+}
+
+interface FallbackPromptArgs {
+  message: string;
+  tripContext: any;
+  tripName?: string;
+  currentSection?: string;
+  isInitialMessage: boolean;
+}
+
+function buildFallbackPrompt({
+  message,
+  tripContext,
+  tripName,
+  currentSection,
+  isInitialMessage,
+}: FallbackPromptArgs): string {
+  const trip = tripContext?.trip || {};
+  const name = trip.name || tripName || 'Viaggio';
+  const destination =
+    (Array.isArray(trip.destinations) && trip.destinations[0]) || trip.destination || 'destinazione';
+  const dateRange =
+    trip.startDate && trip.endDate
+      ? `dal ${trip.startDate} al ${trip.endDate}`
+      : 'con date da definire';
+  const sectionInfo = currentSection
+    ? `L'utente si trova nella sezione "${currentSection}". Concentrati su informazioni utili relative a questa sezione.`
+    : 'Offri assistenza generale sul viaggio.';
+
+  const baseGuidance = isInitialMessage
+    ? `Presentati brevemente come assistente di viaggio. Ricorda nome viaggio, date e invita l'utente a chiedere aiuto.`
+    : `Rispondi con tono professionale e proattivo, concentrandoti sulle richieste nella domanda. Offri suggerimenti pratici e concisi.`;
+
+  return [
+    `Sei l'assistente di viaggio premium di VoyageSmart per il viaggio "${name}" a ${destination} ${dateRange}.`,
+    sectionInfo,
+    baseGuidance,
+    `Domanda dell'utente: ${message}`,
+  ].join('\n\n');
 }
 
 // Funzione per analizzare automaticamente il contenuto e aggiungere marcatori appropriati
@@ -604,6 +650,34 @@ export async function POST(request: NextRequest) {
       expensesCount: Array.isArray(tripContext.expenses) ? tripContext.expenses.length : 0
     });
 
+    let intents = detectIntents(message);
+    let promptText: string;
+    try {
+      promptText = buildChatPrompt({
+        message,
+        tripContext,
+        tripName,
+        currentSection,
+        isInitialMessage: !!isInitialMessage,
+        intents,
+      });
+    } catch (promptError: any) {
+      logger.error('Prompt builder error', {
+        error: promptError?.message,
+        stack: promptError?.stack,
+      });
+      promptText = buildFallbackPrompt({
+        message,
+        tripContext,
+        tripName,
+        currentSection,
+        isInitialMessage: !!isInitialMessage,
+      });
+      intents = detectIntents(message);
+    }
+
+    // Precedente costruzione del prompt mantenuta per riferimento ma disattivata.
+    if (false) {
     // Prepara il prompt con il contesto del viaggio
     let promptText = `Sei un assistente di viaggio intelligente per l'app VoyageSmart.
 Stai aiutando l'utente con il suo viaggio "${tripContext.trip?.name || tripName || 'senza nome'}" a ${tripContext.trip?.destination || 'destinazione sconosciuta'}.`;
@@ -1384,6 +1458,7 @@ Non devi menzionare esplicitamente questi link nelle tue risposte - concentrati 
 
 Domanda dell'utente: ${message}`;
     }
+    } // end legacy prompt builder block
 
     // Genera una cache key per questa richiesta (include sezione e hint di contesto per evitare collisioni tra richieste simili)
     const normalizedMsg = message.trim().toLowerCase();
@@ -1464,6 +1539,24 @@ Domanda dell'utente: ${message}`;
     }
 
     const { text: finalMessage, components: interactiveComponents } = extractInteractiveComponents(enhancedResponse);
+    let mergedComponents = interactiveComponents;
+    let responseTopics: string[] = [];
+    try {
+      const heuristicData = buildHeuristicComponents({
+        intents,
+        tripContext,
+        message,
+      });
+      mergedComponents = mergeInteractiveComponents(interactiveComponents, heuristicData.components);
+      const derivedTopics = inferTopicsFromComponents(mergedComponents);
+      responseTopics = Array.from(new Set([...heuristicData.topics, ...derivedTopics]));
+    } catch (heuristicError: any) {
+      logger.error('Error building heuristic components', {
+        error: heuristicError?.message,
+      });
+      mergedComponents = interactiveComponents;
+      responseTopics = inferTopicsFromComponents(interactiveComponents);
+    }
 
     // Log performance and analytics
     const duration = performance.now() - startTime;
@@ -1476,6 +1569,9 @@ Domanda dell'utente: ${message}`;
       duration,
       success: true,
       cacheHit: cacheAlready,
+      meta: {
+        topics: responseTopics,
+      },
     });
 
     logger.performance('AI Chat API', duration, {
@@ -1484,13 +1580,14 @@ Domanda dell'utente: ${message}`;
       responseLength: finalMessage.length,
       originalResponseLength: responseText.length,
       visualComponentsAdded: enhancedResponse !== responseText,
-      interactiveComponents: interactiveComponents.length,
+      interactiveComponents: mergedComponents.length,
     });
 
     return NextResponse.json({
       success: true,
       message: finalMessage,
-      interactiveComponents,
+      interactiveComponents: mergedComponents,
+      responseTopics,
     });
   } catch (error: any) {
     const duration = performance.now() - startTime;

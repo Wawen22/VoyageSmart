@@ -5,6 +5,7 @@ export type Message = {
   content: string;
   timestamp?: Date;
   interactiveComponents?: InteractiveComponent[];
+  responseTopics?: string[];
 };
 
 // Suggested questions that will appear after AI responses

@@ -30,6 +30,7 @@ import { logger } from '@/lib/logger';
 import MinimizedButton from './MinimizedButton';
 import { Message, SuggestedQuestion, TripData, ChatBotProps } from './types';
 import InteractiveComponentRenderer from './InteractiveComponentRenderer';
+import ResponseTopicPills from './ResponseTopicPills';
 import { getRandomGreeting, getCurrentSection } from './utils';
 import { generateSuggestedQuestions } from './suggestedQuestions';
 import '@/styles/ai-assistant.css';
@@ -152,7 +153,8 @@ export default function ChatBot({
             setMessages([{
               role: 'assistant',
               content: data.message || `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`,
-              interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : []
+              interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : [],
+              responseTopics: Array.isArray(data.responseTopics) ? data.responseTopics : []
             }]);
             setContextLoaded(true);
             setRetryCount(0); // Reset retry count on success
@@ -224,7 +226,8 @@ export default function ChatBot({
             setMessages([{
               role: 'assistant',
               content: data.message || `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`,
-              interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : []
+              interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : [],
+              responseTopics: Array.isArray(data.responseTopics) ? data.responseTopics : []
             }]);
             setContextLoaded(true);
             setRetryCount(0); // Reset retry count on success
@@ -239,7 +242,8 @@ export default function ChatBot({
             // Aggiorna il messaggio iniziale senza contesto
             setMessages([{
               role: 'assistant',
-              content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
+              content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`,
+              responseTopics: []
             }]);
           }
         }
@@ -248,7 +252,8 @@ export default function ChatBot({
       // Aggiorna il messaggio iniziale senza contesto
       setMessages([{
         role: 'assistant',
-        content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`
+        content: `${getRandomGreeting()} per "${tripName || 'questo viaggio'}". Come posso aiutarti oggi?`,
+        responseTopics: []
       }]);
     } finally {
       // In ogni caso, consideriamo il contesto come caricato
@@ -909,7 +914,8 @@ export default function ChatBot({
           role: 'assistant',
           content: data.message || 'Mi dispiace, non sono riuscito a elaborare una risposta.',
           timestamp: new Date(),
-          interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : []
+          interactiveComponents: Array.isArray(data.interactiveComponents) ? data.interactiveComponents : [],
+          responseTopics: Array.isArray(data.responseTopics) ? data.responseTopics : []
         }]);
 
         // Reset retry count and consecutive errors on successful message
@@ -960,7 +966,8 @@ export default function ChatBot({
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: fullErrorMessage,
-        timestamp: new Date()
+        timestamp: new Date(),
+        responseTopics: []
       }]);
 
       setIsTyping(false);
@@ -1174,23 +1181,27 @@ export default function ChatBot({
 
             {message.role === 'assistant' && (
               <div className="flex flex-col items-start space-y-1">
-                <div className="bg-slate-800 text-white p-3 rounded-2xl rounded-tl-sm shadow-md max-w-[85%] ai-message message-slide-in-right">
+                <div className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 text-white p-4 rounded-2xl rounded-tl-sm shadow-xl max-w-[85%] ai-message message-slide-in-right border border-slate-700/50">
                   <div className="mb-1 flex items-center gap-2">
                     <span className="text-xs font-medium text-indigo-400">AI Assistant</span>
                   </div>
+                  <ResponseTopicPills topics={message.responseTopics} />
+
+                  {message.interactiveComponents && message.interactiveComponents.length > 0 && (
+                    <div className="mb-3">
+                      <InteractiveComponentRenderer
+                        components={message.interactiveComponents}
+                        onSendMessage={(value) => handleSendMessage(value)}
+                      />
+                    </div>
+                  )}
+
                   <FormattedAIResponse
                     content={message.content}
                     className="text-sm text-slate-200"
                     tripData={tripData}
                     tripId={tripId}
                   />
-
-                  {message.interactiveComponents && message.interactiveComponents.length > 0 && (
-                    <InteractiveComponentRenderer
-                      components={message.interactiveComponents}
-                      onSendMessage={(value) => handleSendMessage(value)}
-                    />
-                  )}
 
                   {/* Componente UI conversazionale se attivo per questo messaggio */}
                   {activeUIComponent && activeUIComponent.messageIndex === index && (

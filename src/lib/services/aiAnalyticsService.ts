@@ -27,6 +27,7 @@ interface AIRequestLog {
   errorType?: string;
   cacheHit: boolean;
   queueWaitTime?: number;
+  meta?: Record<string, any>;
 }
 
 class AIAnalyticsService {

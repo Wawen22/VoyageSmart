@@ -10,6 +10,8 @@
 - [x] 1.2.2 Develop a library of initial interactive components (e.g., map view, date picker).
 - [x] 1.2.3 Implement the frontend logic to interpret the DSL and render the components.
 - [x] 1.2.4 Update the AI chat interface to support interactive components.
+- [x] 1.2.5 Add intent detection and heuristic-driven interactive components for common travel queries.
+- [x] 1.2.6 Refine AI prompting and chat UI/UX to prioritise relevant, actionable assistance.
 
 ### 1.3 Advanced Preference Center
 - [ ] 1.3.1 Extend the database schema to store detailed user preferences.
