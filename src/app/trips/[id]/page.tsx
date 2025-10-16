@@ -371,55 +371,56 @@ export default function TripDetails() {
 
         {/* Navigation Bar with Glass Effect */}
         <div className="relative z-20 backdrop-blur-sm bg-background/30 border-b border-white/10">
-          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <BackButton
-                href="/dashboard"
-                label="Back to Dashboard"
-                theme="default"
-              />
+          <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="flex w-full items-center justify-between gap-2 sm:flex-1 sm:w-auto sm:justify-start sm:gap-3">
+              <div className="flex items-center gap-3">
+                <BackButton
+                  href="/dashboard"
+                  label="Back to Dashboard"
+                  theme="default"
+                />
+              </div>
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <ProactiveSuggestionsTray
+                  activeSuggestions={filteredActiveSuggestions}
+                  snoozedSuggestions={filteredSnoozedSuggestions}
+                  recentCompletedSuggestions={filteredCompletedSuggestions}
+                  retentionDays={suggestionRetentionDays}
+                  onMarkRead={(suggestionId) => {
+                    void markSuggestionAsRead(suggestionId);
+                  }}
+                  onSnooze={(suggestionId) => {
+                    void snoozeSuggestion(suggestionId);
+                  }}
+                  onRestore={(suggestionId) => {
+                    void restoreSuggestion(suggestionId);
+                  }}
+                  onUncomplete={(suggestionId) => {
+                    void uncompleteSuggestion(suggestionId);
+                  }}
+                />
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
-              <ProactiveSuggestionsTray
-                activeSuggestions={filteredActiveSuggestions}
-                snoozedSuggestions={filteredSnoozedSuggestions}
-                recentCompletedSuggestions={filteredCompletedSuggestions}
-                retentionDays={suggestionRetentionDays}
-                onMarkRead={(suggestionId) => {
-                  void markSuggestionAsRead(suggestionId);
-                }}
-                onSnooze={(suggestionId) => {
-                  void snoozeSuggestion(suggestionId);
-                }}
-                onRestore={(suggestionId) => {
-                  void restoreSuggestion(suggestionId);
-                }}
-                onUncomplete={(suggestionId) => {
-                  void uncompleteSuggestion(suggestionId);
-                }}
-              />
-
-              {isOwner && (
-                <div className="flex space-x-2">
-                  <Link
-                    href={`/trips/${id}/edit`}
-                    className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-primary-foreground bg-primary/90 hover:bg-primary backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
-                  >
-                    <PencilIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
-                    Edit
-                  </Link>
-                  <button
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-destructive/25"
-                  >
-                    <TrashIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
-                    {deleting ? 'Deleting...' : 'Delete'}
-                  </button>
-                </div>
-              )}
-            </div>
+            {isOwner && (
+              <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
+                <Link
+                  href={`/trips/${id}/edit`}
+                  className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-primary-foreground bg-primary/90 hover:bg-primary backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
+                >
+                  <PencilIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
+                  Edit
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="group inline-flex items-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-destructive/25"
+                >
+                  <TrashIcon className="h-3 w-3 mr-1.5 group-hover:rotate-12 transition-transform duration-300" />
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
