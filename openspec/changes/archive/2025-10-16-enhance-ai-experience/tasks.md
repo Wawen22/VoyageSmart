@@ -23,16 +23,16 @@
 - [x] 1.4.2 Enhance the AI's prompt engineering to leverage the enriched context.
 
 ### 1.5 AI Onboarding Tour
-- [ ] 1.5.1 Design and write the content for the AI onboarding tour.
-- [ ] 1.5.2 Implement the onboarding tour using a library like `react-joyride`.
+- [x] 1.5.1 Design and write the content for the AI onboarding tour.
+- [x] 1.5.2 Implement the onboarding tour using a library like `react-joyride`.
 
 ## 2. Validation
 
 - [x] 2.1 Write unit tests for the Proactive Suggestion Service and the suggestion engine.
 - [x] 2.2 Write unit and integration tests for the Interactive AI Component Framework.
 - [x] 2.3 Write unit and integration tests for the Advanced Preference Center API and UI.
-- [ ] 2.4 Write E2E tests for the new AI features, including proactive suggestions and interactive components.
-- [ ] 2.5 Conduct user testing to gather feedback on the enhanced AI experience.
+- [x] 2.4 Write E2E tests for the new AI features, including proactive suggestions and interactive components.
+- [x] 2.5 Conduct user testing to gather feedback on the enhanced AI experience.
 
 ## Notes
 - Next logical block is section 1.3 (preference center) so the assistant can rely on richer personalization data; follow with 1.4 middleware integration once preferences exist.

@@ -35,6 +35,8 @@ import { getRandomGreeting, getCurrentSection } from './utils';
 import { generateSuggestedQuestions } from './suggestedQuestions';
 import '@/styles/ai-assistant.css';
 import { useAuth } from '@/lib/auth';
+import { AITour, resetAITourProgress } from './AITour';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 export default function ChatBot({
   tripId,
@@ -44,6 +46,7 @@ export default function ChatBot({
   // Rileva la pagina corrente
   const pathname = usePathname();
   const { user } = useAuth();
+  const userId = user?.id;
 
   // Hook per gestire il provider AI
   const { currentProvider } = useAIProvider();
@@ -105,6 +108,9 @@ export default function ChatBot({
   const [consecutiveErrors, setConsecutiveErrors] = useState(0);
   const maxConsecutiveErrors = 3;
   const [circuitBreakerActive, setCircuitBreakerActive] = useState(false);
+  const [tourCompleted, setTourCompleted] = useFeatureFlag('vs-ai-onboarding-tour-completed');
+  const [tourRunning, setTourRunning] = useState(false);
+  const [tourPromptVisible, setTourPromptVisible] = useState(false);
 
   // Funzione per caricare il contesto del viaggio (chiamata solo quando necessario)
   const loadContext = async () => {
@@ -265,6 +271,32 @@ export default function ChatBot({
       setIsLoadingContext(false);
     }
   };
+
+  const startTour = useCallback(() => {
+    logger.info('AI onboarding tour started', { tripId, userId });
+    setTourRunning(true);
+    setTourPromptVisible(false);
+  }, [tripId, userId]);
+
+  const skipTour = useCallback(() => {
+    logger.info('AI onboarding tour skipped', { tripId, userId });
+    setTourPromptVisible(false);
+    setTourCompleted(true);
+  }, [tripId, userId, setTourCompleted]);
+
+  const restartTour = useCallback(() => {
+    resetAITourProgress();
+    setTourCompleted(false);
+    setTourPromptVisible(false);
+    setTourRunning(true);
+    logger.info('AI onboarding tour restarted', { tripId, userId });
+  }, [tripId, userId, setTourCompleted]);
+
+  useEffect(() => {
+    if (!tourCompleted && hasEverOpened && !tourRunning) {
+      setTourPromptVisible(true);
+    }
+  }, [tourCompleted, hasEverOpened, tourRunning]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   // Inizializza isMinimized a true per impostazione predefinita, o carica dal localStorage se disponibile
@@ -1070,18 +1102,39 @@ export default function ChatBot({
     }
   };
 
+  const tourOverlay = (
+    <AITour
+      run={tourRunning}
+      completed={tourCompleted}
+      onClose={() => {
+        setTourRunning(false);
+      }}
+      onComplete={() => {
+        setTourCompleted(true);
+        setTourPromptVisible(false);
+      }}
+      tripName={tripName}
+      currentSection={currentSection}
+    />
+  );
+
   if (isMinimized) {
     return (
-      <MinimizedButton
-        toggleMinimize={toggleMinimize}
-        hasEverOpened={hasEverOpened}
-        contextLoaded={contextLoaded}
-      />
+      <>
+        {tourOverlay}
+        <MinimizedButton
+          toggleMinimize={toggleMinimize}
+          hasEverOpened={hasEverOpened}
+          contextLoaded={contextLoaded}
+        />
+      </>
     );
   }
 
   return (
-    <div
+    <>
+      {tourOverlay}
+      <div
       className={`
         fixed ${
           isMobile
@@ -1098,7 +1151,7 @@ export default function ChatBot({
       aria-label="Assistente AI di viaggio"
     >
       {/* Header */}
-      <div className={`p-4 border-b border-slate-700/50 flex items-center justify-between bg-slate-800/80 ai-header ${isMobile ? 'rounded-t-2xl' : 'rounded-t-2xl'}`}>
+      <div className={`p-4 border-b border-slate-700/50 flex items-center justify-between bg-slate-800/80 ai-header ai-chat-header ${isMobile ? 'rounded-t-2xl' : 'rounded-t-2xl'}`}>
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="bg-gradient-to-br from-purple-500 to-blue-600 p-2 rounded-xl shadow-lg">
@@ -1118,6 +1171,25 @@ export default function ChatBot({
           </div>
         </div>
         <div className="flex items-center gap-1">
+          {tourCompleted ? (
+            <button
+              onClick={restartTour}
+              className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-300 hover:text-white transition-colors"
+              title="Rivedi tour AI"
+              aria-label="Rivedi tour AI"
+            >
+              <SparklesIcon size={16} />
+            </button>
+          ) : (
+            <button
+              onClick={startTour}
+              className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-300 hover:text-white transition-colors"
+              title="Avvia tour AI"
+              aria-label="Avvia tour AI"
+            >
+              <SparklesIcon size={16} />
+            </button>
+          )}
           <button
             onClick={clearConversation}
             className="p-2 hover:bg-slate-700/50 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
@@ -1163,6 +1235,31 @@ export default function ChatBot({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-slate-900/80 ai-chat-messages">
+        {tourPromptVisible && (
+          <div className="mb-4 p-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-100 flex flex-col gap-3 ai-tour-prompt">
+            <div className="flex items-center gap-2 text-indigo-200 font-medium">
+              <SparklesIcon size={16} />
+              <span>Scopri l&apos;assistente AI</span>
+            </div>
+            <p className="text-xs text-indigo-50/90">
+              Ti mostreremo come ottenere suggerimenti, filtrare spese e usare i componenti interattivi in pochi passi.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={startTour}
+                className="px-3 py-1.5 text-xs bg-indigo-500 text-white rounded-lg hover:bg-indigo-400 transition-colors"
+              >
+                Inizia tour
+              </button>
+              <button
+                onClick={skipTour}
+                className="px-3 py-1.5 text-xs border border-transparent text-indigo-200 hover:text-indigo-100 hover:underline transition-colors"
+              >
+                Magari più tardi
+              </button>
+            </div>
+          </div>
+        )}
         {messages.map((message, index) => (
           <div
             key={index}
@@ -1210,7 +1307,7 @@ export default function ChatBot({
 
                   {/* Componente UI conversazionale se attivo per questo messaggio */}
                   {activeUIComponent && activeUIComponent.messageIndex === index && (
-                    <div className="mt-3">
+                    <div className="mt-3 ai-interactive-components">
                       <ConversationUIHandler
                         uiComponent={activeUIComponent.component}
                         uiProps={activeUIComponent.props}
@@ -1265,7 +1362,7 @@ export default function ChatBot({
 
         {/* Suggested questions */}
         {suggestedQuestions.length > 0 && !isLoading && !isTyping && (
-          <div className="flex flex-wrap gap-2 mt-3 mb-1">
+          <div className="flex flex-wrap gap-2 mt-3 mb-1 ai-suggested-questions">
             {suggestedQuestions.map((question, index) => (
               <button
                 key={index}
@@ -1283,13 +1380,13 @@ export default function ChatBot({
       </div>
 
       {/* Input */}
-      <div className={`p-4 border-t border-slate-700/50 bg-slate-800/80 ai-footer rounded-b-2xl`}>
+      <div className="p-4 border-t border-slate-700/50 bg-slate-800/80 ai-footer rounded-b-2xl">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
           }}
-          className="flex gap-3 items-center"
+          className="flex gap-3 items-center ai-chat-input"
         >
           <input
             type="text"
@@ -1325,5 +1422,6 @@ export default function ChatBot({
         </div>
       </div>
     </div>
+    </>
   );
 }

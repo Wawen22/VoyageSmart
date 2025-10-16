@@ -91,6 +91,8 @@ const suggestions: SmartSuggestion[] = [
 - **User History**: Learn from past interactions and preferences
 - **Location Awareness**: Provide location-specific information
 - **Time Sensitivity**: Consider dates, seasons, and timing
+- **Real-Time State**: Automatically surfaces the next itinerary item, upcoming transport, outstanding expenses, and user preference tone via the `buildRealTimeContextSnapshot` middleware injected in `/api/ai/chat`
+- **Preference Alignment**: Pulls from the advanced preference center (`user_travel_preferences`) to bias itinerary, dining, and tone selections
 
 #### Multi-modal Capabilities
 - **Text Processing**: Natural language understanding and generation
@@ -211,6 +213,11 @@ await fetch(`/api/ai/proactive-suggestions/${suggestionId}`, {
 ```
 
 Interactive cards on the dashboard present these suggestions with actions to mark them as done or snooze them. Snoozed items collapse into the floating lightbulb hub so travellers can revisit them later, while completed items stay in a “Recent” section for three days to keep a short audit trail.
+
+- **AI Onboarding Tour**
+  - Guided overlay built with `driver.js` highlights the AI trigger, chat header, input, interactive component area, and suggested questions so new users discover key capabilities in-context.
+  - Completion status persists via the `vs-ai-onboarding-tour-completed` browser flag; travellers can restart any time from the chat header sparkle button.
+  - A contextual CTA banner prompts the user the first time the chat opens, reinforcing the availability of the tour without interrupting the conversation flow.
 
 ### AI Wizard
 
