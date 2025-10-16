@@ -13,7 +13,7 @@
 - [x] 1.2.5 Add intent detection and heuristic-driven interactive components for common travel queries.
 - [x] 1.2.6 Refine AI prompting and chat UI/UX to prioritise relevant, actionable assistance.
 
-### 1.3 Advanced Preference Center
+### 1.3 Advanced Preference Center 
 - [x] 1.3.1 Extend the database schema to store detailed user preferences.
 - [x] 1.3.2 Create the API endpoint for managing user preferences.
 - [x] 1.3.3 Develop the UI for the Advanced Preference Center.
