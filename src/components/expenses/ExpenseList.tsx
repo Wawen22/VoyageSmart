@@ -1,4 +1,3 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { ReceiptIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -56,7 +55,7 @@ export default function ExpenseList({ expenses, participants, currency, onDelete
   }
 
   return (
-    <div className="space-y-4 expense-grid-mobile">
+    <div className="space-y-3 expense-grid-mobile">
       {expenses.map((expense, index) => (
         <div
           key={expense.id}

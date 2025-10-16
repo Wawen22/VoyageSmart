@@ -2,9 +2,6 @@
 
 import { useState, memo } from 'react';
 import { formatCurrency } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Trash2Icon,
   CalendarIcon,
@@ -110,103 +107,87 @@ function ExpenseCard({ expense, onDelete, onEdit }: ExpenseCardProps) {
         style={{ backgroundColor: isHovered ? 'var(--primary)' : getCategoryColor(expense.category) }}
       ></div>
 
-      <div className="relative z-10 p-4 md:p-6">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 sm:space-x-3 mb-2">
-              <div
-                className="p-2 rounded-xl backdrop-blur-sm border border-white/20 group-hover:scale-110 transition-all duration-300 flex-shrink-0"
-                style={{ backgroundColor: `${getCategoryColor(expense.category)}20` }}
-              >
+      <div className="relative z-10 flex flex-col gap-4 p-4 md:p-6 sm:gap-5">
+        {/* Primary Row */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="flex flex-1 items-start gap-3">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 backdrop-blur-sm transition-all duration-300 group-hover:scale-110 sm:h-11 sm:w-11"
+              style={{ backgroundColor: `${getCategoryColor(expense.category)}20` }}
+            >
+              <span className="text-lg leading-none sm:text-xl">
                 {getCategoryIcon(expense.category)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-base sm:text-lg text-foreground group-hover:text-amber-500 transition-colors duration-300 truncate">
+              </span>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <h3 className="truncate text-sm font-semibold text-foreground transition-colors duration-300 group-hover:text-amber-500 sm:text-base">
                   {expense.description || getCategoryLabel(expense.category)}
                 </h3>
-                <div className="flex flex-wrap gap-2 mt-1">
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-muted-foreground sm:text-xs">
+                <span
+                  className="inline-flex items-center gap-1 rounded-lg border border-white/20 bg-background/40 px-2 py-0.5"
+                  style={{ color: getCategoryColor(expense.category) }}
+                >
                   <span
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border"
-                    style={{
-                      backgroundColor: `${getCategoryColor(expense.category)}20`,
-                      color: getCategoryColor(expense.category),
-                      borderColor: `${getCategoryColor(expense.category)}30`
-                    }}
-                  >
-                    {getCategoryLabel(expense.category)}
-                  </span>
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-600 border border-blue-500/30">
-                    {expense.split_type === 'equal' ? 'Split equally' : 'Custom split'}
-                  </span>
-                </div>
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: getCategoryColor(expense.category) }}
+                  ></span>
+                  {getCategoryLabel(expense.category)}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-blue-500/10 px-2 py-0.5 text-blue-600">
+                  <UsersIcon className="h-3 w-3" />
+                  {expense.split_type === 'equal' ? 'Split equally' : 'Custom split'}
+                </span>
               </div>
             </div>
+          </div>
 
-            <div className="flex-shrink-0 sm:text-right sm:ml-4">
-              <div className="glass-info-card px-3 py-1.5 rounded-xl">
-                <p className="text-lg font-bold text-foreground">
-                  {formatCurrency(expense.amount, expense.currency)}
-                </p>
-              </div>
+          <div className="flex items-center justify-end">
+            <div className="glass-info-card rounded-lg px-3 py-1.5 text-right">
+              <p className="text-base font-semibold text-foreground sm:text-lg">
+                {formatCurrency(expense.amount, expense.currency)}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Expense Details Section */}
-        <div className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Date */}
-            <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
-              <div className="flex items-center space-x-2 mb-1">
-                <div className="p-1 rounded-lg bg-blue-500/20">
-                  <CalendarIcon className="h-3 w-3 text-blue-500" />
-                </div>
-                <p className="text-xs font-medium text-muted-foreground">Date</p>
-              </div>
-              <p className="text-sm font-semibold text-foreground">{formatDate(expense.date)}</p>
+        {/* Metadata & Actions */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:text-sm">
+            <div className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-background/40 px-2.5 py-1 text-foreground">
+              <CalendarIcon className="h-3.5 w-3.5 text-blue-500" />
+              <span className="font-medium">{formatDate(expense.date)}</span>
             </div>
-
-            {/* Paid By */}
-            <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
-              <div className="flex items-center space-x-2 mb-1">
-                <div className="p-1 rounded-lg bg-green-500/20">
-                  <UserIcon className="h-3 w-3 text-green-500" />
-                </div>
-                <p className="text-xs font-medium text-muted-foreground">Paid by</p>
-              </div>
-              <p className="text-sm font-semibold text-foreground truncate">{expense.paid_by_name}</p>
+            <div className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-background/40 px-2.5 py-1 text-foreground">
+              <UserIcon className="h-3.5 w-3.5 text-green-500" />
+              <span className="max-w-[140px] truncate font-medium sm:max-w-none">
+                {expense.paid_by_name || 'Unknown'}
+              </span>
             </div>
-
-            {/* Split Type */}
-            <div className="p-3 rounded-xl backdrop-blur-sm bg-background/30 border border-white/10">
-              <div className="flex items-center space-x-2 mb-1">
-                <div className="p-1 rounded-lg bg-purple-500/20">
-                  <UsersIcon className="h-3 w-3 text-purple-500" />
-                </div>
-                <p className="text-xs font-medium text-muted-foreground">Split</p>
-              </div>
-              <p className="text-sm font-semibold text-foreground">{expense.split_type === 'equal' ? 'Equal' : 'Custom'}</p>
+            <div className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-background/40 px-2.5 py-1 text-foreground">
+              <UsersIcon className="h-3.5 w-3.5 text-purple-500" />
+              <span className="font-medium">
+                {expense.split_type === 'equal' ? 'Equal split' : 'Custom split'}
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="mt-6 pt-4 border-t border-white/10">
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 sm:gap-3">
             <button
               onClick={() => onEdit(expense)}
-              className="glass-button-primary flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105"
+              className="glass-button-primary inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:scale-105 sm:text-sm"
             >
-              <EditIcon className="h-4 w-4 mr-1.5" />
+              <EditIcon className="h-4 w-4" />
               Edit
             </button>
-
             <button
               onClick={() => onDelete(expense.id)}
-              className="glass-button flex items-center px-3 py-2 rounded-xl text-sm font-medium text-destructive-foreground bg-destructive/90 hover:bg-destructive backdrop-blur-sm border border-white/10 transition-all duration-300 hover:scale-105"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-destructive/90 px-3 py-1.5 text-xs font-medium text-destructive-foreground transition-all duration-300 hover:scale-105 hover:bg-destructive sm:text-sm"
             >
-              <Trash2Icon className="h-4 w-4 mr-1.5" />
+              <Trash2Icon className="h-4 w-4" />
               Delete
             </button>
           </div>
