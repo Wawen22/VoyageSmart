@@ -1,4 +1,5 @@
 import { INTERACTIVE_COMPONENTS_PROMPT } from './interactiveDsl';
+import { RealTimeContextSnapshot } from './realTimeContext';
 import { ChatIntent, ChatIntentType, detectIntents } from './interactiveHeuristics';
 
 interface TripContext {
@@ -23,6 +24,7 @@ interface BuildPromptArgs {
     cuisinePreferences?: string[];
     serviceKeywords?: string[];
   };
+  realTimeContext?: RealTimeContextSnapshot;
 }
 
 export function buildChatPrompt({
@@ -33,6 +35,7 @@ export function buildChatPrompt({
   isInitialMessage = false,
   intents,
   contextFocus,
+  realTimeContext,
 }: BuildPromptArgs): string {
   const effectiveIntents = intents && intents.length > 0 ? intents : detectIntents(message);
   const intentNames =
@@ -43,6 +46,7 @@ export function buildChatPrompt({
   const overview = buildTripOverview(tripContext, tripName);
   const sectionContext = getSectionDescription(currentSection);
   const structuredInsights = buildStructuredInsights(tripContext);
+  const realtimeSnippet = realTimeContext ? buildRealTimeSnippet(realTimeContext) : '';
   const focusSnippet = buildFocusSnippet(contextFocus);
 
   const responseGuidelines = isInitialMessage
@@ -78,6 +82,7 @@ const toneGuidelines = `TONO E STILE:
     sectionContext && `CONTESTO SEZIONE CORRENTE:\n${sectionContext}`,
     focusSnippet,
     structuredInsights,
+    realtimeSnippet,
     responseGuidelines,
     structuredDataGuidelines,
     interactiveGuidelines,
@@ -157,6 +162,79 @@ function buildStructuredInsights(tripContext: TripContext) {
 - ${expenseSnippet}`;
 }
 
+function buildRealTimeSnippet(context: RealTimeContextSnapshot) {
+  const lines: string[] = [];
+  const updatedTime = formatTime(context.nowIso);
+
+  if (context.currentSection) {
+    lines.push(`Sezione attuale: ${context.currentSection.toUpperCase()}`);
+  }
+
+  if (context.nextActivity) {
+    const activityTime = formatTime(context.nextActivity.startTimeIso);
+    const activityDate = context.nextActivity.dayDate ? formatDate(context.nextActivity.dayDate) : '';
+    const whenParts = [activityDate, activityTime ? `alle ${activityTime}` : ''].filter(Boolean).join(' ');
+    const location = context.nextActivity.location ? ` @ ${context.nextActivity.location}` : '';
+    const notes = context.nextActivity.notes ? ` · ${context.nextActivity.notes}` : '';
+    lines.push(
+      `Prossima attività: ${context.nextActivity.name}${location}${whenParts ? ` (${whenParts.trim()})` : ''}${notes}`
+    );
+  } else if (context.todaysActivities) {
+    lines.push(
+      `Attività di oggi: ${context.todaysActivities.count} (${formatDate(context.todaysActivities.dayDate)})`
+    );
+  }
+
+  if (context.nextTransport) {
+    const departureTime = formatTime(context.nextTransport.departureTimeIso);
+    const parts = [
+      context.nextTransport.type || 'Trasporto',
+      context.nextTransport.provider ? `con ${context.nextTransport.provider}` : '',
+      context.nextTransport.departureLocation ? `da ${context.nextTransport.departureLocation}` : '',
+      context.nextTransport.arrivalLocation ? `→ ${context.nextTransport.arrivalLocation}` : '',
+      departureTime ? `alle ${departureTime}` : ''
+    ]
+      .filter(Boolean)
+      .join(' ');
+    lines.push(`Prossimo spostamento: ${parts}`);
+  }
+
+  if (
+    typeof context.outstandingExpenseCount === 'number' &&
+    context.outstandingExpenseCount > 0 &&
+    typeof context.outstandingExpenseTotal === 'number'
+  ) {
+    lines.push(
+      `Spese da saldare: ${context.outstandingExpenseCount} (${context.outstandingExpenseTotal.toFixed(2)} in valuta viaggio)`
+    );
+  }
+
+  const preferenceTokens: string[] = [];
+  if (context.preferredTravelStyle) {
+    preferenceTokens.push(`stile ${context.preferredTravelStyle}`);
+  }
+  if (context.preferredClimate && context.preferredClimate !== 'any') {
+    preferenceTokens.push(`clima ${context.preferredClimate}`);
+  }
+  if (context.aiTone && context.aiTone !== 'balanced') {
+    preferenceTokens.push(`tono AI ${context.aiTone}`);
+  }
+  if (Array.isArray(context.interestTags) && context.interestTags.length > 0) {
+    preferenceTokens.push(`interessi: ${context.interestTags.slice(0, 5).join(', ')}`);
+  }
+
+  if (preferenceTokens.length > 0) {
+    lines.push(`Preferenze utente: ${preferenceTokens.join(' · ')}`);
+  }
+
+  if (lines.length === 0) {
+    return '';
+  }
+
+  return `CONTESTO IN TEMPO REALE (aggiornato alle ${updatedTime}):
+- ${lines.join('\n- ')}`;
+}
+
 function buildFocusSnippet(focus?: {
   location?: string;
   locationType?: string;
@@ -234,5 +312,15 @@ function formatDate(dateLike?: string) {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
+  }).format(date);
+}
+
+function formatTime(dateLike?: string | null) {
+  if (!dateLike) return '';
+  const date = new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('it-IT', {
+    hour: '2-digit',
+    minute: '2-digit'
   }).format(date);
 }

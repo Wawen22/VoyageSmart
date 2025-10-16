@@ -19,6 +19,7 @@ import {
   mergeInteractiveComponents,
 } from '@/lib/ai/interactiveHeuristics';
 import { buildChatPrompt } from '@/lib/ai/chatPromptBuilder';
+import { buildRealTimeContextSnapshot, RealTimeContextSnapshot } from '@/lib/ai/realTimeContext';
 
 // Funzione per analizzare il messaggio e determinare il contesto necessario
 function analyzeMessageContext(message: string): {
@@ -199,6 +200,7 @@ interface FallbackPromptArgs {
   tripName?: string;
   currentSection?: string;
   isInitialMessage: boolean;
+  realTimeContext?: RealTimeContextSnapshot;
 }
 
 function buildFallbackPrompt({
@@ -207,6 +209,7 @@ function buildFallbackPrompt({
   tripName,
   currentSection,
   isInitialMessage,
+  realTimeContext
 }: FallbackPromptArgs): string {
   const trip = tripContext?.trip || {};
   const name = trip.name || tripName || 'Viaggio';
@@ -224,9 +227,16 @@ function buildFallbackPrompt({
     ? `Presentati brevemente come assistente di viaggio. Ricorda nome viaggio, date e invita l'utente a chiedere aiuto.`
     : `Rispondi con tono professionale e proattivo, concentrandoti sulle richieste nella domanda. Offri suggerimenti pratici e concisi.`;
 
+  const realTimeLine = realTimeContext?.nextActivity
+    ? `Prossima attività in calendario: ${realTimeContext.nextActivity.name}${
+        realTimeContext.nextActivity.startTimeIso ? ` alle ${new Date(realTimeContext.nextActivity.startTimeIso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}` : ''
+      }${realTimeContext.nextActivity.dayDate ? ` (${realTimeContext.nextActivity.dayDate})` : ''}.`
+    : undefined;
+
   return [
     `Sei l'assistente di viaggio premium di VoyageSmart per il viaggio "${name}" a ${destination} ${dateRange}.`,
     sectionInfo,
+    realTimeLine,
     baseGuidance,
     `Domanda dell'utente: ${message}`,
   ].join('\n\n');
@@ -456,7 +466,16 @@ export async function POST(request: NextRequest) {
 
     // Ottieni i dati dalla richiesta
     const requestData = await request.json();
-    const { message: requestMessage, tripId: requestTripId, tripName, tripData, isInitialMessage, currentSection, aiProvider } = requestData;
+    const {
+      message: requestMessage,
+      tripId: requestTripId,
+      tripName,
+      tripData,
+      isInitialMessage,
+      currentSection,
+      aiProvider,
+      userId: requestUserId
+    } = requestData;
 
     logger.debug('AI Chat Request', {
       provider: aiProvider,
@@ -653,6 +672,32 @@ export async function POST(request: NextRequest) {
       expensesCount: Array.isArray(tripContext.expenses) ? tripContext.expenses.length : 0
     });
 
+    const resolvedUserId = requestUserId || tripData?.currentUserId;
+
+    let realTimeContext;
+    try {
+      realTimeContext = await buildRealTimeContextSnapshot({
+        tripContext,
+        userId: resolvedUserId,
+        currentSection
+      });
+      logger.debug('Real-time context snapshot prepared', {
+        hasNextActivity: !!realTimeContext?.nextActivity,
+        hasNextTransport: !!realTimeContext?.nextTransport,
+        outstandingExpenses: realTimeContext?.outstandingExpenseCount || 0,
+        userPreferences: {
+          travelStyle: realTimeContext?.preferredTravelStyle,
+          aiTone: realTimeContext?.aiTone
+        }
+      });
+    } catch (contextSnapshotError) {
+      logger.error('Failed to build real-time context snapshot', {
+        error: contextSnapshotError instanceof Error ? contextSnapshotError.message : contextSnapshotError,
+        tripId,
+        userId: resolvedUserId
+      });
+    }
+
     const locationHint = extractLocationHint(message, tripContext);
     const cuisinePreferences = extractCuisinePreferences(message);
     const serviceKeywords = extractServiceKeywords(message);
@@ -673,6 +718,7 @@ export async function POST(request: NextRequest) {
           cuisinePreferences,
           serviceKeywords,
         },
+        realTimeContext,
       });
     } catch (promptError: any) {
       logger.error('Prompt builder error', {
@@ -685,6 +731,7 @@ export async function POST(request: NextRequest) {
         tripName,
         currentSection,
         isInitialMessage: !!isInitialMessage,
+        realTimeContext,
       });
       intents = detectIntents(message);
     }

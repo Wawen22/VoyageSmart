@@ -19,8 +19,8 @@
 - [x] 1.3.3 Develop the UI for the Advanced Preference Center.
 
 ### 1.4 Context-Aware AI
-- [ ] 1.4.1 Implement the middleware to inject real-time context into AI requests.
-- [ ] 1.4.2 Enhance the AI's prompt engineering to leverage the enriched context.
+- [x] 1.4.1 Implement the middleware to inject real-time context into AI requests.
+- [x] 1.4.2 Enhance the AI's prompt engineering to leverage the enriched context.
 
 ### 1.5 AI Onboarding Tour
 - [ ] 1.5.1 Design and write the content for the AI onboarding tour.

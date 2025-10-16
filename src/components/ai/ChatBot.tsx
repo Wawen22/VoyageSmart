@@ -34,6 +34,7 @@ import ResponseTopicPills from './ResponseTopicPills';
 import { getRandomGreeting, getCurrentSection } from './utils';
 import { generateSuggestedQuestions } from './suggestedQuestions';
 import '@/styles/ai-assistant.css';
+import { useAuth } from '@/lib/auth';
 
 export default function ChatBot({
   tripId,
@@ -42,6 +43,7 @@ export default function ChatBot({
 }: ChatBotProps) {
   // Rileva la pagina corrente
   const pathname = usePathname();
+  const { user } = useAuth();
 
   // Hook per gestire il provider AI
   const { currentProvider } = useAIProvider();
@@ -143,7 +145,8 @@ export default function ChatBot({
               tripData, // Passa i dati del viaggio direttamente
               isInitialMessage: true, // Indica che è il messaggio iniziale
               currentSection: currentSection, // Indica la sezione corrente
-              aiProvider: currentProvider // Usa il provider selezionato
+              aiProvider: currentProvider, // Usa il provider selezionato
+              userId: user?.id || tripData?.currentUserId
             }),
           });
 
@@ -216,7 +219,8 @@ export default function ChatBot({
               tripName,
               isInitialMessage: true, // Indica che è il messaggio iniziale
               currentSection: currentSection, // Indica la sezione corrente
-              aiProvider: currentProvider // Usa il provider selezionato
+              aiProvider: currentProvider, // Usa il provider selezionato
+              userId: user?.id || tripData?.currentUserId
             }),
           });
 
@@ -799,7 +803,8 @@ export default function ChatBot({
         tripName,
         isInitialMessage: false, // Indica che non è il messaggio iniziale
         currentSection: currentSection, // Indica la sezione corrente
-        aiProvider: currentProvider // Usa il provider selezionato
+        aiProvider: currentProvider, // Usa il provider selezionato
+        userId: user?.id || tripData?.currentUserId
       };
 
       // Includi i dati del viaggio se disponibili
