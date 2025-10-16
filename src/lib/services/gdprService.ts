@@ -24,6 +24,7 @@ export interface UserDataExport {
   activities: any[];
   subscriptions: any[];
   aiPreferences: any[];
+  travelPreferences: any[];
   processingPurposes: string[];
   dataRetentionPeriod: string;
   thirdPartySharing: ThirdPartyService[];
@@ -69,6 +70,7 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
       activitiesResult,
       subscriptionsResult,
       aiPreferencesResult,
+      travelPreferencesResult,
     ] = await Promise.all([
       supabase.from('trips').select('*').eq('owner_id', userId),
       supabase.from('expenses').select('*').eq('paid_by', userId),
@@ -86,6 +88,7 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
         .eq('trips.owner_id', userId),
       supabase.from('user_subscriptions').select('*').eq('user_id', userId),
       supabase.from('user_ai_preferences').select('*').eq('user_id', userId),
+      supabase.from('user_travel_preferences').select('*').eq('user_id', userId),
     ]);
 
     const exportData: UserDataExport = {
@@ -98,6 +101,7 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
       activities: activitiesResult.data || [],
       subscriptions: subscriptionsResult.data || [],
       aiPreferences: aiPreferencesResult.data || [],
+      travelPreferences: travelPreferencesResult.data || [],
       processingPurposes: [
         'Trip planning and management',
         'Expense tracking and splitting',
@@ -269,4 +273,3 @@ export async function anonymizeUserData(userId: string): Promise<void> {
     throw error;
   }
 }
-

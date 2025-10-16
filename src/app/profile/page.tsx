@@ -315,6 +315,35 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Advanced Preference Center */}
+        <div className="mt-6 bg-card shadow overflow-hidden sm:rounded-lg border border-primary/10">
+          <div className="px-4 py-5 sm:p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h3 className="text-lg leading-6 font-medium text-foreground flex items-center">
+                  <SparklesIcon className="h-5 w-5 mr-2 text-primary" />
+                  Advanced Preference Center
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
+                  Personalise VoyageSmart&apos;s AI with your travel style, interests and comfort preferences.
+                  Fine-tuned profiles power proactive suggestions, itinerary recommendations and the AI chat experience.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="uppercase tracking-wide">
+                  New
+                </Badge>
+                <Link
+                  href="/profile/preferences"
+                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                >
+                  Manage Preferences
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Privacy & Security */}
         <div className="mt-6 bg-card shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">

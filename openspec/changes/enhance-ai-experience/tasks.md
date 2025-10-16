@@ -13,10 +13,10 @@
 - [x] 1.2.5 Add intent detection and heuristic-driven interactive components for common travel queries.
 - [x] 1.2.6 Refine AI prompting and chat UI/UX to prioritise relevant, actionable assistance.
 
-### 1.3 Advanced Preference Center (optional)
-- [ ] 1.3.1 Extend the database schema to store detailed user preferences.
-- [ ] 1.3.2 Create the API endpoint for managing user preferences.
-- [ ] 1.3.3 Develop the UI for the Advanced Preference Center.
+### 1.3 Advanced Preference Center
+- [x] 1.3.1 Extend the database schema to store detailed user preferences.
+- [x] 1.3.2 Create the API endpoint for managing user preferences.
+- [x] 1.3.3 Develop the UI for the Advanced Preference Center.
 
 ### 1.4 Context-Aware AI
 - [ ] 1.4.1 Implement the middleware to inject real-time context into AI requests.
@@ -30,7 +30,7 @@
 
 - [x] 2.1 Write unit tests for the Proactive Suggestion Service and the suggestion engine.
 - [x] 2.2 Write unit and integration tests for the Interactive AI Component Framework.
-- [ ] 2.3 Write unit and integration tests for the Advanced Preference Center API and UI.
+- [x] 2.3 Write unit and integration tests for the Advanced Preference Center API and UI.
 - [ ] 2.4 Write E2E tests for the new AI features, including proactive suggestions and interactive components.
 - [ ] 2.5 Conduct user testing to gather feedback on the enhanced AI experience.
 

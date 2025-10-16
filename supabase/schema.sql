@@ -4,6 +4,15 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
+-- Utility function to keep updated_at columns consistent
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Users table (extends Supabase auth.users)
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -14,6 +23,81 @@ CREATE TABLE IF NOT EXISTS public.users (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   last_login TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+-- Advanced user travel preferences table
+CREATE TABLE IF NOT EXISTS public.user_travel_preferences (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  travel_style TEXT NOT NULL DEFAULT 'balanced' CHECK (travel_style IN ('balanced', 'relaxed', 'adventure', 'culture', 'luxury', 'budget')),
+  interests TEXT[] NOT NULL DEFAULT '{}'::text[],
+  dietary_restrictions TEXT[] NOT NULL DEFAULT '{}'::text[],
+  preferred_climate TEXT NOT NULL DEFAULT 'temperate' CHECK (preferred_climate IN ('temperate', 'warm', 'cold', 'any')),
+  accommodation_style TEXT NOT NULL DEFAULT 'hotel' CHECK (accommodation_style IN ('hotel', 'boutique', 'apartment', 'hostel', 'resort', 'camping')),
+  transportation_modes TEXT[] NOT NULL DEFAULT '{}'::text[],
+  budget_level TEXT NOT NULL DEFAULT 'moderate' CHECK (budget_level IN ('economy', 'moderate', 'premium', 'luxury')),
+  mobility_level TEXT NOT NULL DEFAULT 'average' CHECK (mobility_level IN ('low', 'average', 'high')),
+  ai_personality TEXT NOT NULL DEFAULT 'balanced' CHECK (ai_personality IN ('balanced', 'minimal', 'proactive', 'concierge')),
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+
+ALTER TABLE IF NOT EXISTS public.user_travel_preferences ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'user_travel_preferences' AND policyname = 'Users can view their travel preferences'
+  ) THEN
+    CREATE POLICY "Users can view their travel preferences"
+      ON public.user_travel_preferences
+      FOR SELECT
+      USING (auth.uid() = user_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'user_travel_preferences' AND policyname = 'Users can insert their travel preferences'
+  ) THEN
+    CREATE POLICY "Users can insert their travel preferences"
+      ON public.user_travel_preferences
+      FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'user_travel_preferences' AND policyname = 'Users can update their travel preferences'
+  ) THEN
+    CREATE POLICY "Users can update their travel preferences"
+      ON public.user_travel_preferences
+      FOR UPDATE
+      USING (auth.uid() = user_id)
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'user_travel_preferences' AND policyname = 'Users can delete their travel preferences'
+  ) THEN
+    CREATE POLICY "Users can delete their travel preferences"
+      ON public.user_travel_preferences
+      FOR DELETE
+      USING (auth.uid() = user_id);
+  END IF;
+END;
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'update_user_travel_preferences_updated_at'
+  ) THEN
+    CREATE TRIGGER update_user_travel_preferences_updated_at
+      BEFORE UPDATE ON public.user_travel_preferences
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END;
+$$;
 
 -- Trips table
 CREATE TABLE IF NOT EXISTS public.trips (
