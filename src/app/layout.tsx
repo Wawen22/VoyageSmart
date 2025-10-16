@@ -14,6 +14,7 @@ import OnboardingModal, { OnboardingModalProvider } from '@/components/subscript
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import { CookieConsent } from '@/components/gdpr/CookieConsent';
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -61,6 +62,7 @@ export default function RootLayout({
               <OnboardingModal />
               <ServiceWorkerRegistration />
               <CookieConsent />
+              <Analytics />
             </OnboardingModalProvider>
           </Providers>
         </ErrorBoundary>
