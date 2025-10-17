@@ -229,7 +229,7 @@ export default function TripLayout({
 
       {/* Floating Chat Button - Visible on all trip pages */}
       {!loading && trip && (
-        <FloatingChatButton tripId={id as string} className="bottom-[160px] sm:bottom-6 right-2 sm:left-4 sm:right-auto" />
+        <FloatingChatButton tripId={id as string} className="bottom-[150px] sm:bottom-6 right-2 sm:left-4 sm:right-auto" />
       )}
 
       {/* AI Assistant - Visible on all trip pages only for AI subscribers */}

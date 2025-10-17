@@ -878,11 +878,11 @@ export default function ItineraryWizard({
     return (
       <button
         onClick={toggleMinimize}
-        className="fixed sm:bottom-4 sm:right-[180px] bottom-[160px] sm:right-4 right-2 bg-[#8B5CF6] text-white p-3 rounded-full shadow-lg z-[49] flex items-center gap-2 hover:bg-[#7C3AED] transition-all duration-300 animate-float"
+        className="fixed sm:bottom-4 bottom-[80px] sm:right-[180px] right-[70px] bg-[#8B5CF6] text-white p-3 rounded-full shadow-lg z-[49] flex items-center gap-2 hover:bg-[#7C3AED] transition-all duration-300 animate-float"
         aria-label="Apri wizard itinerario"
       >
         <Calendar size={18} className="sm:w-5 sm:h-5 animate-pulse" />
-        <span className="sm:inline hidden text-sm">Wizard Itinerario</span>
+        <span className="sm:inline hidden text-sm">AI Wizard</span>
       </button>
     );
   }
