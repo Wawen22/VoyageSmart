@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, X, Minimize2, Maximize2, Sparkles, Loader2, Calendar, Map } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Send, Bot, User, X, Minimize2, Maximize2, Loader2, Calendar, Map, Wand2 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FormattedAIResponse from './FormattedAIResponse';
@@ -69,7 +68,6 @@ interface ItineraryWizardProps {
   tripId: string;
   tripData: any;
   itineraryDays: ItineraryDay[];
-  onClose: () => void;
   onActivitiesGenerated: (activities: any[]) => void;
 }
 
@@ -77,7 +75,6 @@ export default function ItineraryWizard({
   tripId,
   tripData,
   itineraryDays,
-  onClose,
   onActivitiesGenerated
 }: ItineraryWizardProps) {
   // Verifica se la chiave API di Gemini è configurata
@@ -124,7 +121,7 @@ export default function ItineraryWizard({
   // Stato dell'input utente
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingActivity, setEditingActivity] = useState<GeneratedActivity | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -878,10 +875,10 @@ export default function ItineraryWizard({
     return (
       <button
         onClick={toggleMinimize}
-        className="fixed sm:bottom-4 bottom-[80px] sm:right-[180px] right-[70px] bg-[#8B5CF6] text-white p-3 rounded-full shadow-lg z-[49] flex items-center gap-2 hover:bg-[#7C3AED] transition-all duration-300 animate-float"
+        className="fixed sm:bottom-4 bottom-[80px] sm:right-[180px] right-[70px] bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white p-3 rounded-full shadow-lg shadow-amber-500/40 z-[49] flex items-center gap-2 hover:from-amber-400 hover:via-orange-400 hover:to-rose-400 transition-all duration-300 border border-white/20 animate-float"
         aria-label="Apri wizard itinerario"
       >
-        <Calendar size={18} className="sm:w-5 sm:h-5 animate-pulse" />
+        <Wand2 size={18} className="sm:w-5 sm:h-5 animate-pulse" />
         <span className="sm:inline hidden text-sm">AI Wizard</span>
       </button>
     );
@@ -892,17 +889,17 @@ export default function ItineraryWizard({
       <div
         className={`
           fixed ${isExpanded ? 'inset-4' : 'sm:bottom-4 sm:right-[180px] bottom-[70px] sm:right-4 right-2 w-[calc(100vw-16px)] sm:w-[400px] sm:h-[550px] h-[500px]'}
-          bg-background border border-border rounded-lg shadow-xl z-[99]
+          bg-background/95 backdrop-blur-xl border border-amber-500/30 rounded-lg shadow-xl shadow-amber-500/25 z-[99]
           flex flex-col transition-all duration-300 ease-in-out
           glass-effect animate-fade-in
         `}
         aria-label="Wizard Generazione Attività"
       >
       {/* Header */}
-      <div className="p-3 border-b flex items-center justify-between bg-primary/5 rounded-t-lg">
+      <div className="p-3 border-b border-amber-500/20 flex items-center justify-between bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-rose-500/10 rounded-t-lg">
         <div className="flex items-center gap-2">
-          <div className="bg-primary/10 p-1.5 rounded-full">
-            <Sparkles className="text-primary" size={18} />
+          <div className="p-1.5 rounded-full bg-gradient-to-br from-amber-500/30 via-orange-500/20 to-rose-500/30">
+            <Wand2 className="text-amber-500" size={18} />
           </div>
           <h3 className="font-medium text-sm">
             Wizard Generazione Attività

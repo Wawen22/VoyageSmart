@@ -13,10 +13,8 @@ import { it } from 'date-fns/locale';
 // Lazy load DaySchedule for better performance
 const DaySchedule = lazy(() => import('@/components/itinerary/DaySchedule'));
 import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
-import { Button } from '@/components/ui/button';
 // Lazy load ItineraryWizard for better performance
 const ItineraryWizard = lazy(() => import('@/components/ai/ItineraryWizard'));
-import AIUpgradePrompt from '@/components/subscription/AIUpgradePrompt';
 import { LazyItineraryMapView } from '@/components/LazyComponents';
 import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
 import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
@@ -85,9 +83,6 @@ export default function TripItinerary() {
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentDayId, setCurrentDayId] = useState<string>('');
   const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'map'>('list');
-
-  // Wizard states
-  const [showWizard, setShowWizard] = useState(false);
 
   const {
     activeSuggestions,
@@ -852,20 +847,7 @@ export default function TripItinerary() {
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-1 sm:gap-1.5 w-full sm:w-auto sm:flex-shrink-0 action-buttons-mobile">
-                {hasAIAccess ? (
-                  <button
-                    onClick={() => setShowWizard(true)}
-                    className="relative overflow-hidden px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center gap-1 sm:gap-1.5 group min-w-0 w-full sm:w-auto"
-                    aria-label="Generate activities with AI"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-purple-400/15 to-indigo-500/20 backdrop-blur-sm border border-purple-500/30 rounded-md sm:rounded-lg"></div>
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md sm:rounded-lg"></div>
-                    <div className="relative z-10 flex items-center gap-1 sm:gap-1.5">
-                      <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600 group-hover:text-purple-500 transition-colors flex-shrink-0" />
-                      <span className="text-purple-600 group-hover:text-purple-500 transition-colors text-xs font-medium">AI Wizard</span>
-                    </div>
-                  </button>
-                ) : (
+                {!hasAIAccess ? (
                   <button
                     onClick={() => router.push('/pricing')}
                     className="relative overflow-hidden px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center justify-center gap-1 sm:gap-1.5 group min-w-0 w-full sm:w-auto"
@@ -878,7 +860,7 @@ export default function TripItinerary() {
                       <span className="text-gray-600 group-hover:text-gray-500 transition-colors text-xs font-medium">AI Plan</span>
                     </div>
                   </button>
-                )}
+                ) : null}
                 <button
                   onClick={() => {
                     setCurrentDay(null);
@@ -1101,21 +1083,19 @@ export default function TripItinerary() {
         )}
       </Suspense>
 
-      {showWizard && (
-        hasAIAccess ? (
-          <Suspense fallback={
-            <div className="fixed inset-4 bg-background border border-border rounded-lg shadow-xl z-[99] flex items-center justify-center">
-              <div className="text-center">
-                <Sparkles className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                <p className="text-sm text-muted-foreground">Caricamento AI Wizard...</p>
-              </div>
+      {hasAIAccess && (
+        <Suspense fallback={
+          <div className="fixed inset-4 bg-background border border-border rounded-lg shadow-xl z-[99] flex items-center justify-center">
+            <div className="text-center">
+              <Sparkles className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+              <p className="text-sm text-muted-foreground">Caricamento AI Wizard...</p>
             </div>
-          }>
-            <ItineraryWizard
+          </div>
+        }>
+          <ItineraryWizard
             tripId={id as string}
             tripData={trip}
             itineraryDays={itineraryDays}
-            onClose={() => setShowWizard(false)}
             onActivitiesGenerated={(activities) => {
               setItineraryDays(prevDays => {
                 const updatedDays = [...prevDays];
@@ -1138,29 +1118,9 @@ export default function TripItinerary() {
 
                 return updatedDays;
               });
-
-              setShowWizard(false);
             }}
           />
-          </Suspense>
-        ) : (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-card rounded-lg shadow-lg max-w-md w-full">
-              <div className="p-6">
-                <button
-                  onClick={() => setShowWizard(false)}
-                  className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
-                <AIUpgradePrompt
-                  feature="Itinerary Wizard"
-                  description="The AI Itinerary Wizard helps you generate personalized activities for your trip based on your preferences and travel style."
-                />
-              </div>
-            </div>
-          </div>
-        )
+        </Suspense>
       )}
     </div>
   );
