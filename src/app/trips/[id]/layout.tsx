@@ -7,6 +7,7 @@ import { useSubscription } from '@/lib/subscription';
 import { supabase } from '@/lib/supabase';
 import ChatBot from '@/components/ai/ChatBot';
 import PersistentTripActions from '@/components/trips/PersistentTripActions';
+import FloatingChatButton from '@/components/chat/FloatingChatButton';
 
 export default function TripLayout({
   children,
@@ -224,6 +225,11 @@ export default function TripLayout({
           expensesCount={expensesCount}
           participantsCount={participants.length}
         />
+      )}
+
+      {/* Floating Chat Button - Visible on all trip pages */}
+      {!loading && trip && (
+        <FloatingChatButton tripId={id as string} className="bottom-[160px] sm:bottom-6 right-2 sm:left-4 sm:right-auto" />
       )}
 
       {/* AI Assistant - Visible on all trip pages only for AI subscribers */}

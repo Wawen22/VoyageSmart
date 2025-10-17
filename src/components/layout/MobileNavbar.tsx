@@ -37,7 +37,8 @@ export default function MobileNavbar() {
   const tripId = isTripPage ? pathname.split('/')[2] : null;
 
   // Determine which section of a trip we're in
-  const isTripPlannerPage = pathname.includes('/itinerary') || pathname.includes('/journal');
+  const isTripPlannerPage = pathname.includes('/itinerary');
+  const isJournalPage = pathname.includes('/journal');
   const isExpensesPage = pathname.includes('/expenses');
   const isAccommodationsPage = pathname.includes('/accommodations');
   const isTransportationPage = pathname.includes('/transportation');
@@ -71,6 +72,25 @@ export default function MobileNavbar() {
           </div>
           {isTripPlannerPage && (
             <div className="absolute -bottom-1 w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
+          )}
+        </Link>
+
+        {/* Journal */}
+        <Link
+          href={`/trips/${tripId}/journal`}
+          className="flex flex-col items-center justify-center w-full h-full group relative"
+        >
+          <div className={`relative p-2.5 rounded-2xl transition-all duration-300 ${
+            isJournalPage
+              ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-500/30 shadow-lg shadow-purple-500/25'
+              : 'bg-gradient-to-br from-purple-500/5 to-pink-500/5 backdrop-blur-sm border border-purple-500/10 hover:from-purple-500/15 hover:to-pink-500/15 hover:border-purple-500/25 hover:shadow-md hover:shadow-purple-500/20 hover:scale-110'
+          }`}>
+            <BookOpenIcon className={`h-5 w-5 transition-colors duration-300 ${
+              isJournalPage ? 'text-purple-500' : 'text-purple-400 group-hover:text-purple-500'
+            }`} />
+          </div>
+          {isJournalPage && (
+            <div className="absolute -bottom-1 w-1 h-1 bg-purple-500 rounded-full animate-pulse"></div>
           )}
         </Link>
 
@@ -137,28 +157,7 @@ export default function MobileNavbar() {
           )}
         </Link>
 
-        {/* Chat */}
-        <Link
-          href={`/trips/${tripId}/chat`}
-          className="flex flex-col items-center justify-center w-full h-full group relative"
-        >
-          <div className={`relative p-2.5 rounded-2xl transition-all duration-300 ${
-            isChatPage
-              ? 'bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-violet-500/30 shadow-lg shadow-violet-500/25'
-              : 'bg-gradient-to-br from-violet-500/5 to-pink-500/5 backdrop-blur-sm border border-violet-500/10 hover:from-violet-500/15 hover:to-pink-500/15 hover:border-violet-500/25 hover:shadow-md hover:shadow-violet-500/20 hover:scale-110'
-          }`}>
-            <MessageCircleIcon className={`h-5 w-5 transition-colors duration-300 ${
-              isChatPage ? 'text-violet-500' : 'text-violet-400 group-hover:text-violet-500'
-            }`} />
-            {/* Unread Badge */}
-            <div className="absolute -top-1 -right-1">
-              <UnreadBadge tripId={tripId as string} />
-            </div>
-          </div>
-          {isChatPage && (
-            <div className="absolute -bottom-1 w-1 h-1 bg-violet-500 rounded-full animate-pulse"></div>
-          )}
-        </Link>
+
       </div>
     </div>
   );

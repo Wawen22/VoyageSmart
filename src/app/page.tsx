@@ -260,7 +260,7 @@ export default function Home() {
       title: 'What is the Travel Journal feature?',
       content: (
         <p>
-          The Travel Journal feature allows you to document your journey with daily entries, organize photos in a gallery, and create a timeline of memories. You can access it from the Trip Planner section, which combines both Itinerary and Journal functionality in one convenient place.
+          The Travel Journal feature allows you to document your journey with daily entries, organize photos in a gallery, and create a timeline of memories. The Journal is now a dedicated section, easily accessible from your trip's dashboard.
         </p>
       )
     },

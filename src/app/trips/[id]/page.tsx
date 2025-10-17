@@ -794,12 +794,8 @@ export default function TripDetails() {
             {/* Trip Planner */}
             <Link href={`/trips/${id}/itinerary`} className="group">
               <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
-                {/* Modern Background Elements */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-                <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-purple-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700" style={{ transitionDelay: '200ms' }}></div>
-
-                {/* Count Badge */}
                 {itineraryCount > 0 && (
                   <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5">
                     <span className="text-[10px] font-semibold text-blue-600/80 uppercase tracking-wide bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
@@ -810,35 +806,55 @@ export default function TripDetails() {
                     </span>
                   </div>
                 )}
-
                 <div className="relative z-10 flex flex-col items-center text-center h-full">
-                  {/* Icon Container */}
                   <div className="relative mb-4">
                     <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                      <div className="relative">
-                        <CalendarIcon className="h-6 w-6 md:h-8 md:w-8 text-blue-500" />
-                        <div className="absolute -bottom-1 -right-1 p-1 bg-background rounded-full border border-white/20">
-                          <BookOpenIcon className="h-3 w-3 text-purple-500" />
-                        </div>
-                      </div>
+                      <CalendarIcon className="h-6 w-6 md:h-8 md:w-8 text-blue-500" />
                     </div>
-                    {/* Floating indicator */}
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                   </div>
-
-                  {/* Content */}
                   <div className="flex-1 flex flex-col justify-center">
                     <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-blue-500 transition-colors duration-300 mb-2">
-                      Trip Planner
+                      Itinerary
                     </h3>
                     <p className="text-xs md:text-sm text-muted-foreground leading-relaxed hidden md:block">
-                      Plan activities, keep a journal and photo gallery
+                      Plan daily activities
                     </p>
                   </div>
-
-                  {/* Action Indicator */}
                   <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="flex items-center text-xs text-blue-500 font-medium">
+                      <span>Explore</span>
+                      <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Travel Journal */}
+            <Link href={`/trips/${id}/journal`} className="group">
+              <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -top-12 -right-12 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+                <div className="relative z-10 flex flex-col items-center text-center h-full">
+                  <div className="relative mb-4">
+                    <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                      <BookOpenIcon className="h-6 w-6 md:h-8 md:w-8 text-purple-500" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-purple-500 transition-colors duration-300 mb-2">
+                      Travel Journal
+                    </h3>
+                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed hidden md:block">
+                      Document your memories
+                    </p>
+                  </div>
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="flex items-center text-xs text-purple-500 font-medium">
                       <span>Explore</span>
                       <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1053,50 +1069,7 @@ export default function TripDetails() {
               </div>
             </Link>
 
-            {/* Group Chat */}
-            <Link href={`/trips/${id}/chat`} className="group">
-              <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
-                {/* Modern Background Elements */}
-                <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute -top-12 -right-12 w-24 h-24 bg-violet-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
-                {/* Unread Badge */}
-                <div className="absolute top-3 right-3 z-20">
-                  <UnreadBadge tripId={id as string} />
-                </div>
-
-                <div className="relative z-10 flex flex-col items-center text-center h-full">
-                  {/* Icon Container */}
-                  <div className="relative mb-4">
-                    <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                      <MessageCircleIcon className="h-6 w-6 md:h-8 md:w-8 text-violet-500" />
-                    </div>
-                    {/* Chat indicator */}
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-violet-400 rounded-full animate-pulse"></div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 flex flex-col justify-center">
-                    <h3 className="text-sm md:text-lg font-bold text-foreground group-hover:text-violet-500 transition-colors duration-300 mb-2">
-                      Group Chat
-                    </h3>
-                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed hidden md:block">
-                      Chat with trip participants
-                    </p>
-                  </div>
-
-                  {/* Action Indicator */}
-                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="flex items-center text-xs text-violet-500 font-medium">
-                      <span>Chat</span>
-                      <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
           </div>
         </div>
       </main>

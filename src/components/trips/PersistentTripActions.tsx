@@ -82,7 +82,7 @@ export default function PersistentTripActions({
       href: `/trips/${tripId}/itinerary`,
       icon: CalendarIcon,
       title: 'Trip Planner',
-      description: 'Plan activities and journal',
+      description: 'Plan daily activities',
       gradient: 'from-blue-500/20 to-purple-500/20',
       hoverGradient: 'from-blue-500/10 via-transparent to-purple-500/10',
       glowColor: 'bg-blue-500/20',
@@ -90,6 +90,18 @@ export default function PersistentTripActions({
       badge: <BookOpenIcon className="h-3 w-3 text-purple-500" />,
       count: itineraryCount,
       isActive: pathname.includes('/itinerary')
+    },
+    {
+      id: 'journal',
+      href: `/trips/${tripId}/journal`,
+      icon: BookOpenIcon,
+      title: 'Travel Journal',
+      description: 'Document your memories',
+      gradient: 'from-purple-500/20 to-pink-500/20',
+      hoverGradient: 'from-purple-500/10 via-transparent to-pink-500/10',
+      glowColor: 'bg-purple-500/20',
+      textColor: 'text-purple-500',
+      isActive: pathname.includes('/journal')
     },
     {
       id: 'accommodations',
@@ -131,19 +143,6 @@ export default function PersistentTripActions({
       textColor: 'text-amber-500',
       count: expensesCount,
       isActive: pathname.includes('/expenses')
-    },
-    {
-      id: 'chat',
-      href: `/trips/${tripId}/chat`,
-      icon: MessageCircleIcon,
-      title: 'Group Chat',
-      description: 'Chat with participants',
-      gradient: 'from-violet-500/20 to-pink-500/20',
-      hoverGradient: 'from-violet-500/10 via-transparent to-pink-500/10',
-      glowColor: 'bg-violet-500/20',
-      textColor: 'text-violet-500',
-      unreadBadge: true,
-      isActive: pathname.includes('/chat')
     }
   ];
 
