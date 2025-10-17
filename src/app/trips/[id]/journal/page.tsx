@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BackButton from '@/components/ui/BackButton';
@@ -11,6 +11,8 @@ import { BookOpenIcon, ImageIcon, ClockIcon, PlusIcon, LockIcon, InfoIcon } from
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
 import { fetchJournalEntries, fetchJournalMedia, JournalEntry } from '@/lib/features/journalSlice';
+import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 
 // Lazy load heavy components
 const JournalEntryForm = lazy(() => import('@/components/journal/JournalEntryForm'));
@@ -49,10 +51,47 @@ export default function TripJournal() {
   const [showMediaUploader, setShowMediaUploader] = useState(false);
   const [showJournalInfoModal, setShowJournalInfoModal] = useState(false);
 
+  const {
+    activeSuggestions,
+    snoozedSuggestions,
+    recentCompletedSuggestions,
+    retentionDays: suggestionRetentionDays,
+    trigger: triggerProactiveSuggestions,
+    refresh: refreshProactiveSuggestions,
+    markAsRead: markSuggestionAsRead,
+    snooze: snoozeSuggestion,
+    restore: restoreSuggestion,
+    uncomplete: uncompleteSuggestion
+  } = useProactiveSuggestions();
+
+  const filteredActiveSuggestions = useMemo(
+    () => activeSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [activeSuggestions, id]
+  );
+  const filteredSnoozedSuggestions = useMemo(
+    () => snoozedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [snoozedSuggestions, id]
+  );
+  const filteredCompletedSuggestions = useMemo(
+    () => recentCompletedSuggestions.filter((suggestion) => suggestion.tripId === id),
+    [recentCompletedSuggestions, id]
+  );
+
   useEffect(() => {
     dispatch(fetchJournalEntries(id as string));
     dispatch(fetchJournalMedia(id as string));
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (!user?.id || !id) return;
+
+    const run = async () => {
+      await refreshProactiveSuggestions({ silent: true });
+      await triggerProactiveSuggestions({ trigger: 'app_open' });
+    };
+
+    void run();
+  }, [user?.id, id, refreshProactiveSuggestions, triggerProactiveSuggestions]);
 
   useEffect(() => {
     const fetchTrip = async () => {
@@ -160,6 +199,26 @@ export default function TripJournal() {
           <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <BackButton href={`/trips/${id}`} label="Back to Trip" theme="purple" />
+            </div>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+              <ProactiveSuggestionsTray
+                activeSuggestions={filteredActiveSuggestions}
+                snoozedSuggestions={filteredSnoozedSuggestions}
+                recentCompletedSuggestions={filteredCompletedSuggestions}
+                retentionDays={suggestionRetentionDays}
+                onMarkRead={(suggestionId) => {
+                  void markSuggestionAsRead(suggestionId);
+                }}
+                onSnooze={(suggestionId) => {
+                  void snoozeSuggestion(suggestionId);
+                }}
+                onRestore={(suggestionId) => {
+                  void restoreSuggestion(suggestionId);
+                }}
+                onUncomplete={(suggestionId) => {
+                  void uncompleteSuggestion(suggestionId);
+                }}
+              />
             </div>
           </div>
         </div>
