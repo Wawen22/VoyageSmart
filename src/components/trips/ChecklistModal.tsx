@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Checklist, ChecklistItem } from '@/lib/services/checklistService';
@@ -462,227 +462,281 @@ export function ChecklistModal({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
-      <DialogContent className="max-w-3xl w-full bg-background/95 backdrop-blur-xl border border-border/60 shadow-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between text-xl font-semibold">
-            <span>Trip Checklist</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => void handleRefresh()}
-              disabled={loading || refreshing}
-              className="gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <RefreshCcw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
-              <span className="hidden sm:inline">Refresh</span>
-            </Button>
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Organize personal tasks and group responsibilities for your trip.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-3xl w-full p-0 text-emerald-50 sm:rounded-[28px] [&>button.absolute.right-3.top-3]:hidden">
+        <div className="relative max-h-[90vh] overflow-hidden rounded-[inherit] border border-emerald-200/35 bg-gradient-to-br from-emerald-400/18 via-slate-900/84 to-black/82 shadow-[0_45px_120px_-35px_rgba(16,185,129,0.65)] backdrop-blur-2xl">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(51,255,204,0.26),transparent_60%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.26),transparent_55%)]" />
+          <div className="relative z-10 flex h-full flex-col">
+            <div className="px-6 pt-5 pb-4 space-y-4">
+              <DialogHeader>
+              <DialogTitle className="flex items-center justify-between text-xl font-semibold text-emerald-50">
+                <span className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
+                  Trip Checklist
+                </span>
+              </DialogTitle>
+              <DialogDescription className="text-sm text-emerald-100/70">
+                Organize personal tasks and group responsibilities for your trip.
+              </DialogDescription>
+              </DialogHeader>
 
-        {error && (
-          <div className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {error}
+              <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void handleRefresh()}
+                  disabled={loading || refreshing}
+                  className="gap-2 rounded-full border border-emerald-200/30 bg-emerald-400/10 text-emerald-100 shadow-[0_20px_60px_-45px_rgba(20,184,166,0.7)] transition hover:bg-emerald-400/20 hover:text-emerald-50"
+                >
+                  <RefreshCcw className={cn('h-4 w-4', refreshing && 'animate-spin')} />
+                  <span className="hidden sm:inline">Refresh</span>
+                </Button>
+                <DialogClose className="group rounded-full border border-emerald-200/30 bg-emerald-400/10 p-2 text-emerald-100 shadow-[0_20px_60px_-45px_rgba(248,113,113,0.7)] transition hover:bg-destructive/15 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/50">
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close</span>
+                </DialogClose>
+              </div>
+
+            {error && (
+              <div className="rounded-xl border border-destructive/40 bg-destructive/20 px-4 py-3 text-sm text-destructive shadow-[0_25px_70px_-45px_rgba(248,113,113,0.85)]">
+                {error}
+              </div>
+            )}
           </div>
-        )}
 
-        {loading ? (
-          <div className="flex h-48 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : !selectedChecklist ? (
-          <div className="flex h-48 flex-col items-center justify-center text-center text-sm text-muted-foreground">
-            <p>No checklist available yet.</p>
-            <p>Try refreshing or adding a new item to get started.</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <Tabs value={selectedChecklistId ?? undefined} onValueChange={handleSelectChecklist}>
-              <TabsList>
-                {checklists.map((checklist) => {
-                  const unchecked = checklist.items.filter((item) => !item.isChecked).length;
-                  return (
-                    <TabsTrigger key={checklist.id} value={checklist.id} className="gap-2">
-                      <span>{checklist.name}</span>
-                      {unchecked > 0 && (
-                        <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-primary/20 px-1.5 text-xs font-semibold text-primary">
-                          {unchecked}
-                        </span>
-                      )}
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
+            <div className="flex-1 overflow-y-auto px-6 pb-6">
+            {loading ? (
+              <div className="flex h-48 items-center justify-center text-emerald-100/80">
+                <Loader2 className="h-6 w-6 animate-spin text-emerald-200" />
+              </div>
+            ) : !selectedChecklist ? (
+              <div className="flex h-48 flex-col items-center justify-center text-center text-sm text-emerald-100/70">
+                <p>No checklist available yet.</p>
+                <p>Try refreshing or adding a new item to get started.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <Tabs value={selectedChecklistId ?? undefined} onValueChange={handleSelectChecklist}>
+                  <TabsList className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-emerald-200/35 bg-emerald-500/20 p-1 backdrop-blur">
+                    {checklists.map((checklist) => {
+                      const unchecked = checklist.items.filter((item) => !item.isChecked).length;
+                      const isPersonal = checklist.type === 'personal';
+                      const triggerPalette = isPersonal
+                        ? 'text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-500/20 data-[state=active]:border-emerald-300/80 data-[state=active]:bg-emerald-500/30 data-[state=active]:shadow-[0_16px_32px_-20px_rgba(16,185,129,0.75)]'
+                        : 'text-cyan-100 hover:border-cyan-300/50 hover:bg-cyan-500/20 data-[state=active]:border-cyan-300/80 data-[state=active]:bg-cyan-500/25 data-[state=active]:shadow-[0_16px_32px_-20px_rgba(14,165,233,0.75)]';
+                      const badgePalette = isPersonal
+                        ? 'bg-emerald-400/45 text-emerald-950'
+                        : 'bg-cyan-400/45 text-cyan-950';
 
-              {checklists.map((checklist) => (
-                <TabsContent key={checklist.id} value={checklist.id} className="space-y-4">
-                  <div className="rounded-xl border border-border/60 bg-background/60 p-4 shadow-inner">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <Input
-                        value={newItemContent}
-                        onChange={(event) => setNewItemContent(event.target.value)}
-                        onKeyDown={handleInputKeyPress}
-                        placeholder="Add a new checklist item..."
-                        disabled={isAddingItem}
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        onClick={() => void handleAddItem()}
-                        disabled={isAddingItem}
-                        className="gap-2"
-                      >
-                        {isAddingItem ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Plus className="h-4 w-4" />
-                        )}
-                        Add
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="max-h-80 overflow-y-auto rounded-xl border border-border/40 bg-background/40 p-2">
-                    {checklist.items.length === 0 ? (
-                      <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-                        No items yet. Add something above to get started.
-                      </div>
-                    ) : (
-                      <DragDropContext onDragEnd={handleReorder}>
-                        <Droppable droppableId={`droppable-${checklist.id}`}>
-                          {(droppableProvided) => (
-                            <div
-                              ref={droppableProvided.innerRef}
-                              {...droppableProvided.droppableProps}
-                              className="space-y-2"
-                            >
-                              {checklist.items.map((item, index) => {
-                                const isEditing = editingItemId === item.id;
-                                return (
-                                  <Draggable key={item.id} draggableId={item.id} index={index}>
-                                    {(draggableProvided, snapshot) => (
-                                      <div
-                                        ref={draggableProvided.innerRef}
-                                        {...draggableProvided.draggableProps}
-                                        className={cn(
-                                          'flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/80 p-3 transition-all',
-                                          snapshot.isDragging && 'shadow-lg ring-2 ring-primary/40'
-                                        )}
-                                      >
-                                        <div className="flex flex-1 items-start gap-3">
-                                          <button
-                                            type="button"
-                                            {...draggableProvided.dragHandleProps}
-                                            className="mt-1 rounded-md border border-transparent p-1 text-muted-foreground hover:border-border/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                                            aria-label="Drag to reorder"
-                                          >
-                                            <GripVertical className="h-4 w-4" />
-                                          </button>
-
-                                          <Checkbox
-                                            checked={item.isChecked}
-                                            onCheckedChange={() => void handleToggleItem(checklist.id, item)}
-                                            className="mt-1"
-                                          />
-
-                                          <div className="flex flex-1 flex-col">
-                                            {isEditing ? (
-                                              <div className="flex items-center gap-2">
-                                                <Input
-                                                  value={editingValue}
-                                                  onChange={handleEditChange}
-                                                  onKeyDown={(event) => {
-                                                    if (event.key === 'Enter') {
-                                                      event.preventDefault();
-                                                      void saveEdit(checklist.id, item);
-                                                    } else if (event.key === 'Escape') {
-                                                      event.preventDefault();
-                                                      cancelEdit();
-                                                    }
-                                                  }}
-                                                  autoFocus
-                                                />
-                                              </div>
-                                            ) : (
-                                              <p
-                                                className={cn(
-                                                  'text-sm leading-tight',
-                                                  item.isChecked && 'text-muted-foreground line-through'
-                                                )}
-                                              >
-                                                {item.content}
-                                              </p>
-                                            )}
-                                            <span className="mt-1 text-xs text-muted-foreground">
-                                              Updated {new Date(item.updatedAt).toLocaleString()}
-                                            </span>
-                                          </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                          {isEditing ? (
-                                            <>
-                                              <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="h-8 w-8"
-                                                onClick={() => void saveEdit(checklist.id, item)}
-                                                aria-label="Save changes"
-                                              >
-                                                <Save className="h-4 w-4" />
-                                              </Button>
-                                              <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="h-8 w-8 text-destructive hover:text-destructive"
-                                                onClick={cancelEdit}
-                                                aria-label="Cancel edit"
-                                              >
-                                                <X className="h-4 w-4" />
-                                              </Button>
-                                            </>
-                                          ) : (
-                                            <>
-                                              <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="h-8 w-8"
-                                                onClick={() => beginEdit(item)}
-                                                aria-label="Edit item"
-                                              >
-                                                <Pencil className="h-4 w-4" />
-                                              </Button>
-                                              <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="h-8 w-8 text-destructive hover:text-destructive"
-                                                onClick={() => void handleDeleteItem(checklist.id, item)}
-                                                aria-label="Delete item"
-                                              >
-                                                <Trash2 className="h-4 w-4" />
-                                              </Button>
-                                            </>
-                                          )}
-                                        </div>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                );
-                              })}
-                              {droppableProvided.placeholder}
-                            </div>
+                      return (
+                        <TabsTrigger
+                          key={checklist.id}
+                          value={checklist.id}
+                          className={cn(
+                            'relative flex h-full min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-transparent px-4 py-2 text-sm font-medium leading-tight transition-all duration-300 ease-out hover:shadow-[0_12px_25px_-18px_rgba(20,184,166,0.65)]',
+                            triggerPalette
                           )}
-                        </Droppable>
-                      </DragDropContext>
-                    )}
-                  </div>
-                </TabsContent>
-              ))}
-            </Tabs>
+                        >
+                          <span className="tracking-wide drop-shadow-sm text-center leading-tight">{checklist.name}</span>
+                          {unchecked > 0 && (
+                            <span className={cn('inline-flex min-w-[1.5rem] items-center justify-center rounded-full px-1.5 text-xs font-semibold', badgePalette)}>
+                              {unchecked}
+                            </span>
+                          )}
+                        </TabsTrigger>
+                      );
+                    })}
+                  </TabsList>
+
+                  {checklists.map((checklist) => {
+                    const isPersonal = checklist.type === 'personal';
+                    const cardPalette = isPersonal
+                      ? 'border-emerald-200/35 from-emerald-400/22 via-slate-900/65 to-emerald-500/18 shadow-[0_30px_70px_-45px_rgba(16,185,129,0.75)]'
+                      : 'border-cyan-200/30 from-cyan-400/22 via-slate-900/60 to-cyan-500/18 shadow-[0_30px_70px_-45px_rgba(14,165,233,0.6)]';
+                    const listPalette = isPersonal
+                      ? 'border-emerald-200/35 from-slate-950/35 via-slate-900/45 to-emerald-500/18'
+                      : 'border-cyan-200/30 from-slate-950/35 via-slate-900/45 to-cyan-500/18';
+                    const checkboxPalette = isPersonal
+                      ? 'border-emerald-300/60 data-[state=checked]:bg-emerald-400 data-[state=checked]:text-emerald-950'
+                      : 'border-cyan-300/60 data-[state=checked]:bg-cyan-400 data-[state=checked]:text-cyan-950';
+
+                    return (
+                      <TabsContent key={checklist.id} value={checklist.id} className="space-y-4">
+                      <div className={cn(
+                          'rounded-2xl bg-gradient-to-r p-4 backdrop-blur-lg',
+                          cardPalette
+                        )}>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                          <Input
+                            value={newItemContent}
+                            onChange={(event) => setNewItemContent(event.target.value)}
+                            onKeyDown={handleInputKeyPress}
+                            placeholder="Add a new checklist item..."
+                            disabled={isAddingItem}
+                            className="flex-1 rounded-xl border border-emerald-200/40 bg-slate-950/60 text-emerald-50 placeholder:text-emerald-100/60"
+                          />
+                          <Button
+                            type="button"
+                            onClick={() => void handleAddItem()}
+                            disabled={isAddingItem}
+                            className="gap-2 rounded-xl border border-emerald-300/40 bg-gradient-to-r from-emerald-400/45 via-emerald-500/40 to-teal-500/45 text-emerald-950 shadow-[0_20px_60px_-40px_rgba(16,185,129,0.85)] hover:scale-105 hover:text-emerald-900"
+                          >
+                            {isAddingItem ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Plus className="h-4 w-4" />
+                            )}
+                            Add
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className={cn(
+                          'max-h-80 overflow-y-auto rounded-2xl border bg-gradient-to-br p-2 backdrop-blur-lg',
+                          listPalette
+                        )}>
+                        {checklist.items.length === 0 ? (
+                          <div className="flex h-32 items-center justify-center text-sm text-emerald-100/70">
+                            No items yet. Add something above to get started.
+                          </div>
+                        ) : (
+                          <DragDropContext onDragEnd={handleReorder}>
+                            <Droppable droppableId={`droppable-${checklist.id}`}>
+                              {(droppableProvided) => (
+                                <div
+                                  ref={droppableProvided.innerRef}
+                                  {...droppableProvided.droppableProps}
+                                  className="space-y-2"
+                                >
+                                  {checklist.items.map((item, index) => {
+                                    const isEditing = editingItemId === item.id;
+                                    return (
+                                      <Draggable key={item.id} draggableId={item.id} index={index}>
+                                        {(draggableProvided, snapshot) => (
+                                          <div
+                                            ref={draggableProvided.innerRef}
+                                            {...draggableProvided.draggableProps}
+                                            className={cn(
+                                              'flex items-center justify-between gap-3 rounded-2xl border border-emerald-200/20 bg-gradient-to-r from-slate-950/35 via-slate-900/25 to-emerald-500/15 p-3 transition-all backdrop-blur-md',
+                                              snapshot.isDragging && 'shadow-[0_25px_70px_-45px_rgba(20,184,166,0.8)] ring-2 ring-emerald-300/40'
+                                            )}
+                                          >
+                                            <div className="flex flex-1 items-start gap-3">
+                                              <button
+                                                type="button"
+                                                {...draggableProvided.dragHandleProps}
+                                                className="mt-1 rounded-md border border-transparent p-1 text-emerald-100/70 transition hover:border-emerald-300/50 hover:text-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/40"
+                                                aria-label="Drag to reorder"
+                                              >
+                                                <GripVertical className="h-4 w-4" />
+                                              </button>
+
+                                              <Checkbox
+                                                checked={item.isChecked}
+                                                onCheckedChange={() => void handleToggleItem(checklist.id, item)}
+                                                className={cn('mt-1', checkboxPalette)}
+                                              />
+
+                                              <div className="flex flex-1 flex-col">
+                                                {isEditing ? (
+                                                  <div className="flex items-center gap-2">
+                                                    <Input
+                                                      value={editingValue}
+                                                      onChange={handleEditChange}
+                                                      onKeyDown={(event) => {
+                                                        if (event.key === 'Enter') {
+                                                          event.preventDefault();
+                                                          void saveEdit(checklist.id, item);
+                                                        } else if (event.key === 'Escape') {
+                                                          event.preventDefault();
+                                                          cancelEdit();
+                                                        }
+                                                      }}
+                                                      autoFocus
+                                                      className="rounded-lg border border-emerald-200/40 bg-emerald-500/10 text-emerald-50"
+                                                    />
+                                                  </div>
+                                                ) : (
+                                                  <p
+                                                    className={cn(
+                                                      'text-sm leading-tight text-emerald-50 drop-shadow-sm',
+                                                      item.isChecked && 'text-emerald-200/60 line-through'
+                                                    )}
+                                                  >
+                                                    {item.content}
+                                                  </p>
+                                                )}
+                                                <span className="mt-1 text-xs text-emerald-100/60">
+                                                  Updated {new Date(item.updatedAt).toLocaleString()}
+                                                </span>
+                                              </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                              {isEditing ? (
+                                                <>
+                                                  <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-emerald-100/90 hover:text-emerald-50"
+                                                    onClick={() => void saveEdit(checklist.id, item)}
+                                                    aria-label="Save changes"
+                                                  >
+                                                    <Save className="h-4 w-4" />
+                                                  </Button>
+                                                  <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                                    onClick={cancelEdit}
+                                                    aria-label="Cancel edit"
+                                                  >
+                                                    <X className="h-4 w-4" />
+                                                  </Button>
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-emerald-100/80 hover:text-emerald-50"
+                                                    onClick={() => beginEdit(item)}
+                                                    aria-label="Edit item"
+                                                  >
+                                                    <Pencil className="h-4 w-4" />
+                                                  </Button>
+                                                  <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-8 w-8 text-destructive hover:text-destructive"
+                                                    onClick={() => void handleDeleteItem(checklist.id, item)}
+                                                    aria-label="Delete item"
+                                                  >
+                                                    <Trash2 className="h-4 w-4" />
+                                                  </Button>
+                                                </>
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </Draggable>
+                                    );
+                                  })}
+                                  {droppableProvided.placeholder}
+                                </div>
+                              )}
+                            </Droppable>
+                          </DragDropContext>
+                        )}
+                      </div>
+                      </TabsContent>
+                    );
+                  })}
+                </Tabs>
+              </div>
+            )}
+            </div>
           </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );
