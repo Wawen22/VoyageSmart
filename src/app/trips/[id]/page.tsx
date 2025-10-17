@@ -14,6 +14,8 @@ import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 import TripWeather from '@/components/weather/TripWeather';
 import { TripDestinations } from '@/lib/types/destination';
 import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { ChecklistButton } from '@/components/trips/ChecklistButton';
+import { ChecklistModal } from '@/components/trips/ChecklistModal';
 import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 import {
   MapPinIcon,
@@ -82,6 +84,8 @@ export default function TripDetails() {
   const [transportationCount, setTransportationCount] = useState<number>(0);
   const [itineraryCount, setItineraryCount] = useState<number>(0);
   const [expensesCount, setExpensesCount] = useState<number>(0);
+  const [isChecklistModalOpen, setIsChecklistModalOpen] = useState(false);
+  const [checklistPendingCount, setChecklistPendingCount] = useState(0);
 
   const {
     activeSuggestions,
@@ -381,6 +385,10 @@ export default function TripDetails() {
                 />
               </div>
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <ChecklistButton
+                  onClick={() => setIsChecklistModalOpen(true)}
+                  pendingCount={checklistPendingCount}
+                />
                 <ProactiveSuggestionsTray
                   activeSuggestions={filteredActiveSuggestions}
                   snoozedSuggestions={filteredSnoozedSuggestions}
@@ -1074,7 +1082,12 @@ export default function TripDetails() {
         </div>
       </main>
 
-
+      <ChecklistModal
+        tripId={Array.isArray(id) ? id[0] : (id as string)}
+        open={isChecklistModalOpen}
+        onOpenChange={setIsChecklistModalOpen}
+        onPendingCountChange={setChecklistPendingCount}
+      />
     </div>
   );
 }
