@@ -516,32 +516,95 @@ export function ChecklistModal({
             ) : (
               <div className="space-y-6">
                 <Tabs value={selectedChecklistId ?? undefined} onValueChange={handleSelectChecklist}>
-                  <TabsList className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-emerald-200/35 bg-emerald-500/20 p-1 backdrop-blur">
+                  <TabsList className="grid w-full grid-cols-2 gap-3 rounded-2xl border border-emerald-200/30 bg-slate-950/50 p-3 backdrop-blur-xl shadow-[0_4px_24px_-8px_rgba(16,185,129,0.3)] h-auto">
                     {checklists.map((checklist) => {
                       const unchecked = checklist.items.filter((item) => !item.isChecked).length;
                       const isPersonal = checklist.type === 'personal';
-                      const triggerPalette = isPersonal
-                        ? 'text-emerald-100 hover:border-emerald-300/50 hover:bg-emerald-500/20 data-[state=active]:border-emerald-300/80 data-[state=active]:bg-emerald-500/30 data-[state=active]:shadow-[0_16px_32px_-20px_rgba(16,185,129,0.75)]'
-                        : 'text-cyan-100 hover:border-cyan-300/50 hover:bg-cyan-500/20 data-[state=active]:border-cyan-300/80 data-[state=active]:bg-cyan-500/25 data-[state=active]:shadow-[0_16px_32px_-20px_rgba(14,165,233,0.75)]';
-                      const badgePalette = isPersonal
-                        ? 'bg-emerald-400/45 text-emerald-950'
-                        : 'bg-cyan-400/45 text-cyan-950';
+                      const palette = isPersonal
+                        ? {
+                            // Personal Checklist - Emerald/Teal theme
+                            baseText: 'text-emerald-100/70',
+                            activeText: 'data-[state=active]:text-emerald-50',
+                            baseBorder: 'border-emerald-200/20',
+                            activeBorder: 'data-[state=active]:border-emerald-400/60',
+                            hoverBorder: 'hover:border-emerald-300/40',
+                            baseGradient: 'from-slate-900/40 to-slate-950/60',
+                            activeGradient: 'data-[state=active]:from-emerald-500/25 data-[state=active]:via-teal-500/20 data-[state=active]:to-emerald-600/25',
+                            badge: 'bg-emerald-400/85 text-emerald-950',
+                            activeBadge: 'data-[state=active]:bg-emerald-300 data-[state=active]:text-emerald-950 data-[state=active]:ring-emerald-400/50',
+                            shadow: 'shadow-emerald-500/0',
+                            activeShadow: 'data-[state=active]:shadow-[0_0_20px_-4px_rgba(16,185,129,0.4),0_8px_16px_-8px_rgba(16,185,129,0.6)]',
+                            hoverShadow: 'hover:shadow-[0_4px_12px_-4px_rgba(16,185,129,0.3)]',
+                            glow: 'data-[state=active]:ring-2 data-[state=active]:ring-emerald-400/30'
+                          }
+                        : {
+                            // Group Checklist - Cyan/Sky theme
+                            baseText: 'text-cyan-100/70',
+                            activeText: 'data-[state=active]:text-cyan-50',
+                            baseBorder: 'border-cyan-200/20',
+                            activeBorder: 'data-[state=active]:border-cyan-400/60',
+                            hoverBorder: 'hover:border-cyan-300/40',
+                            baseGradient: 'from-slate-900/40 to-slate-950/60',
+                            activeGradient: 'data-[state=active]:from-cyan-500/25 data-[state=active]:via-sky-500/20 data-[state=active]:to-cyan-600/25',
+                            badge: 'bg-cyan-400/85 text-cyan-950',
+                            activeBadge: 'data-[state=active]:bg-cyan-300 data-[state=active]:text-cyan-950 data-[state=active]:ring-cyan-400/50',
+                            shadow: 'shadow-cyan-500/0',
+                            activeShadow: 'data-[state=active]:shadow-[0_0_20px_-4px_rgba(6,182,212,0.4),0_8px_16px_-8px_rgba(6,182,212,0.6)]',
+                            hoverShadow: 'hover:shadow-[0_4px_12px_-4px_rgba(6,182,212,0.3)]',
+                            glow: 'data-[state=active]:ring-2 data-[state=active]:ring-cyan-400/30'
+                          };
 
                       return (
                         <TabsTrigger
                           key={checklist.id}
                           value={checklist.id}
                           className={cn(
-                            'relative flex h-full min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-transparent px-4 py-2 text-sm font-medium leading-tight transition-all duration-300 ease-out hover:shadow-[0_12px_25px_-18px_rgba(20,184,166,0.65)]',
-                            triggerPalette
+                            // Base layout & structure
+                            'group relative flex items-center justify-center gap-2 overflow-hidden rounded-xl border px-5 py-4 min-h-[64px] transition-all duration-300 ease-out',
+                            // Typography
+                            'text-sm font-bold uppercase tracking-wider',
+                            // Background gradient
+                            'bg-gradient-to-br',
+                            palette.baseGradient,
+                            palette.activeGradient,
+                            // Border states
+                            palette.baseBorder,
+                            palette.activeBorder,
+                            palette.hoverBorder,
+                            // Text colors
+                            palette.baseText,
+                            palette.activeText,
+                            // Shadow & glow effects
+                            palette.shadow,
+                            palette.activeShadow,
+                            palette.hoverShadow,
+                            palette.glow,
+                            // Hover effects
+                            'hover:scale-[1.01]',
+                            // Active state
+                            'data-[state=active]:scale-[1.02]',
+                            // Focus states
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950/50',
+                            // Backdrop
+                            'backdrop-blur-sm'
                           )}
                         >
-                          <span className="tracking-wide drop-shadow-sm text-center leading-tight">{checklist.name}</span>
-                          {unchecked > 0 && (
-                            <span className={cn('inline-flex min-w-[1.5rem] items-center justify-center rounded-full px-1.5 text-xs font-semibold', badgePalette)}>
-                              {unchecked}
-                            </span>
-                          )}
+                          {/* Shine effect on active */}
+                          <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-300 group-data-[state=active]:opacity-100" />
+
+                          {/* Content */}
+                          <span className="relative flex items-center gap-2">
+                            <span className="truncate drop-shadow-sm">{checklist.name}</span>
+                            {unchecked > 0 && (
+                              <span className={cn(
+                                'inline-flex min-w-[1.5rem] shrink-0 items-center justify-center rounded-full px-1.5 py-0.5 text-[0.65rem] font-extrabold shadow-sm ring-1 ring-white/15 transition-all duration-300',
+                                palette.badge,
+                                palette.activeBadge
+                              )}>
+                                {unchecked}
+                              </span>
+                            )}
+                          </span>
                         </TabsTrigger>
                       );
                     })}
