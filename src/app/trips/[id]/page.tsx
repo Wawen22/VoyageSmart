@@ -14,8 +14,7 @@ import { usePremiumFeature } from '@/hooks/usePremiumFeature';
 import TripWeather from '@/components/weather/TripWeather';
 import { TripDestinations } from '@/lib/types/destination';
 import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
-import { ChecklistButton } from '@/components/trips/ChecklistButton';
-import { ChecklistModal } from '@/components/trips/ChecklistModal';
+import { TripChecklistTrigger } from '@/components/trips/TripChecklistTrigger';
 import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 import {
   MapPinIcon,
@@ -84,8 +83,7 @@ export default function TripDetails() {
   const [transportationCount, setTransportationCount] = useState<number>(0);
   const [itineraryCount, setItineraryCount] = useState<number>(0);
   const [expensesCount, setExpensesCount] = useState<number>(0);
-  const [isChecklistModalOpen, setIsChecklistModalOpen] = useState(false);
-  const [checklistPendingCount, setChecklistPendingCount] = useState(0);
+  const [journalCount, setJournalCount] = useState<number>(0);
 
   const {
     activeSuggestions,
@@ -231,10 +229,17 @@ export default function TripDetails() {
           .select('*', { count: 'exact', head: true })
           .eq('trip_id', id);
 
+        // Fetch journal entries count
+        const { count: journalEntriesCount } = await supabase
+          .from('trip_journal')
+          .select('*', { count: 'exact', head: true })
+          .eq('trip_id', id);
+
         setAccommodationCount(accCount || 0);
         setTransportationCount(transCount || 0);
         setItineraryCount((daysCount || 0) + (activitiesCount || 0));
         setExpensesCount(expCount || 0);
+        setJournalCount(journalEntriesCount || 0);
       } catch (error) {
         console.error('Error fetching counts:', error);
       }
@@ -380,15 +385,13 @@ export default function TripDetails() {
               <div className="flex items-center gap-3">
                 <BackButton
                   href="/dashboard"
-                  label="Back to Dashboard"
+                  label="Dashboard"
                   theme="default"
+                  iconOnly
                 />
               </div>
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                <ChecklistButton
-                  onClick={() => setIsChecklistModalOpen(true)}
-                  pendingCount={checklistPendingCount}
-                />
+                <TripChecklistTrigger tripId={Array.isArray(id) ? id[0] : (id as string)} />
                 <ProactiveSuggestionsTray
                   activeSuggestions={filteredActiveSuggestions}
                   snoozedSuggestions={filteredSnoozedSuggestions}
@@ -846,6 +849,16 @@ export default function TripDetails() {
               <div className="glass-card rounded-2xl p-4 md:p-6 relative overflow-hidden h-full group-hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+                {journalCount > 0 && (
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-purple-600/80 uppercase tracking-wide bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                      Items
+                    </span>
+                    <span className="inline-flex items-center justify-center min-w-[2rem] h-7 px-2.5 rounded-full text-xs font-bold bg-gradient-to-br from-purple-500/20 to-pink-500/20 text-purple-600 border border-purple-500/30 backdrop-blur-sm shadow-sm">
+                      {journalCount}
+                    </span>
+                  </div>
+                )}
                 <div className="relative z-10 flex flex-col items-center text-center h-full">
                   <div className="relative mb-4">
                     <div className="p-3 md:p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -1081,13 +1094,6 @@ export default function TripDetails() {
           </div>
         </div>
       </main>
-
-      <ChecklistModal
-        tripId={Array.isArray(id) ? id[0] : (id as string)}
-        open={isChecklistModalOpen}
-        onOpenChange={setIsChecklistModalOpen}
-        onPendingCountChange={setChecklistPendingCount}
-      />
     </div>
   );
 }

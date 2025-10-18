@@ -7,9 +7,10 @@ export type BackButtonProps = {
   label?: string;
   className?: string;
   theme?: 'default' | 'blue' | 'purple' | 'violet' | 'green' | 'orange' | 'amber' | 'sky';
+  iconOnly?: boolean;
 };
 
-export default function BackButton({ href, label = 'Back', className, theme = 'default' }: BackButtonProps) {
+export default function BackButton({ href, label = 'Back', className, theme = 'default', iconOnly = false }: BackButtonProps) {
   const getThemeClasses = () => {
     switch (theme) {
       case 'blue':
@@ -35,10 +36,12 @@ export default function BackButton({ href, label = 'Back', className, theme = 'd
     <Link
       href={href}
       className={cn(
-        "relative overflow-hidden inline-flex items-center px-3 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 group shadow-lg back-button-mobile",
+        "relative overflow-hidden inline-flex items-center rounded-xl font-medium transition-all duration-300 hover:scale-105 group shadow-lg back-button-mobile",
+        iconOnly ? "p-2.5" : "px-3 py-2",
         className
       )}
-      aria-label={`Back to ${label}`}
+      aria-label={iconOnly ? `Back to ${label}` : undefined}
+      title={iconOnly ? `Back to ${label}` : undefined}
     >
       {/* Glassy Background */}
       <div className={`absolute inset-0 bg-gradient-to-br ${getThemeClasses()} backdrop-blur-sm border rounded-xl`}></div>
@@ -47,7 +50,7 @@ export default function BackButton({ href, label = 'Back', className, theme = 'd
       {/* Content */}
       <div className="relative z-10 flex items-center gap-2">
         <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-        <span className="text-sm font-medium">{label}</span>
+        {!iconOnly && <span className="text-sm font-medium">{label}</span>}
       </div>
     </Link>
   );

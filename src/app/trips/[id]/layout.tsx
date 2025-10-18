@@ -24,6 +24,7 @@ export default function TripLayout({
   const [transportationCount, setTransportationCount] = useState<number>(0);
   const [itineraryCount, setItineraryCount] = useState<number>(0);
   const [expensesCount, setExpensesCount] = useState<number>(0);
+  const [journalCount, setJournalCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -84,6 +85,14 @@ export default function TripLayout({
           .order('date', { ascending: false });
 
         if (expensesError) throw expensesError;
+
+        // Fetch journal entries
+        const { data: journalData, error: journalError } = await supabase
+          .from('trip_journal')
+          .select('id')
+          .eq('trip_id', id);
+
+        if (journalError) throw journalError;
 
         // Group activities by day_id
         const activitiesByDay = (activitiesData || []).reduce((acc: any, activity: any) => {
@@ -178,6 +187,9 @@ export default function TripLayout({
         // Set expenses count
         setExpensesCount(processedExpenses.length);
 
+        // Set journal count
+        setJournalCount((journalData || []).length);
+
         setTrip(tripWithDetails);
 
         // Fetch participants
@@ -223,6 +235,7 @@ export default function TripLayout({
           transportationCount={transportationCount}
           itineraryCount={itineraryCount}
           expensesCount={expensesCount}
+          journalCount={journalCount}
           participantsCount={participants.length}
         />
       )}

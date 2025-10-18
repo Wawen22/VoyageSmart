@@ -24,6 +24,7 @@ interface PersistentTripActionsProps {
   transportationCount?: number;
   itineraryCount?: number;
   expensesCount?: number;
+  journalCount?: number;
   participantsCount?: number;
 }
 
@@ -33,6 +34,7 @@ export default function PersistentTripActions({
   transportationCount = 0,
   itineraryCount = 0,
   expensesCount = 0,
+  journalCount = 0,
   participantsCount = 0
 }: PersistentTripActionsProps) {
   const pathname = usePathname();
@@ -101,6 +103,7 @@ export default function PersistentTripActions({
       hoverGradient: 'from-purple-500/10 via-transparent to-pink-500/10',
       glowColor: 'bg-purple-500/20',
       textColor: 'text-purple-500',
+      count: journalCount,
       isActive: pathname.includes('/journal')
     },
     {
