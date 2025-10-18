@@ -17,6 +17,7 @@ import { PlusIcon, ReceiptIcon, BarChart3Icon, UsersIcon, DollarSignIcon } from 
 import { useToast } from '@/components/ui/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { TripChecklistTrigger } from '@/components/trips/TripChecklistTrigger';
 import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 
 type DatabaseUser = {
@@ -101,6 +102,7 @@ type Settlement = {
 
 export default function ExpensesPage() {
   const { id } = useParams();
+  const tripId = Array.isArray(id) ? id[0] : (id as string);
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -827,6 +829,7 @@ export default function ExpensesPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+                <TripChecklistTrigger tripId={tripId} />
                 <ProactiveSuggestionsTray
                   activeSuggestions={filteredActiveSuggestions}
                   snoozedSuggestions={filteredSnoozedSuggestions}
@@ -926,6 +929,7 @@ export default function ExpensesPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+              <TripChecklistTrigger tripId={tripId} />
               <ProactiveSuggestionsTray
                 activeSuggestions={filteredActiveSuggestions}
                 snoozedSuggestions={filteredSnoozedSuggestions}

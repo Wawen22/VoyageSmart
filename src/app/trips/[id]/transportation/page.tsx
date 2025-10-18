@@ -37,6 +37,7 @@ const TransportationDetailsModal = lazy(() => import('@/components/transportatio
 import { LazyTransportationMap } from '@/components/LazyComponents';
 import TransportationCounterWidget from '@/components/ui/TransportationCounterWidget';
 import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { TripChecklistTrigger } from '@/components/trips/TripChecklistTrigger';
 import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 
 type Trip = {
@@ -48,6 +49,7 @@ type Trip = {
 
 export default function TransportationPage() {
   const { id } = useParams();
+  const tripId = Array.isArray(id) ? id[0] : (id as string);
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useAuth();
@@ -292,6 +294,7 @@ export default function TransportationPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+              <TripChecklistTrigger tripId={tripId} />
               <ProactiveSuggestionsTray
                 activeSuggestions={filteredActiveSuggestions}
                 snoozedSuggestions={filteredSnoozedSuggestions}

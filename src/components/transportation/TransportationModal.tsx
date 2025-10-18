@@ -32,7 +32,9 @@ import {
   MoreHorizontalIcon,
   MapPinIcon,
   FileIcon,
-  XIcon
+  XIcon,
+  Calendar as CalendarIcon,
+  DollarSignIcon
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { LazyMapView } from '@/components/LazyComponents';

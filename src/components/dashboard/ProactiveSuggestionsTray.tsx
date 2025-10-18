@@ -130,7 +130,7 @@ export function ProactiveSuggestionsTray({
             </span>
           )}
         </div>
-        <span>Suggerimenti salvati</span>
+        <span>My Suggestions</span>
       </button>
 
       {open && anchorRect && createPortal(

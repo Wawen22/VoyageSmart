@@ -17,6 +17,7 @@ import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
 const ItineraryWizard = lazy(() => import('@/components/ai/ItineraryWizard'));
 import { LazyItineraryMapView } from '@/components/LazyComponents';
 import { ProactiveSuggestionsTray } from '@/components/dashboard/ProactiveSuggestionsTray';
+import { TripChecklistTrigger } from '@/components/trips/TripChecklistTrigger';
 import { useProactiveSuggestions } from '@/hooks/useProactiveSuggestions';
 
 // Lazy load heavy components
@@ -64,6 +65,7 @@ type Activity = {
 
 export default function TripItinerary() {
   const { id } = useParams();
+  const tripId = Array.isArray(id) ? id[0] : (id as string);
   const router = useRouter();
   const { user } = useAuth();
   const { canAccessFeature } = useSubscription();
@@ -619,9 +621,12 @@ export default function TripItinerary() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="flex items-center mb-6">
-          <BackButton href={`/trips/${id}`} />
-          <h1 className="text-2xl font-bold ml-2">Itinerary</h1>
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
+          <div className="flex items-center gap-2">
+            <BackButton href={`/trips/${id}`} />
+            <TripChecklistTrigger tripId={tripId} />
+          </div>
+          <h1 className="text-2xl font-bold">Itinerary</h1>
         </div>
         <ItinerarySkeleton />
       </div>
@@ -680,6 +685,7 @@ export default function TripItinerary() {
               />
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 justify-end">
+              <TripChecklistTrigger tripId={tripId} />
               <ProactiveSuggestionsTray
                 activeSuggestions={filteredActiveSuggestions}
                 snoozedSuggestions={filteredSnoozedSuggestions}

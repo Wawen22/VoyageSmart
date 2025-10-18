@@ -8,9 +8,11 @@ import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import TripChat from '@/components/chat/TripChat';
 import { MessageCircleIcon } from 'lucide-react';
+import { TripChecklistTrigger } from '@/components/trips/TripChecklistTrigger';
 
 export default function TripChatPage() {
   const { id } = useParams();
+  const tripId = Array.isArray(id) ? id[0] : (id as string);
   const { user } = useAuth();
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -144,8 +146,9 @@ export default function TripChatPage() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto py-2 md:py-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-start md:mb-4">
+          <div className="flex justify-between items-start md:mb-4 gap-2">
             <BackButton href={`/trips/${id}`} label="Back to Trip" theme="violet" />
+            <TripChecklistTrigger tripId={tripId} />
           </div>
 
           {/* Hide Group Chat title section on mobile, show only on desktop */}
