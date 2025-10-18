@@ -44,6 +44,7 @@ interface ContextualActionButtonsProps {
 const iconMap = {
   Receipt: Receipt,
   Calendar: Calendar,
+  CalendarIcon: Calendar,
   Building2: Building2,
   Car: Car,
   MapPin: MapPin,
