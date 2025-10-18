@@ -62,4 +62,4 @@ VoyageSmart is a full-stack travel planning platform. It helps individuals and g
 - Google Gemini API, OpenAI API, DeepSeek via OpenRouter (AI features)
 - Mapbox GL (interactive maps), Weather API (forecast data)
 - Resend (transactional email)
-- Vercel deployment platform and telemetry (Next.js)
+- Vercel deployment platform and telemetry (Next.js) -> Manual Vercel deployment

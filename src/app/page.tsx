@@ -38,7 +38,11 @@ import {
   HeartIcon,
   AwardIcon,
   ChevronUpIcon,
-  HomeIcon
+  HomeIcon,
+  LightbulbIcon,
+  CheckSquareIcon,
+  BarChart3Icon,
+  CloudIcon
 } from 'lucide-react';
 
 export default function Home() {
@@ -59,10 +63,7 @@ export default function Home() {
   } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
-  const aiRef = useRef<HTMLDivElement>(null);
-  const latestRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
-  const faqRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -86,10 +87,7 @@ export default function Home() {
       const sections = [
         { ref: heroRef, id: 'hero' },
         { ref: featuresRef, id: 'features' },
-        { ref: aiRef, id: 'ai' },
-        { ref: latestRef, id: 'latest' },
-        { ref: pricingRef, id: 'pricing' },
-        { ref: faqRef, id: 'faq' }
+        { ref: pricingRef, id: 'pricing' }
       ];
 
       const scrollPosition = window.scrollY + 200;
@@ -178,43 +176,43 @@ export default function Home() {
 
   const features = [
     {
-      title: 'Plan Your Trips',
-      description: 'Create detailed itineraries, add accommodations, and organize transportation all in one place.',
+      title: 'Smart Trip Planning',
+      description: 'Create detailed itineraries with AI-powered suggestions, manage accommodations, and organize transportation seamlessly.',
       icon: <CalendarIcon className="h-6 w-6 text-primary" />,
       delay: 0,
       image: '/images/app-screenshot-1.jpg'
     },
     {
-      title: 'AI-Powered Assistant',
-      description: 'Get intelligent travel recommendations, smart itinerary optimization, and 24/7 AI assistance for your trips.',
+      title: 'AI Travel Assistant',
+      description: 'Get 24/7 intelligent recommendations, automated itinerary generation, and proactive suggestions tailored to your trip.',
       icon: <SparklesIcon className="h-6 w-6 text-primary" />,
       delay: 100,
       image: '/images/app-screenshots/4_Trip-Details_AI_Chat.png'
     },
     {
-      title: 'Keep a Travel Journal',
-      description: 'Document your journey with daily entries, organize photos in a gallery, and create a timeline of memories.',
+      title: 'Travel Journal & Memories',
+      description: 'Document your journey with daily entries, organize photos in a beautiful gallery, and create an interactive timeline of memories.',
       icon: <BookOpenIcon className="h-6 w-6 text-primary" />,
       delay: 200,
       image: '/images/app-screenshots/10_TripPlanner_Journal_Timeline-View.jpeg'
     },
     {
-      title: 'Track Expenses',
-      description: 'Keep track of your travel budget, split expenses with friends, and see who owes what.',
+      title: 'Smart Expense Tracking',
+      description: 'Track expenses with multi-currency support, split costs fairly among travelers, and get real-time balance updates.',
       icon: <DollarSignIcon className="h-6 w-6 text-primary" />,
       delay: 300,
       image: '/images/app-screenshot-2.jpg'
     },
     {
-      title: 'Travel Analytics',
-      description: 'Discover insights about your travel patterns with detailed analytics on destinations, frequency, duration, and spending habits.',
+      title: 'Travel Analytics & Insights',
+      description: 'Discover patterns in your travel habits with comprehensive analytics on destinations, spending, duration, and preferences.',
       icon: <TrendingUpIcon className="h-6 w-6 text-primary" />,
       delay: 400,
       image: '/images/app-screenshots/2_Dashboard_Analytics.png'
     },
     {
-      title: 'Collaborate',
-      description: 'Invite friends and family to join your trip planning, make decisions together, and share memories.',
+      title: 'Real-Time Collaboration',
+      description: 'Plan together with friends and family, share checklists, chat in real-time, and make group decisions effortlessly.',
       icon: <UsersIcon className="h-6 w-6 text-primary" />,
       delay: 500,
       image: '/images/app-screenshot-3.jpg'
@@ -223,72 +221,7 @@ export default function Home() {
 
 
 
-  const faqItems = [
-    {
-      title: 'Is VoyageSmart free to use?',
-      content: (
-        <p>
-          VoyageSmart offers a free tier that allows you to create up to 3 trips. For unlimited trips and access to premium features like accommodation and transportation tracking, you can upgrade to our Premium plan. For AI-powered features, check out our AI Assistant plan.
-        </p>
-      )
-    },
-    {
-      title: 'What AI features are available?',
-      content: (
-        <p>
-          Our AI Assistant plan includes a 24/7 AI travel assistant that provides personalized recommendations, an AI Itinerary Generation Wizard that creates complete day-by-day plans, smart budget optimization, and intelligent activity suggestions based on your preferences and travel style.
-        </p>
-      )
-    },
-    {
-      title: 'How does the AI Itinerary Generation Wizard work?',
-      content: (
-        <p>
-          The AI Wizard asks you about your travel preferences, budget, interests, and time constraints. Based on this information, it generates a complete itinerary with activities, timing suggestions, and location recommendations. You can then review and edit the suggestions before adding them to your trip.
-        </p>
-      )
-    },
-    {
-      title: 'How do I invite friends to my trip?',
-      content: (
-        <p>
-          Once you\'ve created a trip, you can invite friends by going to the trip details page and clicking on the "Invite" button. You can then enter their email addresses to send them an invitation.
-        </p>
-      )
-    },
-    {
-      title: 'What is the Travel Journal feature?',
-      content: (
-        <p>
-          The Travel Journal feature allows you to document your journey with daily entries, organize photos in a gallery, and create a timeline of memories. The Journal is now a dedicated section, easily accessible from your trip's dashboard.
-        </p>
-      )
-    },
-    {
-      title: 'Can I use VoyageSmart on my mobile device?',
-      content: (
-        <p>
-          Yes! VoyageSmart is fully responsive and works on all devices, including smartphones and tablets. We\'ve optimized the interface for mobile use, so you can plan your trips on the go.
-        </p>
-      )
-    },
-    {
-      title: 'How does expense splitting work?',
-      content: (
-        <p>
-          Our expense tracking feature allows you to record expenses and assign them to specific trip participants. The app automatically calculates who owes what, making it easy to settle up at the end of your trip.
-        </p>
-      )
-    },
-    {
-      title: 'Can I export my itinerary?',
-      content: (
-        <p>
-          Currently, you can view your itinerary within the app. We're working on adding export functionality in a future update, which will allow you to export your itinerary to PDF or share it with non-VoyageSmart users.
-        </p>
-      )
-    }
-  ];
+
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 relative overflow-hidden">
@@ -343,7 +276,22 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section ref={heroRef} className="min-h-screen lg:min-h-[85vh] xl:min-h-screen w-full flex items-center justify-center relative pt-16">
+      <section ref={heroRef} aria-label="Hero section - VoyageSmart AI-powered travel planning" className="min-h-screen lg:min-h-[85vh] xl:min-h-screen w-full flex items-center justify-center relative pt-16 overflow-hidden">
+        {/* Animated Background Video */}
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-5 dark:opacity-10"
+          >
+            <source src="/images/animated_logo-voyage_smart.mp4" type="video/mp4" />
+          </video>
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
+        </div>
+
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-12 xl:gap-16">
             {/* Left Side - Content */}
@@ -360,21 +308,25 @@ export default function Home() {
                 </h1>
 
                 <p className="text-xl md:text-2xl lg:text-xl xl:text-2xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                  The <span className="text-primary font-semibold">AI-powered travel companion</span> that transforms how you plan, organize, and experience your adventures.
+                  The <span className="text-primary font-semibold">AI-powered travel companion</span> that transforms how you plan, organize, and experience your adventures with intelligent suggestions and seamless collaboration.
                 </p>
 
                 <div className="flex flex-wrap justify-center lg:justify-start gap-3">
-                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20">
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
                     <SparklesIcon className="h-4 w-4 mr-2" />
                     AI-Powered
                   </Badge>
-                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20">
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
                     <UsersIcon className="h-4 w-4 mr-2" />
                     Collaborative
                   </Badge>
-                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20">
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
                     <ZapIcon className="h-4 w-4 mr-2" />
                     Smart Planning
+                  </Badge>
+                  <Badge variant="secondary" className="px-4 py-2 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+                    <BookOpenIcon className="h-4 w-4 mr-2" />
+                    Travel Journal
                   </Badge>
                 </div>
 
@@ -438,116 +390,702 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section ref={featuresRef} className="py-16 md:py-24 relative overflow-hidden bg-gradient-to-b from-background to-muted/10">
+      {/* How It Works Section */}
+      <section aria-label="How VoyageSmart works - Step by step guide" className="py-20 md:py-32 bg-gradient-to-b from-muted/10 via-background to-background relative overflow-hidden">
         {/* Background Elements */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-primary/8 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]"></div>
+        <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-3xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full border border-primary/20 mb-6 animate-fade-in backdrop-blur-sm">
-              <AwardIcon className="h-5 w-5" />
-              <span className="font-semibold">Powerful Features</span>
+          {/* Section Header */}
+          <div className="text-center mb-16 lg:mb-20">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full border border-primary/20 mb-6 backdrop-blur-sm">
+              <RocketIcon className="h-5 w-5" />
+              <span className="font-semibold">Simple Process</span>
             </div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-fade-in bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
-              Everything You Need
-              <span className="block bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                In One Place
+
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+              <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                How VoyageSmart
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Works For You
               </span>
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in delay-100 leading-relaxed">
-              From planning to memories, we've got every aspect of your journey covered
+
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              From planning to memories, follow these simple steps to create unforgettable travel experiences
             </p>
           </div>
 
-          {/* Features Grid - Modern Compact Design */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="group relative overflow-hidden bg-gradient-to-br from-background/80 via-background/60 to-background/40 backdrop-blur-xl border border-border/30 hover:border-primary/40 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 hover:scale-[1.02]"
-                style={{ animationDelay: `${feature.delay}ms` }}
-              >
-                {/* Glassy Background Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-2xl"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent opacity-50 rounded-2xl"></div>
+          {/* Steps Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6 mb-12">
+            {/* Step 1 */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-3xl blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
+              <div className="relative bg-card border-2 border-border/50 rounded-3xl p-8 hover:border-primary/30 transition-all duration-300 h-full">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                      1
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold">Create Your Trip</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Set your destination, dates, and invite travel companions to start planning together
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-3xl blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
+              <div className="relative bg-card border-2 border-border/50 rounded-3xl p-8 hover:border-primary/30 transition-all duration-300 h-full">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                      2
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold">Plan with AI</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Use our AI Assistant to generate itineraries, get suggestions, and optimize your schedule
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-3xl blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
+              <div className="relative bg-card border-2 border-border/50 rounded-3xl p-8 hover:border-primary/30 transition-all duration-300 h-full">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                      3
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold">Track & Organize</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Manage expenses, create checklists, and keep everything organized in one place
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-3xl blur opacity-25 group-hover:opacity-75 transition duration-500"></div>
+              <div className="relative bg-card border-2 border-border/50 rounded-3xl p-8 hover:border-primary/30 transition-all duration-300 h-full">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center text-2xl font-bold text-white shadow-lg">
+                      4
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold">Capture Memories</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Document your journey with photos, journal entries, and create a beautiful timeline
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <p className="text-lg text-muted-foreground mb-6">
+              Ready to transform your travel planning experience?
+            </p>
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-10 py-6 rounded-2xl text-lg font-semibold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
+            >
+              <Link href="/register" className="flex items-center gap-3">
+                <RocketIcon className="h-6 w-6" />
+                Get Started Free
+                <ArrowRightIcon className="h-5 w-5 animate-bounce-horizontal" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section - Consolidated & Categorized */}
+      <section ref={featuresRef} aria-label="VoyageSmart features organized by category" className="py-20 md:py-32 relative overflow-hidden bg-gradient-to-b from-background via-muted/5 to-background">
+        {/* Background Elements */}
+        <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-bl from-purple-500/5 via-primary/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-primary/8 to-transparent rounded-full blur-3xl"></div>
+
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16 lg:mb-20">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full border border-primary/20 mb-6 backdrop-blur-sm">
+              <AwardIcon className="h-5 w-5" />
+              <span className="font-semibold">Complete Platform</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                Everything You Need
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                For Perfect Trips
+              </span>
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              A comprehensive suite of tools powered by AI to plan, organize, and capture every moment of your journey
+            </p>
+          </div>
+
+          {/* AI-Powered Intelligence - MOST PROMINENT */}
+          <div className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-xl">
+                <SparklesIcon className="h-6 w-6 text-purple-500" />
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-primary to-indigo-600 bg-clip-text text-transparent">
+                  AI-Powered Intelligence
+                </h3>
+                <p className="text-muted-foreground text-sm">Let AI handle the heavy lifting</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* AI Travel Assistant */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-purple-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview - Video */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-indigo-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshots/4_Trip-Details_AI_Chat.png', '24/7 AI Assistant', 'AI Chat Interface', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <FeatureScreenshot
+                      src="/images/app-screenshots/4_Trip-Details_AI_Chat.png"
+                      alt="AI Assistant Chat Interface"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
+                  {/* Play/Expand Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-purple-500/90 backdrop-blur-sm rounded-full border border-purple-300/30 shadow-xl">
+                      <PlayIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  {/* Badge */}
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-purple-500/90 backdrop-blur-sm rounded-full border border-purple-300/30">
+                    <span className="text-xs font-semibold text-white">Video Demo</span>
+                  </div>
+                </div>
 
                 {/* Content */}
-                <div className="relative z-10">
-                  {/* Header */}
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl group-hover:from-primary/30 group-hover:to-primary/20 transition-all duration-300 shadow-md group-hover:scale-110 backdrop-blur-sm">
-                      {feature.icon}
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <SparklesIcon className="h-5 w-5 text-purple-500" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300">
-                        {feature.title}
-                      </h3>
-                    </div>
+                    <h4 className="text-lg font-bold">24/7 AI Assistant</h4>
                   </div>
-
-                  {/* Description */}
-                  <p className="text-muted-foreground leading-relaxed mb-4 text-sm">
-                    {feature.description}
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Chat with AI for instant recommendations, answers, and personalized travel advice anytime
                   </p>
+                </div>
+              </div>
 
-                  {/* Feature Preview */}
-                  <div
-                    className="relative overflow-hidden rounded-xl mb-4 group-hover:scale-[1.02] transition-transform duration-500 cursor-pointer"
-                    onClick={() => openMediaPopup(feature.image, feature.title, feature.title, 'image')}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10 rounded-xl"></div>
+              {/* AI Itinerary Wizard */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-indigo-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview - Video Placeholder */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-indigo-500/10 via-indigo-500/5 to-purple-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'AI Itinerary Wizard', 'AI-Generated Itinerary', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
                     <FeatureScreenshot
-                      src={feature.image}
-                      alt={feature.title}
-                      className="w-full h-32 object-cover transition-transform duration-700 group-hover:scale-105"
+                      src="/images/app-screenshot-1.jpg"
+                      alt="AI Itinerary Wizard"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    {/* Play Button Overlay */}
-                    <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <div className="p-3 bg-background/90 backdrop-blur-md rounded-full border border-primary/30 shadow-xl hover:scale-110 transition-transform duration-300 group">
-                        <PlayIcon className="h-6 w-6 text-primary ml-0.5" />
-                      </div>
-                    </div>
-                    {/* Corner Play Icon */}
-                    <div className="absolute top-3 right-3 z-20 p-2 bg-background/80 backdrop-blur-sm rounded-lg border border-border/50 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <PlayIcon className="h-4 w-4 text-primary" />
+                  </div>
+                  {/* Play/Expand Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-indigo-500/90 backdrop-blur-sm rounded-full border border-indigo-300/30 shadow-xl">
+                      <PlayIcon className="h-6 w-6 text-white" />
                     </div>
                   </div>
+                  {/* Badge */}
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-indigo-500/90 backdrop-blur-sm rounded-full border border-indigo-300/30">
+                    <span className="text-xs font-semibold text-white">Video Demo</span>
+                  </div>
+                </div>
 
-                  {/* Feature Highlight */}
-                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-3 border border-primary/20 group-hover:border-primary/30 transition-all duration-300 backdrop-blur-sm">
-                    <div className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse mt-1.5 flex-shrink-0"></div>
-                      <p className="text-xs font-medium text-primary/90 leading-relaxed">
-                        {index === 0 && "Create detailed day-by-day plans for your entire trip"}
-                        {index === 1 && "Get personalized recommendations and smart suggestions powered by AI"}
-                        {index === 2 && "Document your journey with photos and daily entries"}
-                        {index === 3 && "Split expenses fairly and see who owes what"}
-                        {index === 4 && "Analyze your travel patterns with detailed insights and statistics"}
-                        {index === 5 && "Plan together with friends and family in real-time"}
-                      </p>
+                {/* Content */}
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <CalendarIcon className="h-5 w-5 text-indigo-500" />
+                    </div>
+                    <h4 className="text-lg font-bold">AI Itinerary Wizard</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Generate complete day-by-day itineraries with activities, timing, and location suggestions
+                  </p>
+                </div>
+              </div>
+
+              {/* Proactive Suggestions */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-purple-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview - Image Placeholder */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-pink-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Proactive Suggestions', 'AI Proactive Suggestions', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <LightbulbIcon className="h-16 w-16 text-purple-500/40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">Click to preview</p>
+                    </div>
+                  </div>
+                  {/* Expand Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-purple-500/90 backdrop-blur-sm rounded-full border border-purple-300/30 shadow-xl">
+                      <ImageIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  {/* Badge */}
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-purple-500/90 backdrop-blur-sm rounded-full border border-purple-300/30">
+                    <span className="text-xs font-semibold text-white">Screenshot</span>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <LightbulbIcon className="h-5 w-5 text-purple-500" />
+                    </div>
+                    <h4 className="text-lg font-bold">Proactive Suggestions</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Get context-aware recommendations before you need them - packing lists, activities, and tips
+                  </p>
+                </div>
+              </div>
+
+              {/* Smart Budget Optimization */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-indigo-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview - Image Placeholder */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-indigo-500/10 via-indigo-500/5 to-blue-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-2.jpg', 'Budget Optimization', 'AI Budget Planning', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <FeatureScreenshot
+                      src="/images/app-screenshot-2.jpg"
+                      alt="Budget Optimization"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
+                  {/* Expand Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-indigo-500/90 backdrop-blur-sm rounded-full border border-indigo-300/30 shadow-xl">
+                      <ImageIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  {/* Badge */}
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-indigo-500/90 backdrop-blur-sm rounded-full border border-indigo-300/30">
+                    <span className="text-xs font-semibold text-white">Screenshot</span>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <DollarSignIcon className="h-5 w-5 text-indigo-500" />
+                    </div>
+                    <h4 className="text-lg font-bold">Budget Optimization</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    AI-powered budget planning to maximize your experience within your spending limits
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Planning & Organization */}
+          <div className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl">
+                <MapPinIcon className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold">Planning & Organization</h3>
+                <p className="text-muted-foreground text-sm">Build your perfect itinerary</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Smart Trip Planning */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-primary/10 via-primary/5 to-blue-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Smart Trip Planning', 'Trip Planning Interface', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <FeatureScreenshot
+                      src="/images/app-screenshot-1.jpg"
+                      alt="Smart Trip Planning"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-primary/90 backdrop-blur-sm rounded-full border border-primary-foreground/30 shadow-xl">
+                      <ImageIcon className="h-6 w-6 text-white" />
                     </div>
                   </div>
                 </div>
 
-                {/* Decorative Elements */}
-                <div className="absolute top-2 right-2 w-16 h-16 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                <div className="absolute bottom-2 left-2 w-12 h-12 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <CalendarIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Smart Trip Planning</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Create detailed itineraries with activities, accommodations, and transportation all in one place
+                  </p>
+                </div>
               </div>
-            ))}
+
+              {/* Interactive Maps */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview - Video Placeholder */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-emerald-500/10 via-primary/5 to-teal-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Interactive Maps', 'Map View Interface', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <GlobeIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">Interactive map demo</p>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-emerald-500/90 backdrop-blur-sm rounded-full border border-emerald-300/30 shadow-xl">
+                      <PlayIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-emerald-500/90 backdrop-blur-sm rounded-full border border-emerald-300/30">
+                    <span className="text-xs font-semibold text-white">Video Demo</span>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <GlobeIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Interactive Maps</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Visualize your journey with map, calendar, and list views for all destinations
+                  </p>
+                </div>
+              </div>
+
+              {/* Multi-Destination */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-blue-500/10 via-primary/5 to-cyan-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Multi-Destination Planning', 'Multi-Stop Trip View', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <FeatureScreenshot
+                      src="/images/app-screenshot-3.jpg"
+                      alt="Multi-Destination Planning"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-blue-500/90 backdrop-blur-sm rounded-full border border-blue-300/30 shadow-xl">
+                      <ImageIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <MapPinIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Multi-Destination</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Plan complex trips with multiple stops, perfect for road trips and backpacking adventures
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Collaboration & Sharing */}
+          <div className="mb-20">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl">
+                <UsersIcon className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold">Collaboration & Sharing</h3>
+                <p className="text-muted-foreground text-sm">Plan together seamlessly</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Real-Time Collaboration */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview - Video Placeholder */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-pink-500/10 via-primary/5 to-rose-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Real-Time Collaboration', 'Collaborative Planning', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <UsersIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">Real-time collaboration demo</p>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-pink-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-pink-500/90 backdrop-blur-sm rounded-full border border-pink-300/30 shadow-xl">
+                      <PlayIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-pink-500/90 backdrop-blur-sm rounded-full border border-pink-300/30">
+                    <span className="text-xs font-semibold text-white">Video Demo</span>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <UsersIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Real-Time Collaboration</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Plan together with friends and family, chat in real-time, and make group decisions effortlessly
+                  </p>
+                </div>
+              </div>
+
+              {/* Trip Checklists */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview - Video Placeholder */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-green-500/10 via-primary/5 to-emerald-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Trip Checklists', 'Checklist Interface', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <CheckSquareIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">Drag-and-drop checklist demo</p>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-green-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-green-500/90 backdrop-blur-sm rounded-full border border-green-300/30 shadow-xl">
+                      <PlayIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="absolute top-3 right-3 px-3 py-1 bg-green-500/90 backdrop-blur-sm rounded-full border border-green-300/30">
+                    <span className="text-xs font-semibold text-white">Video Demo</span>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <CheckSquareIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Trip Checklists</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Create personal and group checklists with drag-and-drop organization and real-time sync
+                  </p>
+                </div>
+              </div>
+
+              {/* Role-Based Permissions */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-amber-500/10 via-primary/5 to-orange-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-2.jpg', 'Smart Permissions', 'Permission Management', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <ShieldIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">Permission controls</p>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-amber-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-amber-500/90 backdrop-blur-sm rounded-full border border-amber-300/30 shadow-xl">
+                      <ImageIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <ShieldIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Smart Permissions</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Control who can view, edit, or manage different aspects of your trip with role-based access
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tracking & Insights */}
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl">
+                <TrendingUpIcon className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold">Tracking & Insights</h3>
+                <p className="text-muted-foreground text-sm">Stay organized and informed</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Smart Expense Tracking */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-green-500/10 via-primary/5 to-emerald-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-2.jpg', 'Expense Tracking', 'Expense Management Dashboard', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <FeatureScreenshot
+                      src="/images/app-screenshot-2.jpg"
+                      alt="Expense Tracking"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-green-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-green-500/90 backdrop-blur-sm rounded-full border border-green-300/30 shadow-xl">
+                      <ImageIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <DollarSignIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Expense Tracking</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Track expenses with multi-currency support, split costs fairly, and see real-time balances
+                  </p>
+                </div>
+              </div>
+
+              {/* Travel Analytics */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-blue-500/10 via-primary/5 to-cyan-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshots/2_Dashboard_Analytics.png', 'Travel Analytics', 'Analytics Dashboard', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <FeatureScreenshot
+                      src="/images/app-screenshots/2_Dashboard_Analytics.png"
+                      alt="Travel Analytics Dashboard"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-blue-500/90 backdrop-blur-sm rounded-full border border-blue-300/30 shadow-xl">
+                      <ImageIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <BarChart3Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Travel Analytics</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Discover patterns in your travel with insights on destinations, spending, and preferences
+                  </p>
+                </div>
+              </div>
+
+              {/* Weather Integration */}
+              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                {/* Media Preview */}
+                <div
+                  className="relative h-48 bg-gradient-to-br from-sky-500/10 via-primary/5 to-blue-500/10 cursor-pointer overflow-hidden"
+                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Weather Integration', 'Weather Forecast Widget', 'image')}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <CloudIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">7-day weather forecast</p>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-sky-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="p-3 bg-sky-500/90 backdrop-blur-sm rounded-full border border-sky-300/30 shadow-xl">
+                      <ImageIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                      <CloudIcon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h4 className="text-lg font-bold">Weather Integration</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Real-time weather and 7-day forecasts for all destinations to plan activities perfectly
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Call to Action */}
           <div className="text-center">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-8 py-4 rounded-xl text-base font-semibold shadow-xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-10 py-6 rounded-2xl text-lg font-semibold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
             >
               <Link href="/register" className="flex items-center gap-3">
-                <TrendingUpIcon className="h-5 w-5" />
-                Explore All Features
-                <ArrowRightIcon className="h-4 w-4 animate-bounce-horizontal" />
+                <RocketIcon className="h-6 w-6" />
+                Get Started Free
+                <ArrowRightIcon className="h-5 w-5 animate-bounce-horizontal" />
               </Link>
             </Button>
           </div>
@@ -558,273 +1096,337 @@ export default function Home() {
 
 
 
-
-
-      {/* AI Features Section */}
-      <section ref={aiRef} className="py-16 md:py-24 bg-gradient-to-b from-primary/5 to-background relative overflow-hidden">
+      {/* What's New Section */}
+      <section aria-label="What's new - Latest VoyageSmart updates and features" className="py-20 md:py-32 bg-gradient-to-b from-muted/10 via-background to-background relative overflow-hidden">
         {/* Background Elements */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-purple-500/8 via-primary/5 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-indigo-500/6 via-primary/4 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-bl from-emerald-500/5 via-primary/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-purple-500/5 via-primary/5 to-transparent rounded-full blur-3xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           {/* Section Header */}
-          <div className="text-center mb-12 lg:mb-16">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/10 via-primary/10 to-indigo-500/10 text-purple-600 px-4 py-2 rounded-full border border-purple-500/20 mb-6">
-              <SparklesIcon className="h-5 w-5" />
-              <span className="font-semibold">AI Powered</span>
+          <div className="text-center mb-16 lg:mb-20">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500/10 via-primary/10 to-purple-500/10 text-emerald-600 dark:text-emerald-400 px-6 py-3 rounded-full border border-emerald-500/20 mb-6 backdrop-blur-sm">
+              <StarIcon className="h-5 w-5" />
+              <span className="font-semibold">What's New</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6">
-              <span className="bg-gradient-to-r from-purple-600 via-primary to-indigo-600 bg-clip-text text-transparent">
-                Intelligent Travel
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+              <span className="bg-gradient-to-r from-emerald-600 via-primary to-purple-600 bg-clip-text text-transparent">
+                Latest Updates
               </span>
               <br />
               <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                Planning
+                & New Features
               </span>
             </h2>
 
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Experience the future of travel planning with our AI-powered assistant that learns your preferences and provides personalized recommendations.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Check out our newest features and improvements that make VoyageSmart even better
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-            {/* Left Side - Features List */}
-            <div className="flex-1 w-full">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
-                <div className="flex items-start gap-4 p-4 rounded-2xl bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/10 hover:border-purple-500/20 transition-all duration-300 group">
-                  <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
-                    <SparklesIcon className="h-6 w-6 text-purple-500" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg md:text-xl font-bold text-purple-600 mb-2">24/7 AI Travel Assistant</h3>
-                    <p className="text-sm md:text-base text-muted-foreground">Get instant answers and personalized suggestions</p>
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
+            {/* Proactive AI Suggestions */}
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/90 via-card/80 to-card/70 backdrop-blur-xl border-2 border-border/30 hover:border-emerald-500/40 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+              {/* Glowing Background Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+
+              {/* Media Preview */}
+              <div
+                className="relative h-56 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-green-500/10 cursor-pointer overflow-hidden"
+                onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Proactive AI Suggestions', 'AI Suggestions Interface', 'image')}
+              >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center p-6">
+                    <LightbulbIcon className="h-20 w-20 text-emerald-500/40 mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground font-medium">AI Proactive Suggestions Demo</p>
                   </div>
                 </div>
-
-                <div className="flex items-start gap-4 p-4 rounded-2xl bg-gradient-to-br from-indigo-500/5 to-indigo-500/10 border border-indigo-500/10 hover:border-indigo-500/20 transition-all duration-300 group">
-                  <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
-                    <CalendarIcon className="h-6 w-6 text-indigo-500" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg md:text-xl font-bold text-indigo-600 mb-2">AI Itinerary Wizard</h3>
-                    <p className="text-sm md:text-base text-muted-foreground">Generate complete day-by-day plans</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                  <div className="p-4 bg-emerald-500/90 backdrop-blur-sm rounded-full border border-emerald-300/30 shadow-2xl">
+                    <PlayIcon className="h-8 w-8 text-white" />
                   </div>
                 </div>
-
-                <div className="flex items-start gap-4 p-4 rounded-2xl bg-gradient-to-br from-purple-500/5 to-purple-500/10 border border-purple-500/10 hover:border-purple-500/20 transition-all duration-300 group sm:col-span-2 lg:col-span-1">
-                  <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300">
-                    <DollarSignIcon className="h-6 w-6 text-purple-500" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg md:text-xl font-bold text-purple-600 mb-2">Smart Budget Optimization</h3>
-                    <p className="text-sm md:text-base text-muted-foreground">Maximize your experience within your budget</p>
-                  </div>
+                <div className="absolute top-4 right-4 px-4 py-2 bg-emerald-500/90 backdrop-blur-sm rounded-full border border-emerald-300/30">
+                  <span className="text-sm font-bold text-white">Video Demo</span>
                 </div>
               </div>
 
-              <div className="mt-8 text-center lg:text-left">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-purple-500 via-primary to-indigo-600 hover:from-purple-600 hover:via-primary/90 hover:to-indigo-700 text-white px-8 py-4 md:py-6 rounded-xl text-base md:text-lg font-semibold shadow-xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105"
-                  onClick={() => scrollToSection(pricingRef)}
-                >
-                  <SparklesIcon className="h-5 w-5 mr-2" />
-                  Experience AI Magic
-                </Button>
+              <div className="relative z-10 p-8 lg:p-10">
+                {/* Icon & Title */}
+                <div className="flex items-start gap-5 mb-6">
+                  <div className="p-4 bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 rounded-2xl shadow-lg group-hover:scale-110 group-hover:shadow-emerald-500/20 transition-all duration-300">
+                    <LightbulbIcon className="h-8 w-8 text-emerald-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent group-hover:from-emerald-500 group-hover:to-emerald-600 transition-all duration-300">
+                      Proactive AI Suggestions
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Intelligent recommendations when you need them</p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-base text-muted-foreground leading-relaxed mb-6">
+                  Get smart, context-aware suggestions automatically based on your trip timeline and preferences. From packing reminders before departure to activity recommendations during your journey.
+                </p>
+
+                {/* Feature Highlights */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Upcoming trip reminders with smart packing lists</p>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">In-trip activity suggestions based on location</p>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Snooze and manage suggestions with ease</p>
+                  </div>
+                </div>
+
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm font-semibold">
+                  <SparklesIcon className="h-4 w-4" />
+                  AI-Powered
+                </div>
               </div>
             </div>
 
-            {/* Right Side - AI Demo */}
-            <div className="flex-1 w-full max-w-lg lg:max-w-none">
-              <div className="bg-gradient-to-br from-purple-500/10 via-primary/5 to-indigo-500/10 rounded-2xl p-4 md:p-6 border border-purple-500/20 shadow-xl backdrop-blur-sm">
-                <div className="bg-gradient-to-br from-card/95 to-card/85 rounded-xl p-4 md:p-6 shadow-lg border border-border/50">
-                  {/* Header */}
-                  <div className="flex items-center mb-4">
-                    <div className="relative">
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mr-3 shadow-md">
-                        <SparklesIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
-                    </div>
-                    <div>
-                      <span className="font-bold text-sm md:text-base bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">AI Travel Assistant</span>
-                      <p className="text-xs text-muted-foreground">Online • Ready to help</p>
-                    </div>
-                  </div>
+            {/* Trip Checklists */}
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/90 via-card/80 to-card/70 backdrop-blur-xl border-2 border-border/30 hover:border-teal-500/40 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+              {/* Glowing Background Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-teal-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-teal-500/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
-                  {/* Chat Messages */}
-                  <div className="space-y-3">
-                    <div className="bg-gradient-to-r from-purple-500/10 to-purple-500/5 rounded-xl p-3 border border-purple-500/20">
-                      <p className="text-xs text-muted-foreground mb-1">You</p>
-                      <p className="font-medium text-sm">"Suggest activities for my trip to Rome"</p>
-                    </div>
-
-                    <div className="bg-gradient-to-r from-indigo-500/10 to-indigo-500/5 rounded-xl p-3 border border-indigo-500/20">
-                      <p className="text-xs text-muted-foreground mb-2">AI Assistant</p>
-                      <p className="text-sm mb-2">Based on your trip to Rome (June 15-20) and your interest in history and food, I recommend:</p>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
-                          <CalendarIcon className="h-4 w-4 text-indigo-500 flex-shrink-0" />
-                          <span className="text-xs">Colosseum tour (morning, avoid crowds)</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
-                          <DollarSignIcon className="h-4 w-4 text-indigo-500 flex-shrink-0" />
-                          <span className="text-xs">Trastevere food tour (evening)</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-background/50 rounded-lg p-2">
-                          <MapPinIcon className="h-4 w-4 text-indigo-500 flex-shrink-0" />
-                          <span className="text-xs">Vatican Museums (book skip-the-line)</span>
-                        </div>
-                      </div>
-                    </div>
+              {/* Media Preview */}
+              <div
+                className="relative h-56 bg-gradient-to-br from-teal-500/10 via-teal-500/5 to-cyan-500/10 cursor-pointer overflow-hidden"
+                onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Trip Checklists', 'Checklist Management', 'image')}
+              >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center p-6">
+                    <CheckSquareIcon className="h-20 w-20 text-teal-500/40 mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground font-medium">Drag-and-Drop Checklist Demo</p>
                   </div>
-
-                  {/* Typing Indicator */}
-                  <div className="mt-3 flex items-center gap-2 text-muted-foreground">
-                    <div className="flex space-x-1">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                    <span className="text-xs">AI is thinking...</span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-teal-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                  <div className="p-4 bg-teal-500/90 backdrop-blur-sm rounded-full border border-teal-300/30 shadow-2xl">
+                    <PlayIcon className="h-8 w-8 text-white" />
                   </div>
+                </div>
+                <div className="absolute top-4 right-4 px-4 py-2 bg-teal-500/90 backdrop-blur-sm rounded-full border border-teal-300/30">
+                  <span className="text-sm font-bold text-white">Video Demo</span>
+                </div>
+              </div>
+
+              <div className="relative z-10 p-8 lg:p-10">
+                {/* Icon & Title */}
+                <div className="flex items-start gap-5 mb-6">
+                  <div className="p-4 bg-gradient-to-br from-teal-500/20 to-teal-500/10 rounded-2xl shadow-lg group-hover:scale-110 group-hover:shadow-teal-500/20 transition-all duration-300">
+                    <CheckSquareIcon className="h-8 w-8 text-teal-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent group-hover:from-teal-500 group-hover:to-teal-600 transition-all duration-300">
+                      Trip Checklists
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Stay organized with smart checklists</p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-base text-muted-foreground leading-relaxed mb-6">
+                  Create personal and group checklists for every trip. Drag-and-drop to reorder items, check off tasks, and ensure nothing gets forgotten before or during your journey.
+                </p>
+
+                {/* Feature Highlights */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-teal-500/5 to-teal-500/10 border border-teal-500/20">
+                    <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Personal and group checklists for each trip</p>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-teal-500/5 to-teal-500/10 border border-teal-500/20">
+                    <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Drag-and-drop reordering for easy organization</p>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-teal-500/5 to-teal-500/10 border border-teal-500/20">
+                    <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Real-time sync across all participants</p>
+                  </div>
+                </div>
+
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-600 dark:text-teal-400 text-sm font-semibold">
+                  <CheckSquareIcon className="h-4 w-4" />
+                  Collaborative
+                </div>
+              </div>
+            </div>
+
+            {/* Travel Analytics */}
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/90 via-card/80 to-card/70 backdrop-blur-xl border-2 border-border/30 hover:border-blue-500/40 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+              {/* Glowing Background Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+
+              {/* Media Preview */}
+              <div
+                className="relative h-56 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-indigo-500/10 cursor-pointer overflow-hidden"
+                onClick={() => openMediaPopup('/images/app-screenshots/2_Dashboard_Analytics.png', 'Travel Analytics', 'Analytics Dashboard', 'image')}
+              >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <FeatureScreenshot
+                    src="/images/app-screenshots/2_Dashboard_Analytics.png"
+                    alt="Travel Analytics Dashboard"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                  <div className="p-4 bg-blue-500/90 backdrop-blur-sm rounded-full border border-blue-300/30 shadow-2xl">
+                    <ImageIcon className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <div className="absolute top-4 right-4 px-4 py-2 bg-blue-500/90 backdrop-blur-sm rounded-full border border-blue-300/30">
+                  <span className="text-sm font-bold text-white">Live Dashboard</span>
+                </div>
+              </div>
+
+              <div className="relative z-10 p-8 lg:p-10">
+                {/* Icon & Title */}
+                <div className="flex items-start gap-5 mb-6">
+                  <div className="p-4 bg-gradient-to-br from-blue-500/20 to-blue-500/10 rounded-2xl shadow-lg group-hover:scale-110 group-hover:shadow-blue-500/20 transition-all duration-300">
+                    <BarChart3Icon className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-blue-600 transition-all duration-300">
+                      Travel Analytics
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Insights into your travel patterns</p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-base text-muted-foreground leading-relaxed mb-6">
+                  Discover fascinating insights about your travel habits. Analyze destinations, spending patterns, trip frequency, and more with beautiful visualizations and comprehensive statistics.
+                </p>
+
+                {/* Feature Highlights */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Comprehensive travel statistics and trends</p>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Spending analysis and budget insights</p>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Interactive charts and timeline views</p>
+                  </div>
+                </div>
+
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-sm font-semibold">
+                  <TrendingUpIcon className="h-4 w-4" />
+                  Data-Driven
+                </div>
+              </div>
+            </div>
+
+            {/* Weather Integration */}
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/90 via-card/80 to-card/70 backdrop-blur-xl border-2 border-border/30 hover:border-cyan-500/40 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+              {/* Glowing Background Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-cyan-500/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+
+              {/* Media Preview */}
+              <div
+                className="relative h-56 bg-gradient-to-br from-cyan-500/10 via-sky-500/5 to-blue-500/10 cursor-pointer overflow-hidden"
+                onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Weather Integration', 'Weather Forecast Widget', 'image')}
+              >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center p-6">
+                    <CloudIcon className="h-20 w-20 text-cyan-500/40 mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground font-medium">7-Day Weather Forecast</p>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                  <div className="p-4 bg-cyan-500/90 backdrop-blur-sm rounded-full border border-cyan-300/30 shadow-2xl">
+                    <ImageIcon className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <div className="absolute top-4 right-4 px-4 py-2 bg-cyan-500/90 backdrop-blur-sm rounded-full border border-cyan-300/30">
+                  <span className="text-sm font-bold text-white">Live Widget</span>
+                </div>
+              </div>
+
+              <div className="relative z-10 p-8 lg:p-10">
+                {/* Icon & Title */}
+                <div className="flex items-start gap-5 mb-6">
+                  <div className="p-4 bg-gradient-to-br from-cyan-500/20 to-cyan-500/10 rounded-2xl shadow-lg group-hover:scale-110 group-hover:shadow-cyan-500/20 transition-all duration-300">
+                    <CloudIcon className="h-8 w-8 text-cyan-500" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent group-hover:from-cyan-500 group-hover:to-cyan-600 transition-all duration-300">
+                      Weather Integration
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Real-time weather for your destinations</p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-base text-muted-foreground leading-relaxed mb-6">
+                  Stay prepared with real-time weather data and forecasts for all your destinations. Plan activities around the weather and pack accordingly with accurate, up-to-date information.
+                </p>
+
+                {/* Feature Highlights */}
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-cyan-500/5 to-cyan-500/10 border border-cyan-500/20">
+                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Current weather and 7-day forecasts</p>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-cyan-500/5 to-cyan-500/10 border border-cyan-500/20">
+                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Multi-destination weather tracking</p>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-cyan-500/5 to-cyan-500/10 border border-cyan-500/20">
+                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
+                    <p className="text-sm font-medium text-foreground">Temperature, humidity, and precipitation data</p>
+                  </div>
+                </div>
+
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 text-sm font-semibold">
+                  <CloudIcon className="h-4 w-4" />
+                  Real-Time
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Latest Features Section */}
-      <section ref={latestRef} className="py-20 md:py-24 bg-gradient-to-b from-background to-muted/10 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-muted/30 to-transparent"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full filter blur-3xl animate-pulse-slow"></div>
-        <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-primary/5 rounded-full filter blur-2xl animate-pulse-slow"></div>
-
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 px-4 py-1.5 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-              <span className="animate-pulse-slow mr-1">●</span> New
-            </Badge>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-              Latest Features
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              We're constantly improving VoyageSmart with new features to enhance your travel planning experience
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-            <div className="bg-card border-2 border-border/50 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/20 group">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-primary/10 rounded-xl mr-5 group-hover:bg-primary/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
-                  <MapPinIcon className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold group-hover:text-primary transition-colors duration-300">Interactive Maps</h3>
-              </div>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
-                Visualize your trips with interactive maps featuring List, Calendar, and Map views. See all your destinations in one beautiful interface.
-              </p>
-              <div className="bg-gradient-to-br from-primary/5 to-transparent rounded-xl p-5 border border-primary/10 group-hover:border-primary/20 transition-all duration-300">
-                <div className="flex flex-col space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
-                      <MapPinIcon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="font-medium">Interactive Map View</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
-                      <CalendarIcon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="font-medium">Calendar Integration</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
-                      <GlobeIcon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="font-medium">Route Visualization</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-card border-2 border-border/50 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/20 group">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-primary/10 rounded-xl mr-5 group-hover:bg-primary/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
-                  <BookOpenIcon className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold group-hover:text-primary transition-colors duration-300">Travel Journal</h3>
-              </div>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
-                Document your journey with daily entries, organize photos in a gallery, and create a timeline of memories all in one place.
-              </p>
-              <div className="bg-gradient-to-br from-primary/5 to-transparent rounded-xl p-5 border border-primary/10 group-hover:border-primary/20 transition-all duration-300">
-                <div className="flex flex-col space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
-                      <BookOpenIcon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="font-medium">Daily Entries</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
-                      <ImageIcon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="font-medium">Photo Gallery</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-primary/10 shadow-sm">
-                      <CalendarIcon className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="font-medium">Memories Timeline</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-card border-2 border-border/50 rounded-xl overflow-hidden shadow-xl p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-primary/20 group">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-primary/10 rounded-xl mr-5 group-hover:bg-primary/20 transition-all duration-300 shadow-md transform group-hover:scale-110">
-                  <MapPinIcon className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold group-hover:text-primary transition-colors duration-300">Multiple Destinations</h3>
-              </div>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
-                Plan trips with multiple destinations and easily keep track of all your stops. Perfect for road trips, backpacking adventures, or multi-city business trips.
-              </p>
-              <div className="bg-gradient-to-br from-primary/5 to-transparent rounded-xl p-5 border border-primary/10 group-hover:border-primary/20 transition-all duration-300">
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-center p-1 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
-                    <span className="inline-flex items-center font-medium text-primary">
-                      <span className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold mr-2">1</span>
-                      Paris, France
-                      <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">Primary</span>
-                    </span>
-                  </div>
-                  <div style={{ paddingLeft: '4px' }} className="flex items-center p-2 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
-                    <span className="inline-flex items-center">
-                      <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold mr-2">2</span>
-                      Lyon, France
-                    </span>
-                  </div>
-                  <div className="flex items-center p-1 bg-white/50 dark:bg-black/5 rounded-lg shadow-sm">
-                    <span className="inline-flex items-center">
-                      <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold mr-2">3</span>
-                      Nice, France
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* CTA */}
+          <div className="text-center">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-emerald-500 via-primary to-purple-600 hover:from-emerald-600 hover:via-primary/90 hover:to-purple-700 text-white px-10 py-6 rounded-2xl text-lg font-semibold shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105"
+            >
+              <Link href="/register" className="flex items-center gap-3">
+                <RocketIcon className="h-6 w-6" />
+                Try These Features Now
+                <ArrowRightIcon className="h-5 w-5 animate-bounce-horizontal" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section ref={pricingRef} className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
+      <section ref={pricingRef} aria-label="Pricing plans and options" className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-muted/10 to-transparent"></div>
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full filter blur-3xl"></div>
         <div className="absolute bottom-20 left-10 w-72 h-72 bg-primary/5 rounded-full filter blur-2xl"></div>
@@ -1077,45 +1679,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section ref={faqRef} className="py-20 md:py-32 bg-gradient-to-b from-muted/20 to-background relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-muted/20 to-transparent"></div>
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full filter blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-primary/5 rounded-full filter blur-2xl"></div>
-
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-20">
-            <Badge className="mb-4 px-4 py-1.5 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">Help</Badge>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Find answers to common questions about VoyageSmart
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-card/50 backdrop-blur-sm border-2 border-border/50 rounded-xl p-6 md:p-8 shadow-lg">
-              <Accordion items={faqItems} className="mb-8" />
-            </div>
-
-            <div className="text-center mt-16">
-              <p className="text-muted-foreground mb-6 text-lg">Still have questions?</p>
-              <Button
-                variant="outline"
-                className="group px-8 py-6 text-base font-medium rounded-xl border-primary/20 hover:bg-primary/5 transition-all duration-300 hover:scale-105"
-                asChild
-              >
-                <Link href="/support">
-                  <PhoneIcon className="h-5 w-5 mr-3 group-hover:text-primary transition-colors duration-300" />
-                  <span className="group-hover:text-primary transition-colors duration-300">Contact Support</span>
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Ready to Start Section */}
       <section className="py-20 md:py-24 bg-gradient-to-b from-background to-primary/5 relative overflow-hidden">
         {/* Background Elements */}
@@ -1136,8 +1699,24 @@ export default function Home() {
               </h2>
 
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Join thousands of travelers who've discovered the magic of AI-powered trip planning.
+                Join thousands of travelers who've discovered the magic of AI-powered trip planning with proactive suggestions, smart checklists, and beautiful travel journals.
               </p>
+
+              {/* Feature Highlights */}
+              <div className="flex flex-wrap justify-center gap-4 text-sm">
+                <Badge variant="secondary" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
+                  <CheckIcon className="h-4 w-4 mr-2" />
+                  Free to Start
+                </Badge>
+                <Badge variant="secondary" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
+                  <CheckIcon className="h-4 w-4 mr-2" />
+                  No Credit Card Required
+                </Badge>
+                <Badge variant="secondary" className="px-4 py-2 bg-primary/10 text-primary border-primary/20">
+                  <CheckIcon className="h-4 w-4 mr-2" />
+                  Setup in 2 Minutes
+                </Badge>
+              </div>
             </div>
 
             {/* CTA Buttons */}
@@ -1166,19 +1745,52 @@ export default function Home() {
               </Button>
             </div>
 
+            {/* Help & Support Link - Enhanced Visibility */}
+            <div className="pt-8">
+              <div className="max-w-2xl mx-auto p-8 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/20 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:border-primary/30 transition-all duration-300">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="p-4 bg-primary/20 rounded-full">
+                    <HelpCircleIcon className="h-8 w-8 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                      Have Questions?
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      Visit our Help Center for FAQs, guides, and support
+                    </p>
+                  </div>
+                  <Button
+                    size="lg"
+                    className="group px-10 py-6 text-lg font-semibold rounded-xl bg-primary/10 hover:bg-primary/20 border-2 border-primary/30 hover:border-primary/50 text-primary transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                    asChild
+                  >
+                    <Link href="/support" className="flex items-center gap-3">
+                      <HelpCircleIcon className="h-6 w-6" />
+                      <span>Visit Help Center & FAQ</span>
+                      <ArrowRightIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
             {/* Trust Indicators */}
-            <div className="flex flex-wrap justify-center items-center gap-8 opacity-70">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <ShieldIcon className="h-5 w-5 text-primary" />
-                <span className="font-medium">Secure & Private</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent border border-primary/10">
+                <ShieldIcon className="h-8 w-8 text-primary" />
+                <span className="font-semibold text-foreground">GDPR Compliant</span>
+                <span className="text-sm text-muted-foreground text-center">Your data is secure and private</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <StarIcon className="h-5 w-5 text-primary" />
-                <span className="font-medium">10K+ Happy Users</span>
+              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent border border-primary/10">
+                <StarIcon className="h-8 w-8 text-primary" />
+                <span className="font-semibold text-foreground">10K+ Users</span>
+                <span className="text-sm text-muted-foreground text-center">Trusted by travelers worldwide</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <ZapIcon className="h-5 w-5 text-primary" />
-                <span className="font-medium">AI-Powered</span>
+              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent border border-primary/10">
+                <SparklesIcon className="h-8 w-8 text-primary" />
+                <span className="font-semibold text-foreground">AI-Powered</span>
+                <span className="text-sm text-muted-foreground text-center">Intelligent travel assistance</span>
               </div>
             </div>
           </div>
@@ -1251,15 +1863,7 @@ export default function Home() {
                     <span className="group-hover:translate-x-1 transition-transform duration-300">Travel Hub</span>
                   </Link>
                 </li>
-                <li>
-                  <button
-                    onClick={() => scrollToSection(faqRef)}
-                    className="text-muted-foreground hover:text-primary transition-all duration-300 text-left flex items-center group text-base md:text-lg"
-                  >
-                    <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
-                    <span className="group-hover:translate-x-1 transition-transform duration-300">FAQ</span>
-                  </button>
-                </li>
+
                 <li>
                   <Link href="/documentation" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
@@ -1350,11 +1954,8 @@ export default function Home() {
       <div className="hidden lg:flex fixed left-4 xl:left-6 top-1/2 transform -translate-y-1/2 z-50 flex-col gap-3 bg-background/90 backdrop-blur-xl rounded-xl p-4 border border-border/50 shadow-xl w-[64px] items-center">
         {[
           { id: 'hero', label: 'Home', icon: HomeIcon },
-          { id: 'features', label: 'Features', icon: SparklesIcon },
-          { id: 'ai', label: 'AI Powered', icon: RocketIcon },
-          { id: 'latest', label: 'Latest', icon: StarIcon },
-          { id: 'pricing', label: 'Pricing', icon: DollarSignIcon },
-          { id: 'faq', label: 'Help', icon: HelpCircleIcon }
+          { id: 'features', label: 'Features', icon: AwardIcon },
+          { id: 'pricing', label: 'Pricing', icon: DollarSignIcon }
         ].map((section) => {
           const isActive = activeSection === section.id;
           const Icon = section.icon;
@@ -1363,7 +1964,7 @@ export default function Home() {
             <div key={section.id} className="relative group">
               <button
                 onClick={() => {
-                  const refs = { hero: heroRef, features: featuresRef, ai: aiRef, latest: latestRef, pricing: pricingRef, faq: faqRef };
+                  const refs = { hero: heroRef, features: featuresRef, pricing: pricingRef };
                   const ref = refs[section.id as keyof typeof refs];
                   if (ref?.current) {
                     ref.current.scrollIntoView({ behavior: 'smooth' });
@@ -1399,11 +2000,8 @@ export default function Home() {
         <div className="flex justify-around items-center py-2 px-4 max-w-md mx-auto">
           {[
             { id: 'hero', label: 'Home', icon: HomeIcon },
-            { id: 'features', label: 'Features', icon: SparklesIcon },
-            { id: 'ai', label: 'AI', icon: RocketIcon },
-            { id: 'latest', label: 'New', icon: StarIcon },
-            { id: 'pricing', label: 'Pricing', icon: DollarSignIcon },
-            { id: 'faq', label: 'Help', icon: HelpCircleIcon }
+            { id: 'features', label: 'Features', icon: AwardIcon },
+            { id: 'pricing', label: 'Pricing', icon: DollarSignIcon }
           ].map((section) => {
             const isActive = activeSection === section.id;
             const Icon = section.icon;
@@ -1412,7 +2010,7 @@ export default function Home() {
               <button
                 key={section.id}
                 onClick={() => {
-                  const refs = { hero: heroRef, features: featuresRef, ai: aiRef, latest: latestRef, pricing: pricingRef, faq: faqRef };
+                  const refs = { hero: heroRef, features: featuresRef, pricing: pricingRef };
                   const ref = refs[section.id as keyof typeof refs];
                   if (ref?.current) {
                     ref.current.scrollIntoView({ behavior: 'smooth' });

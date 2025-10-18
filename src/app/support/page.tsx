@@ -1,8 +1,101 @@
 import Link from 'next/link';
 import { Mail, Shield, Wrench, HelpCircle, Clock, ArrowLeft, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Accordion from '@/components/ui/Accordion';
 
 export default function SupportPage() {
+  // FAQ Items from landing page
+  const faqItems = [
+    {
+      title: 'Is VoyageSmart free to use?',
+      content: (
+        <p>
+          VoyageSmart offers a free tier that allows you to create up to 3 trips. For unlimited trips and access to premium features like accommodation and transportation tracking, you can upgrade to our Premium plan. For AI-powered features, check out our AI Assistant plan.
+        </p>
+      )
+    },
+    {
+      title: 'What AI features are available?',
+      content: (
+        <p>
+          Our AI Assistant plan includes a 24/7 AI travel assistant that provides personalized recommendations, an AI Itinerary Generation Wizard that creates complete day-by-day plans, smart budget optimization, and intelligent activity suggestions based on your preferences and travel style.
+        </p>
+      )
+    },
+    {
+      title: 'How does the AI Itinerary Generation Wizard work?',
+      content: (
+        <p>
+          The AI Wizard asks you about your travel preferences, budget, interests, and time constraints. Based on this information, it generates a complete itinerary with activities, timing suggestions, and location recommendations. You can then review and edit the suggestions before adding them to your trip.
+        </p>
+      )
+    },
+    {
+      title: 'How do I invite friends to my trip?',
+      content: (
+        <p>
+          Once you&apos;ve created a trip, you can invite friends by going to the trip details page and clicking on the &quot;Invite&quot; button. You can then enter their email addresses to send them an invitation.
+        </p>
+      )
+    },
+    {
+      title: 'What is the Travel Journal feature?',
+      content: (
+        <p>
+          The Travel Journal feature allows you to document your journey with daily entries, organize photos in a beautiful gallery, and create an interactive timeline of memories. The Journal is now a dedicated section with three views: Timeline, Gallery, and Entries, easily accessible from your trip&apos;s dashboard.
+        </p>
+      )
+    },
+    {
+      title: 'What are Proactive AI Suggestions?',
+      content: (
+        <p>
+          Proactive AI Suggestions are intelligent recommendations that appear automatically based on your trip context. You&apos;ll receive packing reminders before departure, activity suggestions during your trip, and helpful tips tailored to your destination and preferences. You can snooze, dismiss, or mark suggestions as complete.
+        </p>
+      )
+    },
+    {
+      title: 'How do Trip Checklists work?',
+      content: (
+        <p>
+          Each trip has both personal and group checklists. You can add items, check them off, reorder them with drag-and-drop, and edit or delete as needed. Personal checklists are private to you, while group checklists are shared with all trip participants for collaborative planning.
+        </p>
+      )
+    },
+    {
+      title: 'What insights can I get from Travel Analytics?',
+      content: (
+        <p>
+          Travel Analytics provides comprehensive insights into your travel patterns, including total trips, destinations visited, average trip duration, spending trends, most visited locations, and travel frequency over time. You can view interactive charts, timelines, and detailed statistics to understand your travel habits better.
+        </p>
+      )
+    },
+    {
+      title: 'Can I use VoyageSmart on my mobile device?',
+      content: (
+        <p>
+          Yes! VoyageSmart is fully responsive and works on all devices, including smartphones and tablets. We&apos;ve optimized the interface for mobile use, so you can plan your trips on the go.
+        </p>
+      )
+    },
+    {
+      title: 'How does expense splitting work?',
+      content: (
+        <p>
+          Our expense tracking feature allows you to record expenses and assign them to specific trip participants. The app automatically calculates who owes what, making it easy to settle up at the end of your trip.
+        </p>
+      )
+    },
+    {
+      title: 'Can I export my itinerary?',
+      content: (
+        <p>
+          Currently, you can view your itinerary within the app. We&apos;re working on adding export functionality in a future update, which will allow you to export your itinerary to PDF or share it with non-VoyageSmart users.
+        </p>
+      )
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -196,12 +289,34 @@ export default function SupportPage() {
           </div>
         </div>
 
-        {/* FAQ Section */}
+        {/* VoyageSmart FAQ Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-            <HelpCircle className="h-6 w-6 text-primary" />
-            Frequently Asked Questions
-          </h2>
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full border border-primary/20 mb-4">
+              <HelpCircle className="h-5 w-5" />
+              <span className="font-semibold">Help Center</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Find answers to common questions about VoyageSmart features and functionality
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-card/50 backdrop-blur-sm border-2 border-border/50 rounded-xl p-6 md:p-8 shadow-lg">
+              <Accordion items={faqItems} />
+            </div>
+          </div>
+        </div>
+
+        {/* Support-Specific FAQ Section */}
+        <div className="mb-12">
+          <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+            <MessageCircle className="h-6 w-6 text-primary" />
+            Support & Contact Questions
+          </h3>
           <div className="space-y-4">
             <details className="group p-4 bg-card border border-border rounded-lg hover:border-primary/50 transition-all">
               <summary className="font-semibold text-foreground cursor-pointer list-none flex items-center justify-between">
@@ -237,7 +352,7 @@ export default function SupportPage() {
                 <Link href="/profile/privacy" className="text-primary hover:underline">
                   Privacy Settings
                 </Link>{' '}
-                page and click "Export My Data" to download all your personal data in JSON format.
+                page and click &quot;Export My Data&quot; to download all your personal data in JSON format.
               </p>
             </details>
 
