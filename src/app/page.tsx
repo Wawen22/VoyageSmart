@@ -65,6 +65,7 @@ export default function Home() {
   } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
+  const latestUpdatesRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,6 +90,7 @@ export default function Home() {
       const sections = [
         { ref: heroRef, id: 'hero' },
         { ref: featuresRef, id: 'features' },
+        { ref: latestUpdatesRef, id: 'latest-updates' },
         { ref: pricingRef, id: 'pricing' }
       ];
 
@@ -251,11 +253,10 @@ export default function Home() {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
-                href="/documentation"
-                target="_blank"
+                href="/support"
                 className="text-foreground/70 hover:text-primary transition-all duration-300 font-medium relative group"
               >
-                Documentation
+                Support
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </div>
@@ -787,7 +788,7 @@ export default function Home() {
 
 
       {/* What's New Section - Compact */}
-      <section aria-label="What's new - Latest VoyageSmart updates and features" className="py-16 md:py-24 bg-gradient-to-b from-muted/10 via-background to-background relative overflow-hidden">
+      <section ref={latestUpdatesRef} aria-label="What's new - Latest VoyageSmart updates and features" className="py-16 md:py-24 bg-gradient-to-b from-muted/10 via-background to-background relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-bl from-emerald-500/5 via-primary/5 to-transparent rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-purple-500/5 via-primary/5 to-transparent rounded-full blur-3xl"></div>
@@ -1410,9 +1411,9 @@ export default function Home() {
                 </li>
 
                 <li>
-                  <Link href="/documentation" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
+                  <Link href="/support" className="text-muted-foreground hover:text-primary transition-all duration-300 flex items-center group text-base md:text-lg">
                     <ArrowRightIcon className="h-4 w-4 mr-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 text-primary" />
-                    <span className="group-hover:translate-x-1 transition-transform duration-300">Documentation</span>
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">Support</span>
                   </Link>
                 </li>
               </ul>
@@ -1500,6 +1501,7 @@ export default function Home() {
         {[
           { id: 'hero', label: 'Home', icon: HomeIcon },
           { id: 'features', label: 'Features', icon: AwardIcon },
+          { id: 'latest-updates', label: 'Latest Updates', icon: SparklesIcon },
           { id: 'pricing', label: 'Pricing', icon: DollarSignIcon }
         ].map((section) => {
           const isActive = activeSection === section.id;
@@ -1509,7 +1511,7 @@ export default function Home() {
             <div key={section.id} className="relative group">
               <button
                 onClick={() => {
-                  const refs = { hero: heroRef, features: featuresRef, pricing: pricingRef };
+                  const refs = { hero: heroRef, features: featuresRef, 'latest-updates': latestUpdatesRef, pricing: pricingRef };
                   const ref = refs[section.id as keyof typeof refs];
                   if (ref?.current) {
                     ref.current.scrollIntoView({ behavior: 'smooth' });
@@ -1542,10 +1544,11 @@ export default function Home() {
 
       {/* Mobile Navigation Bar - Bottom (App-style) */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 shadow-2xl">
-        <div className="flex justify-around items-center py-2 px-4 max-w-md mx-auto">
+        <div className="flex justify-around items-center py-2 px-2 max-w-md mx-auto">
           {[
             { id: 'hero', label: 'Home', icon: HomeIcon },
             { id: 'features', label: 'Features', icon: AwardIcon },
+            { id: 'latest-updates', label: 'Updates', icon: SparklesIcon },
             { id: 'pricing', label: 'Pricing', icon: DollarSignIcon }
           ].map((section) => {
             const isActive = activeSection === section.id;
@@ -1555,7 +1558,7 @@ export default function Home() {
               <button
                 key={section.id}
                 onClick={() => {
-                  const refs = { hero: heroRef, features: featuresRef, pricing: pricingRef };
+                  const refs = { hero: heroRef, features: featuresRef, 'latest-updates': latestUpdatesRef, pricing: pricingRef };
                   const ref = refs[section.id as keyof typeof refs];
                   if (ref?.current) {
                     ref.current.scrollIntoView({ behavior: 'smooth' });

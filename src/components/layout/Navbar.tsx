@@ -82,18 +82,6 @@ export default function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden sm:flex items-center space-x-6">
-              {/* Support link - always visible */}
-              <Link
-                href="/support"
-                className={`${
-                  pathname.startsWith('/support')
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                } text-sm font-medium transition-colors`}
-              >
-                Support
-              </Link>
-
               {/* Travel Hub link - always visible */}
               <Link
                 href="/hub"
@@ -139,19 +127,6 @@ export default function Navbar() {
 
             {/* Mobile Navigation */}
             <div className="flex items-center gap-2 sm:hidden">
-              {/* Support link for mobile */}
-              <Link
-                href="/support"
-                className={`p-2 rounded-md ${
-                  pathname.startsWith('/support')
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                aria-label="Support"
-              >
-                <BookOpenIcon className="h-5 w-5" />
-              </Link>
-
               {/* Travel Hub link for mobile */}
               <Link
                 href="/hub"
@@ -237,16 +212,6 @@ export default function Navbar() {
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Dashboard
-              </Link>
-              <Link
-                href="/support"
-                className={`nav-indicator ${
-                  pathname.startsWith('/support')
-                    ? 'border-primary text-foreground active'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-              >
-                Support
               </Link>
               <Link
                 href="/hub"
@@ -460,20 +425,6 @@ export default function Navbar() {
                   >
                     <TagIcon className="h-4 w-4" />
                     {user ? "Subscription" : "Pricing"}
-                  </Link>
-
-                  <Link
-                    href="/support"
-                    className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
-                      pathname.startsWith('/support') ? 'text-primary bg-muted' : 'text-foreground'
-                    }`}
-                    onClick={(e) => {
-                      // Allow the navigation to happen first
-                      setTimeout(() => setIsProfileMenuOpen(false), 0);
-                    }}
-                  >
-                    <BookOpenIcon className="h-4 w-4" />
-                    Support
                   </Link>
 
                   <Link
