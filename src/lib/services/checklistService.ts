@@ -158,9 +158,12 @@ export async function ensureDefaultChecklists(
 export async function listChecklists(
   client: SupabaseClient,
   tripId: string,
-  userId: string
+  userId: string,
+  ensureDefaults = true
 ): Promise<Checklist[]> {
-  await ensureDefaultChecklists(client, tripId, userId);
+  if (ensureDefaults) {
+    await ensureDefaultChecklists(client, tripId, userId);
+  }
 
   const { data, error } = await client
     .from<ChecklistRow>(CHECKLIST_TABLE)

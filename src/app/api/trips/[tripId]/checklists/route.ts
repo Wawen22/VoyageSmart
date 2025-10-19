@@ -20,7 +20,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   try {
-    const checklists = await listChecklists(client, tripId, userId);
+    const ensureDefaults = request.nextUrl.searchParams.get('ensureDefaults') !== 'false';
+    const checklists = await listChecklists(client, tripId, userId, ensureDefaults);
     return NextResponse.json({ success: true, checklists });
   } catch (error) {
     return checklistErrorResponse(error, 'Failed to load checklists');

@@ -72,6 +72,7 @@ export function ChecklistModal({
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const selectedChecklist = useMemo(
     () => checklists.find((checklist) => checklist.id === selectedChecklistId) ?? null,
@@ -141,7 +142,12 @@ export function ChecklistModal({
       setError(null);
 
       try {
-        const data = await request(`/api/trips/${tripId}/checklists`, {
+        const url = new URL(`/api/trips/${tripId}/checklists`, window.location.origin);
+        if (initialLoadComplete) {
+          url.searchParams.set('ensureDefaults', 'false');
+        }
+
+        const data = await request(url.toString(), {
           method: 'GET',
           signal,
           fallbackMessage: 'Unable to load checklists'
@@ -158,6 +164,10 @@ export function ChecklistModal({
           const personal = fetched.find((checklist) => checklist.type === 'personal');
           return personal?.id ?? (fetched[0]?.id ?? null);
         });
+
+        if (!initialLoadComplete) {
+          setInitialLoadComplete(true);
+        }
       } catch (fetchError: any) {
         if (fetchError?.name === 'AbortError') {
           return;
