@@ -174,7 +174,7 @@ export default function InteractiveEmptyState({ searchTerm, filter }: Interactiv
             asChild
             className="rounded-2xl px-12 py-6 text-xl border-2 border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all duration-300 hover:scale-105"
           >
-            <Link href="/documentation">
+            <Link href="/support">
               Scopri di Più 📚
             </Link>
           </Button>

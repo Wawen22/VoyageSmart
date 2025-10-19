@@ -82,16 +82,16 @@ export default function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden sm:flex items-center space-x-6">
-              {/* Documentation link - always visible */}
+              {/* Support link - always visible */}
               <Link
-                href="/documentation"
+                href="/support"
                 className={`${
-                  pathname.startsWith('/documentation')
+                  pathname.startsWith('/support')
                     ? 'text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 } text-sm font-medium transition-colors`}
               >
-                Documentation
+                Support
               </Link>
 
               {/* Travel Hub link - always visible */}
@@ -139,15 +139,15 @@ export default function Navbar() {
 
             {/* Mobile Navigation */}
             <div className="flex items-center gap-2 sm:hidden">
-              {/* Documentation link for mobile */}
+              {/* Support link for mobile */}
               <Link
-                href="/documentation"
+                href="/support"
                 className={`p-2 rounded-md ${
-                  pathname.startsWith('/documentation')
+                  pathname.startsWith('/support')
                     ? 'text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
-                aria-label="Documentation"
+                aria-label="Support"
               >
                 <BookOpenIcon className="h-5 w-5" />
               </Link>
@@ -239,14 +239,14 @@ export default function Navbar() {
                 Dashboard
               </Link>
               <Link
-                href="/documentation"
+                href="/support"
                 className={`nav-indicator ${
-                  pathname.startsWith('/documentation')
+                  pathname.startsWith('/support')
                     ? 'border-primary text-foreground active'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
-                Documentation
+                Support
               </Link>
               <Link
                 href="/hub"
@@ -463,9 +463,9 @@ export default function Navbar() {
                   </Link>
 
                   <Link
-                    href="/documentation"
+                    href="/support"
                     className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted transition-colors ${
-                      pathname.startsWith('/documentation') ? 'text-primary bg-muted' : 'text-foreground'
+                      pathname.startsWith('/support') ? 'text-primary bg-muted' : 'text-foreground'
                     }`}
                     onClick={(e) => {
                       // Allow the navigation to happen first
@@ -473,7 +473,7 @@ export default function Navbar() {
                     }}
                   >
                     <BookOpenIcon className="h-4 w-4" />
-                    Documentation
+                    Support
                   </Link>
 
                   <Link

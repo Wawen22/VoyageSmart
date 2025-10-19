@@ -11,6 +11,8 @@ import { useSubscription } from '@/lib/subscription';
 import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import RippleButton from '@/components/ui/RippleButton';
+import FeatureGrid from '@/components/landing/FeatureGrid';
+import FeatureCarousel from '@/components/landing/FeatureCarousel';
 
 import Accordion from '@/components/ui/Accordion';
 import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
@@ -518,577 +520,265 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section - Consolidated & Categorized */}
+      {/* Features Section - New FeatureGrid Component */}
       <section ref={featuresRef} aria-label="VoyageSmart features organized by category" className="py-20 md:py-32 relative overflow-hidden bg-gradient-to-b from-background via-muted/5 to-background">
         {/* Background Elements */}
         <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-bl from-purple-500/5 via-primary/5 to-transparent rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-primary/8 to-transparent rounded-full blur-3xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          {/* Section Header */}
-          <div className="text-center mb-16 lg:mb-20">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full border border-primary/20 mb-6 backdrop-blur-sm">
-              <AwardIcon className="h-5 w-5" />
-              <span className="font-semibold">Complete Platform</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                Everything You Need
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                For Perfect Trips
-              </span>
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              A comprehensive suite of tools powered by AI to plan, organize, and capture every moment of your journey
-            </p>
-          </div>
-
-          {/* AI-Powered Intelligence - MOST PROMINENT */}
-          <div className="mb-20">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-xl">
-                <SparklesIcon className="h-6 w-6 text-purple-500" />
-              </div>
-              <div>
-                <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 via-primary to-indigo-600 bg-clip-text text-transparent">
-                  AI-Powered Intelligence
-                </h3>
-                <p className="text-muted-foreground text-sm">Let AI handle the heavy lifting</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* AI Travel Assistant */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-purple-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview - Video */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-indigo-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshots/4_Trip-Details_AI_Chat.png', '24/7 AI Assistant', 'AI Chat Interface', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FeatureScreenshot
-                      src="/images/app-screenshots/4_Trip-Details_AI_Chat.png"
-                      alt="AI Assistant Chat Interface"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  {/* Play/Expand Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-purple-500/90 backdrop-blur-sm rounded-full border border-purple-300/30 shadow-xl">
-                      <PlayIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                  {/* Badge */}
-                  <div className="absolute top-3 right-3 px-3 py-1 bg-purple-500/90 backdrop-blur-sm rounded-full border border-purple-300/30">
-                    <span className="text-xs font-semibold text-white">Video Demo</span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <SparklesIcon className="h-5 w-5 text-purple-500" />
-                    </div>
-                    <h4 className="text-lg font-bold">24/7 AI Assistant</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Chat with AI for instant recommendations, answers, and personalized travel advice anytime
-                  </p>
-                </div>
-              </div>
-
-              {/* AI Itinerary Wizard */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-indigo-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview - Video Placeholder */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-indigo-500/10 via-indigo-500/5 to-purple-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'AI Itinerary Wizard', 'AI-Generated Itinerary', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FeatureScreenshot
-                      src="/images/app-screenshot-1.jpg"
-                      alt="AI Itinerary Wizard"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  {/* Play/Expand Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-indigo-500/90 backdrop-blur-sm rounded-full border border-indigo-300/30 shadow-xl">
-                      <PlayIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                  {/* Badge */}
-                  <div className="absolute top-3 right-3 px-3 py-1 bg-indigo-500/90 backdrop-blur-sm rounded-full border border-indigo-300/30">
-                    <span className="text-xs font-semibold text-white">Video Demo</span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <CalendarIcon className="h-5 w-5 text-indigo-500" />
-                    </div>
-                    <h4 className="text-lg font-bold">AI Itinerary Wizard</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Generate complete day-by-day itineraries with activities, timing, and location suggestions
-                  </p>
-                </div>
-              </div>
-
-              {/* Proactive Suggestions */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-purple-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview - Image Placeholder */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-pink-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Proactive Suggestions', 'AI Proactive Suggestions', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <LightbulbIcon className="h-16 w-16 text-purple-500/40 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Click to preview</p>
-                    </div>
-                  </div>
-                  {/* Expand Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-purple-500/90 backdrop-blur-sm rounded-full border border-purple-300/30 shadow-xl">
-                      <ImageIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                  {/* Badge */}
-                  <div className="absolute top-3 right-3 px-3 py-1 bg-purple-500/90 backdrop-blur-sm rounded-full border border-purple-300/30">
-                    <span className="text-xs font-semibold text-white">Screenshot</span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-purple-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <LightbulbIcon className="h-5 w-5 text-purple-500" />
-                    </div>
-                    <h4 className="text-lg font-bold">Proactive Suggestions</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Get context-aware recommendations before you need them - packing lists, activities, and tips
-                  </p>
-                </div>
-              </div>
-
-              {/* Smart Budget Optimization */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-indigo-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview - Image Placeholder */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-indigo-500/10 via-indigo-500/5 to-blue-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-2.jpg', 'Budget Optimization', 'AI Budget Planning', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FeatureScreenshot
-                      src="/images/app-screenshot-2.jpg"
-                      alt="Budget Optimization"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  {/* Expand Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-indigo-500/90 backdrop-blur-sm rounded-full border border-indigo-300/30 shadow-xl">
-                      <ImageIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                  {/* Badge */}
-                  <div className="absolute top-3 right-3 px-3 py-1 bg-indigo-500/90 backdrop-blur-sm rounded-full border border-indigo-300/30">
-                    <span className="text-xs font-semibold text-white">Screenshot</span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-indigo-500/20 to-indigo-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <DollarSignIcon className="h-5 w-5 text-indigo-500" />
-                    </div>
-                    <h4 className="text-lg font-bold">Budget Optimization</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    AI-powered budget planning to maximize your experience within your spending limits
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Planning & Organization */}
-          <div className="mb-20">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl">
-                <MapPinIcon className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-2xl md:text-3xl font-bold">Planning & Organization</h3>
-                <p className="text-muted-foreground text-sm">Build your perfect itinerary</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Smart Trip Planning */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-primary/10 via-primary/5 to-blue-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Smart Trip Planning', 'Trip Planning Interface', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FeatureScreenshot
-                      src="/images/app-screenshot-1.jpg"
-                      alt="Smart Trip Planning"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-primary/90 backdrop-blur-sm rounded-full border border-primary-foreground/30 shadow-xl">
-                      <ImageIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <CalendarIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Smart Trip Planning</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Create detailed itineraries with activities, accommodations, and transportation all in one place
-                  </p>
-                </div>
-              </div>
-
-              {/* Interactive Maps */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview - Video Placeholder */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-emerald-500/10 via-primary/5 to-teal-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Interactive Maps', 'Map View Interface', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <GlobeIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Interactive map demo</p>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-emerald-500/90 backdrop-blur-sm rounded-full border border-emerald-300/30 shadow-xl">
-                      <PlayIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="absolute top-3 right-3 px-3 py-1 bg-emerald-500/90 backdrop-blur-sm rounded-full border border-emerald-300/30">
-                    <span className="text-xs font-semibold text-white">Video Demo</span>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <GlobeIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Interactive Maps</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Visualize your journey with map, calendar, and list views for all destinations
-                  </p>
-                </div>
-              </div>
-
-              {/* Multi-Destination */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-blue-500/10 via-primary/5 to-cyan-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Multi-Destination Planning', 'Multi-Stop Trip View', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FeatureScreenshot
-                      src="/images/app-screenshot-3.jpg"
-                      alt="Multi-Destination Planning"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-blue-500/90 backdrop-blur-sm rounded-full border border-blue-300/30 shadow-xl">
-                      <ImageIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <MapPinIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Multi-Destination</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Plan complex trips with multiple stops, perfect for road trips and backpacking adventures
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Collaboration & Sharing */}
-          <div className="mb-20">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl">
-                <UsersIcon className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-2xl md:text-3xl font-bold">Collaboration & Sharing</h3>
-                <p className="text-muted-foreground text-sm">Plan together seamlessly</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Real-Time Collaboration */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview - Video Placeholder */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-pink-500/10 via-primary/5 to-rose-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Real-Time Collaboration', 'Collaborative Planning', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <UsersIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Real-time collaboration demo</p>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-pink-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-pink-500/90 backdrop-blur-sm rounded-full border border-pink-300/30 shadow-xl">
-                      <PlayIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="absolute top-3 right-3 px-3 py-1 bg-pink-500/90 backdrop-blur-sm rounded-full border border-pink-300/30">
-                    <span className="text-xs font-semibold text-white">Video Demo</span>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <UsersIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Real-Time Collaboration</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Plan together with friends and family, chat in real-time, and make group decisions effortlessly
-                  </p>
-                </div>
-              </div>
-
-              {/* Trip Checklists */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview - Video Placeholder */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-green-500/10 via-primary/5 to-emerald-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Trip Checklists', 'Checklist Interface', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <CheckSquareIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Drag-and-drop checklist demo</p>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-green-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-green-500/90 backdrop-blur-sm rounded-full border border-green-300/30 shadow-xl">
-                      <PlayIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="absolute top-3 right-3 px-3 py-1 bg-green-500/90 backdrop-blur-sm rounded-full border border-green-300/30">
-                    <span className="text-xs font-semibold text-white">Video Demo</span>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <CheckSquareIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Trip Checklists</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Create personal and group checklists with drag-and-drop organization and real-time sync
-                  </p>
-                </div>
-              </div>
-
-              {/* Role-Based Permissions */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-amber-500/10 via-primary/5 to-orange-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-2.jpg', 'Smart Permissions', 'Permission Management', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <ShieldIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Permission controls</p>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-amber-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-amber-500/90 backdrop-blur-sm rounded-full border border-amber-300/30 shadow-xl">
-                      <ImageIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <ShieldIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Smart Permissions</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Control who can view, edit, or manage different aspects of your trip with role-based access
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tracking & Insights */}
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl">
-                <TrendingUpIcon className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-2xl md:text-3xl font-bold">Tracking & Insights</h3>
-                <p className="text-muted-foreground text-sm">Stay organized and informed</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Smart Expense Tracking */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-green-500/10 via-primary/5 to-emerald-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-2.jpg', 'Expense Tracking', 'Expense Management Dashboard', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FeatureScreenshot
-                      src="/images/app-screenshot-2.jpg"
-                      alt="Expense Tracking"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-green-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-green-500/90 backdrop-blur-sm rounded-full border border-green-300/30 shadow-xl">
-                      <ImageIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <DollarSignIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Expense Tracking</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Track expenses with multi-currency support, split costs fairly, and see real-time balances
-                  </p>
-                </div>
-              </div>
-
-              {/* Travel Analytics */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-blue-500/10 via-primary/5 to-cyan-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshots/2_Dashboard_Analytics.png', 'Travel Analytics', 'Analytics Dashboard', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <FeatureScreenshot
-                      src="/images/app-screenshots/2_Dashboard_Analytics.png"
-                      alt="Travel Analytics Dashboard"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-blue-500/90 backdrop-blur-sm rounded-full border border-blue-300/30 shadow-xl">
-                      <ImageIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <BarChart3Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Travel Analytics</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Discover patterns in your travel with insights on destinations, spending, and preferences
-                  </p>
-                </div>
-              </div>
-
-              {/* Weather Integration */}
-              <div className="group bg-card border-2 border-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                {/* Media Preview */}
-                <div
-                  className="relative h-48 bg-gradient-to-br from-sky-500/10 via-primary/5 to-blue-500/10 cursor-pointer overflow-hidden"
-                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Weather Integration', 'Weather Forecast Widget', 'image')}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <CloudIcon className="h-16 w-16 text-primary/40 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">7-day weather forecast</p>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-sky-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <div className="p-3 bg-sky-500/90 backdrop-blur-sm rounded-full border border-sky-300/30 shadow-xl">
-                      <ImageIcon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg group-hover:scale-110 transition-transform">
-                      <CloudIcon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h4 className="text-lg font-bold">Weather Integration</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Real-time weather and 7-day forecasts for all destinations to plan activities perfectly
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Call to Action */}
-          <div className="text-center">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-10 py-6 rounded-2xl text-lg font-semibold shadow-2xl hover:shadow-primary/25 transition-all duration-300 hover:scale-105"
-            >
-              <Link href="/register" className="flex items-center gap-3">
-                <RocketIcon className="h-6 w-6" />
-                Get Started Free
-                <ArrowRightIcon className="h-5 w-5 animate-bounce-horizontal" />
-              </Link>
-            </Button>
-          </div>
+          <FeatureGrid
+            categories={[
+              {
+                name: 'AI-Powered Intelligence',
+                icon: <SparklesIcon className="h-6 w-6 text-purple-500" />,
+                color: 'purple',
+                description: 'Let AI handle the heavy lifting',
+                features: [
+                  {
+                    id: 'ai-assistant',
+                    title: '24/7 AI Assistant',
+                    subtitle: 'Your personal travel companion',
+                    description: 'Chat with AI for instant recommendations, answers, and personalized travel advice anytime',
+                    icon: <SparklesIcon className="h-8 w-8 text-purple-500" />,
+                    color: 'purple',
+                    category: 'AI-Powered Intelligence',
+                    categoryColor: 'purple',
+                    highlights: [
+                      'Natural language conversations',
+                      'Context-aware recommendations',
+                      'Multi-language support',
+                      'Real-time responses'
+                    ],
+                    badge: {
+                      text: 'AI',
+                      icon: <SparklesIcon className="h-3 w-3" />
+                    },
+                    image: '/images/app-screenshots/4_Trip-Details_AI_Chat.png'
+                  },
+                  {
+                    id: 'ai-itinerary',
+                    title: 'AI Itinerary Wizard',
+                    subtitle: 'Smart itinerary generation',
+                    description: 'Generate complete day-by-day itineraries with activities, timing, and location suggestions',
+                    icon: <CalendarIcon className="h-8 w-8 text-indigo-500" />,
+                    color: 'indigo',
+                    category: 'AI-Powered Intelligence',
+                    categoryColor: 'purple',
+                    highlights: [
+                      'Day-by-day planning',
+                      'Activity suggestions',
+                      'Optimal timing',
+                      'Location-aware'
+                    ],
+                    badge: {
+                      text: 'AI',
+                      icon: <SparklesIcon className="h-3 w-3" />
+                    },
+                    image: '/images/app-screenshot-1.jpg'
+                  },
+                  {
+                    id: 'proactive-suggestions',
+                    title: 'Proactive Suggestions',
+                    subtitle: 'AI that anticipates your needs',
+                    description: 'Get context-aware recommendations before you need them - packing lists, activities, and tips',
+                    icon: <LightbulbIcon className="h-8 w-8 text-purple-500" />,
+                    color: 'purple',
+                    category: 'AI-Powered Intelligence',
+                    categoryColor: 'purple',
+                    highlights: [
+                      'Smart packing lists',
+                      'Activity recommendations',
+                      'Local tips and insights',
+                      'Weather-based suggestions'
+                    ],
+                    badge: {
+                      text: 'AI',
+                      icon: <SparklesIcon className="h-3 w-3" />
+                    },
+                    imagePlaceholder: <LightbulbIcon className="h-16 w-16 text-purple-500/40" />
+                  }
+                ]
+              },
+              {
+                name: 'Planning & Organization',
+                icon: <MapPinIcon className="h-6 w-6 text-blue-500" />,
+                color: 'blue',
+                description: 'Build your perfect itinerary',
+                features: [
+                  {
+                    id: 'smart-planning',
+                    title: 'Smart Trip Planning',
+                    subtitle: 'All-in-one itinerary builder',
+                    description: 'Create detailed itineraries with activities, accommodations, and transportation all in one place',
+                    icon: <CalendarIcon className="h-8 w-8 text-blue-500" />,
+                    color: 'blue',
+                    category: 'Planning & Organization',
+                    categoryColor: 'blue',
+                    highlights: [
+                      'Drag-and-drop interface',
+                      'Activity scheduling',
+                      'Accommodation booking',
+                      'Transportation planning'
+                    ],
+                    image: '/images/app-screenshot-1.jpg'
+                  },
+                  {
+                    id: 'interactive-maps',
+                    title: 'Interactive Maps',
+                    subtitle: 'Visualize your journey',
+                    description: 'Visualize your journey with map, calendar, and list views for all destinations',
+                    icon: <GlobeIcon className="h-8 w-8 text-emerald-500" />,
+                    color: 'emerald',
+                    category: 'Planning & Organization',
+                    categoryColor: 'blue',
+                    highlights: [
+                      'Multiple view modes',
+                      'Location markers',
+                      'Route visualization',
+                      'Distance calculations'
+                    ],
+                    imagePlaceholder: <GlobeIcon className="h-16 w-16 text-emerald-500/40" />
+                  },
+                  {
+                    id: 'multi-destination',
+                    title: 'Multi-Destination',
+                    subtitle: 'Complex trip planning',
+                    description: 'Plan complex trips with multiple stops, perfect for road trips and backpacking adventures',
+                    icon: <MapPinIcon className="h-8 w-8 text-blue-500" />,
+                    color: 'blue',
+                    category: 'Planning & Organization',
+                    categoryColor: 'blue',
+                    highlights: [
+                      'Multiple stops',
+                      'Route optimization',
+                      'Time zone handling',
+                      'Connection planning'
+                    ],
+                    image: '/images/app-screenshot-3.jpg'
+                  }
+                ]
+              },
+              {
+                name: 'Collaboration & Sharing',
+                icon: <UsersIcon className="h-6 w-6 text-pink-500" />,
+                color: 'pink',
+                description: 'Plan together seamlessly',
+                features: [
+                  {
+                    id: 'real-time-collab',
+                    title: 'Real-Time Collaboration',
+                    subtitle: 'Plan together, anywhere',
+                    description: 'Plan together with friends and family, chat in real-time, and make group decisions effortlessly',
+                    icon: <UsersIcon className="h-8 w-8 text-pink-500" />,
+                    color: 'pink',
+                    category: 'Collaboration & Sharing',
+                    categoryColor: 'pink',
+                    highlights: [
+                      'Live editing',
+                      'Group chat',
+                      'Voting and polls',
+                      'Activity assignments'
+                    ],
+                    imagePlaceholder: <UsersIcon className="h-16 w-16 text-pink-500/40" />
+                  },
+                  {
+                    id: 'trip-checklists',
+                    title: 'Trip Checklists',
+                    subtitle: 'Never forget anything',
+                    description: 'Create personal and group checklists with drag-and-drop organization and real-time sync',
+                    icon: <CheckSquareIcon className="h-8 w-8 text-green-500" />,
+                    color: 'green',
+                    category: 'Collaboration & Sharing',
+                    categoryColor: 'pink',
+                    highlights: [
+                      'Personal & shared lists',
+                      'Drag-and-drop',
+                      'Task assignments',
+                      'Progress tracking'
+                    ],
+                    imagePlaceholder: <CheckSquareIcon className="h-16 w-16 text-green-500/40" />
+                  },
+                  {
+                    id: 'smart-permissions',
+                    title: 'Smart Permissions',
+                    subtitle: 'Control access levels',
+                    description: 'Control who can view, edit, or manage different aspects of your trip with role-based access',
+                    icon: <ShieldIcon className="h-8 w-8 text-amber-500" />,
+                    color: 'amber',
+                    category: 'Collaboration & Sharing',
+                    categoryColor: 'pink',
+                    highlights: [
+                      'Role-based access',
+                      'Granular permissions',
+                      'Invite management',
+                      'Privacy controls'
+                    ],
+                    imagePlaceholder: <ShieldIcon className="h-16 w-16 text-amber-500/40" />
+                  }
+                ]
+              },
+              {
+                name: 'Tracking & Insights',
+                icon: <TrendingUpIcon className="h-6 w-6 text-emerald-500" />,
+                color: 'emerald',
+                description: 'Stay organized and informed',
+                features: [
+                  {
+                    id: 'expense-tracking',
+                    title: 'Expense Tracking',
+                    subtitle: 'Smart budget management',
+                    description: 'Track expenses with multi-currency support, split costs fairly, and see real-time balances',
+                    icon: <DollarSignIcon className="h-8 w-8 text-green-500" />,
+                    color: 'green',
+                    category: 'Tracking & Insights',
+                    categoryColor: 'emerald',
+                    highlights: [
+                      'Multi-currency support',
+                      'Cost splitting',
+                      'Receipt scanning',
+                      'Budget alerts'
+                    ],
+                    image: '/images/app-screenshot-2.jpg'
+                  },
+                  {
+                    id: 'travel-analytics',
+                    title: 'Travel Analytics',
+                    subtitle: 'Discover your patterns',
+                    description: 'Discover patterns in your travel with insights on destinations, spending, and preferences',
+                    icon: <BarChart3Icon className="h-8 w-8 text-blue-500" />,
+                    color: 'blue',
+                    category: 'Tracking & Insights',
+                    categoryColor: 'emerald',
+                    highlights: [
+                      'Spending insights',
+                      'Travel statistics',
+                      'Destination trends',
+                      'Custom reports'
+                    ],
+                    image: '/images/app-screenshots/2_Dashboard_Analytics.png'
+                  },
+                  {
+                    id: 'weather-integration',
+                    title: 'Weather Integration',
+                    subtitle: 'Plan with confidence',
+                    description: 'Real-time weather and 7-day forecasts for all destinations to plan activities perfectly',
+                    icon: <CloudIcon className="h-8 w-8 text-sky-500" />,
+                    color: 'sky',
+                    category: 'Tracking & Insights',
+                    categoryColor: 'emerald',
+                    highlights: [
+                      'Real-time updates',
+                      '7-day forecasts',
+                      'Severe weather alerts',
+                      'Activity suggestions'
+                    ],
+                    imagePlaceholder: <CloudIcon className="h-16 w-16 text-sky-500/40" />
+                  }
+                ]
+              }
+            ]}
+          />
         </div>
       </section>
 
@@ -1096,315 +786,170 @@ export default function Home() {
 
 
 
-      {/* What's New Section */}
-      <section aria-label="What's new - Latest VoyageSmart updates and features" className="py-20 md:py-32 bg-gradient-to-b from-muted/10 via-background to-background relative overflow-hidden">
+      {/* What's New Section - Compact */}
+      <section aria-label="What's new - Latest VoyageSmart updates and features" className="py-16 md:py-24 bg-gradient-to-b from-muted/10 via-background to-background relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-bl from-emerald-500/5 via-primary/5 to-transparent rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-purple-500/5 via-primary/5 to-transparent rounded-full blur-3xl"></div>
 
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          {/* Section Header */}
-          <div className="text-center mb-16 lg:mb-20">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500/10 via-primary/10 to-purple-500/10 text-emerald-600 dark:text-emerald-400 px-6 py-3 rounded-full border border-emerald-500/20 mb-6 backdrop-blur-sm">
-              <StarIcon className="h-5 w-5" />
-              <span className="font-semibold">What's New</span>
+          {/* Section Header - Compact */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500/10 via-primary/10 to-purple-500/10 text-emerald-600 dark:text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/20 mb-4 backdrop-blur-sm">
+              <StarIcon className="h-4 w-4" />
+              <span className="font-semibold text-sm">What's New</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3">
               <span className="bg-gradient-to-r from-emerald-600 via-primary to-purple-600 bg-clip-text text-transparent">
-                Latest Updates
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                & New Features
+                Latest Updates & New Features
               </span>
             </h2>
 
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Check out our newest features and improvements that make VoyageSmart even better
+            <p className="text-base text-muted-foreground max-w-2xl mx-auto">
+              Check out our newest features and improvements
             </p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
+          {/* Features Grid - Compact Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {/* Proactive AI Suggestions */}
-            <div className="group relative overflow-hidden bg-gradient-to-br from-card/90 via-card/80 to-card/70 backdrop-blur-xl border-2 border-border/30 hover:border-emerald-500/40 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl border-2 border-border/30 hover:border-emerald-500/40 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               {/* Glowing Background Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-2xl"></div>
 
-              {/* Media Preview */}
-              <div
-                className="relative h-56 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-green-500/10 cursor-pointer overflow-hidden"
-                onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Proactive AI Suggestions', 'AI Suggestions Interface', 'image')}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-6">
-                    <LightbulbIcon className="h-20 w-20 text-emerald-500/40 mx-auto mb-4" />
-                    <p className="text-sm text-muted-foreground font-medium">AI Proactive Suggestions Demo</p>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                  <div className="p-4 bg-emerald-500/90 backdrop-blur-sm rounded-full border border-emerald-300/30 shadow-2xl">
-                    <PlayIcon className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 px-4 py-2 bg-emerald-500/90 backdrop-blur-sm rounded-full border border-emerald-300/30">
-                  <span className="text-sm font-bold text-white">Video Demo</span>
-                </div>
-              </div>
-
-              <div className="relative z-10 p-8 lg:p-10">
+              <div className="relative z-10 p-6">
                 {/* Icon & Title */}
-                <div className="flex items-start gap-5 mb-6">
-                  <div className="p-4 bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 rounded-2xl shadow-lg group-hover:scale-110 group-hover:shadow-emerald-500/20 transition-all duration-300">
-                    <LightbulbIcon className="h-8 w-8 text-emerald-500" />
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="p-3 bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 rounded-xl shadow-lg group-hover:scale-110 group-hover:shadow-emerald-500/20 transition-all duration-300 flex-shrink-0">
+                    <LightbulbIcon className="h-6 w-6 text-emerald-500" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent group-hover:from-emerald-500 group-hover:to-emerald-600 transition-all duration-300">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold mb-1 bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
                       Proactive AI Suggestions
                     </h3>
-                    <p className="text-sm text-muted-foreground">Intelligent recommendations when you need them</p>
+                    <p className="text-xs text-muted-foreground">Smart recommendations</p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-base text-muted-foreground leading-relaxed mb-6">
-                  Get smart, context-aware suggestions automatically based on your trip timeline and preferences. From packing reminders before departure to activity recommendations during your journey.
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Get context-aware suggestions automatically based on your trip timeline and preferences.
                 </p>
 
-                {/* Feature Highlights */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Upcoming trip reminders with smart packing lists</p>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">In-trip activity suggestions based on location</p>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Snooze and manage suggestions with ease</p>
-                  </div>
-                </div>
-
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm font-semibold">
-                  <SparklesIcon className="h-4 w-4" />
-                  AI-Powered
-                </div>
+                {/* View Demo Button */}
+                <button
+                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Proactive AI Suggestions', 'AI Suggestions Interface', 'image')}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm font-semibold transition-all duration-200"
+                >
+                  <PlayIcon className="h-4 w-4" />
+                  View Demo
+                </button>
               </div>
             </div>
 
             {/* Trip Checklists */}
-            <div className="group relative overflow-hidden bg-gradient-to-br from-card/90 via-card/80 to-card/70 backdrop-blur-xl border-2 border-border/30 hover:border-teal-500/40 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl border-2 border-border/30 hover:border-teal-500/40 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               {/* Glowing Background Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-teal-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-teal-500/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-teal-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-2xl"></div>
 
-              {/* Media Preview */}
-              <div
-                className="relative h-56 bg-gradient-to-br from-teal-500/10 via-teal-500/5 to-cyan-500/10 cursor-pointer overflow-hidden"
-                onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Trip Checklists', 'Checklist Management', 'image')}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-6">
-                    <CheckSquareIcon className="h-20 w-20 text-teal-500/40 mx-auto mb-4" />
-                    <p className="text-sm text-muted-foreground font-medium">Drag-and-Drop Checklist Demo</p>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-teal-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                  <div className="p-4 bg-teal-500/90 backdrop-blur-sm rounded-full border border-teal-300/30 shadow-2xl">
-                    <PlayIcon className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 px-4 py-2 bg-teal-500/90 backdrop-blur-sm rounded-full border border-teal-300/30">
-                  <span className="text-sm font-bold text-white">Video Demo</span>
-                </div>
-              </div>
-
-              <div className="relative z-10 p-8 lg:p-10">
+              <div className="relative z-10 p-6">
                 {/* Icon & Title */}
-                <div className="flex items-start gap-5 mb-6">
-                  <div className="p-4 bg-gradient-to-br from-teal-500/20 to-teal-500/10 rounded-2xl shadow-lg group-hover:scale-110 group-hover:shadow-teal-500/20 transition-all duration-300">
-                    <CheckSquareIcon className="h-8 w-8 text-teal-500" />
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="p-3 bg-gradient-to-br from-teal-500/20 to-teal-500/10 rounded-xl shadow-lg group-hover:scale-110 group-hover:shadow-teal-500/20 transition-all duration-300 flex-shrink-0">
+                    <CheckSquareIcon className="h-6 w-6 text-teal-500" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent group-hover:from-teal-500 group-hover:to-teal-600 transition-all duration-300">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold mb-1 bg-gradient-to-r from-teal-600 to-teal-500 bg-clip-text text-transparent">
                       Trip Checklists
                     </h3>
-                    <p className="text-sm text-muted-foreground">Stay organized with smart checklists</p>
+                    <p className="text-xs text-muted-foreground">Stay organized</p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-base text-muted-foreground leading-relaxed mb-6">
-                  Create personal and group checklists for every trip. Drag-and-drop to reorder items, check off tasks, and ensure nothing gets forgotten before or during your journey.
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Create personal and group checklists with drag-and-drop organization and real-time sync.
                 </p>
 
-                {/* Feature Highlights */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-teal-500/5 to-teal-500/10 border border-teal-500/20">
-                    <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Personal and group checklists for each trip</p>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-teal-500/5 to-teal-500/10 border border-teal-500/20">
-                    <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Drag-and-drop reordering for easy organization</p>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-teal-500/5 to-teal-500/10 border border-teal-500/20">
-                    <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Real-time sync across all participants</p>
-                  </div>
-                </div>
-
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-600 dark:text-teal-400 text-sm font-semibold">
-                  <CheckSquareIcon className="h-4 w-4" />
-                  Collaborative
-                </div>
+                {/* View Demo Button */}
+                <button
+                  onClick={() => openMediaPopup('/images/app-screenshot-1.jpg', 'Trip Checklists', 'Checklist Management', 'image')}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-600 dark:text-teal-400 text-sm font-semibold transition-all duration-200"
+                >
+                  <PlayIcon className="h-4 w-4" />
+                  View Demo
+                </button>
               </div>
             </div>
 
             {/* Travel Analytics */}
-            <div className="group relative overflow-hidden bg-gradient-to-br from-card/90 via-card/80 to-card/70 backdrop-blur-xl border-2 border-border/30 hover:border-blue-500/40 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl border-2 border-border/30 hover:border-blue-500/40 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               {/* Glowing Background Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-2xl"></div>
 
-              {/* Media Preview */}
-              <div
-                className="relative h-56 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-indigo-500/10 cursor-pointer overflow-hidden"
-                onClick={() => openMediaPopup('/images/app-screenshots/2_Dashboard_Analytics.png', 'Travel Analytics', 'Analytics Dashboard', 'image')}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <FeatureScreenshot
-                    src="/images/app-screenshots/2_Dashboard_Analytics.png"
-                    alt="Travel Analytics Dashboard"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                  <div className="p-4 bg-blue-500/90 backdrop-blur-sm rounded-full border border-blue-300/30 shadow-2xl">
-                    <ImageIcon className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 px-4 py-2 bg-blue-500/90 backdrop-blur-sm rounded-full border border-blue-300/30">
-                  <span className="text-sm font-bold text-white">Live Dashboard</span>
-                </div>
-              </div>
-
-              <div className="relative z-10 p-8 lg:p-10">
+              <div className="relative z-10 p-6">
                 {/* Icon & Title */}
-                <div className="flex items-start gap-5 mb-6">
-                  <div className="p-4 bg-gradient-to-br from-blue-500/20 to-blue-500/10 rounded-2xl shadow-lg group-hover:scale-110 group-hover:shadow-blue-500/20 transition-all duration-300">
-                    <BarChart3Icon className="h-8 w-8 text-blue-500" />
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-500/10 rounded-xl shadow-lg group-hover:scale-110 group-hover:shadow-blue-500/20 transition-all duration-300 flex-shrink-0">
+                    <BarChart3Icon className="h-6 w-6 text-blue-500" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-blue-600 transition-all duration-300">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold mb-1 bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                       Travel Analytics
                     </h3>
-                    <p className="text-sm text-muted-foreground">Insights into your travel patterns</p>
+                    <p className="text-xs text-muted-foreground">Insights & patterns</p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-base text-muted-foreground leading-relaxed mb-6">
-                  Discover fascinating insights about your travel habits. Analyze destinations, spending patterns, trip frequency, and more with beautiful visualizations and comprehensive statistics.
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Discover insights about your travel habits with beautiful visualizations and statistics.
                 </p>
 
-                {/* Feature Highlights */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Comprehensive travel statistics and trends</p>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Spending analysis and budget insights</p>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-blue-500/5 to-blue-500/10 border border-blue-500/20">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Interactive charts and timeline views</p>
-                  </div>
-                </div>
-
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-sm font-semibold">
-                  <TrendingUpIcon className="h-4 w-4" />
-                  Data-Driven
-                </div>
+                {/* View Demo Button */}
+                <button
+                  onClick={() => openMediaPopup('/images/app-screenshots/2_Dashboard_Analytics.png', 'Travel Analytics', 'Analytics Dashboard', 'image')}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-sm font-semibold transition-all duration-200"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  View Demo
+                </button>
               </div>
             </div>
 
             {/* Weather Integration */}
-            <div className="group relative overflow-hidden bg-gradient-to-br from-card/90 via-card/80 to-card/70 backdrop-blur-xl border-2 border-border/30 hover:border-cyan-500/40 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <div className="group relative overflow-hidden bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl border-2 border-border/30 hover:border-cyan-500/40 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               {/* Glowing Background Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-cyan-500/10 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-2xl"></div>
 
-              {/* Media Preview */}
-              <div
-                className="relative h-56 bg-gradient-to-br from-cyan-500/10 via-sky-500/5 to-blue-500/10 cursor-pointer overflow-hidden"
-                onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Weather Integration', 'Weather Forecast Widget', 'image')}
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-6">
-                    <CloudIcon className="h-20 w-20 text-cyan-500/40 mx-auto mb-4" />
-                    <p className="text-sm text-muted-foreground font-medium">7-Day Weather Forecast</p>
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                  <div className="p-4 bg-cyan-500/90 backdrop-blur-sm rounded-full border border-cyan-300/30 shadow-2xl">
-                    <ImageIcon className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 px-4 py-2 bg-cyan-500/90 backdrop-blur-sm rounded-full border border-cyan-300/30">
-                  <span className="text-sm font-bold text-white">Live Widget</span>
-                </div>
-              </div>
-
-              <div className="relative z-10 p-8 lg:p-10">
+              <div className="relative z-10 p-6">
                 {/* Icon & Title */}
-                <div className="flex items-start gap-5 mb-6">
-                  <div className="p-4 bg-gradient-to-br from-cyan-500/20 to-cyan-500/10 rounded-2xl shadow-lg group-hover:scale-110 group-hover:shadow-cyan-500/20 transition-all duration-300">
-                    <CloudIcon className="h-8 w-8 text-cyan-500" />
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="p-3 bg-gradient-to-br from-cyan-500/20 to-cyan-500/10 rounded-xl shadow-lg group-hover:scale-110 group-hover:shadow-cyan-500/20 transition-all duration-300 flex-shrink-0">
+                    <CloudIcon className="h-6 w-6 text-cyan-500" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl lg:text-3xl font-bold mb-2 bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent group-hover:from-cyan-500 group-hover:to-cyan-600 transition-all duration-300">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold mb-1 bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent">
                       Weather Integration
                     </h3>
-                    <p className="text-sm text-muted-foreground">Real-time weather for your destinations</p>
+                    <p className="text-xs text-muted-foreground">Real-time forecasts</p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-base text-muted-foreground leading-relaxed mb-6">
-                  Stay prepared with real-time weather data and forecasts for all your destinations. Plan activities around the weather and pack accordingly with accurate, up-to-date information.
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  Stay prepared with real-time weather data and forecasts for all your destinations.
                 </p>
 
-                {/* Feature Highlights */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-cyan-500/5 to-cyan-500/10 border border-cyan-500/20">
-                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Current weather and 7-day forecasts</p>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-cyan-500/5 to-cyan-500/10 border border-cyan-500/20">
-                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Multi-destination weather tracking</p>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-r from-cyan-500/5 to-cyan-500/10 border border-cyan-500/20">
-                    <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-pulse mt-2 flex-shrink-0"></div>
-                    <p className="text-sm font-medium text-foreground">Temperature, humidity, and precipitation data</p>
-                  </div>
-                </div>
-
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 text-sm font-semibold">
-                  <CloudIcon className="h-4 w-4" />
-                  Real-Time
-                </div>
+                {/* View Demo Button */}
+                <button
+                  onClick={() => openMediaPopup('/images/app-screenshot-3.jpg', 'Weather Integration', 'Weather Forecast Widget', 'image')}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 text-sm font-semibold transition-all duration-200"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  View Demo
+                </button>
               </div>
             </div>
           </div>

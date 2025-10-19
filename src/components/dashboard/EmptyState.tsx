@@ -89,7 +89,7 @@ export default function EmptyState({ searchTerm, filter }: EmptyStateProps) {
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <Link href="/documentation">
+            <Link href="/support">
               Learn More
             </Link>
           </Button>

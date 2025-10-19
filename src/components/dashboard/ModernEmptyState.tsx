@@ -138,7 +138,7 @@ export default function ModernEmptyState({ searchTerm, filter }: ModernEmptyStat
             asChild 
             className="rounded-xl px-8 py-4 text-lg border-2 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            <Link href="/documentation">
+            <Link href="/support">
               Learn More
             </Link>
           </Button>
