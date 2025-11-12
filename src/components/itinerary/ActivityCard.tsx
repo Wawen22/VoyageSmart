@@ -1,21 +1,29 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { 
-  MapPinIcon, 
-  ClockIcon, 
-  DollarSignIcon, 
-  FileIcon, 
-  TrashIcon, 
-  EditIcon, 
-  MoveIcon, 
+import {
+  MapPinIcon,
+  ClockIcon,
+  DollarSignIcon,
   EyeIcon,
+  EditIcon,
+  MoveIcon,
+  TrashIcon,
+  CheckCircleIcon,
   UtensilsIcon,
   LandmarkIcon,
   CarIcon,
-  HotelIcon,
-  ActivityIcon as DefaultIcon
+  PlaneIcon,
+  BedIcon,
+  MoreVerticalIcon
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type Activity = {
   id: string;
@@ -43,7 +51,6 @@ type ActivityCardProps = {
   isSelectable?: boolean;
   isSelected?: boolean;
   onSelectChange?: (activityId: string, isSelected: boolean) => void;
-  isDragging?: boolean;
 };
 
 export default function ActivityCard({
@@ -54,8 +61,7 @@ export default function ActivityCard({
   onViewDetails,
   isSelectable = false,
   isSelected = false,
-  onSelectChange,
-  isDragging = false
+  onSelectChange
 }: ActivityCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -76,73 +82,6 @@ export default function ActivityCard({
     }).format(amount);
   };
 
-  const getPriorityLabel = (priority: number) => {
-    switch (priority) {
-      case 1: return 'High';
-      case 2: return 'Medium';
-      case 3:
-      default: return 'Low';
-    }
-  };
-
-  const getPriorityBorderColor = (priority: number) => {
-    switch (priority) {
-      case 1: return 'border-l-red-500';
-      case 2: return 'border-l-orange-500';
-      case 3:
-      default: return 'border-l-blue-500';
-    }
-  };
-
-  const getPriorityOrbGradient = (priority: number) => {
-    switch (priority) {
-      case 1: return 'from-red-500/30 to-red-600/20';
-      case 2: return 'from-orange-500/30 to-orange-600/20';
-      case 3:
-      default: return 'from-blue-500/30 to-blue-600/20';
-    }
-  };
-
-  const getCategoryIcon = (type: string | null) => {
-    switch (type?.toLowerCase()) {
-      case 'food':
-      case 'restaurant':
-        return UtensilsIcon;
-      case 'culture':
-      case 'museum':
-      case 'monument':
-        return LandmarkIcon;
-      case 'transport':
-      case 'transportation':
-        return CarIcon;
-      case 'accommodation':
-      case 'hotel':
-        return HotelIcon;
-      default:
-        return DefaultIcon;
-    }
-  };
-
-  const getCategoryGradient = (type: string | null) => {
-    switch (type?.toLowerCase()) {
-      case 'food':
-      case 'restaurant':
-        return 'from-orange-500/20 to-amber-500/20';
-      case 'culture':
-      case 'museum':
-      case 'monument':
-        return 'from-purple-500/20 to-pink-500/20';
-      case 'transport':
-      case 'transportation':
-        return 'from-blue-500/20 to-cyan-500/20';
-      case 'accommodation':
-      case 'hotel':
-        return 'from-teal-500/20 to-emerald-500/20';
-      default:
-        return 'from-blue-500/20 to-purple-500/20';
-    }
-  };
-
   const handleDeleteClick = () => {
     if (confirmDelete) {
       onDelete(activity.id);
@@ -153,210 +92,190 @@ export default function ActivityCard({
     }
   };
 
-  const CategoryIcon = getCategoryIcon(activity.type);
-  const isCompleted = activity.status === 'completed';
+  const getPriorityDotColor = () => {
+    switch (activity.priority) {
+      case 1: return 'bg-red-500';
+      case 2: return 'bg-orange-500';
+      case 3:
+      default: return 'bg-blue-500';
+    }
+  };
+
+  const getCategoryIcon = () => {
+    const type = activity.type?.toLowerCase();
+    switch (type) {
+      case 'food':
+      case 'restaurant':
+        return UtensilsIcon;
+      case 'culture':
+      case 'activity':
+      case 'sightseeing':
+        return LandmarkIcon;
+      case 'transport':
+      case 'car':
+      case 'train':
+      case 'bus':
+        return CarIcon;
+      case 'flight':
+      case 'plane':
+        return PlaneIcon;
+      case 'accommodation':
+      case 'hotel':
+      case 'lodging':
+        return BedIcon;
+      default:
+        return MapPinIcon;
+    }
+  };
+
+  const getCategoryColor = () => {
+    const type = activity.type?.toLowerCase();
+    switch (type) {
+      case 'food':
+      case 'restaurant':
+        return 'text-orange-500 bg-orange-500/10 border-orange-500/30';
+      case 'culture':
+      case 'activity':
+      case 'sightseeing':
+        return 'text-purple-500 bg-purple-500/10 border-purple-500/30';
+      case 'transport':
+      case 'car':
+      case 'train':
+      case 'bus':
+        return 'text-blue-500 bg-blue-500/10 border-blue-500/30';
+      case 'flight':
+      case 'plane':
+        return 'text-cyan-500 bg-cyan-500/10 border-cyan-500/30';
+      case 'accommodation':
+      case 'hotel':
+      case 'lodging':
+        return 'text-teal-500 bg-teal-500/10 border-teal-500/30';
+      default:
+        return 'text-gray-500 bg-gray-500/10 border-gray-500/30';
+    }
+  };
+
+  const CategoryIcon = getCategoryIcon();
+  const priorityDotColor = getPriorityDotColor();
+  const categoryColor = getCategoryColor();
 
   return (
-    <div 
+    <div
       className={`
-        group relative glass-card rounded-2xl p-4 
-        border-l-4 ${getPriorityBorderColor(activity.priority)}
-        hover:shadow-2xl transition-all duration-500 
-        md:hover:scale-[1.02] hover:-translate-y-1
-        ${isSelected ? 'ring-2 ring-blue-500/50 bg-blue-500/10' : ''}
-        ${isDragging ? 'opacity-60 rotate-2 scale-95' : ''}
-        ${isCompleted ? 'opacity-70' : ''}
+        relative flex items-start gap-3 py-2 px-3
+        glass-card rounded-xl
+        border border-white/10
+        hover:border-white/20 hover:shadow-md
+        transition-all duration-200
+        ${activity.status === 'completed' ? 'opacity-60' : ''}
       `}
     >
-      {/* Animated Background Orbs */}
+      {/* Priority Indicator Dot */}
+      <div className={`absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full ${priorityDotColor} shadow-lg`} />
+
+      {/* Selection Checkbox */}
+      {isSelectable && (
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={(checked) => 
+            onSelectChange?.(activity.id, checked as boolean)
+          }
+          className="flex-shrink-0 mt-0.5"
+        />
+      )}
+
+      {/* Category Icon - Prominent Timeline Style */}
       <div className={`
-        absolute -top-12 -right-12 w-24 h-24 
-        bg-gradient-to-br ${getCategoryGradient(activity.type)}
-        rounded-full blur-3xl opacity-0 
-        group-hover:opacity-100 transition-all duration-700
-      `} />
-      <div className={`
-        absolute -bottom-12 -left-12 w-24 h-24 
-        bg-gradient-to-br ${getPriorityOrbGradient(activity.priority)}
-        rounded-full blur-3xl opacity-0 
-        group-hover:opacity-100 transition-all duration-700
-      `} />
-      
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 opacity-[0.02] glass-grid-pattern rounded-2xl pointer-events-none" />
+        p-2 rounded-full border-2
+        ${categoryColor}
+        flex-shrink-0 shadow-sm
+      `}>
+        <CategoryIcon className="h-4 w-4" />
+      </div>
 
-      {/* Content */}
-      <div className="relative z-10">
-        <div className="flex justify-between items-start gap-3">
-          {/* Checkbox for selection */}
-          {isSelectable && (
-            <div className="pt-1 flex-shrink-0">
-              <Checkbox
-                checked={isSelected}
-                onCheckedChange={(checked) => onSelectChange?.(activity.id, checked === true)}
-                aria-label={`Select ${activity.name}`}
-                className="border-white/30 data-[state=checked]:bg-blue-500"
-              />
-            </div>
-          )}
+      {/* Content - Ultra Compact */}
+      <div className="flex-1 min-w-0">
+        <h3 className={`
+          text-sm font-semibold leading-tight mb-0.5
+          ${activity.status === 'completed' ? 'line-through text-muted-foreground' : ''}
+        `}>
+          {activity.name}
+        </h3>
 
-          {/* Main Content */}
-          <div className="flex-1 min-w-0">
-            {/* Title with icon */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`
-                p-1.5 rounded-lg bg-gradient-to-br ${getCategoryGradient(activity.type)}
-                backdrop-blur-sm border border-white/10
-              `}>
-                <CategoryIcon className="h-4 w-4" />
-              </div>
-              <h3 className={`
-                text-sm sm:text-base font-bold 
-                group-hover:text-blue-500 transition-colors duration-300
-                ${isCompleted ? 'line-through' : ''}
-              `}>
-                {activity.name}
-              </h3>
-            </div>
-
-            {/* Badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              {activity.start_time && (
-                <div className="
-                  inline-flex items-center px-2.5 py-1 rounded-full 
-                  text-xs font-medium bg-blue-500/20 text-blue-600 
-                  border border-blue-500/30 backdrop-blur-sm
-                ">
-                  <ClockIcon className="h-3 w-3 mr-1" />
-                  {formatTime(activity.start_time)}
-                  {activity.end_time && ` - ${formatTime(activity.end_time)}`}
-                </div>
-              )}
-
-              {activity.location && (
-                <div className="
-                  inline-flex items-center px-2.5 py-1 rounded-full 
-                  text-xs font-medium bg-purple-500/20 text-purple-600 
-                  border border-purple-500/30 backdrop-blur-sm
-                ">
-                  <MapPinIcon className="h-3 w-3 mr-1 flex-shrink-0" />
-                  <span className="truncate max-w-[150px]">{activity.location}</span>
-                </div>
-              )}
-
-              {activity.cost !== null && activity.cost > 0 && (
-                <div className="
-                  inline-flex items-center px-2.5 py-1 rounded-full 
-                  text-xs font-medium bg-green-500/20 text-green-600 
-                  border border-green-500/30 backdrop-blur-sm
-                ">
-                  <DollarSignIcon className="h-3 w-3 mr-1" />
-                  {formatCurrency(activity.cost, activity.currency)}
-                </div>
-              )}
-
-              {activity.booking_reference && (
-                <div className="
-                  inline-flex items-center px-2.5 py-1 rounded-full 
-                  text-xs font-medium bg-amber-500/20 text-amber-600 
-                  border border-amber-500/30 backdrop-blur-sm
-                ">
-                  <FileIcon className="h-3 w-3 mr-1 flex-shrink-0" />
-                  <span className="truncate max-w-[100px]">{activity.booking_reference}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Notes Preview */}
-            {activity.notes && (
-              <div className="
-                mt-3 p-3 rounded-xl 
-                bg-background/30 border border-white/10 
-                backdrop-blur-sm
-              ">
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {activity.notes}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Priority Badge */}
-          <div className="flex-shrink-0">
-            <span className={`
-              inline-flex items-center px-2.5 py-1 rounded-full 
-              text-xs font-medium backdrop-blur-sm
-              ${activity.priority === 1 ? 'bg-red-500/20 text-red-600 border border-red-500/30' : ''}
-              ${activity.priority === 2 ? 'bg-orange-500/20 text-orange-600 border border-orange-500/30' : ''}
-              ${activity.priority === 3 ? 'bg-blue-500/20 text-blue-600 border border-blue-500/30' : ''}
-            `}>
-              {getPriorityLabel(activity.priority)}
+        {/* Compact Info Row - Single Line */}
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          {activity.start_time && (
+            <span className="flex items-center gap-0.5">
+              <ClockIcon className="h-3 w-3" />
+              {formatTime(activity.start_time)}
             </span>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="
-          mt-4 pt-3 border-t border-white/10
-          flex justify-end items-center gap-1
-          opacity-0 group-hover:opacity-100 transition-opacity duration-300
-        ">
-          {onViewDetails && (
-            <button
-              onClick={() => onViewDetails(activity)}
-              className="
-                p-2 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 
-                text-blue-600 transition-all duration-300 hover:scale-110
-              "
-              aria-label="View details"
-              title="View details"
-            >
-              <EyeIcon className="h-4 w-4" />
-            </button>
+          )}
+          
+          {activity.location && (
+            <span className="flex items-center gap-0.5 truncate max-w-[100px]">
+              <MapPinIcon className="h-3 w-3 flex-shrink-0" />
+              {activity.location}
+            </span>
           )}
 
-          <button
-            onClick={() => onEdit(activity)}
-            className="
-              p-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 
-              text-purple-600 transition-all duration-300 hover:scale-110
-            "
-            aria-label="Edit activity"
-            title="Edit"
-          >
-            <EditIcon className="h-4 w-4" />
-          </button>
-
-          {onMove && (
-            <button
-              onClick={() => onMove(activity)}
-              className="
-                p-2 rounded-xl bg-green-500/20 hover:bg-green-500/30 
-                text-green-600 transition-all duration-300 hover:scale-110
-              "
-              aria-label="Move activity"
-              title="Move to another day"
-            >
-              <MoveIcon className="h-4 w-4" />
-            </button>
+          {activity.cost !== null && activity.cost > 0 && (
+            <span className="flex items-center gap-0.5 text-green-600 font-medium">
+              <DollarSignIcon className="h-3 w-3" />
+              {formatCurrency(activity.cost, activity.currency)}
+            </span>
           )}
 
-          <button
-            onClick={handleDeleteClick}
-            className={`
-              p-2 rounded-xl transition-all duration-300 hover:scale-110
-              ${confirmDelete
-                ? 'bg-red-500/40 text-red-600 animate-pulse ring-2 ring-red-500/50'
-                : 'bg-red-500/20 hover:bg-red-500/30 text-red-600'
-              }
-            `}
-            aria-label={confirmDelete ? 'Confirm delete' : 'Delete activity'}
-            title={confirmDelete ? 'Click again to confirm' : 'Delete'}
-          >
-            <TrashIcon className="h-4 w-4" />
-          </button>
+          {activity.status === 'completed' && (
+            <CheckCircleIcon className="h-3 w-3 text-green-500" />
+          )}
         </div>
       </div>
+
+      {/* Actions Menu - Compact 3 Dots */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className="
+              flex-shrink-0 p-1 rounded-lg
+              hover:bg-white/10
+              transition-colors duration-150
+            "
+            aria-label="More actions"
+          >
+            <MoreVerticalIcon className="h-4 w-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="glass-card border-white/20 w-40">
+          {onViewDetails && (
+            <DropdownMenuItem onClick={() => onViewDetails(activity)} className="text-sm">
+              <EyeIcon className="h-3.5 w-3.5 mr-2" />
+              View
+            </DropdownMenuItem>
+          )}
+          
+          <DropdownMenuItem onClick={() => onEdit(activity)} className="text-sm">
+            <EditIcon className="h-3.5 w-3.5 mr-2" />
+            Edit
+          </DropdownMenuItem>
+
+          {onMove && (
+            <DropdownMenuItem onClick={() => onMove(activity)} className="text-sm">
+              <MoveIcon className="h-3.5 w-3.5 mr-2" />
+              Move
+            </DropdownMenuItem>
+          )}
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem 
+            onClick={handleDeleteClick}
+            className="text-red-500 focus:text-red-600 text-sm"
+          >
+            <TrashIcon className="h-3.5 w-3.5 mr-2" />
+            {confirmDelete ? 'Confirm' : 'Delete'}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
