@@ -1,144 +1,233 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { LazyActivityMapView } from '@/components/LazyComponents';
-import { Activity } from '@/lib/features/itinerarySlice';
-import { format, parseISO } from 'date-fns';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { MapPinIcon } from 'lucide-react';
+import MapboxWrapper from '@/components/map/MapboxWrapper';
 
-type ItineraryDay = {
+type Activity = {
   id: string;
-  trip_id: string;
-  day_date: string;
-  notes: string | null;
-  weather_forecast: any | null;
-  created_at: string;
-  updated_at: string;
+  name: string;
+  location: string | null;
+  type: string | null;
+  coordinates?: string | { x: number; y: number } | null;
+};
+
+type ItineraryMapViewProps = {
   activities?: Activity[];
+  selectedActivityIndex?: number | null;
+  onMarkerClick?: (activityIndex: number) => void;
 };
 
-// Adattatore per convertire Activity in GeneratedActivity
-const adaptActivityForMap = (activity: Activity, dayDate: string) => {
-  return {
-    name: activity.name,
-    type: activity.type || 'default',
-    start_time: activity.start_time,
-    end_time: activity.end_time,
-    location: activity.location,
-    booking_reference: activity.booking_reference,
-    priority: activity.priority || 2,
-    cost: activity.cost,
-    currency: activity.currency || 'EUR',
-    notes: activity.notes,
-    status: activity.status || 'planned',
-    day_id: activity.day_id,
-    day_date: dayDate,
-    coordinates: activity.coordinates ? {
-      x: typeof activity.coordinates === 'string'
-        ? parseFloat(activity.coordinates.replace(/[()]/g, '').split(',')[0])
-        : activity.coordinates.x,
-      y: typeof activity.coordinates === 'string'
-        ? parseFloat(activity.coordinates.replace(/[()]/g, '').split(',')[1])
-        : activity.coordinates.y
-    } : null
-  };
+type ActivityMarker = {
+  index: number;
+  coordinates: [number, number];
+  label: string;
 };
 
-interface ItineraryMapViewProps {
-  days: ItineraryDay[];
-  onViewActivityDetails: (activity: Activity) => void;
-  onUpdateCoordinates?: (activity: Activity, coordinates: { x: number; y: number }) => void;
-  onDeleteActivity?: (activityId: string) => void;
-  onDeleteMultipleActivities?: (activityIds: string[]) => void;
-  onDeleteAllActivities?: (dayId: string) => void;
-}
+const DEFAULT_CENTER: [number, number] = [12.4964, 41.9028];
+const DEFAULT_ZOOM = 2;
 
 export default function ItineraryMapView({
-  days,
-  onViewActivityDetails,
-  onUpdateCoordinates,
-  onDeleteActivity,
-  onDeleteMultipleActivities,
-  onDeleteAllActivities
+  activities = [],
+  selectedActivityIndex,
+  onMarkerClick,
 }: ItineraryMapViewProps) {
-  const [allActivities, setAllActivities] = useState<any[]>([]);
-
-  // Prepara tutte le attività per la mappa
-  useEffect(() => {
-    const activities: any[] = [];
-
-    days.forEach(day => {
-      if (day.activities && day.activities.length > 0) {
-        day.activities.forEach(activity => {
-          activities.push(adaptActivityForMap(activity, day.day_date));
-        });
+  return (
+    <MapboxWrapper
+      fallback={
+        <div className="h-full w-full bg-card/40 flex items-center justify-center">
+          <div className="text-muted-foreground text-sm">Loading map...</div>
+        </div>
       }
+    >
+      {(mapboxgl) => (
+        <ItineraryMapContent
+          mapboxgl={mapboxgl}
+          activities={activities}
+          selectedActivityIndex={selectedActivityIndex}
+          onMarkerClick={onMarkerClick}
+        />
+      )}
+    </MapboxWrapper>
+  );
+}
+
+interface ItineraryMapContentProps extends ItineraryMapViewProps {
+  mapboxgl: any;
+}
+
+function normalizeCoordinates(
+  input?: string | { x: number; y: number } | null
+): [number, number] | null {
+  if (!input) return null;
+
+  let lng: number | null = null;
+  let lat: number | null = null;
+
+  if (typeof input === 'string') {
+    const match = input.replace(/[()]/g, '').split(',');
+    if (match.length === 2) {
+      lng = Number.parseFloat(match[0]);
+      lat = Number.parseFloat(match[1]);
+    }
+  } else {
+    lng = input.x;
+    lat = input.y;
+  }
+
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+  if (lng === 0 && lat === 0) return null;
+  if (lng < -180 || lng > 180 || lat < -90 || lat > 90) return null;
+
+  return [lng, lat];
+}
+
+function ItineraryMapContent({
+  mapboxgl,
+  activities = [],
+  selectedActivityIndex,
+  onMarkerClick,
+}: ItineraryMapContentProps) {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<
+    Array<{
+      marker: any;
+      element: HTMLButtonElement;
+      index: number;
+      coordinates: [number, number];
+      onClick: () => void;
+    }>
+  >([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  const markers = useMemo<ActivityMarker[]>(() => {
+    return activities.reduce<ActivityMarker[]>((acc, activity, index) => {
+      const coordinates = normalizeCoordinates(activity.coordinates);
+      if (!coordinates) return acc;
+      acc.push({
+        index,
+        coordinates,
+        label: activity.name || activity.location || `Stop ${index + 1}`,
+      });
+      return acc;
+    }, []);
+  }, [activities]);
+
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: DEFAULT_CENTER,
+      zoom: DEFAULT_ZOOM,
     });
 
-    setAllActivities(activities);
-  }, [days]);
+    mapRef.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-  // Gestisce il click su un marker
-  const handleMarkerClick = (adaptedActivity: any) => {
-    // Trova l'attività originale
-    for (const day of days) {
-      if (day.activities) {
-        const originalActivity = day.activities.find(a => a.id === adaptedActivity.id);
-        if (originalActivity) {
-          onViewActivityDetails(originalActivity);
-          break;
-        }
+    mapRef.current.on('load', () => {
+      setMapLoaded(true);
+    });
+
+    return () => {
+      markersRef.current.forEach(({ marker, element, onClick }) => {
+        element.removeEventListener('click', onClick);
+        marker.remove();
+      });
+      markersRef.current = [];
+
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
       }
+    };
+  }, [mapboxgl]);
+
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return;
+
+    markersRef.current.forEach(({ marker, element, onClick }) => {
+      element.removeEventListener('click', onClick);
+      marker.remove();
+    });
+    markersRef.current = [];
+
+    const bounds = new mapboxgl.LngLatBounds();
+
+    markers.forEach(({ index, coordinates, label }) => {
+      const markerEl = document.createElement('button');
+      markerEl.type = 'button';
+      markerEl.className = 'itinerary-map-marker';
+      markerEl.textContent = String(index + 1);
+      markerEl.setAttribute('aria-label', label);
+
+      const handleClick = () => {
+        onMarkerClick?.(index);
+      };
+
+      markerEl.addEventListener('click', handleClick);
+
+      const marker = new mapboxgl.Marker({ element: markerEl })
+        .setLngLat(coordinates)
+        .addTo(mapRef.current);
+
+      markersRef.current.push({
+        marker,
+        element: markerEl,
+        index,
+        coordinates,
+        onClick: handleClick,
+      });
+
+      bounds.extend(coordinates);
+    });
+
+    if (markers.length > 0) {
+      mapRef.current.fitBounds(bounds, {
+        padding: 80,
+        maxZoom: 14,
+        duration: 0,
+      });
+    } else {
+      mapRef.current.easeTo({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM, duration: 0 });
     }
-  };
+  }, [mapLoaded, mapboxgl, markers, onMarkerClick]);
 
-  // Gestisce l'aggiornamento delle coordinate
-  const handleCoordinatesUpdate = (adaptedActivity: any, coordinates: { x: number; y: number }) => {
-    if (!onUpdateCoordinates) return;
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return;
 
-    // Trova l'attività originale
-    for (const day of days) {
-      if (day.activities) {
-        const originalActivity = day.activities.find(a => a.id === adaptedActivity.id);
-        if (originalActivity) {
-          onUpdateCoordinates(originalActivity, coordinates);
-          break;
-        }
+    markersRef.current.forEach(({ element, index, coordinates }) => {
+      if (selectedActivityIndex === index) {
+        element.classList.add('is-selected');
+        mapRef.current.easeTo({
+          center: coordinates,
+          zoom: Math.max(mapRef.current.getZoom(), 12),
+          duration: 350,
+        });
+      } else {
+        element.classList.remove('is-selected');
       }
-    }
-  };
+    });
+  }, [selectedActivityIndex, mapLoaded]);
 
   return (
-    <div className="bg-card rounded-lg shadow overflow-hidden">
-      <div className="p-4 border-b">
-        <h3 className="font-medium">Mappa delle Attività</h3>
-        <p className="text-xs text-muted-foreground">
-          Visualizza tutte le attività del tuo itinerario sulla mappa
-        </p>
-      </div>
+    <div className="relative h-full w-full">
+      <div ref={mapContainerRef} className="h-full w-full" />
 
-      <div className="p-0">
-        {allActivities.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="bg-muted/50 p-4 rounded-full mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-            </div>
-            <h4 className="font-medium mb-2">Nessuna attività da visualizzare</h4>
-            <p className="text-sm text-muted-foreground">
-              Aggiungi attività con location al tuo itinerario per visualizzarle sulla mappa
+      {markers.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-center">
+            <MapPinIcon className="h-10 w-10 text-muted-foreground/60 mx-auto mb-3" />
+            <p className="text-muted-foreground text-sm">
+              Nessuna posizione disponibile
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              Aggiungi attività con coordinate per visualizzare la mappa
             </p>
           </div>
-        ) : (
-          <LazyActivityMapView
-            activities={allActivities}
-            height="500px"
-            onMarkerClick={handleMarkerClick}
-            onCoordinatesUpdate={handleCoordinatesUpdate}
-          />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

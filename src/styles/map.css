@@ -298,6 +298,36 @@
   filter: blur(2px);
 }
 
+/* Itinerary map markers */
+.itinerary-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  border: 2px solid rgba(15, 23, 42, 0.9);
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.itinerary-map-marker:hover {
+  transform: scale(1.08);
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.35);
+}
+
+.itinerary-map-marker.is-selected {
+  transform: scale(1.18);
+  box-shadow:
+    0 0 0 6px rgba(59, 130, 246, 0.35),
+    0 16px 26px rgba(15, 23, 42, 0.35);
+}
+
 /* Custom scrollbar for popup content */
 .mapboxgl-popup-content::-webkit-scrollbar {
   width: 4px;

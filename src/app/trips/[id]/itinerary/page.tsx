@@ -10,8 +10,9 @@ import { supabase } from '@/lib/supabase';
 import { format, parseISO, isValid, addDays } from 'date-fns';
 import { CalendarIcon, BookOpenIcon, PlusIcon, ListIcon, Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
-// Lazy load DaySchedule for better performance
-const DaySchedule = lazy(() => import('@/components/itinerary/DaySchedule'));
+// Import new split-screen components
+import ItineraryListView from '@/components/itinerary/ItineraryListView';
+import ItineraryMapView from '@/components/itinerary/ItineraryMapView';
 import ItinerarySkeleton from '@/components/itinerary/ItinerarySkeleton';
 // Lazy load ItineraryWizard for better performance
 const ItineraryWizard = lazy(() => import('@/components/ai/ItineraryWizard'));
@@ -61,6 +62,7 @@ type Activity = {
   currency: string;
   notes: string | null;
   status: string;
+  coordinates?: string | { x: number; y: number } | null;
 };
 
 export default function TripItinerary() {
@@ -85,6 +87,7 @@ export default function TripItinerary() {
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentDayId, setCurrentDayId] = useState<string>('');
   const [viewMode, setViewMode] = useState<'list' | 'calendar' | 'map'>('list');
+  const [selectedActivityIndex, setSelectedActivityIndex] = useState<number | null>(null);
 
   const {
     activeSuggestions,
@@ -609,6 +612,29 @@ export default function TripItinerary() {
     }
   };
 
+  // Handler for clicking an activity in the list view
+  const handleActivityClick = (activity: Activity, index: number) => {
+    setSelectedActivityIndex(index);
+  };
+
+  // Handler for clicking a marker on the map
+  const handleMarkerClick = (index: number) => {
+    setSelectedActivityIndex(index);
+  };
+
+  // Flatten all activities across all days for sequential numbering
+  const allActivities = useMemo(() => {
+    if (!itineraryDays || !Array.isArray(itineraryDays)) {
+      return [];
+    }
+    return itineraryDays.flatMap(day => 
+      day.activities?.map(activity => ({
+        ...activity,
+        dayDate: day.day_date
+      })) || []
+    );
+  }, [itineraryDays]);
+
   const formatDate = (dateString: string) => {
     try {
       const date = parseISO(dateString);
@@ -914,15 +940,10 @@ export default function TripItinerary() {
               </div>
             </div>
           ) : viewMode === 'list' ? (
-            <div className="space-y-6">
-              {itineraryDays.map((day) => (
-                <DaySchedule
-                  key={day.id}
-                  day={day}
-                  onEditDay={(day) => {
-                    setCurrentDay(day);
-                    setShowDayModal(true);
-                  }}
+            <div className="flex flex-col lg:flex-row gap-0 h-[calc(100vh-300px)] border border-border/30 rounded-xl overflow-hidden">
+              <div className="w-full lg:w-1/2 h-full relative shadow-2xl lg:shadow-[8px_0_24px_-8px_rgba(0,0,0,0.3)] z-10 overflow-auto">
+                <ItineraryListView
+                  days={itineraryDays}
                   onAddActivity={(dayId) => {
                     setCurrentActivity(null);
                     setCurrentDayId(dayId);
@@ -934,12 +955,55 @@ export default function TripItinerary() {
                     setShowActivityModal(true);
                   }}
                   onDeleteActivity={handleDeleteActivity}
-                  onDeleteMultipleActivities={handleDeleteMultipleActivities}
-                  onDeleteAllActivities={handleDeleteAllActivities}
-                  onMoveActivity={handleMoveActivity}
-                  onViewActivityDetails={handleViewActivityDetails}
+                  onActivityClick={handleActivityClick}
+                  selectedActivityIndex={selectedActivityIndex}
+                  enableDragDrop={true}
+                  onMoveActivity={async (activityId: string, sourceDayId: string, targetDayId: string) => {
+                    try {
+                      const { error } = await supabase
+                        .from('activities')
+                        .update({ day_id: targetDayId })
+                        .eq('id', activityId);
+
+                      if (error) throw error;
+
+                      // Update local state
+                      setItineraryDays(prevDays =>
+                        prevDays.map(day => {
+                          if (day.id === sourceDayId) {
+                            return {
+                              ...day,
+                              activities: day.activities?.filter(a => a.id !== activityId) || [],
+                            };
+                          } else if (day.id === targetDayId) {
+                            const activityToMove = prevDays
+                              .find(d => d.id === sourceDayId)
+                              ?.activities?.find(a => a.id === activityId);
+                            
+                            if (activityToMove) {
+                              return {
+                                ...day,
+                                activities: [...(day.activities || []), { ...activityToMove, day_id: targetDayId }],
+                              };
+                            }
+                          }
+                          return day;
+                        })
+                      );
+                    } catch (err) {
+                      console.error('Error moving activity:', err);
+                      setError('Failed to move activity. Please try again.');
+                    }
+                  }}
                 />
-              ))}
+              </div>
+              <div className="hidden lg:block lg:w-1/2 h-full overflow-hidden">
+                <ItineraryMapView
+                  activities={allActivities}
+                  selectedActivityIndex={selectedActivityIndex}
+                  onMarkerClick={handleMarkerClick}
+                />
+              </div>
             </div>
           ) : viewMode === 'calendar' ? (
             <Suspense fallback={<div className="p-8 text-center">Loading calendar view...</div>}>
@@ -967,59 +1031,10 @@ export default function TripItinerary() {
               />
             </Suspense>
           ) : (
-            <LazyItineraryMapView
-              days={itineraryDays}
-              onViewActivityDetails={handleViewActivityDetails}
-              onDeleteActivity={handleDeleteActivity}
-              onDeleteMultipleActivities={handleDeleteMultipleActivities}
-              onDeleteAllActivities={handleDeleteAllActivities}
-              onUpdateCoordinates={(activity, coordinates) => {
-                const updateActivity = async () => {
-                  try {
-                    const coordinatesString = `(${coordinates.x},${coordinates.y})`;
-                    console.log('Updating coordinates for activity:', activity.id, 'to:', coordinatesString);
-
-                    const { data, error } = await supabase
-                      .from('activities')
-                      .update({ coordinates: coordinatesString })
-                      .eq('id', activity.id)
-                      .select();
-
-                    if (error) {
-                      console.error('Supabase error updating coordinates:', error);
-                      throw error;
-                    }
-
-                    console.log('Coordinates updated successfully, response:', data);
-
-                    setItineraryDays(prevDays => {
-                      return prevDays.map(day => {
-                        if (day.id === activity.day_id) {
-                          return {
-                            ...day,
-                            activities: day.activities?.map(act => {
-                              if (act.id === activity.id) {
-                                return {
-                                  ...act,
-                                  coordinates: coordinatesString
-                                };
-                              }
-                              return act;
-                            })
-                          };
-                        }
-                        return day;
-                      });
-                    });
-
-                    console.log('State updated with new coordinates');
-                  } catch (err) {
-                    console.error('Error updating coordinates:', err);
-                  }
-                };
-
-                updateActivity();
-              }}
+            <ItineraryMapView
+              activities={allActivities}
+              selectedActivityIndex={selectedActivityIndex}
+              onMarkerClick={handleMarkerClick}
             />
           )}
         </div>
